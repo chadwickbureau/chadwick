@@ -158,8 +158,8 @@ class StatePanel(wxPanel):
             
     def OnPlayEnter(self, event):
         play = str(self.playText.GetValue()).upper()
-        if not IsValid(play):
-            pass
+        if play == "" or not IsValid(play):
+            wxBell()
         else:
             self.doc.AddPlay(play)
 

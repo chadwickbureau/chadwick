@@ -284,7 +284,6 @@ class ChadwickFrame(wxFrame):
         try:
             os.remove(self.book.GetFilename() + "~")
         except:
-            print "oops1"
             pass
 
         # Rename the original file to a backup
@@ -292,7 +291,6 @@ class ChadwickFrame(wxFrame):
             os.rename(self.book.GetFilename(),
                       self.book.GetFilename() + "~")
         except:
-            print "oops2"
             pass
 
         # Now try to write this file
