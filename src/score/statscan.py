@@ -26,6 +26,20 @@
 
 from libchadwick import *
 
+def FormatAverage(num, den):
+    """
+    Return a formatted string representing num/den.
+    Does not create a leading zero, and prints dashes for
+    divide-by-zero.
+    """
+    if den == 0:  return "-----"
+    avg = float(num) / float(den)
+    if avg >= 1.0:
+        return "%5.3f" % avg
+    else:
+        return " .%03d" % round(avg*1000)
+
+
 class BattingAccumulator:
     def __init__(self):
         self.stats = { }
@@ -136,10 +150,16 @@ class BattingAccumulator:
         for (i,key) in enumerate(keys):
             stat = self.stats[key]
             if i % 20 == 0:
-                s += "\n                       G  AB   R   H 2B 3B HR RBI  BB IW  SO DP HP SH SF SB CS\n"
+                s += "\nPlayer                 AVG   SLG   OBP   G  AB   R   H 2B 3B HR RBI  BB IW  SO DP HP SH SF SB CS\n"
             
-            s += ("%-20s %3d %3d %3d %3d %2d %2d %2d %3d %3d %2d %3d %2d %2d %2d %2d %2d %2d\n" %
+            s += ("%-20s %s %s %s %3d %3d %3d %3d %2d %2d %2d %3d %3d %2d %3d %2d %2d %2d %2d %2d %2d\n" %
                 (stat["name"],
+                 FormatAverage(stat["h"], stat["ab"]),
+                 FormatAverage(stat["h"] + stat["2b"] +
+                               2*stat["3b"] + 3*stat["hr"],
+                               stat["ab"]),
+                 FormatAverage(stat["h"] + stat["bb"] + stat["hp"],
+                               stat["ab"] + stat["bb"] + stat["hp"] + stat["sf"]),
                  len(stat["games"]),
                  stat["ab"], stat["r"], stat["h"],
                  stat["2b"], stat["3b"], stat["hr"],
@@ -252,10 +272,16 @@ class TeamBattingAccumulator:
         for (i,key) in enumerate(keys):
             stat = self.stats[key]
             if i % 20 == 0:
-                s += "\n               G  AB   R   H 2B 3B HR RBI  BB IW  SO DP HP SH SF SB CS  LOB\n"
+                s += "\nClub           AVG   SLG   OBP   G  AB   R   H 2B 3B HR RBI  BB IW  SO DP HP SH SF SB CS  LOB\n"
             
-            s += ("%-12s %3d %3d %3d %3d %2d %2d %2d %3d %3d %2d %3d %2d %2d %2d %2d %2d %2d %4d\n" %
+            s += ("%-12s %s %s %s %3d %3d %3d %3d %2d %2d %2d %3d %3d %2d %3d %2d %2d %2d %2d %2d %2d %4d\n" %
                 (stat["city"],
+                 FormatAverage(stat["h"], stat["ab"]),
+                 FormatAverage(stat["h"] + stat["2b"] +
+                               2*stat["3b"] + 3*stat["hr"],
+                               stat["ab"]),
+                 FormatAverage(stat["h"] + stat["bb"] + stat["hp"],
+                               stat["ab"] + stat["bb"] + stat["hp"] + stat["sf"]),
                  len(stat["games"]),
                  stat["ab"], stat["r"], stat["h"],
                  stat["2b"], stat["3b"], stat["hr"],
@@ -388,10 +414,14 @@ class PitchingAccumulator:
         s = ""
         for (i,key) in enumerate(keys):
             stat = self.stats[key]
+            if stat["outs"] == 0:
+                era = "-----"
+            else:
+                era = "%5.2f" % (float(stat["er"]) / float(stat["outs"]) * 27)
             if i % 20 == 0:
-                s += "\n                      G GS CG SH GF  W- L SV    IP   R  ER   H HR  BB IW  SO BK WP HB\n"
-            s += ("%-20s %2d %2d %2d %2d %2d %2d-%2d %2d %3d.%1d %3d %3d %3d %2d %3d %2d %3d %2d %2d %2d\n" %
-                (stat["name"],
+                s += "\nPlayer                 ERA  G GS CG SH GF  W- L SV    IP   R  ER   H HR  BB IW  SO BK WP HB\n"
+            s += ("%-20s %s %2d %2d %2d %2d %2d %2d-%2d %2d %3d.%1d %3d %3d %3d %2d %3d %2d %3d %2d %2d %2d\n" %
+                (stat["name"], era,
                  len(stat["games"]),
                  stat["gs"], stat["cg"], stat["sho"],
                  stat["gf"],
@@ -518,10 +548,14 @@ class TeamPitchingAccumulator:
         s = ""
         for (i,key) in enumerate(keys):
             stat = self.stats[key]
+            if stat["outs"] == 0:
+                era = "-----"
+            else:
+                era = "%5.2f" % (float(stat["er"]) / float(stat["outs"]) * 27)
             if i % 20 == 0:
-                s += "\n              G CG SH  W- L SV    IP   R  ER   H HR  BB IW  SO BK WP HB\n"
-            s += ("%-12s %2d %2d %2d %2d-%2d %2d %3d.%1d %3d %3d %3d %2d %3d %2d %3d %2d %2d %2d\n" %
-                (stat["city"],
+                s += "\nClub           ERA  G CG SH  W- L SV    IP   R  ER   H HR  BB IW  SO BK WP HB\n"
+            s += ("%-12s %s %2d %2d %2d %2d-%2d %2d %3d.%1d %3d %3d %3d %2d %3d %2d %3d %2d %2d %2d\n" %
+                (stat["city"], era,
                  len(stat["games"]),
                  stat["cg"], stat["sho"],
                  stat["w"], stat["l"], stat["sv"],
@@ -606,21 +640,28 @@ class FieldingAccumulator:
         return { "id": player.player_id,
                  "name": player.name,
                  "games": [ ],
-                 "outs":0, "bip":0, "bf":0,
+                 "gs":0, "outs":0, "bip":0, "bf":0,
                  "po":0, "a":0, "e":0, "dp":0, "tp":0 }
 
     def __str__(self):
         keys = self.stats.keys()
         keys.sort()
 
+        posStr = [ "Pitcher", "Catcher", "First base",
+                   "Second base", "Third base",
+                   "Shortstop", "Left field", "Center field",
+                   "Right field" ][self.pos - 1]
+                   
         s = ""
         for (i,key) in enumerate(keys):
             stat = self.stats[key]
             if i % 20 == 0:
-                s += "\n                       G  GS    INN   PO   A  E  DP TP  BIP  BF\n"
+                s += "\n%-20s   PCT   G  GS    INN   PO   A  E  DP TP  BIP  BF\n" % posStr
             
-            s += ("%-20s %3d %3d %4d.%1d %4d %3d %2d %3d %2d %4d %3d\n" %
+            s += ("%-20s %s %3d %3d %4d.%1d %4d %3d %2d %3d %2d %4d %3d\n" %
                 (stat["name"],
+                 FormatAverage(stat["po"] + stat["a"],
+                               stat["po"] + stat["a"] + stat["e"]),
                  len(stat["games"]), stat["gs"],
                  stat["outs"] / 3, stat["outs"] % 3,
                  stat["po"], stat["a"], stat["e"],
@@ -692,10 +733,12 @@ class TeamFieldingAccumulator:
         for (i,key) in enumerate(keys):
             stat = self.stats[key]
             if i % 20 == 0:
-                s += "\n               G   PO   A  E  DP TP  BIP  BF\n"
+                s += "\nClub           PCT   G   PO   A  E  DP TP  BIP  BF\n"
             
-            s += ("%-12s %3d %4d %3d %2d %3d %2d %4d %3d\n" %
+            s += ("%-12s %s %3d %4d %3d %2d %3d %2d %4d %3d\n" %
                 (stat["city"],
+                 FormatAverage(stat["po"] + stat["a"],
+                               stat["po"] + stat["a"] + stat["e"]),
                  len(stat["games"]),
                  stat["po"], stat["a"], stat["e"],
                  stat["dp"], stat["tp"],
@@ -767,20 +810,13 @@ class RecordAccumulator:
         keys = self.stats.keys()
         keys.sort()
 
-        s = "\n                       G   W-  L    PCT  HOME  AWAY  1RUN  XINN\n";
+        s = "\nClub                   G   W-  L    PCT  HOME  AWAY  1RUN  XINN\n";
         for (i,key) in enumerate(keys):
             stat = self.stats[key]
-
-            if stat["w"] > 0 and stat["l"] == 0:
-                pctstr = "1.000"
-            elif stat["w"] > 0 or stat["l"] > 0:
-                pctstr = " .%03d" % round(float(stat["w"]) / float(stat["w"] + stat["l"]) * 1000)
-            else:
-                pctstr = "-----"
-            
             s += ("%-20s %3d %3d-%3d  %s %2d-%2d %2d-%2d %2d-%2d %2d-%2d\n" %
                 (stat["city"] + " " + stat["nickname"],
-                 stat["g"], stat["w"], stat["l"], pctstr,
+                 stat["g"], stat["w"], stat["l"],
+                 FormatAverage(stat["w"], stat["w"]+stat["l"]),
                  stat["hw"], stat["hl"],
                  stat["rw"], stat["rl"],
                  stat["ow"], stat["ol"],
