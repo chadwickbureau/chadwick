@@ -54,10 +54,10 @@ cw_scorebook_cleanup(CWScorebook *scorebook)
   }
 
   while (comment != NULL) {
-    CWComment *next_comment = comment;
+    CWComment *next_comment = comment->next;
     free(comment->text);
     free(comment);
-    comment = comment->next;
+    comment = next_comment;
   }
 }
 
@@ -127,6 +127,7 @@ cw_scorebook_read_comments(CWScorebook *scorebook, FILE *file)
       comment->text = (char *) malloc(sizeof(char) * (strlen(tokens[1]) + 1));
       strcpy(comment->text, tokens[1]);
       comment->prev = scorebook->last_comment;
+      comment->next = NULL;
       if (scorebook->first_comment == NULL) {
 	scorebook->first_comment = comment;
       }
