@@ -281,6 +281,8 @@ void cw_game_event_append(CWGame *game, int inning, int half_inning,
   event->next = NULL;
   event->first_sub = NULL;
   event->last_sub = NULL;
+  event->first_comment = NULL;
+  event->last_comment = NULL;
 
   if (game->first_event == NULL) {
     game->first_event = event;
