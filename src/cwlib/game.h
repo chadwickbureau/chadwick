@@ -127,6 +127,11 @@ void cw_game_set_version(CWGame *game, char *version);
 void cw_game_info_append(CWGame *game, char *label, char *data);
 
 /*
+ * Modify an info record
+ */
+void cw_game_info_set(CWGame *game, char *label, char *data);
+
+/*
  * Scans the info records for 'label' and returns the associated data.
  * The pointer returned is internal to the CWGame structure, so it
  * should not be deleted, nor its contents changed.

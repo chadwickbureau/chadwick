@@ -188,6 +188,26 @@ void cw_game_info_append(CWGame *game, char *label, char *data)
   game->last_info = info;
 }
 
+void
+cw_game_info_set(CWGame *game, char *label, char *data)
+{
+  CWInfo *info = game->first_info;
+
+  while (info != NULL) {
+    if (!strcmp(info->label, label)) {
+      free(info->data);
+      info->data = (char *) malloc(sizeof(char) * (strlen(data) + 1));
+      strcpy(info->data, data);
+      return;
+    }
+    else {
+      info = info->next;
+    }
+  }
+
+  cw_game_info_append(game, label, data);
+}
+
 /*
  * Returns a pointer to a string containing the data associated with
  * 'label', or NULL if not found.
