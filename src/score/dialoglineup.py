@@ -40,11 +40,12 @@ class LineupDialog(wxDialog):
         sizer = wxBoxSizer(wxVERTICAL)
 
         gridSizer = wxFlexGridSizer(10)
-        gridSizer.AddGrowableCol(0)
 
         self.players = [ wxChoice(self, -1, wxDefaultPosition,
                                   wxSize(300, -1)) for i in range(10) ]
-        self.positions = [ wxChoice(self, -1) for i in range(10) ]
+        self.positions = [ wxChoice(self, -1,
+                                    wxDefaultPosition, wxSize(50, -1)) 
+                                    for i in range(10) ]
         
 
         for i in range(10):
@@ -57,17 +58,17 @@ class LineupDialog(wxDialog):
                               0, wxALL | wxALIGN_CENTER, 5)
                 
             self.players[i].SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-            gridSizer.Add(self.players[i], 7, wxALL | wxEXPAND, 5)
+            gridSizer.Add(self.players[i], 0, wxALL | wxALIGN_CENTER, 5)
             EVT_CHOICE(self, self.players[i].GetId(), self.OnSetEntry)
             self.positions[i].SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-            gridSizer.Add(self.positions[i], 1, wxALL | wxEXPAND, 5)
+            gridSizer.Add(self.positions[i], 0, wxALL | wxALIGN_CENTER, 5)
             EVT_CHOICE(self, self.positions[i].GetId(), self.OnSetEntry)
 
         self.pitcherText.Show(false)
         self.players[-1].Show(false)
         self.positions[-1].Show(false)
 
-        sizer.Add(gridSizer, 1, wxEXPAND, 0)
+        sizer.Add(gridSizer, 0, wxALL, 0)
 
         buttonSizer = wxBoxSizer(wxHORIZONTAL)
         buttonSizer.Add(wxButton(self, wxID_CANCEL, "Cancel"),
@@ -75,7 +76,7 @@ class LineupDialog(wxDialog):
         buttonSizer.Add(wxButton(self, wxID_OK, "OK"), 0,
                         wxALL | wxALIGN_CENTER, 5)
         self.FindWindowById(wxID_OK).Enable(false)
-        sizer.Add(buttonSizer, 0, wxALIGN_RIGHT, 5)
+        sizer.Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5)
         
         self.SetSizer(sizer)
         self.Layout()
