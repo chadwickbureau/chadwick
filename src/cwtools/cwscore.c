@@ -670,13 +670,36 @@ void cwscore_list(CWScorebook *scorebook)
   }
 }
 
+void cwscore_delete(CWScorebook *scorebook)
+{
+  char buffer[256];
+
+  printf("Enter game ID to delete:\n");
+  cwscore_get_line(buffer);
+
+  cw_scorebook_remove_game(scorebook, buffer);
+}
+
+void cwscore_help(void)
+{
+  printf("List of commands:\n");
+  printf("NEW      Create a new empty scorebook\n");
+  printf("LOAD     Load a scorebook from file\n");
+  printf("SAVE     Save a scorebook to file\n");
+  printf("LIST     List the games in the current scorebook\n");
+  printf("ENTER    Enter a new game\n");
+  printf("DELETE   Delete a game from the scorebook\n");
+  printf("QUIT     Exit program (does *not* save!)\n");
+}
+
+
 void cwscore_switchboard(void)
 {
   CWScorebook *scorebook = NULL;
   char buffer[256];
 
   while (1) {
-    printf("Command: (NEW, LOAD, SAVE, LIST, ENTER, QUIT)\n");
+    printf("Command: (HELP for list of commands)\n");
     cwscore_get_line(buffer);
     cwscore_uppercase(buffer);
 
@@ -710,6 +733,14 @@ void cwscore_switchboard(void)
 	cwscore_list(scorebook);
       }
     }
+    else if (!strcmp(buffer, "DELETE")) {
+      if (scorebook == NULL) {
+	printf("Error: No scorebook opened!\n");
+      }
+      else {
+	cwscore_delete(scorebook);
+      }
+    }
     else if (!strcmp(buffer, "ENTER")) {
       if (scorebook == NULL) {
 	printf("Error: No scorebook opened!\n");
@@ -717,6 +748,9 @@ void cwscore_switchboard(void)
       else {
 	cwscore_enter_game(scorebook);
       }
+    }
+    else if (!strcmp(buffer, "HELP")) {
+      cwscore_help();
     }
     else if (!strcmp(buffer, "QUIT")) {
       return;
