@@ -26,7 +26,7 @@
 
 from wxPython.wx import *
 from wxPython.grid import *
-import string
+import string, sys
 
 from libchadwick import *
 import scorebook
@@ -189,6 +189,24 @@ class ChadwickFrame(wxFrame):
         result = dialog.ShowModal()
         dialog.Destroy()
         return result
+
+    def OnCommandLineFile(self, filename):
+        """
+        Try to load a scorebook specified on the command line
+        """
+        try:
+            book = scorebook.ChadwickScorebook()
+            book.Read(filename)
+            self.book = book
+            self.OnUpdate()
+        except:
+            dialog = wxMessageDialog(self,
+                                     "An error occurred in reading "
+                                     + filename,
+                                     "Error opening scorebook",
+                                     wxOK | wxICON_ERROR)
+            dialog.ShowModal()
+            
 
     def OnFileNew(self, event):
         if not self.CheckUnsaved():  return
@@ -378,6 +396,8 @@ class ChadwickFrame(wxFrame):
 class ChadwickApp(wxApp):
     def OnInit(self):
         frame = ChadwickFrame(NULL)
+        if len(sys.argv) >= 2:
+            frame.OnCommandLineFile(sys.argv[1])
         frame.Show(true)
         self.SetTopWindow(frame)
 
