@@ -180,9 +180,8 @@ class StatePanel(wxPanel):
     def OnDefensiveSub(self, event):
         team = 1 - self.doc.GetHalfInning()
         dialog = dialoglineup.LineupDialog(self,
-                                           "Defensive lineup for %s %s" %
-                                           (self.doc.GetRoster(team).city,
-                                            self.doc.GetRoster(team).nickname))
+                                           "Defensive lineup for %s" %
+                                           self.doc.GetRoster(team).GetName())
 
         hasDH = (self.doc.GetState().GetPlayer(team, 0) != None)
 

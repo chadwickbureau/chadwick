@@ -105,7 +105,7 @@ class GameEntryFrame(wxFrame):
     def SetGameTitle(self, doc):
         teams = [ ]
         for t in [0, 1]:
-            teams.append(doc.GetRoster(t).city + " " + doc.GetRoster(t).nickname)
+            teams.append(doc.GetRoster(t).GetName())
         
         gameDate = doc.GetGame().GetDate()
         

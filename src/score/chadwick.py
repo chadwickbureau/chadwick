@@ -376,7 +376,7 @@ class ChadwickFrame(wxFrame):
             prevGames = [ y for y in self.book.IterateGames(lambda x: rosters[t].team_id in x.GetTeams()) ]
             dialog = LineupDialog(self, 
                                   "Starting Lineup for %s" % 
-                                  (rosters[t].city + " " + rosters[t].nickname))
+                                  rosters[t].GetName())
             dialog.LoadRoster(doc.GetRoster(t), t, True)
 
             if len(prevGames) > 0:
@@ -406,14 +406,12 @@ class ChadwickFrame(wxFrame):
                 
             for slot in range(9):
                 player = dialog.GetPlayerInSlot(slot+1)
-                doc.SetStarter(player.player_id,
-                               player.first_name + " " + player.last_name,
+                doc.SetStarter(player.player_id, player.GetName(),
                                t, slot+1, dialog.GetPositionInSlot(slot+1))
 
             if dialog.HasDH():
                 player = dialog.GetPlayerInSlot(10)
-                doc.SetStarter(player.player_id,
-                               player.first_name + " " + player.last_name,
+                doc.SetStarter(player.player_id, player.GetName(),
                                t, 0, 1)
                 cw_game_info_set(doc.GetGame(), "usedh", "true")
                 

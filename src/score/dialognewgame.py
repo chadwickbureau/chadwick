@@ -101,8 +101,8 @@ class NewGameDialog(wxDialog):
 
         for t in f.IterateTeams():
             t.year = f.GetYear()
-            self.teams[0].Append(t.city + " " + t.nickname)
-            self.teams[1].Append(t.city + " " + t.nickname)
+            self.teams[0].Append(t.GetName())
+            self.teams[1].Append(t.GetName())
             self.teamIDs.append(t.team_id)
 
         self.teams[0].SetSelection(0)

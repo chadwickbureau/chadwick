@@ -32,18 +32,143 @@ from wxutils import FormattedStaticText
 from dialogboxview import BoxscoreViewDialog
 from gameeditor import GameEditor
 
+class GameListTable(wxPyGridTableBase):
+    def __init__(self, parent):
+        wxPyGridTableBase.__init__(self)
+        self.parent = parent
+        self.filter = lambda x: True
+        self.games= [ ]
+        self.attr = [ wxGridCellAttr() for i in range(7) ]
+
+        for x in self.attr:
+            x.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL))
+            x.SetTextColour(wxBLACK)
+            x.SetBackgroundColour(wxColour(242, 242, 242))
+        
+        self.attr[0].SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER)
+        self.attr[1].SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER)
+        self.attr[2].SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER)
+        self.attr[3].SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER)
+        self.attr[4].SetAlignment(wxALIGN_LEFT, wxALIGN_CENTER)
+        self.attr[5].SetAlignment(wxALIGN_LEFT, wxALIGN_CENTER)
+        self.attr[6].SetAlignment(wxALIGN_LEFT, wxALIGN_CENTER)
+
+    def SetScorebook(self, book):
+        self.book = book
+        self.games = [ g for g in self.book.IterateGames(self.filter) ]
+
+    def SetFilter(self, f):
+        self.filter = f
+        self.games = [ g for g in self.book.IterateGames(self.filter) ]
+
+    def GetAttr(self, row, col, kind):
+        if col not in [2, 3]:
+            self.attr[col].IncRef()
+            return self.attr[col]
+        else:
+            attr = self.attr[col].Clone()
+            try:
+                game = self.games[row]
+            except:
+                attr.IncRef()
+                return attr
+            
+            score = game.GetScore()
+            if (score[0] > score[1] and col == 2) or \
+               (score[1] > score[0] and col == 3):
+                attr.SetTextColour(wxNamedColour("blue"))
+            attr.IncRef()
+            return attr
+
+    def GetNumberRows(self):
+        if hasattr(self, "book"):
+            return self.book.NumGames(self.filter)
+        else:
+            return 0
+
+    def GetNumberCols(self):
+        return 7
+
+    def IsEmptyCell(self, row, col):
+        return False
+
+    def GetValue(self, row, col):
+        if not hasattr(self, "book"):  return ""
+
+        game = self.games[row]
+        if col == 0:
+            return game.GetDate()
+        elif col == 1:
+            return { 0: "", 1: "1", 2: "2" }[game.GetNumber()]
+        elif col == 2:
+            return ("%s %d" %
+                    (self.book.GetTeam(game.GetTeam(0)).GetName(),
+                     game.GetScore()[0]))
+        elif col == 3:
+            return ("%s %d" %
+                   (self.book.GetTeam(game.GetTeam(1)).GetName(),
+                     game.GetScore()[1]))
+        elif col == 4:
+            wp = game.GetWinningPitcher()
+            if wp != "":
+                return self.book.GetPlayer(wp).GetSortName()
+            else:
+                return ""
+        elif col == 5:
+            lp = game.GetLosingPitcher()
+            if lp != "":
+                return self.book.GetPlayer(lp).GetSortName()
+            else:
+                return ""
+        elif col == 6:
+            save = game.GetSavePitcher()
+            if save != "":
+                return self.book.GetPlayer(save).GetSortName()
+            else:
+                return ""
+            
+
+    def SetValue(self, row, col, value):
+        pass
+
+    def GetColLabelValue(self, col):
+        return [ "Date", "#", "Visitors", "Home", "Winner", "Loser", "Save" ][col]
+
+    def AppendRows(self, howMany):
+        msg = wxGridTableMessage(self,
+                                 wxGRIDTABLE_NOTIFY_ROWS_APPENDED,
+                                 howMany)
+        self.parent.ProcessTableMessage(msg)
+
+    def DeleteRows(self, where, howMany):
+        msg = wxGridTableMessage(self,
+                                 wxGRIDTABLE_NOTIFY_ROWS_DELETED,
+                                 where, howMany)
+        self.parent.ProcessTableMessage(msg)
+                                 
+
 class GameListGrid(wxGrid):
     def __init__(self, parent):
         wxGrid.__init__(self, parent, -1)
-        self.CreateGrid(0, 2)
-        self.SetColLabelValue(0, "Date")
-        self.SetColLabelValue(1, "Result")
-        self.SetDefaultCellFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-        self.SetDefaultCellAlignment(wxALIGN_CENTER, wxALIGN_CENTER)
+        self.table = GameListTable(self)
+        self.filter = lambda x: True
+        self.SetTable(self.table, True)
         self.EnableEditing(false)
         self.SetSelectionMode(wxGrid.wxGridSelectRows)
 
-        self.filter = lambda x: True
+        self.SetRowLabelSize(1)
+        self.SetLabelFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+        self.SetDefaultCellFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL))
+        self.SetColLabelAlignment(wxALIGN_CENTER, wxALIGN_CENTER)
+        self.SetDefaultCellBackgroundColour(wxColour(242, 242, 242))
+
+        self.SetColSize(0, 100)
+        self.SetColSize(1, 25)
+        self.SetColSize(2, 175)
+        self.SetColSize(3, 175)
+        self.SetColSize(4, 150)
+        self.SetColSize(5, 150)
+        self.SetColSize(6, 150)
 
         EVT_GRID_CELL_LEFT_DCLICK(self, self.OnLeftDoubleClick)
 
@@ -52,31 +177,15 @@ class GameListGrid(wxGrid):
         Update grid to list all games in scorebook 'book' matching
         filter function 'f'
         """
+        self.table.SetScorebook(book)
+        self.table.SetFilter(f)
         self.book = book
         self.filter = f
         if self.GetNumberRows() > book.NumGames(self.filter):
             self.DeleteRows(0, self.GetNumberRows() - book.NumGames(self.filter))
         elif self.GetNumberRows() < book.NumGames(self.filter):
-            self.InsertRows(0, book.NumGames(self.filter) - self.GetNumberRows())
+            self.AppendRows(book.NumGames(self.filter) - self.GetNumberRows())
         
-        for (i,game) in enumerate(book.IterateGames(self.filter)):
-            number = game.GetNumber()
-            if number == 1:
-                self.SetCellValue(i, 0, game.GetDate() + " (G1)")
-            elif number == 2:
-                self.SetCellValue(i, 0, game.GetDate() + " (G2)")
-            else:
-                self.SetCellValue(i, 0, game.GetDate())
-
-            teams = [ book.GetTeam(t) for t in game.GetTeams() ]
-            score = game.GetScore()
-            result = ("%s %s %d at %s %s %d" %
-                      (teams[0].city, teams[0].nickname, score[0],
-                       teams[1].city, teams[1].nickname, score[1]))
-            self.SetCellValue(i, 1, result)
-            
-        self.AutoSizeRows()
-        self.AutoSizeColumns()
         self.AdjustScrollbars()
 
     def OnLeftDoubleClick(self, event):
@@ -131,7 +240,7 @@ class GameListPanel(wxPanel):
         self.teamList.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
         self.teamList.Append("all teams")
         for team in book.IterateTeams():
-            self.teamList.Append(team.city + " " + team.nickname)
+            self.teamList.Append(team.GetName())
         self.teamList.SetStringSelection(teamChoice)
         
         self.gameList.OnUpdate(book, self.gameList.GetFilter())

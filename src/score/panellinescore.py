@@ -107,8 +107,7 @@ class LinescorePanel(wxPanel):
         
     def OnUpdate(self):
         for t in [0,1]:
-            self.teamName[t].SetLabel(self.doc.GetRoster(t).city + " " +
-                                      self.doc.GetRoster(t).nickname)
+            self.teamName[t].SetLabel(self.doc.GetRoster(t).GetName())
             self.runsText[t].SetLabel(str(self.doc.GetScore(t)))
             self.hitsText[t].SetLabel(str(self.doc.GetHits(t)))
             self.errorsText[t].SetLabel(str(self.doc.GetErrors(t)))

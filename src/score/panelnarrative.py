@@ -65,10 +65,8 @@ class NarrativePanel(wxPanel):
 
     def PrintHeading(self):
         text = ""
-        text += "%s %s at %s %s\n" % (self.doc.GetRoster(0).city,
-                                      self.doc.GetRoster(0).nickname,
-                                      self.doc.GetRoster(1).city,
-                                      self.doc.GetRoster(1).nickname)
+        text += "%s at %s\n" % (self.doc.GetRoster(0).GetName(),
+                                self.doc.GetRoster(1).GetName())
         text += "Game of %s" % self.doc.GetGame().GetDate()
         number = self.doc.GetGame().GetNumber()
         if number == 1:
@@ -90,8 +88,8 @@ class NarrativePanel(wxPanel):
                               for slot in xrange(1, 10) ])
 
         text += "Starting lineups:\n\n"
-        text += "   %-25s %-25s\n" % (self.doc.GetRoster(0).city,
-                                      self.doc.GetRoster(1).city)
+        text += "   %-25s %-25s\n" % (self.doc.GetRoster(0).GetCity(),
+                                      self.doc.GetRoster(1).GetCity())
         positions = [ "", "p", "c", "1b", "2b", "3b", "ss",
                       "lf", "cf", "rf" ]
         for slot in range(9):
@@ -163,7 +161,7 @@ class NarrativePanel(wxPanel):
                 ros = self.doc.GetRoster(team)
                 batter = ros.FindPlayer(batterId)
                 
-                x = "%-20s " % (batter.first_name + " " + batter.last_name)
+                x = "%-20s " % batter.GetName()
                 x += "%2d-%2d " % (gameiter.GetTeamScore(0),
                                    gameiter.GetTeamScore(1))
                 x += "("

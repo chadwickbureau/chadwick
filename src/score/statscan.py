@@ -287,7 +287,7 @@ class TeamBattingRegister:
         keys = self.stats.keys()
         keys.sort()
 
-        s = "\n%-20s   AVG   SLG   OBP   G  AB   R   H 2B 3B HR RBI  BB IW  SO DP HP SH SF SB CS\n" % self.book.GetTeam(self.team).city
+        s = "\n%-20s   AVG   SLG   OBP   G  AB   R   H 2B 3B HR RBI  BB IW  SO DP HP SH SF SB CS\n" % self.book.GetTeam(self.team).GetCity()
         for (i,key) in enumerate(keys):
             stat = self.stats[key]
             
@@ -387,7 +387,7 @@ class TeamBattingAccumulator:
         for 'player', which is an appearance record.
         """
         return { "id": team.team_id,
-                 "city": team.city, "nickname": team.nickname,
+                 "city": team.GetCity(), "nickname": team.GetNickname(),
                  "games": [ ],
                  "ab":0, "r":0, "h":0,
                  "2b":0, "3b":0, "hr":0, "bi":0,
@@ -716,7 +716,7 @@ class TeamPitchingRegister:
         keys = self.stats.keys()
         keys.sort()
 
-        s = "\n%-20s   ERA  G GS CG SH GF  W- L SV    IP   R  ER   H HR  BB IW  SO BK WP HB\n" % self.book.GetTeam(self.team).city
+        s = "\n%-20s   ERA  G GS CG SH GF  W- L SV    IP   R  ER   H HR  BB IW  SO BK WP HB\n" % self.book.GetTeam(self.team).GetCity()
         for (i,key) in enumerate(keys):
             stat = self.stats[key]
             if stat["outs"] == 0:
@@ -829,7 +829,7 @@ class TeamPitchingAccumulator:
         for 'team', which is a roster record
         """
         return { "id": team.team_id,
-                 "city": team.city, "nickname": team.nickname,
+                 "city": team.GetCity(), "nickname": team.GetNickname(),
                  "games": [ ],
                  "gs":0, "cg":0, "sho":0, "gf":0,
                  "w":0, "l":0, "sv":0,
@@ -1018,7 +1018,7 @@ class TeamFieldingAccumulator:
         for 'team', which is a team roster record
         """
         return { "id": team.team_id,
-                 "city": team.city, "nickname": team.nickname,
+                 "city": team.GetCity(), "nickname": team.GetNickname(),
                  "games": [ ],
                  "bip":0, "bf":0,
                  "po":0, "a":0, "e":0, "dp":0, "tp":0 }
@@ -1081,7 +1081,7 @@ class GameLogAccumulator:
                                                    y["date"] + str(y["number"])))
             roster = self.cwf.GetTeam(team)
 
-            s += "\nGame log for %s %s\n" % (roster.city, roster.nickname)
+            s += "\nGame log for %s\n" % roster.GetName()
 
             wins = 0
             losses = 0
@@ -1092,19 +1092,19 @@ class GameLogAccumulator:
                 
                 if game["wp"] != "":
                     wp = self.cwf.GetPlayer(game["wp"])
-                    wpname = wp.first_name[0] + ". " + wp.last_name
+                    wpname = wp.GetFirstName()[0] + ". " + wp.GetLastName()
                 else:
                     wpname = ""
                     
                 if game["lp"] != "":
                     lp = self.cwf.GetPlayer(game["lp"])
-                    lpname = lp.first_name[0] + ". " + lp.last_name
+                    lpname = lp.GetFirstName()[0] + ". " + lp.GetLastName()
                 else:
                     lpname = ""
                     
                 if game["save"] != "":
                     save = self.cwf.GetPlayer(game["save"])
-                    savename = save.first_name[0] + ". " + save.last_name
+                    savename = save.GetFirstName()[0] + ". " + save.GetLastName()
                 else:
                     savename = ""
 
@@ -1201,7 +1201,7 @@ class RecordAccumulator:
         for 'team', which is a roster record
         """
         return { "id": team.team_id,
-                 "city": team.city, "nickname": team.nickname,
+                 "city": team.GetCity(), "nickname": team.GetNickname(),
                  "g":0, "w":0, "l":0, "t":0,
                  "hw":0, "hl":0,  # home record
                  "rw":0, "rl":0,  # road record
@@ -1276,8 +1276,8 @@ class GrandSlamAccumulator:
 
             s += ("%s %s %s  %-20s %-20s %d\n" % 
                   (rec["date"], rec["number"], rec["site"],
-                   batter.first_name[0] + ". " + batter.last_name + " (" + rec["team"] + ")",
-                   pitcher.first_name[0] + ". " + pitcher.last_name + " (" + rec["opp"] + ")",
+                   batter.GetFirstName()[0] + ". " + batter.GetLastName() + " (" + rec["team"] + ")",
+                   pitcher.GetFirstName()[0] + ". " + pitcher.GetLastName() + " (" + rec["opp"] + ")",
                    rec["inning"]))
         return s
 

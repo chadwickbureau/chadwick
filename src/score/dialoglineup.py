@@ -147,7 +147,7 @@ class LineupDialog(wxDialog):
             ctrl.Clear()
             ctrl.Append("")
             for player in iterate_roster(self.roster):
-                ctrl.Append(player.first_name + " " + player.last_name)
+                ctrl.Append(player.GetName())
             ctrl.SetForegroundColour(fgColors[team])
             ctrl.SetSelection(0)
 
@@ -170,13 +170,13 @@ class LineupDialog(wxDialog):
 
             for player in iterate_roster(self.roster):
                 if player.player_id == pitcher:
-                    self.players[-1].SetStringSelection(player.first_name + " " + player.last_name)
+                    self.players[-1].SetStringSelection(player.GetName())
 
         for slot in range(9):
             playerId = gameiter.GetPlayer(team, slot+1)
             for player in iterate_roster(self.roster):
                 if player.player_id == playerId:
-                    self.players[slot].SetStringSelection(player.first_name + " " + player.last_name)
+                    self.players[slot].SetStringSelection(player.GetName())
                     self.origPlayers.append(self.players[slot].GetSelection())
             if cw_gameiter_player_position(gameiter, team, playerId) <= 10:
                 self.positions[slot].SetSelection(cw_gameiter_player_position(gameiter, team, playerId))
@@ -255,7 +255,7 @@ class PinchDialog(wxDialog):
 
         self.player.Clear()
         for player in iterate_roster(self.roster):
-            self.player.Append(player.first_name + " " + player.last_name)
+            self.player.Append(player.GetName())
 
         if team == 0:
             self.player.SetForegroundColour(wxRED)

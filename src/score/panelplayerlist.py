@@ -109,8 +109,7 @@ class NewPlayerDialog(wxDialog):
 
         sizer.Add(FormattedStaticText(self, "Team"),
                   0, wxALL | wxALIGN_CENTER, 5)
-        teamList = [ team.city + " " + team.nickname
-                     for team in book.IterateTeams() ]
+        teamList = [ team.GetName() for team in book.IterateTeams() ]
         self.team = wxChoice(self, -1, wxDefaultPosition, wxSize(150, -1),
                              teamList)
         self.team.SetSelection(0)
@@ -174,40 +173,105 @@ class NewPlayerDialog(wxDialog):
         return [ t for t in self.book.IterateTeams() ][self.team.GetSelection()].team_id
     
 
+class PlayerListTable(wxPyGridTableBase):
+    def __init__(self, parent):
+        wxPyGridTableBase.__init__(self)
+        self.parent = parent
+        self.attr = [ wxGridCellAttr() for i in range(4) ]
+
+        for x in self.attr:
+            x.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL))
+            x.SetTextColour(wxBLACK)
+            x.SetBackgroundColour(wxColour(242, 242, 242))
+        
+        self.attr[0].SetAlignment(wxALIGN_LEFT, wxALIGN_CENTER)
+        self.attr[1].SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER)
+        self.attr[2].SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER)
+        self.attr[3].SetAlignment(wxALIGN_LEFT, wxALIGN_CENTER)
+
+    def SetScorebook(self, book):   self.book = book
+
+    def GetAttr(self, row, col, kind):
+        self.attr[col].IncRef()
+        return self.attr[col]
+
+    def GetNumberRows(self):
+        if hasattr(self, "book"):
+            return self.book.NumPlayers()
+        else:
+            return 0
+
+    def GetNumberCols(self):
+        return 4
+
+    def IsEmptyCell(self, row, col):
+        return False
+
+    def GetValue(self, row, col):
+        if not hasattr(self, "book"):  return ""
+
+        player = self.book.GetPlayerNumber(row)
+        if col == 0:
+            return player.GetSortName()
+        elif col == 1:
+            return { "R": "Right", "L": "Left",
+                     "B": "Both", "?": "Unknown" }[player.bats]
+        elif col == 2:
+            return { "R": "Right", "L": "Left", "?": "Unknown" }[player.throws]
+        else:
+            return player.player_id
+        
+
+    def SetValue(self, row, col, value):
+        pass
+
+    def GetColLabelValue(self, col):
+        return [ "Player", "Bats", "Throws", "ID" ][col]
+
+    def AppendRows(self, howMany):
+        msg = wxGridTableMessage(self,
+                                 wxGRIDTABLE_NOTIFY_ROWS_APPENDED,
+                                 howMany)
+        self.parent.ProcessTableMessage(msg)
+
+    def DeleteRows(self, where, howMany):
+        msg = wxGridTableMessage(self,
+                                 wxGRIDTABLE_NOTIFY_ROWS_DELETED,
+                                 where, howMany)
+        self.parent.ProcessTableMessage(msg)
+                                 
+
 class PlayerListGrid(wxGrid):
     def __init__(self, parent):
         wxGrid.__init__(self, parent, -1)
-        self.CreateGrid(0, 5)
-        self.SetColLabelValue(0, "Player ID")
-        self.SetColLabelValue(1, "First")
-        self.SetColLabelValue(2, "Last")
-        self.SetColLabelValue(3, "Bats")
-        self.SetColLabelValue(4, "Throws")
-        self.SetDefaultCellFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-        self.EnableEditing(false)
+        self.table = PlayerListTable(self)
+        self.SetBackgroundColour(wxColour(242, 242, 242))
+        self.SetTable(self.table, True)
+        self.SetRowLabelSize(1)
+        self.SetLabelFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+        self.SetDefaultCellFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL))
+        self.SetColLabelAlignment(wxALIGN_CENTER, wxALIGN_CENTER)
+        self.SetDefaultCellBackgroundColour(wxColour(242, 242, 242))
+
+        self.SetColSize(0, 250)
+        self.SetColSize(1, 75)
+        self.SetColSize(2, 75)
+        self.SetColSize(3, 100)
 
     def OnUpdate(self, book):
+        self.table.SetScorebook(book)
         if self.GetNumberRows() > book.NumPlayers():
             self.DeleteRows(0, self.GetNumberRows() - book.NumPlayers())
         elif self.GetNumberRows() < book.NumPlayers():
-            self.InsertRows(0, book.NumPlayers() - self.GetNumberRows())
-
-        for (i,player) in enumerate(book.IteratePlayers()):
-            self.SetCellValue(i, 0, player.player_id)
-            self.SetCellValue(i, 1, player.first_name)
-            self.SetCellValue(i, 2, player.last_name)
-            self.SetCellValue(i, 3, player.bats)
-            self.SetCellValue(i, 4, player.throws)
+            self.AppendRows(book.NumPlayers() - self.GetNumberRows())
             
-        self.AutoSizeRows()
-        self.AutoSizeColumns()
         self.AdjustScrollbars()
 
 class PlayerListPanel(wxPanel):
     def __init__(self, parent):
         wxPanel.__init__(self, parent, -1)
 
-        newPlayerButton = wxButton(self, -1, "Create new player")
+        newPlayerButton = wxButton(self, -1, "Add player")
         newPlayerButton.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
         self.playerList = PlayerListGrid(self)
 

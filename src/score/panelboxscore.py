@@ -59,11 +59,9 @@ class BoxscorePanel(wxPanel):
             self.text.AppendText("\n")
 
     def PrintHeading(self, box):
-        self.text.AppendText("%s %s at %s %s\n" %
-                             (self.doc.GetRoster(0).city,
-                              self.doc.GetRoster(0).nickname,
-                              self.doc.GetRoster(1).city,
-                              self.doc.GetRoster(1).nickname))
+        self.text.AppendText("%s at %s\n" %
+                             (self.doc.GetRoster(0).GetName(),
+                              self.doc.GetRoster(1).GetName()))
         self.text.AppendText("Game of %s" % self.doc.GetGame().GetDate())
         number = self.doc.GetGame().GetNumber()
         if number == 1:
@@ -84,7 +82,7 @@ class BoxscorePanel(wxPanel):
         for t in [0, 1]:
             ros = self.doc.GetRoster(t)
 
-            self.text.AppendText("%-15s" % ros.city)
+            self.text.AppendText("%-15s" % ros.GetCity())
 
             for r in box.byInnings[t]:
                 self.text.AppendText(" %2d" % r)
@@ -110,7 +108,7 @@ class BoxscorePanel(wxPanel):
             totals = { "ab":0, "r":0, "h":0, "bi":0, "bb":0, "so":0 }
             
             self.text.AppendText("%-30s ab  r  h bi bb so\n" %
-                                 ros.city)
+                                 ros.GetCity())
             for slot in range(9):
                 starter = True
                 for rec in box.stats[t][slot]:
@@ -152,7 +150,7 @@ class BoxscorePanel(wxPanel):
         for t in [0, 1]:
             ros = self.doc.GetRoster(t)
             self.text.AppendText("%-25s   ip  h hr  r er bb so\n" %
-                                 ros.city)
+                                 ros.GetCity())
 
             for rec in box.pitching[t]:
                 decision = ""

@@ -32,8 +32,8 @@ from panelboxscore import BoxscorePanel
 
 class BoxscoreViewDialog(wxDialog):
     def __init__(self, parent, doc):
-        title = (doc.GetRoster(0).city + " at " + 
-                 doc.GetRoster(1).city + " on " +
+        title = (doc.GetRoster(0).GetCity() + " at " + 
+                 doc.GetRoster(1).GetCity() + " on " +
                  doc.GetGame().GetDate())
         if doc.GetGame().GetNumber() == 1:
             title += " (first game)"

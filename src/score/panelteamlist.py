@@ -104,11 +104,21 @@ class TeamListGrid(wxGrid):
     def __init__(self, parent):
         wxGrid.__init__(self, parent, -1)
         self.CreateGrid(0, 4)
-        self.SetColLabelValue(0, "Team ID")
-        self.SetColLabelValue(1, "City")
-        self.SetColLabelValue(2, "Nickname")
-        self.SetColLabelValue(3, "League ID")
-        self.SetDefaultCellFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+        self.SetColLabelValue(0, "City")
+        self.SetColLabelValue(1, "Nickname")
+        self.SetColLabelValue(2, "Team ID")
+        self.SetColLabelValue(3, "League")
+        self.SetRowLabelSize(1)
+        self.SetLabelFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+        self.SetDefaultCellFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL))
+        self.SetColLabelAlignment(wxALIGN_CENTER, wxALIGN_CENTER)
+        self.SetDefaultCellBackgroundColour(wxColour(242, 242, 242))
+        
+        self.SetColSize(0, 150)
+        self.SetColSize(1, 150)
+        self.SetColSize(2, 100)
+        self.SetColSize(3, 100)
+
         self.EnableEditing(false)
 
     def OnUpdate(self, book):
@@ -118,15 +128,13 @@ class TeamListGrid(wxGrid):
             self.InsertRows(0, book.NumTeams() - self.GetNumberRows())
 
         for (i,team) in enumerate(book.IterateTeams()):
-            self.SetCellValue(i, 0, team.team_id)
-            self.SetCellAlignment(i, 0, wxALIGN_CENTER, wxALIGN_CENTER)
-            self.SetCellValue(i, 1, team.city)
-            self.SetCellValue(i, 2, team.nickname)
+            self.SetCellValue(i, 0, team.GetCity())
+            self.SetCellValue(i, 1, team.GetNickname())
+            self.SetCellValue(i, 2, team.team_id)
+            self.SetCellAlignment(i, 2, wxALIGN_CENTER, wxALIGN_CENTER)
             self.SetCellValue(i, 3, team.league)
             self.SetCellAlignment(i, 3, wxALIGN_CENTER, wxALIGN_CENTER)
             
-        self.AutoSizeRows()
-        self.AutoSizeColumns()
         self.AdjustScrollbars()
 
 class TeamListPanel(wxPanel):

@@ -129,7 +129,7 @@ class GameEditor:
                              "??", "", "NP")
         cw_game_substitute_append(self.game,
                                   player.player_id,
-                                  player.first_name + " " + player.last_name,
+                                  player.GetName(),
                                   team, slot, pos)
         self.gameiter.ToEnd()
         self.boxscore.Build()

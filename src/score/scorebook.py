@@ -47,7 +47,7 @@ class ChadwickScorebook:
         self.year = year
         self.league = CWLeague()
         self.games = [ ]
-        self.players = { }
+        self.playerDict = { }
         self.filename = "untitled.chw"
         
     def GetFilename(self):   return self.filename
@@ -202,46 +202,53 @@ class ChadwickScorebook:
 
         self.games.sort(lambda x, y: cmp(x.GetDate(), y.GetDate()))
 
-        self.players = { }
+        self.playerDict = { }
         for team in self.IterateTeams():
             x = team.first_player
             while x != None:
-                self.players[x.player_id] = x
+                self.playerDict[x.player_id] = x
                 x = x.next
+        self.players = self.playerDict.keys()
+        self.players.sort()
 
     def NumGames(self, crit=lambda x: True):
         return len(filter(crit, self.games))
+
+    def GetGameNumber(self, i, crit=lambda x: True):
+        return filter(crit, self.games)[i]
 
     def IterateGames(self, crit=lambda x: True):
         for g in self.games:
             if crit(g):  yield g
 
-    def NumPlayers(self):  return len(self.players)
+    def NumPlayers(self):  return len(self.playerDict)
 
     def IteratePlayers(self):
-        keys = self.players.keys()
+        keys = self.playerDict.keys()
         keys.sort()
-        for p in keys: yield self.players[p]
+        for p in keys: yield self.playerDict[p]
 
-    def GetPlayer(self, playerID):
-        return self.players[playerID]
+    def GetPlayer(self, playerID):  return self.playerDict[playerID]
+    def GetPlayerNumber(self, i):   return self.playerDict[self.players[i]]
 
     def UniquePlayerID(self, first, last):
         playerID = (last.replace(" ", "").replace("'", ""))[:4].lower()
         while len(playerID) < 4: playerID += "-"
         playerID += first[0].lower()
         i = 1
-        while "%s%03d" % (playerID,i) in self.players.keys(): i += 1
+        while "%s%03d" % (playerID,i) in self.playerDict.keys(): i += 1
         return "%s%03d" % (playerID,i)
 
     def AddPlayer(self, playerID, firstName, lastName, bats, throws, team):
-        p = cw_player_create(playerID, lastName, firstName, bats, throws)
+        p = CWPlayer(playerID, lastName, firstName, bats, throws)
 
         roster = self.league.first_roster
         while roster.team_id != team:  roster = roster.next
 
         roster.InsertPlayer(p)
-        self.players[playerID] = p
+        self.playerDict[playerID] = p
+        self.players.append(playerID)
+        self.players.sort()
         self.modified = True
         
     def GetTeam(self, teamId):

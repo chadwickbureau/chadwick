@@ -80,9 +80,7 @@ class LineupGrid(wxScrolledWindow):
         memdc.SetTextForeground(self.fgColor)
         memdc.SetBrush(wxBrush(wxColour(190, 190, 190), wxSOLID))
         memdc.DrawRectangle(0, 0, 270, height)
-        self.DrawCenteredText(memdc,
-                              roster.city + " " + roster.nickname,
-                              135, height/2)
+        self.DrawCenteredText(memdc, roster.GetName(), 135, height/2)
         for slot in range(10):
             ycoord = (slot+1) * height + height/2
 
@@ -117,8 +115,7 @@ class LineupGrid(wxScrolledWindow):
 
             player = roster.FindPlayer(playerId)
 
-            self.DrawVCenteredText(memdc,
-                                   player.first_name + " " + player.last_name,
+            self.DrawVCenteredText(memdc, player.GetName(),
                                    40, ycoord)
 
             if slot < 9:
