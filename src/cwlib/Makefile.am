@@ -24,9 +24,9 @@
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ##
 
-lib_LIBRARIES = libchadwick.a
+lib_LTLIBRARIES = libchadwick.la
 
-libchadwick_a_SOURCES = \
+libchadwick_la_SOURCES = \
 	chadwick.h \
 	book.c \
 	book.h \

@@ -4,7 +4,7 @@ AM_INIT_AUTOMAKE(chadwick, 0.2.0)
 
 dnl Checks for programs.
 AC_PROG_CC
-AC_PROG_RANLIB
+AM_PROG_LIBTOOL
 
 dnl Checks for libraries.
 
