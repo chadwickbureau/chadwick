@@ -151,6 +151,123 @@ class BattingAccumulator:
 
         return s
 
+class TeamBattingAccumulator:
+    def __init__(self, cwf):
+        self.stats = { }
+        for team in cwf.IterateTeams():
+            self.stats[team.team_id] = self.NewBattingStats(team)
+
+    def OnBeginGame(self, game, gameiter):
+        vis = cw_game_info_lookup(game, "visteam")
+        self.stats[vis]["games"].append(game.game_id)
+
+        home = cw_game_info_lookup(game, "hometeam")
+        self.stats[home]["games"].append(game.game_id)
+
+    def OnSubstitution(self, game, gameiter):
+        pass
+
+    def OnEvent(self, game, gameiter):
+        event_data = gameiter.event_data
+        team = cw_gameiter_get_halfinning(gameiter)
+
+        if team == 0:
+            batter = self.stats[cw_game_info_lookup(game, "visteam")]
+        else:
+            batter = self.stats[cw_game_info_lookup(game, "hometeam")]
+
+        if cw_event_is_official_ab(event_data):
+            batter["ab"] += 1
+
+        if event_data.event_type == CW_EVENT_SINGLE:
+            batter["h"] += 1
+        elif event_data.event_type == CW_EVENT_DOUBLE:
+            batter["h"] += 1
+            batter["2b"] += 1
+        elif event_data.event_type == CW_EVENT_TRIPLE:
+            batter["h"] += 1
+            batter["3b"] += 1
+        elif event_data.event_type == CW_EVENT_HOMERUN:
+            batter["h"] += 1
+            batter["hr"] += 1
+        elif event_data.event_type == CW_EVENT_WALK:
+            batter["bb"] += 1
+        elif event_data.event_type == CW_EVENT_INTENTIONALWALK:
+            batter["bb"] += 1
+            batter["ibb"] += 1
+        elif event_data.event_type == CW_EVENT_STRIKEOUT:
+            batter["so"] += 1
+        elif event_data.event_type == CW_EVENT_HITBYPITCH:
+            batter["hp"] += 1
+
+        batter["bi"] += cw_event_rbi_on_play(event_data)
+
+        if event_data.sh_flag > 0:
+            batter["sh"] += 1
+        if event_data.sf_flag > 0:
+            batter["sf"] += 1
+        if event_data.gdp_flag > 0:
+            batter["gdp"] += 1
+
+        for base in [1,2,3]:
+            if cw_gameiter_get_runner(gameiter, base) == "":
+                continue
+            
+            destBase = cw_gameiter_get_advancement(gameiter, base)
+            if destBase >= 4:
+                batter["r"] += 1
+            if cw_gameiter_get_sb_flag(gameiter, base) > 0:
+                batter["sb"] += 1
+            if cw_gameiter_get_cs_flag(gameiter, base) > 0:
+                batter["cs"] += 1
+
+        destBase = cw_gameiter_get_advancement(gameiter, 0)
+        if destBase >= 4:
+            batter["r"] += 1
+
+    def OnEndGame(self, game, gameiter):
+        self.stats[cw_game_info_lookup(game, "visteam")]["lob"] += cw_gameiter_left_on_base(gameiter, 0)
+        self.stats[cw_game_info_lookup(game, "hometeam")]["lob"] += cw_gameiter_left_on_base(gameiter, 1)
+
+    def NewBattingStats(self, team):
+        """
+        Generate a new batting stats entry (dictionary)
+        for 'player', which is an appearance record.
+        """
+        return { "id": team.team_id,
+                 "city": team.city, "nickname": team.nickname,
+                 "games": [ ],
+                 "ab":0, "r":0, "h":0,
+                 "2b":0, "3b":0, "hr":0, "bi":0,
+                 "bb":0, "ibb":0, "so":0,
+                 "gdp":0, "hp":0, "sh":0, "sf":0,
+                 "sb":0, "cs":0,
+                 "lob":0 }
+
+    def __str__(self):
+        keys = self.stats.keys()
+        keys.sort()
+
+        s = ""
+        for (i,key) in enumerate(keys):
+            stat = self.stats[key]
+            if i % 20 == 0:
+                s += "\n               G  AB   R   H 2B 3B HR RBI  BB IW  SO DP HP SH SF SB CS  LOB\n"
+            
+            s += ("%-12s %3d %3d %3d %3d %2d %2d %2d %3d %3d %2d %3d %2d %2d %2d %2d %2d %2d %4d\n" %
+                (stat["city"],
+                 len(stat["games"]),
+                 stat["ab"], stat["r"], stat["h"],
+                 stat["2b"], stat["3b"], stat["hr"],
+                 stat["bi"],
+                 stat["bb"], stat["ibb"], stat["so"],
+                 stat["gdp"], stat["hp"],
+                 stat["sh"], stat["sf"],
+                 stat["sb"], stat["cs"], stat["lob"]))
+
+        return s
+
+
 
 class PitchingAccumulator:
     def __init__(self):
@@ -287,6 +404,137 @@ class PitchingAccumulator:
 
         return s
         
+
+
+class TeamPitchingAccumulator:
+    def __init__(self, cwf):
+        self.stats = { }
+        for team in cwf.IterateTeams():
+            self.stats[team.team_id] = self.NewPitchingStats(team)
+
+    def OnBeginGame(self, game, gameiter):
+        vis = cw_game_info_lookup(game, "visteam")
+        self.stats[vis]["games"].append(game.game_id)
+
+        home = cw_game_info_lookup(game, "hometeam")
+        self.stats[home]["games"].append(game.game_id)
+
+    def OnSubstitution(self, game, gameiter):
+        pass
+
+    def OnEvent(self, game, gameiter):
+        event_data = gameiter.event_data
+        team = cw_gameiter_get_halfinning(gameiter)
+
+        if team == 1:
+            pitcher = self.stats[cw_game_info_lookup(game, "visteam")]
+        else:
+            pitcher = self.stats[cw_game_info_lookup(game, "hometeam")]
+
+        pitcher["outs"] += cw_event_outs_on_play(event_data)
+
+        if event_data.event_type == CW_EVENT_SINGLE:
+            pitcher["h"] += 1
+        elif event_data.event_type == CW_EVENT_DOUBLE:
+            pitcher["h"] += 1
+        elif event_data.event_type == CW_EVENT_TRIPLE:
+            pitcher["h"] += 1
+        elif event_data.event_type == CW_EVENT_HOMERUN:
+            pitcher["h"] += 1
+            pitcher["hr"] += 1
+        elif event_data.event_type == CW_EVENT_WALK:
+            pitcher["bb"] += 1
+        elif event_data.event_type == CW_EVENT_INTENTIONALWALK:
+            pitcher["bb"] += 1
+            pitcher["ibb"] += 1
+        elif event_data.event_type == CW_EVENT_STRIKEOUT:
+            pitcher["so"] += 1
+        elif event_data.event_type == CW_EVENT_HITBYPITCH:
+            pitcher["hb"] += 1
+        elif event_data.event_type == CW_EVENT_BALK:
+            pitcher["bk"] += 1
+
+        if event_data.wp_flag > 0:
+            pitcher["wp"] += 1
+
+        for base in [1,2,3]:
+            if cw_gameiter_get_runner(gameiter, base) == "":
+                continue
+            
+            destBase = cw_gameiter_get_advancement(gameiter, base)
+            if destBase >= 4:
+                pitcher["r"] += 1
+                if destBase == 4:
+                    pitcher["er"] += 1
+
+        destBase = cw_gameiter_get_advancement(gameiter, 0)
+        if destBase >= 4:
+            pitcher["r"] += 1
+            if destBase == 4:
+                pitcher["er"] += 1
+
+    def OnEndGame(self, game, gameiter):
+        teams = [ cw_game_info_lookup(game, "visteam"),
+                  cw_game_info_lookup(game, "hometeam") ]
+        if cw_gameiter_get_score(gameiter, 0) > cw_gameiter_get_score(gameiter, 1):
+            self.stats[teams[0]]["w"] += 1
+            self.stats[teams[1]]["l"] += 1
+            if cw_game_info_lookup(game, "save") != "":
+                self.stats[teams[0]]["sv"] += 1
+        elif cw_gameiter_get_score(gameiter, 0) < cw_gameiter_get_score(gameiter, 1):
+            self.stats[teams[1]]["w"] += 1
+            self.stats[teams[0]]["l"] += 1
+            if cw_game_info_lookup(game, "save") != "":
+                self.stats[teams[1]]["sv"] += 1
+
+        for t in [0, 1]:
+            startP = cw_game_starter_find_by_position(game, t, 1).player_id
+            endP = cw_gameiter_get_fielder(gameiter, t, 1)
+            if startP == endP:
+                # TODO: It's possible but rare to start and end game but
+                # not pitch a complete game!
+                self.stats[teams[t]]["cg"] += 1
+            if cw_gameiter_get_score(gameiter, 1-t) == 0:
+                self.stats[teams[t]]["sho"] += 1
+
+    def NewPitchingStats(self, team):
+        """
+        Generate a new pitching stats entry (dictionary)
+        for 'team', which is a roster record
+        """
+        return { "id": team.team_id,
+                 "city": team.city, "nickname": team.nickname,
+                 "games": [ ],
+                 "gs":0, "cg":0, "sho":0, "gf":0,
+                 "w":0, "l":0, "sv":0,
+                 "outs":0, "r":0, "er":0, "h":0, "hr":0,
+                 "bb":0, "ibb":0, "so":0,
+                 "wp":0, "bk":0, "hb":0 }
+
+    def __str__(self):
+        keys = self.stats.keys()
+        keys.sort()
+
+        s = ""
+        for (i,key) in enumerate(keys):
+            stat = self.stats[key]
+            if i % 20 == 0:
+                s += "\n              G CG SH  W- L SV    IP   R  ER   H HR  BB IW  SO BK WP HB\n"
+            s += ("%-12s %2d %2d %2d %2d-%2d %2d %3d.%1d %3d %3d %3d %2d %3d %2d %3d %2d %2d %2d\n" %
+                (stat["city"],
+                 len(stat["games"]),
+                 stat["cg"], stat["sho"],
+                 stat["w"], stat["l"], stat["sv"],
+                 stat["outs"] / 3, stat["outs"] % 3,
+                 stat["r"], stat["er"],
+                 stat["h"], stat["hr"],
+                 stat["bb"], stat["ibb"], stat["so"],
+                 stat["bk"], stat["wp"], stat["hb"]))
+
+        return s
+        
+
+
 class FieldingAccumulator:
     def __init__(self, pos):
         self.stats = { }
@@ -358,7 +606,7 @@ class FieldingAccumulator:
         return { "id": player.player_id,
                  "name": player.name,
                  "games": [ ],
-                 "gs":0, "outs":0, "bip":0, "bf":0,
+                 "outs":0, "bip":0, "bf":0,
                  "po":0, "a":0, "e":0, "dp":0, "tp":0 }
 
     def __str__(self):
@@ -380,6 +628,81 @@ class FieldingAccumulator:
                  stat["bip"], stat["bf"]))
 
         return s
+
+class TeamFieldingAccumulator:
+    def __init__(self, cwf):
+        self.stats = { }
+        for team in cwf.IterateTeams():
+            self.stats[team.team_id] = self.NewFieldingStats(team)
+
+    def OnBeginGame(self, game, gameiter):
+        vis = cw_game_info_lookup(game, "visteam")
+        self.stats[vis]["games"].append(game.game_id)
+
+        home = cw_game_info_lookup(game, "hometeam")
+        self.stats[home]["games"].append(game.game_id)
+
+    def OnSubstitution(self, game, gameiter):
+        pass
+
+    def OnEvent(self, game, gameiter):
+        event_data = gameiter.event_data
+        team = cw_gameiter_get_halfinning(gameiter)
+
+        if team == 1:
+            fielder = self.stats[cw_game_info_lookup(game, "visteam")]
+        else:
+            fielder = self.stats[cw_game_info_lookup(game, "hometeam")]
+
+        fielder["po"] += cw_event_outs_on_play(event_data)
+        fielder["a"] += event_data.num_assists
+        fielder["e"] += event_data.num_errors
+
+        if event_data.dp_flag:    fielder["dp"] += 1
+        elif event_data.tp_flag:  fielder["tp"] += 1
+
+        if event_data.fielded_by > 0 and cw_event_outs_on_play(event_data) > 0:
+            fielder["bf"] += 1
+        if (event_data.fielded_by > 0 or
+            event_data.event_type in [CW_EVENT_SINGLE,
+                                      CW_EVENT_DOUBLE,
+                                      CW_EVENT_TRIPLE]):
+            fielder["bip"] += 1
+            
+
+    def OnEndGame(self, game, gameiter):
+        pass
+
+    def NewFieldingStats(self, team):
+        """
+        Generate a new fielding stats entry (dictionary)
+        for 'team', which is a team roster record
+        """
+        return { "id": team.team_id,
+                 "city": team.city, "nickname": team.nickname,
+                 "games": [ ],
+                 "bip":0, "bf":0,
+                 "po":0, "a":0, "e":0, "dp":0, "tp":0 }
+
+    def __str__(self):
+        keys = self.stats.keys()
+        keys.sort()
+
+        s = ""
+        for (i,key) in enumerate(keys):
+            stat = self.stats[key]
+            if i % 20 == 0:
+                s += "\n               G   PO   A  E  DP TP  BIP  BF\n"
+            
+            s += ("%-12s %3d %4d %3d %2d %3d %2d %4d %3d\n" %
+                (stat["city"],
+                 len(stat["games"]),
+                 stat["po"], stat["a"], stat["e"],
+                 stat["dp"], stat["tp"],
+                 stat["bip"], stat["bf"]))
+
+        return s
+
 
 class RecordAccumulator:
     def __init__(self, cwf):
@@ -496,6 +819,9 @@ if __name__ == "__main__":
     book = scorebook.ChadwickScorebook()
     book.Read(fn)
     x = [ RecordAccumulator(book),
+          TeamBattingAccumulator(book),
+          TeamPitchingAccumulator(book),
+          TeamFieldingAccumulator(book),
           BattingAccumulator(), PitchingAccumulator() ]
     for pos in range(9):
         x.append(FieldingAccumulator(pos+1))

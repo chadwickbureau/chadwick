@@ -144,6 +144,7 @@ CW_MENU_GAME_NEW = 2000
 CW_MENU_REPORT_BATTING = 2010
 CW_MENU_REPORT_PITCHING = 2011
 CW_MENU_REPORT_FIELDING = 2012
+CW_MENU_REPORT_TEAM = 2013
 
 class ChadwickFrame(wxFrame):
     def __init__(self, parent):
@@ -176,6 +177,7 @@ class ChadwickFrame(wxFrame):
         EVT_MENU(self, CW_MENU_REPORT_BATTING, self.OnReportBatting)
         EVT_MENU(self, CW_MENU_REPORT_PITCHING, self.OnReportPitching)
         EVT_MENU(self, CW_MENU_REPORT_FIELDING, self.OnReportFielding)
+        EVT_MENU(self, CW_MENU_REPORT_TEAM, self.OnReportTeam)
         EVT_BUTTON(self, panelstate.CW_BUTTON_SAVE, self.OnGameSave)
         EVT_CLOSE(self, self.OnClickClose)
 
@@ -203,6 +205,8 @@ class ChadwickFrame(wxFrame):
                           "Show pitching statistics")
         reportMenu.Append(CW_MENU_REPORT_FIELDING, "Fielding",
                           "Show fielding statistics")
+        reportMenu.Append(CW_MENU_REPORT_TEAM, "Team",
+                          "Show team statistics")
         
         helpMenu = wxMenu()
         helpMenu.Append(wxID_ABOUT, "&About", "About Chadwick")
@@ -357,6 +361,19 @@ class ChadwickFrame(wxFrame):
                               string.join([ str(x) for x in fs ], "\n\n"))
         dialog.ShowModal()
             
+    def OnReportTeam(self, event):
+        acc = [ statscan.RecordAccumulator(self.book),
+                statscan.TeamBattingAccumulator(self.book),
+                statscan.TeamPitchingAccumulator(self.book),
+                statscan.TeamFieldingAccumulator(self.book) ]
+        busyInfo = wxBusyInfo("Generating team statistics... Please be patient!")
+        statscan.ProcessFile(self.book, acc)
+        del busyInfo
+
+        dialog = ReportDialog(self, "Team statistics",
+                              string.join([ str(x) for x in acc ], "\n\n"))
+        dialog.ShowModal()
+
     def OnUpdate(self):
         self.teamList.OnUpdate(self.book)
         self.gameList.OnUpdate(self.book)
