@@ -100,9 +100,9 @@ CWGame *cwscore_create_game(char *game_id, char *visitors, char *home)
   cw_game_info_append(game, "visteam", visitors);
   cw_game_info_append(game, "hometeam", home);
   cw_game_info_append(game, "site", 
-		      cwscore_get_info("Site:", buffer));
+		      cwscore_get_info("Site: (CCCNN)", buffer));
   cw_game_info_append(game, "date", 
-		      cwscore_get_info("Date:", buffer));
+		      cwscore_get_info("Date: (YYYY/MM/DD)", buffer));
   cw_game_info_append(game, "number",
 		      cwscore_get_info("Game number:", buffer));
   cw_game_info_append(game, "starttime",
@@ -249,48 +249,91 @@ void cwscore_undo(CWGame *game)
   cw_game_truncate(game, game->last_event);
 }
 
+void cwscore_enter_comment(CWGame *game)
+{
+  char buffer[256];
+  printf("Enter one-line comment:\n");
+  cwscore_get_line(buffer);
+  cw_game_comment_append(game, buffer);
+}
+
+void cwscore_display_lineups(CWGameIterator *gameiter,
+			     CWRoster *visitors, CWRoster *home)
+{
+  int i;
+  static char positions[13][3] = {
+    "", "p", "c", "1b", "2b", "3b", "ss", "lf", "cf", "rf",
+    "dh", "ph", "pr"
+  };
+
+  for (i = 1; i <= 9; i++) {
+    printf("%-20s %-2s   %-20s %-2s\n",
+	   gameiter->lineups[i][0].name,
+	   positions[gameiter->lineups[i][0].position],
+	   gameiter->lineups[i][1].name,
+	   positions[gameiter->lineups[i][1].position]);
+  }
+}
+
+int cwscore_display_state(CWGameIterator *gameiter,
+			  CWRoster *visitors, CWRoster *home,
+			  int *inning, int *half_inning, char **batter)
+{
+  int outs, i;
+  char runners[4][20];
+
+  cw_gameiter_reset(gameiter);
+
+  while (gameiter->event != NULL) {
+    cw_gameiter_next(gameiter);
+  }
+
+  if (cwscore_gameover(gameiter)) {
+    return 0;
+  }
+
+  if (gameiter->outs == 3) {
+    *inning = gameiter->inning + gameiter->half_inning;
+    *half_inning = (gameiter->half_inning + 1) % 2;
+    outs = 0;
+    for (i = 1; i <= 3; i++) {
+      strcpy(runners[i], "");
+    }
+  }
+  else {
+    *inning = gameiter->inning;
+    *half_inning = gameiter->half_inning;
+    outs = gameiter->outs;
+    for (i = 1; i <= 3; i++) {
+      strcpy(runners[i], gameiter->runners[i]);
+    }
+  }
+
+  cwscore_display_lineups(gameiter, visitors, home);
+
+  *batter = gameiter->lineups[gameiter->num_batters[*half_inning] % 9 + 1][*half_inning].player_id;
+
+  printf("B: %8s  1: %8s  2: %8s  3: %8s  PA: %2d I: %2d  O: %d  S: %2d-%2d\n", 
+	 *batter, runners[1], runners[2], runners[3],
+	 gameiter->num_batters[*half_inning] + 1,
+	 *inning, outs, gameiter->score[0], gameiter->score[1]);
+  return 1;
+}
+
 void cwscore_enter_events(CWGame *game, CWRoster *visitors, CWRoster *home)
 {
   char buffer[256];
   CWGameIterator *gameiter = cw_gameiter_create(game);
 
   while (1) {
-    int inning, half_inning, outs, i;
+    int inning, half_inning;
     char *batter;
-    char runners[4][20];
-    cw_gameiter_reset(gameiter); 
 
-    while (gameiter->event != NULL) {
-      cw_gameiter_next(gameiter);
+    if (!cwscore_display_state(gameiter, visitors, home, 
+			       &inning, &half_inning, &batter)) {
+      /* game is over */
+      return;
     }
-
-    if (cwscore_gameover(gameiter)) {
-      break;
-    }
-
-    if (gameiter->outs == 3) {
-      inning = gameiter->inning + gameiter->half_inning;
-      half_inning = (gameiter->half_inning + 1) % 2;
-      outs = 0;
-      for (i = 1; i <= 3; i++) {
-	strcpy(runners[i], "");
-      }
-    }
-    else {
-      inning = gameiter->inning;
-      half_inning = gameiter->half_inning;
-      outs = gameiter->outs;
-      for (i = 1; i <= 3; i++) {
-	strcpy(runners[i], gameiter->runners[i]);
-      }
-    }
-
-    batter = gameiter->lineups[gameiter->num_batters[half_inning] % 9 + 1][half_inning].player_id;
-
-    printf("Batter: %8s  1: %8s  2: %8s  3: %8s  I: %2d  O: %d  S: %2d-%2d\n", 
-	   batter, runners[1], runners[2], runners[3],
-	   inning, outs, gameiter->score[0], gameiter->score[1]);
-
     cwscore_get_line(buffer);
     cwscore_uppercase(buffer);
     if (!strcmp(buffer, "OS")) {
@@ -308,12 +351,21 @@ void cwscore_enter_events(CWGame *game, CWRoster *visitors, CWRoster *home)
     else if (!strcmp(buffer, "BACK")) {
       cwscore_undo(game);
     }
+    else if (!strcmp(buffer, "COM")) {
+      cwscore_enter_comment(game);
+    }
     else if (!strcmp(buffer, "END")) {
       break;
     }
     else {
-      cw_game_event_append(game, inning, half_inning,
-			   batter, "??", "", buffer);
+      CWParsedEvent event_data;
+      if (!cw_parse_event(buffer, &event_data)) {
+	printf("Parse error in event text '%s'\n", buffer);
+      }
+      else {
+	cw_game_event_append(game, inning, half_inning,
+			     batter, "??", "", buffer);
+      }
     }
   }
 
@@ -328,17 +380,16 @@ void cwscore_enter_game(CWScorebook *scorebook)
   CWGame *game;
   FILE *file;
 
-  cwscore_get_team("Enter visiting team ID:", buffer);
+  cwscore_get_team("Enter visiting team ID: (CCCYYYY)", buffer);
   visitor = cwscore_read_roster(buffer);
-  cwscore_get_team("Enter home team ID:", buffer);
+  cwscore_get_team("Enter home team ID: (CCCYYYY)", buffer);
   home = cwscore_read_roster(buffer);
-  printf("Enter game ID:\n");
+  printf("Enter game ID: (CCCYYYYMMDDG)\n");
   cwscore_get_line(buffer);
   game = cwscore_create_game(buffer, visitor->team_id, home->team_id);
 
   cwscore_get_lineup(game, visitor, 0);
   cwscore_get_lineup(game, home, 1);
-  cw_game_write(game, stdout);
   cwscore_enter_events(game, visitor, home);
 
   cw_scorebook_append_game(scorebook, game);
@@ -390,7 +441,11 @@ void cwscore_list(CWScorebook *scorebook)
   int count = 0;
 
   while (game != NULL) {
-    printf("Game: %3d  ID: %12s\n", ++count, game->game_id);
+    printf("Game: %3d  ID: %12s  V: %3s  H: %3s  Site: %5s\n",
+	   ++count, game->game_id,
+	   cw_game_info_lookup(game, "visteam"),
+	   cw_game_info_lookup(game, "hometeam"),
+	   cw_game_info_lookup(game, "site"));
     game = game->next;
   }
 }
