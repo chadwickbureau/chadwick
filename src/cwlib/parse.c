@@ -986,6 +986,11 @@ static int parse_foul_error(CWParserState *state, CWParsedEvent *event,
   return 1;
 }
 
+/*
+ * Parse the parenthesis notation for a force play.
+ * Returns the base parsed (zero for batter), or a negative
+ * number if an error occurs
+ */
 static int parse_out_base(CWParserState *state)
 {
   int base;
@@ -993,12 +998,14 @@ static int parse_out_base(CWParserState *state)
   cw_parse_nextsym(state);
   if (state->sym!= '1' && state->sym!= '2' && state->sym!= '3' && state->sym!= 'B') {
     cw_parse_error(state);
+    return -1;
   }
   base = (state->sym== 'B') ? 0 : (state->sym- '0');
   
   cw_parse_nextsym(state);
   if (state->sym != ')') {
     cw_parse_error(state);
+    return -1;
   }
   cw_parse_nextsym(state);
 
@@ -1023,6 +1030,7 @@ static int parse_generic_out(CWParserState *state, CWParsedEvent *event,
 
     if (state->sym == '(') {
       int base = parse_out_base(state);
+      if (base < 0)  return 0;
       event->advance[base] = (safe) ? base + 1 : 0;
       event->fc_flag[base] = 1;
       if (strlen(state->token) > 1 || base > 0) {
