@@ -132,7 +132,7 @@ cw_parse_initialize(CWParserState *state, char *input)
   }
 
   /* Preprocessing to turn SBH and CSH strings into SB4 and CS4 */
-  if (c = strstr(state->inputString, "SBH")) {
+  if ((c = strstr(state->inputString, "SBH"))) {
     *(c+2) = '4';
   }
   if ((c = strstr(state->inputString, "CSH")) &&

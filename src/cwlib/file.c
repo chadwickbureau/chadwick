@@ -41,7 +41,7 @@
 int cw_file_tokenize_line(char *line, char **tokens)
 {
   unsigned int i;
-  int j = 1, quote = 0, numTokens = 0;
+  int quote = 0, numTokens = 0;
 
   strcpy(tokens[numTokens], "");
   for (i = 0; i < strlen(line); i++) {

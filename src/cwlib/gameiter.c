@@ -128,7 +128,7 @@ cw_gameiter_removeds_cleanup(CWGameIterator *gameiter)
 void
 cw_gameiter_reset(CWGameIterator *gameiter)
 {
-  int i, t;
+  int i;
   gameiter->event = gameiter->game->first_event;
 
   gameiter->event_count = 0;
