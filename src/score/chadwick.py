@@ -280,9 +280,20 @@ class ChadwickFrame(wxFrame):
     def OnFileMRU(self, event):
         if not self.CheckUnsaved():  return
         
-        self.book = scorebook.ChadwickScorebook()
-        self.book.Read(str(self.fileHistory.GetHistoryFile(event.GetId() - wxID_FILE1)))
-        self.OnUpdate()
+        filename = self.fileHistory.GetHistoryFile(event.GetId() - wxID_FILE1)
+        try:
+            book = scorebook.ChadwickScorebook()
+            book.Read(str(filename))
+            self.book = book
+            self.OnUpdate()
+        except:
+            dialog = wxMessageDialog(self,
+                                     "An error occurred in reading " 
+                                     + str(filename),
+                                     "Error opening scorebook",
+                                     wxOK | wxICON_ERROR)
+            dialog.ShowModal()
+            
             
     def OnFileSave(self, event):
         if not self.book.IsModified():  return
