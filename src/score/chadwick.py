@@ -411,105 +411,67 @@ class ChadwickFrame(wxFrame):
         del self.entryFrame
         self.OnUpdate()
 
-    def OnReportRegisterBatting(self, event):
-        bs = statscan.BattingAccumulator()
-        dialog = wxProgressDialog("Generating batting register",
-                                  "Generating batting register", 100, self,
+    def RunReport(self, message, title, acc):
+        dialog = wxProgressDialog(message, message, 100, self,
                                   wxPD_APP_MODAL | wxPD_AUTO_HIDE |
                                   wxPD_CAN_ABORT | wxPD_ELAPSED_TIME |
                                   wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME)
-        if statscan.ProcessFile(self.book, [ bs ], dialog):
+        try:
+            if statscan.ProcessFile(self.book, acc, dialog):
+                dialog.Show(false)
+                
+                dialog = ReportDialog(self, title, 
+                                      string.join([ str(x) for x in acc ],
+                                                  "\n\n"))
+                dialog.ShowModal()
+            else:
+                dialog.Show(false)
+        except:
             dialog.Show(false)
 
-            dialog = ReportDialog(self, "Batting register", str(bs))
+            dialog = wxMessageDialog(self,
+                                     "An internal error occurred in "
+                                     "generating the report.\n"
+                                     "Please send a bug report to "
+                                     "the maintaner at "
+                                     "turocy@econmail.tamu.edu\n"
+                                     "It is helpful to include this scorebook "
+                                     "as an "
+                                     "attachment when you send the report.\n"
+                                     "The problem deals only with this "
+                                     "report: don't worry, "
+                                     "your data is unaffected.\n"
+                                     "We apologize for the inconvenience!\n",
+                                     "Oops! There's a bug in Chadwick",
+                                     wxOK | wxICON_EXCLAMATION)
             dialog.ShowModal()
-        else:
-            dialog.Show(false)
+        
+    def OnReportRegisterBatting(self, event):
+        self.RunReport("Compiling batting register", "Batting register",
+                       [ statscan.BattingAccumulator() ])
 
     def OnReportRegisterPitching(self, event):
-        ps = statscan.PitchingAccumulator()
-        dialog = wxProgressDialog("Generating pitching register",
-                                  "Generating pitching register", 100, self,
-                                  wxPD_APP_MODAL | wxPD_AUTO_HIDE |
-                                  wxPD_CAN_ABORT | wxPD_ELAPSED_TIME |
-                                  wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME)
-        if statscan.ProcessFile(self.book, [ ps ], dialog):
-            dialog.Show(false)
-            
-            dialog = ReportDialog(self, "Pitching register", str(ps))
-            dialog.ShowModal()
-        else:
-            dialog.Show(false)
+        self.RunReport("Compiling pitching register", "Pitching register",
+                       [ statscan.PitchingAccumulator() ])
 
     def OnReportRegisterFielding(self, event):
-        fs = [ statscan.FieldingAccumulator(p+1) for p in range(9) ]
-        dialog = wxProgressDialog("Generating fielding register",
-                                  "Generating fielding register", 100, self,
-                                  wxPD_APP_MODAL | wxPD_AUTO_HIDE |
-                                  wxPD_CAN_ABORT | wxPD_ELAPSED_TIME |
-                                  wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME)
-        if statscan.ProcessFile(self.book, fs, dialog):
-            dialog.Show(false)
-            
-            dialog = ReportDialog(self, "Fielding register",
-                                  string.join([ str(x) for x in fs ], "\n\n"))
-            dialog.ShowModal()
-        else:
-            dialog.Show(false)
-            
-    def OnReportTeam(self, event):
-        acc = [ statscan.RecordAccumulator(self.book),
-                statscan.TeamBattingAccumulator(self.book),
-                statscan.TeamPitchingAccumulator(self.book),
-                statscan.TeamFieldingAccumulator(self.book) ]
+        self.RunReport("Compiling fielding register", "Fielding register",
+                       [ statscan.FieldingAccumulator(p+1) for p in range(9) ])
 
-        dialog = wxProgressDialog("Generating team statistics",
-                                  "Generating team statistics", 100, self,
-                                  wxPD_APP_MODAL | wxPD_AUTO_HIDE |
-                                  wxPD_CAN_ABORT | wxPD_ELAPSED_TIME |
-                                  wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME)
-        if statscan.ProcessFile(self.book, acc, dialog):
-            dialog.Show(false)
-            
-            dialog = ReportDialog(self, "Team statistics",
-                                  string.join([ str(x) for x in acc ], "\n\n"))
-            dialog.ShowModal()
-        else:
-            dialog.Show(false)
+    def OnReportTeam(self, event):
+        self.RunReport("Compiling team statistics", "Team statistics",
+                       [ statscan.RecordAccumulator(self.book),
+                         statscan.TeamBattingAccumulator(self.book),
+                         statscan.TeamPitchingAccumulator(self.book),
+                         statscan.TeamFieldingAccumulator(self.book) ])
 
     def OnReportLogTeam(self, event):
-        acc = [ statscan.GameLogAccumulator(self.book) ]
-
-        dialog = wxProgressDialog("Generating game logs",
-                                  "Generating game logs", 100, self,
-                                  wxPD_APP_MODAL | wxPD_AUTO_HIDE |
-                                  wxPD_CAN_ABORT | wxPD_ELAPSED_TIME |
-                                  wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME)
-        if statscan.ProcessFile(self.book, acc, dialog):
-            dialog.Show(false)
-            
-            dialog = ReportDialog(self, "Game log",
-                                  string.join([ str(x) for x in acc ], "\n\n"))
-            dialog.ShowModal()
-        else:
-            dialog.Show(false)
+        self.RunReport("Compiling game logs", "Game logs",
+                       [ statscan.GameLogAccumulator(self.book) ])
 
     def OnReportEventsSlams(self, event):
-        acc = [ statscan.GrandSlamAccumulator(self.book) ]
-
-        dialog = wxProgressDialog("Generating list of grand slams",
-                                  "Generating list of grand slams", 100, self,
-                                  wxPD_APP_MODAL | wxPD_AUTO_HIDE |
-                                  wxPD_CAN_ABORT | wxPD_ELAPSED_TIME |
-                                  wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME)
-        if statscan.ProcessFile(self.book, acc, dialog):
-            dialog.Show(false)
-            
-            dialog = ReportDialog(self, "List of grand slams",
-                                  string.join([ str(x) for x in acc ], "\n\n"))
-            dialog.ShowModal()
-        else:
-            dialog.Show(false)
+        self.RunReport("Compiling list of grand slams", "Grand slams",
+                       [ statscan.GrandSlamAccumulator(self.book) ])
 
     def OnUpdate(self):
         title = "Chadwick: [%s] %d" % (self.book.GetFilename(),
