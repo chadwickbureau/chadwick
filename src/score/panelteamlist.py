@@ -108,7 +108,7 @@ class TeamListGrid(wxGrid):
 
     def OnUpdate(self, book):
         if self.GetNumberRows() > book.NumTeams():
-            self.DeleteRows(self.GetNumberRows() - book.NumTeams())
+            self.DeleteRows(0, self.GetNumberRows() - book.NumTeams())
         elif self.GetNumberRows() < book.NumTeams():
             self.InsertRows(0, book.NumTeams() - self.GetNumberRows())
 

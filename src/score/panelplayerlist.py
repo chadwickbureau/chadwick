@@ -183,7 +183,7 @@ class PlayerListGrid(wxGrid):
 
     def OnUpdate(self, book):
         if self.GetNumberRows() > book.NumPlayers():
-            self.DeleteRows(self.GetNumberRows() - book.NumPlayers())
+            self.DeleteRows(0, self.GetNumberRows() - book.NumPlayers())
         elif self.GetNumberRows() < book.NumPlayers():
             self.InsertRows(0, book.NumPlayers() - self.GetNumberRows())
 

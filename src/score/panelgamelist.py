@@ -48,10 +48,10 @@ class GameListGrid(wxGrid):
     def OnUpdate(self, book):
         self.book = book
         if self.GetNumberRows() > book.NumGames():
-            self.DeleteRows(self.GetNumberRows() - book.NumGames())
+            self.DeleteRows(0, self.GetNumberRows() - book.NumGames())
         elif self.GetNumberRows() < book.NumGames():
             self.InsertRows(0, book.NumGames() - self.GetNumberRows())
-
+        
         for (i,game) in enumerate(book.IterateGames()):
             number = game.GetNumber()
             if number == 1:
