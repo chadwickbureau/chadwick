@@ -145,7 +145,7 @@ DECLARE_FIELDFUNC(cwgame_date)
 DECLARE_FIELDFUNC(cwgame_number)
 {
   char *tmp;
-  return sprintf(buffer, "%d",
+  return sprintf(buffer, (ascii) ? "%d" : "%5d",
 		 (tmp = cw_game_info_lookup(gameiter->game, "number")) ?
 		 atoi(tmp) : 0);
 }
@@ -170,7 +170,7 @@ DECLARE_FIELDFUNC(cwgame_day_of_week)
     year += 1900;
   }
 
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-10s",
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%s",
 		 day_names[get_day_of_week(month, day, year)]);
 }
 
@@ -181,11 +181,11 @@ DECLARE_FIELDFUNC(cwgame_start_time)
   char *time = cw_game_info_lookup(gameiter->game, "starttime");
 
   if (time == NULL) {
-    return sprintf(buffer, "0");
+    return sprintf(buffer, (ascii) ? "0" : "   0");
   }
 
   sscanf(time, "%d:%d", &hour, &min);
-  return sprintf(buffer, "%d", hour * 100 + min);
+  return sprintf(buffer, (ascii) ? "%d" : "%4d", hour * 100 + min);
 }
 
 /* Field 5 */
@@ -253,7 +253,7 @@ DECLARE_FIELDFUNC(cwgame_home_pitcher)
 DECLARE_FIELDFUNC(cwgame_umpire_home)
 {
   char *tmp;
-  return sprintf(buffer, "\"%s\"",
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "umphome")) ?
 		 tmp : "");
 }
@@ -262,7 +262,7 @@ DECLARE_FIELDFUNC(cwgame_umpire_home)
 DECLARE_FIELDFUNC(cwgame_umpire_1b)
 {
   char *tmp;
-  return sprintf(buffer, "\"%s\"",
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "ump1b")) ? 
 		 tmp : "");
 }
@@ -271,7 +271,7 @@ DECLARE_FIELDFUNC(cwgame_umpire_1b)
 DECLARE_FIELDFUNC(cwgame_umpire_2b)
 {
   char *tmp;
-  return sprintf(buffer, "\"%s\"",
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "ump2b")) ?
 		 tmp : "");
 }
@@ -280,7 +280,7 @@ DECLARE_FIELDFUNC(cwgame_umpire_2b)
 DECLARE_FIELDFUNC(cwgame_umpire_3b)
 {
   char *tmp;
-  return sprintf(buffer, "\"%s\"",
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "ump3b")) ? 
 		 tmp : "");
 }
@@ -289,7 +289,7 @@ DECLARE_FIELDFUNC(cwgame_umpire_3b)
 DECLARE_FIELDFUNC(cwgame_umpire_lf)
 {
   char *tmp;
-  return sprintf(buffer, "\"%s\"",
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "umplf")) ?
 		 tmp : "");
 }
@@ -298,7 +298,7 @@ DECLARE_FIELDFUNC(cwgame_umpire_lf)
 DECLARE_FIELDFUNC(cwgame_umpire_rf)
 {
   char *tmp;
-  return sprintf(buffer, "\"%s\"",
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "umprf")) ?
 		 tmp : "");
 }
@@ -307,7 +307,7 @@ DECLARE_FIELDFUNC(cwgame_umpire_rf)
 DECLARE_FIELDFUNC(cwgame_attendance)
 {
   char *tmp;
-  return sprintf(buffer, "%d", 
+  return sprintf(buffer, (ascii) ? "%d" : "%5d", 
 		 (tmp = cw_game_info_lookup(gameiter->game, "attendance")) ? 
 		 atoi(tmp) : 0);
 }
@@ -317,7 +317,7 @@ DECLARE_FIELDFUNC(cwgame_scorer)
 {
   char *tmp;
 
-  return sprintf(buffer, "\"%s\"",
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "scorer")) ?
 		 tmp : "");
 }
@@ -326,7 +326,7 @@ DECLARE_FIELDFUNC(cwgame_scorer)
 DECLARE_FIELDFUNC(cwgame_translator)
 {
   char *tmp;
-  return sprintf(buffer, "\"%s\"",
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "translator")) ?
 		 tmp : "");
 }
@@ -335,7 +335,7 @@ DECLARE_FIELDFUNC(cwgame_translator)
 DECLARE_FIELDFUNC(cwgame_inputter)
 {
   char *tmp;
-  return sprintf(buffer, "\"%s\"",
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "inputter")) ?
 		 tmp : "");
 }
@@ -344,7 +344,7 @@ DECLARE_FIELDFUNC(cwgame_inputter)
 DECLARE_FIELDFUNC(cwgame_inputtime)
 {
   char *tmp;
-  return sprintf(buffer, "\"%s\"",
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "inputtime")) ? 
 		 tmp : "");
 }
@@ -353,7 +353,7 @@ DECLARE_FIELDFUNC(cwgame_inputtime)
 DECLARE_FIELDFUNC(cwgame_edittime)
 {
   char *tmp;
-  return sprintf(buffer, "\"%s\"",
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "edittime")) ? 
 		 tmp : "");
 }
@@ -388,7 +388,7 @@ DECLARE_FIELDFUNC(cwgame_pitches)
 DECLARE_FIELDFUNC(cwgame_temperature)
 {
   char *tmp;
-  return sprintf(buffer, "%d",
+  return sprintf(buffer, (ascii) ? "%d" : "%3d",
 		 (tmp = cw_game_info_lookup(gameiter->game, "temp")) ? 
 		 atoi(tmp) : 0);
 }
@@ -459,7 +459,7 @@ DECLARE_FIELDFUNC(cwgame_sky)
 DECLARE_FIELDFUNC(cwgame_time_of_game)
 {
   char *tmp;
-  return sprintf(buffer, "%d",
+  return sprintf(buffer, (ascii) ? "%d" : "%3d",
 		 (tmp = cw_game_info_lookup(gameiter->game, "timeofgame")) ? 
 		 atoi(tmp) : 0);
 }
@@ -467,55 +467,57 @@ DECLARE_FIELDFUNC(cwgame_time_of_game)
 /* Field 33 */
 DECLARE_FIELDFUNC(cwgame_innings)
 {
-  return sprintf(buffer, "%d", gameiter->inning);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->inning);
 }
 
 /* Field 34 */
 DECLARE_FIELDFUNC(cwgame_visitor_score)
 {
-  return sprintf(buffer, "%d", gameiter->score[0]);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->score[0]);
 }
 
 /* Field 35 */
 DECLARE_FIELDFUNC(cwgame_home_score)
 {
-  return sprintf(buffer, "%d", gameiter->score[1]);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->score[1]);
 }
 
 /* Field 36 */
 DECLARE_FIELDFUNC(cwgame_visitor_hits)
 {
-  return sprintf(buffer, "%d", gameiter->hits[0]);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->hits[0]);
 }
 
 /* Field 37 */
 DECLARE_FIELDFUNC(cwgame_home_hits)
 {
-  return sprintf(buffer, "%d", gameiter->hits[1]);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->hits[1]);
 }
 
 /* Field 38 */
 DECLARE_FIELDFUNC(cwgame_visitor_errors)
 {
-  return sprintf(buffer, "%d", gameiter->errors[0]);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->errors[0]);
 }
 
 /* Field 39 */
 DECLARE_FIELDFUNC(cwgame_home_errors)
 {
-  return sprintf(buffer, "%d", gameiter->errors[1]);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->errors[1]);
 }
 
 /* Field 40 */
 DECLARE_FIELDFUNC(cwgame_visitor_lob)
 {
-  return sprintf(buffer, "%d", cw_gameiter_left_on_base(gameiter, 0));
+  return sprintf(buffer, (ascii) ? "%d" : "%2d",
+		 cw_gameiter_left_on_base(gameiter, 0));
 }
 
 /* Field 41 */
 DECLARE_FIELDFUNC(cwgame_home_lob)
 {
-  return sprintf(buffer, "%d", cw_gameiter_left_on_base(gameiter, 1));
+  return sprintf(buffer, (ascii) ? "%d" : "%2d",
+		 cw_gameiter_left_on_base(gameiter, 1));
 }
 
 /* Field 42 */
