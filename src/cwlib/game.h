@@ -143,9 +143,14 @@ CWAppearance *cw_game_starter_find_by_position(CWGame *game,
 /*
  * Add an event record to the game
  */
-void cw_game_event_append(CWGame *p_game, int inning, int halfInning,
+void cw_game_event_append(CWGame *game, int inning, int halfInning,
 			  char *batter, char *count, char *pitches,
 			  char *event_text);
+
+/*
+ * Truncate the game before an event
+ */
+void cw_game_truncate(CWGame *game, CWEvent *event); 
 
 /*
  * Add a substitute record to the game

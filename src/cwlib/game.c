@@ -92,10 +92,15 @@ static void cw_game_cleanup_starters(CWGame *game)
 
 /*
  * Private auxiliary function to cleanup memory from events list
+ * 'event' is the event at which to start
  */
-static void cw_game_cleanup_events(CWGame *game)
+static void cw_game_cleanup_events(CWGame *game, CWEvent *event)
 {
-  CWEvent *event = game->first_event;
+  if (event->prev != NULL) {
+    event->prev->next = NULL;
+  }
+  game->last_event = event->prev;
+
   while (event != NULL) {
     CWEvent *next_event = event->next;
     CWAppearance *sub = event->first_sub;
@@ -113,9 +118,6 @@ static void cw_game_cleanup_events(CWGame *game)
     free(event);
     event = next_event;
   }
-
-  game->first_event = NULL;
-  game->last_event = NULL;
 }
 
 /*
@@ -141,7 +143,8 @@ void cw_game_cleanup(CWGame *game)
 {
   cw_game_cleanup_tags(game);
   cw_game_cleanup_starters(game);
-  cw_game_cleanup_events(game);
+  cw_game_cleanup_events(game, game->first_event);
+  game->first_event = NULL;
   cw_game_cleanup_data(game);
   
   free(game->version);
@@ -279,6 +282,11 @@ void cw_game_event_append(CWGame *game, int inning, int half_inning,
   game->last_event = event;
 }
 
+void cw_game_truncate(CWGame *game, CWEvent *event)
+{
+  cw_game_cleanup_events(game, event);
+}
+
 void cw_game_substitute_append(CWGame *game, char *player_id, char *name,
 			       int team, int slot, int pos)
 {
@@ -414,11 +422,23 @@ cw_game_write_header(CWGame *game, FILE *file)
   fprintf(file, "version,%s\n", game->version);
 
   while (info != NULL) {
-    if (!strstr(info->data, ",")) {
-      fprintf(file, "info,%s,%s\n", info->label, info->data);
+    /*
+     * Use explicit quotes around the data if either a comma appears
+     * in the data, or to be output-compatible with existing tools 
+     */
+    if (strstr(info->data, ",") ||
+	!strcmp(info->label, "inputprogvers") ||
+	!strcmp(info->label, "umphome") ||
+	!strcmp(info->label, "ump1b") ||
+	!strcmp(info->label, "ump2b") ||
+	!strcmp(info->label, "ump3b") ||
+	!strcmp(info->label, "scorer") ||
+	!strcmp(info->label, "translator") ||
+	!strcmp(info->label, "inputter")) {
+      fprintf(file, "info,%s,\"%s\"\n", info->label, info->data);
     }
     else {
-      fprintf(file, "info,%s,\"%s\"\n", info->label, info->data);
+      fprintf(file, "info,%s,%s\n", info->label, info->data);
     }
     info = info->next;
   }
