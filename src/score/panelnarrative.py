@@ -91,7 +91,7 @@ class NarrativePanel(wxPanel):
         text += "   %-25s %-25s\n" % (self.doc.GetRoster(0).GetCity(),
                                       self.doc.GetRoster(1).GetCity())
         positions = [ "", "p", "c", "1b", "2b", "3b", "ss",
-                      "lf", "cf", "rf" ]
+                      "lf", "cf", "rf", "dh" ]
         for slot in range(9):
             text += ("%d. %-20s %-2s   %-20s %-2s\n" %
                      (slot+1,
