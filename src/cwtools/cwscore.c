@@ -784,10 +784,10 @@ CWScorebook *cwscore_load(void)
     printf("Error opening file '%s'\n", buffer);
     return NULL;
   }
-  fclose(file);
 
   scorebook = cw_scorebook_create();
-  cw_scorebook_read(scorebook, buffer);
+  cw_scorebook_read(scorebook, file);
+  fclose(file);
   return scorebook;
 }
 
