@@ -161,6 +161,7 @@ class ChadwickScorebook:
             self.WriteTeam(zf, team)
         
         zf.close()
+        self.filename = filename
         self.modified = False
 
     def WriteTeam(self, zf, team):

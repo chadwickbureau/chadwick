@@ -122,6 +122,7 @@ class ChadwickFrame(wxFrame):
         EVT_MENU(self, wxID_OPEN, self.OnFileOpen)
         EVT_MENU_RANGE(self, wxID_FILE1, wxID_FILE9, self.OnFileMRU)
         EVT_MENU(self, wxID_SAVE, self.OnFileSave)
+        EVT_MENU(self, wxID_SAVEAS, self.OnFileSaveAs)
         EVT_MENU(self, wxID_EXIT, self.OnFileExit)
         EVT_MENU(self, wxID_ABOUT, self.OnHelpAbout)
         EVT_BUTTON(self, CW_MENU_GAME_NEW, self.OnGameNew)
@@ -140,6 +141,8 @@ class ChadwickFrame(wxFrame):
         fileMenu.Append(wxID_NEW, "&New", "Create a new scorebook")
         fileMenu.Append(wxID_OPEN, "&Open", "Open a saved scorebook")
         fileMenu.Append(wxID_SAVE, "&Save", "Save the current scorebook")
+        fileMenu.Append(wxID_SAVEAS, "Save &as",
+                        "Save the scorebook to a different file")
         fileMenu.AppendSeparator()
         fileMenu.Append(wxID_EXIT, "&Exit", "Close Chadwick")
 
@@ -223,6 +226,19 @@ class ChadwickFrame(wxFrame):
         self.OnUpdate()
             
     def OnFileSave(self, event):
+        try:
+            self.book.Write(self.book.GetFilename())
+            self.OnUpdate()
+        except:
+            dialog = wxMessageDialog(self,
+                                     "An error occurred in writing "
+                                     + self.book.GetFilename(),
+                                     "Error saving scorebook",
+                                     wxOK | wxICON_ERROR)
+            dialog.ShowModal()
+
+
+    def OnFileSaveAs(self, event):
         dialog = wxFileDialog(self, "Scorebook to save...",
                               "", "",
                               "Chadwick scorebooks (*.chw)|*.chw|"
@@ -232,6 +248,7 @@ class ChadwickFrame(wxFrame):
             try:
                 self.book.Write(str(dialog.GetPath()))
                 self.fileHistory.AddFileToHistory(dialog.GetPath())
+                self.OnUpdate()
             except:
                 dialog = wxMessageDialog(self,
                                          "An error occurred in writing "
