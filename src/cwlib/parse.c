@@ -41,10 +41,10 @@ cw_event_is_batter(CWParsedEvent *event)
   /* This takes advantage of the event numberings; logic would need changed
    * should those number assignments change
    */
-  return (event->event_type == EVENT_GENERICOUT ||
-	  event->event_type == EVENT_STRIKEOUT ||
-	  (event->event_type >= EVENT_WALK &&
-	   event->event_type <= EVENT_HOMERUN));
+  return (event->event_type == CW_EVENT_GENERICOUT ||
+	  event->event_type == CW_EVENT_STRIKEOUT ||
+	  (event->event_type >= CW_EVENT_WALK &&
+	   event->event_type <= CW_EVENT_HOMERUN));
 }
 
 int
@@ -55,10 +55,10 @@ cw_event_is_official_ab(CWParsedEvent *event)
   }
 
   if (event->sh_flag || event->sf_flag ||
-      event->event_type == EVENT_WALK ||
-      event->event_type == EVENT_INTENTIONALWALK ||
-      event->event_type == EVENT_HITBYPITCH ||
-      event->event_type == EVENT_INTERFERENCE) {
+      event->event_type == CW_EVENT_WALK ||
+      event->event_type == CW_EVENT_INTENTIONALWALK ||
+      event->event_type == CW_EVENT_HITBYPITCH ||
+      event->event_type == CW_EVENT_INTERFERENCE) {
     return 0;
   }
 
@@ -201,7 +201,7 @@ static void
 cw_parse_event_initialize(CWParsedEvent *event)
 {
   int i;
-  event->event_type = EVENT_UNKNOWN;
+  event->event_type = CW_EVENT_UNKNOWN;
   for (i = 0; i <= 3; i++) {
     event->advance[i] = 0;
     event->rbi_flag[i] = 0;
@@ -615,8 +615,8 @@ static void parse_flags(CWParserState *state, CWParsedEvent *event)
     else if ((!strcmp(flag, "/TH") || !strcmp(flag, "/TH1") ||
 	      !strcmp(flag, "/TH2") || !strcmp(flag, "/TH3") ||
 	      !strcmp(flag, "/THH")) && 
-	     (event->event_type == EVENT_ERROR ||
-	      event->event_type == EVENT_PICKOFFERROR)) {
+	     (event->event_type == CW_EVENT_ERROR ||
+	      event->event_type == CW_EVENT_PICKOFFERROR)) {
       event->error_types[0] = 'T';
     }
     else if (!strcmp(flag, "/B")) {
@@ -1283,7 +1283,7 @@ static int parse_pickoff(CWParserState *state, CWParsedEvent *event,
   }
   else if (state->sym == 'E') {
     /* going to leave this commented to match hevent output for now */
-    /*    event->event_type = EVENT_PICKOFFERROR;  */
+    /*    event->event_type = CW_EVENT_PICKOFFERROR;  */
     parse_fielding_credit(state, event, ' ' );
     strncpy(event->play[runner], state->token, 20);
 
@@ -1590,15 +1590,15 @@ static int parse_runner_advance(CWParserState *state, CWParsedEvent *event)
       event->advance[baseFrom] = baseTo;
     }
     if (baseTo == 4 && cw_event_is_batter(event) && !event->gdp_flag &&
-	(event->event_type != EVENT_ERROR || baseFrom == 3) &&
-	event->event_type != EVENT_STRIKEOUT &&
+	(event->event_type != CW_EVENT_ERROR || baseFrom == 3) &&
+	event->event_type != CW_EVENT_STRIKEOUT &&
 	event->rbi_flag[baseFrom] != -1) {
       event->rbi_flag[baseFrom] = 1;
     }
   }
   else {
     event->advance[baseFrom] = 0;
-    if (event->event_type == EVENT_FIELDERSCHOICE) {
+    if (event->event_type == CW_EVENT_FIELDERSCHOICE) {
       event->fc_flag[baseFrom] = 1;
     }
   }
@@ -1630,29 +1630,29 @@ void SanityCheck(CWParsedEvent *event)
 {
   int base;
 
-  if (event->event_type == EVENT_SINGLE &&
+  if (event->event_type == CW_EVENT_SINGLE &&
       event->advance[0] == 0 && 
       !strcmp(event->play[0], "")) {
     event->advance[0] = 1;
   }
-  else if (event->event_type == EVENT_DOUBLE &&
+  else if (event->event_type == CW_EVENT_DOUBLE &&
 	   event->advance[0] == 0 && 
 	   !strcmp(event->play[0], "")) {
     event->advance[0] = 2;
   }
-  if (event->event_type == EVENT_TRIPLE &&
+  if (event->event_type == CW_EVENT_TRIPLE &&
       event->advance[0] == 0 && 
       !strcmp(event->play[0], "")) {
     event->advance[0] = 3;
   }
-  if (event->event_type == EVENT_HOMERUN &&
+  if (event->event_type == CW_EVENT_HOMERUN &&
       event->advance[0] == 0 && 
       !strcmp(event->play[0], "")) {
     event->advance[0] = 4;
     event->rbi_flag[0] = 1;
   }
 
-  if (event->event_type == EVENT_STRIKEOUT)  {
+  if (event->event_type == CW_EVENT_STRIKEOUT)  {
     event->batted_ball_type = ' ';
     if (!strcmp(event->play[0], "2") && 
 	event->advance[0] > 0) {
@@ -1663,7 +1663,7 @@ void SanityCheck(CWParsedEvent *event)
     }
   }
 
-  if (event->event_type == EVENT_WALK) {
+  if (event->event_type == CW_EVENT_WALK) {
     event->rbi_flag[0] = 0;
     event->rbi_flag[1] = 0;
     event->rbi_flag[2] = 0;
@@ -1683,7 +1683,7 @@ void SanityCheck(CWParsedEvent *event)
 
   /* The following implements rules for default batted ball types based
    * upon defensive fielding credit */
-  if (event->event_type == EVENT_GENERICOUT) {
+  if (event->event_type == CW_EVENT_GENERICOUT) {
     if (strlen(event->play[0]) == 1 &&
 	!event->dp_flag && !event->tp_flag && !event->bunt_flag &&
 	event->batted_ball_type == ' ') {
@@ -1695,7 +1695,7 @@ void SanityCheck(CWParsedEvent *event)
     }
   }
 
-  if (event->event_type == EVENT_SINGLE && event->bunt_flag &&
+  if (event->event_type == CW_EVENT_SINGLE && event->bunt_flag &&
       event->batted_ball_type == ' ') {
     event->batted_ball_type = 'G';
   }
@@ -1714,38 +1714,38 @@ typedef struct {
 int cw_parse_event(char *text, CWParsedEvent *event)
 {
   static cw_parse_table_entry primary_table[] = {
-    { EVENT_BALK, "BK", parse_balk },
-    { EVENT_INTERFERENCE, "C", parse_interference },
-    { EVENT_CAUGHTSTEALING, "CS", parse_caught_stealing },
-    { EVENT_DOUBLE, "D", parse_base_hit },
-    { EVENT_DOUBLE, "DGR", parse_ground_rule_double },
-    { EVENT_INDIFFERENCE, "DI", parse_indifference },
-    { EVENT_ERROR, "E", parse_safe_on_error },
-    { EVENT_FIELDERSCHOICE, "FC", parse_fielders_choice },
-    { EVENT_FIELDERSCHOICE, "FCSH", parse_sac_fielders_choice },  /* archaic */
-    { EVENT_FOULERROR, "FLE", parse_foul_error },
-    { EVENT_HOMERUN, "H", parse_base_hit },
-    { EVENT_HITBYPITCH, "HBP", parse_hit_by_pitch },
-    { EVENT_HITBYPITCH, "HP", parse_hit_by_pitch },
-    { EVENT_HOMERUN, "HR", parse_base_hit },
-    { EVENT_INTENTIONALWALK, "I", parse_walk },
-    { EVENT_INTENTIONALWALK, "IW", parse_walk },
-    { EVENT_STRIKEOUT, "K", parse_strikeout },
-    { EVENT_STRIKEOUT, "KE", parse_strikeout_error },  /* archaic */
-    { EVENT_OTHERADVANCE, "OA", parse_other_advance },
-    { EVENT_OTHERADVANCE, "OBA", parse_other_advance },
-    { EVENT_PASSEDBALL, "PB", parse_passed_ball },
-    { EVENT_PICKOFF, "PO", parse_pickoff },
-    { EVENT_PICKOFF, "POCS", parse_pickoff_caught_stealing },
-    { EVENT_PICKOFFERROR, "POE", parse_pickoff_error },
-    { EVENT_STOLENBASE, "POSB", parse_pickoff_stolen_base },
-    { EVENT_SINGLE, "S", parse_base_hit },
-    { EVENT_STOLENBASE, "SB", parse_stolen_base },
-    { EVENT_ERROR, "SHE", parse_sac_hit_error },   /* archaic */
-    { EVENT_TRIPLE, "T", parse_base_hit },
-    { EVENT_WALK, "W", parse_walk },
-    { EVENT_WILDPITCH, "WP", parse_wild_pitch },
-    { EVENT_GENERICOUT, "", parse_generic_out },
+    { CW_EVENT_BALK, "BK", parse_balk },
+    { CW_EVENT_INTERFERENCE, "C", parse_interference },
+    { CW_EVENT_CAUGHTSTEALING, "CS", parse_caught_stealing },
+    { CW_EVENT_DOUBLE, "D", parse_base_hit },
+    { CW_EVENT_DOUBLE, "DGR", parse_ground_rule_double },
+    { CW_EVENT_INDIFFERENCE, "DI", parse_indifference },
+    { CW_EVENT_ERROR, "E", parse_safe_on_error },
+    { CW_EVENT_FIELDERSCHOICE, "FC", parse_fielders_choice },
+    { CW_EVENT_FIELDERSCHOICE, "FCSH", parse_sac_fielders_choice },  /* archaic */
+    { CW_EVENT_FOULERROR, "FLE", parse_foul_error },
+    { CW_EVENT_HOMERUN, "H", parse_base_hit },
+    { CW_EVENT_HITBYPITCH, "HBP", parse_hit_by_pitch },
+    { CW_EVENT_HITBYPITCH, "HP", parse_hit_by_pitch },
+    { CW_EVENT_HOMERUN, "HR", parse_base_hit },
+    { CW_EVENT_INTENTIONALWALK, "I", parse_walk },
+    { CW_EVENT_INTENTIONALWALK, "IW", parse_walk },
+    { CW_EVENT_STRIKEOUT, "K", parse_strikeout },
+    { CW_EVENT_STRIKEOUT, "KE", parse_strikeout_error },  /* archaic */
+    { CW_EVENT_OTHERADVANCE, "OA", parse_other_advance },
+    { CW_EVENT_OTHERADVANCE, "OBA", parse_other_advance },
+    { CW_EVENT_PASSEDBALL, "PB", parse_passed_ball },
+    { CW_EVENT_PICKOFF, "PO", parse_pickoff },
+    { CW_EVENT_PICKOFF, "POCS", parse_pickoff_caught_stealing },
+    { CW_EVENT_PICKOFFERROR, "POE", parse_pickoff_error },
+    { CW_EVENT_STOLENBASE, "POSB", parse_pickoff_stolen_base },
+    { CW_EVENT_SINGLE, "S", parse_base_hit },
+    { CW_EVENT_STOLENBASE, "SB", parse_stolen_base },
+    { CW_EVENT_ERROR, "SHE", parse_sac_hit_error },   /* archaic */
+    { CW_EVENT_TRIPLE, "T", parse_base_hit },
+    { CW_EVENT_WALK, "W", parse_walk },
+    { CW_EVENT_WILDPITCH, "WP", parse_wild_pitch },
+    { CW_EVENT_GENERICOUT, "", parse_generic_out },
   };
     
   int i;
@@ -1756,7 +1756,7 @@ int cw_parse_event(char *text, CWParsedEvent *event)
   cw_parse_primary_event(&state);
 
   if (state.token[0] == '\0') {
-    event->event_type = EVENT_GENERICOUT;
+    event->event_type = CW_EVENT_GENERICOUT;
     if (!parse_generic_out(&state, event, 1)) {
       cw_parse_cleanup(&state);
       return 0;

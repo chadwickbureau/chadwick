@@ -327,22 +327,22 @@ cw_boxscore_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
   if (cw_event_is_official_ab(event_data)) {
     player->batting->ab++;
 
-    if (event_data->event_type >= EVENT_SINGLE &&
-	event_data->event_type <= EVENT_HOMERUN) {
+    if (event_data->event_type >= CW_EVENT_SINGLE &&
+	event_data->event_type <= CW_EVENT_HOMERUN) {
       player->batting->h++;
       pitcher->pitching->h++;
-      if (event_data->event_type == EVENT_DOUBLE) {
+      if (event_data->event_type == CW_EVENT_DOUBLE) {
 	player->batting->b2++;
       }
-      else if (event_data->event_type == EVENT_TRIPLE) {
+      else if (event_data->event_type == CW_EVENT_TRIPLE) {
 	player->batting->b3++;
       }
-      else if (event_data->event_type == EVENT_HOMERUN) {
+      else if (event_data->event_type == CW_EVENT_HOMERUN) {
 	player->batting->hr++;
 	pitcher->pitching->hr++;
       }
     }
-    else if (event_data->event_type == EVENT_STRIKEOUT) {
+    else if (event_data->event_type == CW_EVENT_STRIKEOUT) {
       player->batting->so++;
       pitcher->pitching->so++;
     }
@@ -350,19 +350,19 @@ cw_boxscore_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       player->batting->gdp++;
     }
   }
-  else if (event_data->event_type == EVENT_WALK ||
-	   event_data->event_type == EVENT_INTENTIONALWALK) {
+  else if (event_data->event_type == CW_EVENT_WALK ||
+	   event_data->event_type == CW_EVENT_INTENTIONALWALK) {
     player->batting->bb++;
     pitcher->pitching->bb++;
-    if (event_data->event_type == EVENT_INTENTIONALWALK) {
+    if (event_data->event_type == CW_EVENT_INTENTIONALWALK) {
       player->batting->ibb++;
       pitcher->pitching->ibb++;
     }
   }
-  else if (event_data->event_type == EVENT_HITBYPITCH) {
+  else if (event_data->event_type == CW_EVENT_HITBYPITCH) {
     player->batting->hp++;
   }
-  else if (event_data->event_type == EVENT_BALK) {
+  else if (event_data->event_type == CW_EVENT_BALK) {
     pitcher->pitching->bk++;
   }
   else if (event_data->wp_flag) {
@@ -432,14 +432,14 @@ cw_boxscore_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
     
     player->fielding[pos]->outs += cw_event_outs_on_play(gameiter->event_data);
 
-    if (gameiter->event_data->event_type == EVENT_SINGLE ||
-	gameiter->event_data->event_type == EVENT_DOUBLE ||
-	gameiter->event_data->event_type == EVENT_TRIPLE ||
-	(gameiter->event_data->event_type == EVENT_HOMERUN &&
+    if (gameiter->event_data->event_type == CW_EVENT_SINGLE ||
+	gameiter->event_data->event_type == CW_EVENT_DOUBLE ||
+	gameiter->event_data->event_type == CW_EVENT_TRIPLE ||
+	(gameiter->event_data->event_type == CW_EVENT_HOMERUN &&
 	 gameiter->event_data->fielded_by > 0) ||
-	gameiter->event_data->event_type == EVENT_ERROR ||
-	gameiter->event_data->event_type == EVENT_GENERICOUT ||
-	gameiter->event_data->event_type == EVENT_FIELDERSCHOICE) {
+	gameiter->event_data->event_type == CW_EVENT_ERROR ||
+	gameiter->event_data->event_type == CW_EVENT_GENERICOUT ||
+	gameiter->event_data->event_type == CW_EVENT_FIELDERSCHOICE) {
       player->fielding[pos]->bip++;
     }
 

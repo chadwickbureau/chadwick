@@ -407,9 +407,9 @@ DECLARE_FIELDFUNC(cwevent_ab_flag)
 DECLARE_FIELDFUNC(cwevent_hit_value)
 {
   return sprintf(buffer, "%d", 
-		 (gameiter->event_data->event_type >= EVENT_SINGLE &&
-		  gameiter->event_data->event_type <= EVENT_HOMERUN) ?
-		 gameiter->event_data->event_type - EVENT_SINGLE + 1 : 0);
+		 (gameiter->event_data->event_type >= CW_EVENT_SINGLE &&
+		  gameiter->event_data->event_type <= CW_EVENT_HOMERUN) ?
+		 gameiter->event_data->event_type - CW_EVENT_SINGLE + 1 : 0);
 }
 
 /* Field 38 */
@@ -558,7 +558,7 @@ DECLARE_FIELDFUNC(cwevent_batter_advance)
 {
   /* bevent does not record batter advancing on inning-ending
    * forceouts */
-  if (gameiter->event_data->event_type == EVENT_GENERICOUT &&
+  if (gameiter->event_data->event_type == CW_EVENT_GENERICOUT &&
       gameiter->outs +
       cw_event_outs_on_play(gameiter->event_data) >= 3 &&
       gameiter->event_data->num_errors == 0) {

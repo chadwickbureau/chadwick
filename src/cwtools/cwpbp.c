@@ -228,48 +228,48 @@ cwpbp_print_text(CWGameIterator *gameiter, CWRoster *visitors, CWRoster *home)
 
       printf("%s %s", batter->first_name, batter->last_name);
       switch (gameiter->event_data->event_type) {
-      case EVENT_SINGLE:
+      case CW_EVENT_SINGLE:
 	printf(" singled");
 	cwpbp_print_hit_fielder(gameiter,
 				(gameiter->half_inning == 0) ? home : visitors);
 	break;
-      case EVENT_DOUBLE:
+      case CW_EVENT_DOUBLE:
 	printf(" doubled");
 	cwpbp_print_hit_fielder(gameiter,
 				(gameiter->half_inning == 0) ? home : visitors);
 	break;
-      case EVENT_TRIPLE:
+      case CW_EVENT_TRIPLE:
 	printf(" tripled");
 	cwpbp_print_hit_fielder(gameiter,
 				(gameiter->half_inning == 0) ? home : visitors);
 	break;
-      case EVENT_HOMERUN:
+      case CW_EVENT_HOMERUN:
 	printf(" homered");
 	cwpbp_print_hit_fielder(gameiter,
 				(gameiter->half_inning == 0) ? home : visitors);
 	break;
-      case EVENT_WALK:
+      case CW_EVENT_WALK:
 	printf(" walked");
 	break;
-      case EVENT_INTENTIONALWALK:
+      case CW_EVENT_INTENTIONALWALK:
 	printf(" was intentionally walked");
 	break;
-      case EVENT_STRIKEOUT:
+      case CW_EVENT_STRIKEOUT:
 	printf(" struck out");
 	break;
-      case EVENT_HITBYPITCH:
+      case CW_EVENT_HITBYPITCH:
 	printf(" was hit by a pitch");
 	break;
-      case EVENT_GENERICOUT:
+      case CW_EVENT_GENERICOUT:
 	cwpbp_process_generic_out(gameiter, visitors, home);
 	break;
-      case EVENT_ERROR:
+      case CW_EVENT_ERROR:
 	printf(" reached on an error");
 	break;
-      case EVENT_INTERFERENCE:
+      case CW_EVENT_INTERFERENCE:
 	printf(" was awarded first on interference");
 	break;
-      case EVENT_FIELDERSCHOICE:
+      case CW_EVENT_FIELDERSCHOICE:
 	printf(" reached on a fielder's choice");
 	break;
       default:

@@ -364,8 +364,8 @@ cw_gameiter_next(CWGameIterator *gameiter)
     gameiter->score[gameiter->half_inning] += 
       cw_event_runs_on_play(gameiter->event_data);
     gameiter->hits[gameiter->half_inning] +=
-      (gameiter->event_data->event_type >= EVENT_SINGLE &&
-       gameiter->event_data->event_type <= EVENT_HOMERUN) ? 1 : 0;
+      (gameiter->event_data->event_type >= CW_EVENT_SINGLE &&
+       gameiter->event_data->event_type <= CW_EVENT_HOMERUN) ? 1 : 0;
     gameiter->errors[1 - gameiter->half_inning] += 
       gameiter->event_data->num_errors;
     gameiter->times_out[gameiter->half_inning] += 
@@ -421,7 +421,7 @@ cw_gameiter_next(CWGameIterator *gameiter)
       }
     }
 
-    if (gameiter->event_data->event_type == EVENT_ERROR &&
+    if (gameiter->event_data->event_type == CW_EVENT_ERROR &&
 	gameiter->outs == 2 &&
 	gameiter->event_data->rbi_flag[3] == 1) {
       /* No RBIs should be awarded, even if not explicitly noted (NR)
@@ -487,7 +487,7 @@ cw_gameiter_player_position(CWGameIterator *gameiter,
 char *
 cw_gameiter_charged_batter(CWGameIterator *gameiter)
 {
-  if (gameiter->event_data->event_type == EVENT_STRIKEOUT &&
+  if (gameiter->event_data->event_type == CW_EVENT_STRIKEOUT &&
       gameiter->strikeout_batter != NULL) {
     return gameiter->strikeout_batter;
   }
@@ -499,8 +499,8 @@ cw_gameiter_charged_batter(CWGameIterator *gameiter)
 char *
 cw_gameiter_charged_pitcher(CWGameIterator *gameiter)
 {
-  if ((gameiter->event_data->event_type == EVENT_WALK || 
-       gameiter->event_data->event_type == EVENT_INTENTIONALWALK) &&
+  if ((gameiter->event_data->event_type == CW_EVENT_WALK || 
+       gameiter->event_data->event_type == CW_EVENT_INTENTIONALWALK) &&
       gameiter->walk_pitcher != NULL) {
     return gameiter->walk_pitcher;
   }
