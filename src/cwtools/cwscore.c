@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
 #include "cwlib/chadwick.h"
  
 char *cwscore_position_from_number(int position)
@@ -102,6 +103,8 @@ char *cwscore_get_info(char *prompt, char *data)
 CWGame *cwscore_create_game(char *game_id, char *visitors, char *home)
 {
   char buffer[256];
+  time_t curtime;
+  struct tm *loctime;
   CWGame *game = cw_game_create(game_id);
   cw_game_set_version(game, "1");
   
@@ -136,7 +139,11 @@ CWGame *cwscore_create_game(char *game_id, char *visitors, char *home)
 		      cwscore_get_info("Translator:", buffer));
   cw_game_info_append(game, "inputter",
 		      cwscore_get_info("Inputter:", buffer));
-  cw_game_info_append(game, "inputtime", "");
+
+  curtime = time(NULL);
+  loctime = localtime (&curtime);
+  strftime (buffer, 256, "%Y/%m/%d %I:%M%p", loctime);
+  cw_game_info_append(game, "inputtime", buffer);
   cw_game_info_append(game, "howscored", 
 		      cwscore_get_info("How scored: (park radio tv unknown)", buffer));
   cw_game_info_append(game, "pitches", "none");
