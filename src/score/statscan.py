@@ -1230,6 +1230,137 @@ class GrandSlamLog:
                    rec["inning"]))
         return s
 
+class BigGameLog:
+    """
+    This is a log report for 'big games' by players.  It provides
+    the generic stuff needed to generate such a report.  Derived
+    reports should provide three functions: the OnEvent() function;
+    a GetHeader() function, which returns the text string placed over
+    the count in the text output; and a GetThreshold() function to
+    indicate the statistical count needed to appear in the report.
+    """
+    def __init__(self, book):
+        self.events = [ ]
+        self.book = book
+
+    # Provide us in derived class!
+    def GetTitle(self):   return ""
+    def GetHeader(self):  return ""
+    def GetThreshold(self):  return 2
+    def IsOffense(self):  return True
+    def OnEvent(self, game, gameiter):  pass
+    
+    def OnBeginGame(self, game, gameiter): self.counts = [ { }, { } ]
+    def OnSubstitution(self, game, gameiter): pass
+
+    def OnEndGame(self, game, gameiter):
+        for (t,team) in enumerate(self.counts):
+            for key in team:
+                if team[key] >= self.GetThreshold():
+                    if self.IsOffense():
+                        self.events.append({ "game": game,
+                                             "batter": key,
+                                             "team": game.GetTeam(t),
+                                             "opp": game.GetTeam(1-t),
+                                             "site": game.GetTeam(1),
+                                             "count": team[key] })
+                    else:
+                        self.events.append({ "game": game,
+                                             "batter": key,
+                                             "team": game.GetTeam(1-t),
+                                             "opp": game.GetTeam(t),
+                                             "site": game.GetTeam(1),
+                                             "count": team[key] })
+
+
+    def __str__(self):
+        s = "\n%s\n" % self.GetTitle()
+        s += ("\nPlayer                         Date           Team Opp  Site  %2s\n" %
+             self.GetHeader())
+
+        self.events.sort(lambda x, y:
+                         cmp(x["game"].GetDate()+x["site"]+str(x["game"].GetNumber()),
+                             y["game"].GetDate()+y["site"]+str(y["game"].GetNumber())))
+        
+        for rec in self.events:
+            player = self.book.GetPlayer(rec["batter"])
+            s += ("%-30s %10s %s %s  %s  %s   %2d\n" %
+                  (player.GetSortName(),
+                   rec["game"].GetDate(),
+                   [ "   ", "(1)", "(2)" ][rec["game"].GetNumber()],
+                   rec["team"], rec["opp"], rec["site"],
+                   rec["count"]))
+
+        return s
+
+
+class MultiHRLog(BigGameLog):
+    def __init__(self, book):  BigGameLog.__init__(self, book)
+
+    def GetTitle(self):
+        return ("Players with at least %d home runs in a game" %
+                self.GetThreshold())
+    def GetHeader(self):  return "HR"
+    def GetThreshold(self):  return 2
+    def IsOffense(self):  return True
+    
+    def OnEvent(self, game, gameiter):
+        eventData = gameiter.GetEventData()
+        team = gameiter.event.half_inning
+
+        if eventData.event_type == CW_EVENT_HOMERUN:
+            batter = gameiter.event.batter
+            if gameiter.event.batter in self.counts[team]:
+                self.counts[team][batter] += 1
+            else:
+                self.counts[team][batter] = 1
+
+class MultiHitLog(BigGameLog):
+    def __init__(self, book):  BigGameLog.__init__(self, book)
+
+    def GetTitle(self):
+        return ("Players with at least %d hits in a game" %
+                self.GetThreshold())
+    def GetHeader(self):  return "H"
+    def GetThreshold(self):  return 4
+    def IsOffense(self):  return True
+    
+    def OnEvent(self, game, gameiter):
+        eventData = gameiter.GetEventData()
+        team = gameiter.event.half_inning
+
+        if eventData.event_type in [ CW_EVENT_SINGLE,
+                                     CW_EVENT_DOUBLE,
+                                     CW_EVENT_TRIPLE,
+                                     CW_EVENT_HOMERUN ]:
+            batter = gameiter.event.batter
+            if gameiter.event.batter in self.counts[team]:
+                self.counts[team][batter] += 1
+            else:
+                self.counts[team][batter] = 1
+
+class MultiStrikeoutLog(BigGameLog):
+    def __init__(self, book):  BigGameLog.__init__(self, book)
+
+    def GetTitle(self):
+        return ("Pitchers with at least %d strikeouts in a game" %
+                self.GetThreshold())
+    def GetHeader(self):  return "SO"
+    def GetThreshold(self):  return 10
+    def IsOffense(self):  return False
+    
+    def OnEvent(self, game, gameiter):
+        eventData = gameiter.GetEventData()
+        team = gameiter.event.half_inning
+
+        if eventData.event_type == CW_EVENT_STRIKEOUT:
+            pitcher = gameiter.GetFielder(1-team, 1)
+            if pitcher in self.counts[team]:
+                self.counts[team][pitcher] += 1
+            else:
+                self.counts[team][pitcher] = 1
+
+
 def ProcessGame(game, acclist):
     gameiter = CWGameIterator(game)
     map(lambda x: x.OnBeginGame(game, gameiter), acclist)
@@ -1270,10 +1401,11 @@ if __name__ == "__main__":
     book = scorebook.ChadwickScorebook()
     book.Read(fn)
 
-    x = [ TeamRecordTotals(book),
-          TeamBattingTotals(book),
-          TeamPitchingTotals(book),
-          TeamFieldingTotals(book) ]
+    #x = [ TeamRecordTotals(book),
+    #      TeamBattingTotals(book),
+    #      TeamPitchingTotals(book),
+    #      TeamFieldingTotals(book) ]
+    x = [ MultiHRLog(book), MultiHitLog(book), MultiStrikeoutLog(book) ]
     ProcessFile(book, x)
 
     for acc in x:

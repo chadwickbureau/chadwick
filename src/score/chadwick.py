@@ -99,6 +99,7 @@ CW_MENU_REPORT_TEAM_BATTING = 2023
 CW_MENU_REPORT_TEAM_PITCHING = 2024
 CW_MENU_REPORT_EVENTS = 2016
 CW_MENU_REPORT_EVENTS_SLAMS = 2017
+CW_MENU_REPORT_EVENTS_BIGGAME = 2018
 
 class ChadwickFrame(wxFrame):
     def __init__(self, parent):
@@ -148,6 +149,8 @@ class ChadwickFrame(wxFrame):
         EVT_MENU(self, CW_MENU_REPORT_TEAM_BATTING, self.OnReportTeamBatting)
         EVT_MENU(self, CW_MENU_REPORT_TEAM_PITCHING, self.OnReportTeamPitching)
         EVT_MENU(self, CW_MENU_REPORT_EVENTS_SLAMS, self.OnReportEventsSlams)
+        EVT_MENU(self, CW_MENU_REPORT_EVENTS_BIGGAME,
+                 self.OnReportEventsBigGame)
         EVT_BUTTON(self, panelstate.CW_BUTTON_SAVE, self.OnGameSave)
         EVT_CLOSE(self, self.OnClickClose)
 
@@ -194,6 +197,9 @@ class ChadwickFrame(wxFrame):
                               reportTeamMenu, "Compile team-by-team reports")
 
         reportEventsMenu = wxMenu()
+        reportEventsMenu.Append(CW_MENU_REPORT_EVENTS_BIGGAME,
+                                "&Big games",
+                                "Compile a log of notable individual performanceS")
         reportEventsMenu.Append(CW_MENU_REPORT_EVENTS_SLAMS,
                                 "&Grand slams",
                                 "Compile log of grand slam home runs")
@@ -435,7 +441,7 @@ class ChadwickFrame(wxFrame):
                                   wxPD_CAN_ABORT | wxPD_ELAPSED_TIME |
                                   wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME)
         try:
-            if statscan.ProcessFile(self.book, acc, dialog):
+            if statscan.ProcessFile(self.book, acc, monitor=dialog):
                 dialog.Show(false)
                 
                 dialog = ReportDialog(self, title, 
@@ -503,6 +509,13 @@ class ChadwickFrame(wxFrame):
     def OnReportEventsSlams(self, event):
         self.RunReport("Compiling list of grand slams", "Grand slams",
                        [ statscan.GrandSlamLog(self.book) ])
+
+    def OnReportEventsBigGame(self, event):
+        self.RunReport("Compiling list of notable individual performances",
+                       "Notable individual performances",
+                       [ statscan.MultiHRLog(self.book),
+                         statscan.MultiHitLog(self.book),
+                         statscan.MultiStrikeoutLog(self.book) ])
 
     def OnUpdate(self):
         title = "Chadwick: [%s] %d" % (self.book.GetFilename(),
