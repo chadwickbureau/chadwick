@@ -106,13 +106,24 @@ cwbox_print_header(CWGame *game, CWRoster *visitors, CWRoster *home)
   printf("\n");
 }
 
+char positions[][3] = {
+  "", "p", "c", "1b", "2b", "3b", "ss", "lf", "cf", "rf",
+  "dh", "ph", "pr"
+};
+
 void
 cwbox_print_player(CWBoxPlayer *player, CWRoster *roster)
 {
   CWPlayer *bio = cw_roster_player_find(roster, player->player_id);
   char name[256];
+  int pos;
+
   sprintf(name, (player->prev == NULL) ? "%s %s" : " %s %s",
 	  bio->first_name, bio->last_name);
+  for (pos = 0; pos < player->num_positions; pos++) {
+    strcat(name, (pos == 0) ? ", " : "-");
+    strcat(name, positions[player->positions[pos]]);
+  }
 
   printf("%-25s %2d %2d %2d %2d %2d %2d\n",
 	 name, player->batting->ab, player->batting->r,
@@ -166,7 +177,6 @@ void cwbox_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
     }
     printf("\n");
   }
-    
 
   printf("\f");
   cw_boxscore_cleanup(boxscore);

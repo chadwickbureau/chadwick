@@ -163,6 +163,7 @@ cw_boxscore_player_create(char *player_id)
   player->player_id = (char *) malloc(sizeof(char) * (strlen(player_id) + 1));
   strcpy(player->player_id, player_id);
   player->batting = cw_boxscore_batting_create();
+  player->num_positions = 0;
   for (i = 0; i <= 9; i++) {
     player->fielding[i] = NULL;
   }
@@ -216,6 +217,8 @@ cw_boxscore_enter_starters(CWBoxscore *boxscore, CWGame *game)
       CWAppearance *app = cw_game_starter_find(game, t, i);
       boxscore->slots[i][t] = cw_boxscore_player_create(app->player_id);
       boxscore->slots[i][t]->batting->g = 1;
+      boxscore->slots[i][t]->num_positions++;
+      boxscore->slots[i][t]->positions[0] = app->pos;
       if (app->pos < 10) {
 	boxscore->slots[i][t]->fielding[app->pos] = cw_boxscore_fielding_create();
 	boxscore->slots[i][t]->fielding[app->pos]->g = 1;
@@ -261,6 +264,10 @@ cw_boxscore_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
 	boxscore->slots[sub->slot][sub->team]->fielding[sub->pos] = cw_boxscore_fielding_create();
 	boxscore->slots[sub->slot][sub->team]->fielding[sub->pos]->g = 1;
       }
+    }
+
+    if (sub->slot > 0) {
+      boxscore->slots[sub->slot][sub->team]->positions[boxscore->slots[sub->slot][sub->team]->num_positions++] = sub->pos;
     }
 
     if (sub->pos == 1) {

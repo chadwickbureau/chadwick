@@ -40,6 +40,8 @@ typedef struct cw_box_fielding_struct {
 typedef struct cw_box_player_struct {
   char *player_id;
   CWBoxBatting *batting;
+  int num_positions;
+  int positions[10];
   CWBoxFielding *fielding[10];
   struct cw_box_player_struct *prev, *next;
 } CWBoxPlayer;
