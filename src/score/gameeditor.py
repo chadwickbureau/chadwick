@@ -176,7 +176,7 @@ class GameEditor:
         includes any players who have come to bat and are
         still on base.
         """
-        return self.gameiter.GetLOB(team)
+        return self.gameiter.GetTeamLOB(team)
 
     def IsLeadoff(self):
         return self.game.first_event == None or self.gameiter.outs == 3
