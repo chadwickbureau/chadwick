@@ -27,15 +27,18 @@
 lib_LIBRARIES = libchadwick.a
 
 libchadwick_a_SOURCES = \
+	chadwick.h \
 	book.c \
+	book.h \
 	file.c \
+	file.h \
 	game.c \
+	game.h \
 	gameiter.c \
+	gameiter.h \
 	league.c \
+	league.h \
 	parse.c \
-	roster.c
-
-
-
-
-
+	parse.h \
+	roster.c \
+	roster.h

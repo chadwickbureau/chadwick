@@ -680,27 +680,20 @@ void (*cwtools_process_game)(CWGame *, CWRoster *, CWRoster *) = cwgame_process_
 
 void cwgame_print_help(void)
 {
-  fprintf(stderr, "\n\nhgame generates files suitable for use by dBase or Lotus-like programs\n");
+  fprintf(stderr, "\n\ncwgame generates files suitable for use by dBase or Lotus-like programs\n");
   fprintf(stderr, "Each record describes one game.\n");
-  fprintf(stderr, "Usage: hgame [options] eventfile...\n");
+  fprintf(stderr, "Usage: cwgame [options] eventfile...\n");
   fprintf(stderr, "options:\n");
   fprintf(stderr, "  -h        print this help\n");
   fprintf(stderr, "  -i id     only process game given by id\n");
-  fprintf(stderr, "  -q        ask whether to process each game\n");
   fprintf(stderr, "  -y year   Year to process (for teamyyyy and aaayyyy.ros).\n");
   fprintf(stderr, "  -s start  Earliest date to process (mmdd).\n");
   fprintf(stderr, "  -e end    Last date to process (mmdd).\n");
   fprintf(stderr, "  -a        generate Ascii-delimited format files (default)\n");
-  fprintf(stderr, "  -fn       generate Fortran format files\n");
-  fprintf(stderr, "  -m        use master player file instead of local roster files\n");
+  fprintf(stderr, "  -ft       generate Fortran format files\n");
   fprintf(stderr, "  -f flist  give list of fields to output\n");
   fprintf(stderr, "              Default is 0-81\n");
   fprintf(stderr, "  -d        print list of field numbers and descriptions\n");
-  fprintf(stderr, "  The -dxx switches choose a date format for the gamedate field.\n");
-  fprintf(stderr, "  -dsf      slashes, full year: mm/dd/yyyy\n");
-  fprintf(stderr, "  -dsp      slashes, partial year: mm/dd/yy\n");
-  fprintf(stderr, "  -dnf      no slashes, full year: yyyymmdd\n");
-  fprintf(stderr, "  -dnp      no slashes, partial year: yymmdd (the default)\n\n");
 
   exit(0);
 }

@@ -190,7 +190,6 @@ cwsub_print_help(void)
   fprintf(stderr, "options:\n");
   fprintf(stderr, "  -h        print this help\n");
   fprintf(stderr, "  -i id     only process game given by id\n");
-  fprintf(stderr, "  -q        ask whether to process each game\n");
   fprintf(stderr, "  -y year   Year to process (for teamyyyy and aaayyyy.ros).\n");
   fprintf(stderr, "  -s start  Earliest date to process (mmdd).\n");
   fprintf(stderr, "  -e end    Last date to process (mmdd).\n");
@@ -198,7 +197,7 @@ cwsub_print_help(void)
   fprintf(stderr, "  -ft       generate Fortran format files\n");
   fprintf(stderr, "  -m        use master player file instead of local roster files\n");
   fprintf(stderr, "  -f flist  give list of fields to output\n");
-  fprintf(stderr, "              Default is 0-6,8-9,12-13,16-17,26-40,43-45,51,58-61\n");
+  fprintf(stderr, "              Default is 0-9.\n");
   fprintf(stderr, "  -d        print list of field numbers and descriptions\n\n");
 
   exit(0);
