@@ -48,6 +48,7 @@ class ChadwickScorebook:
         self.league = CWLeague()
         self.games = [ ]
         self.playerDict = { }
+        self.players = [ ]
         self.filename = "untitled.chw"
         
     def GetFilename(self):   return self.filename
@@ -317,6 +318,7 @@ class ChadwickScorebook:
                 t.prev.next = t
                 x.prev = t
                 t.next = x
+        self.books[teamID] = CWScorebook()
         self.modified = True
 
     def ModifyTeam(self, teamID, city, nickname, leagueID):
