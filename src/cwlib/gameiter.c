@@ -152,7 +152,7 @@ cw_gameiter_reset(CWGameIterator *gameiter)
   cw_gameiter_lineup_cleanup(gameiter);
   cw_gameiter_lineup_setup(gameiter);
 
-  if (strcmp(gameiter->event->event_text, "NP")) {
+  if (gameiter->event && strcmp(gameiter->event->event_text, "NP")) {
     cw_parse_event(gameiter->event->event_text, gameiter->event_data);
   }
 }
