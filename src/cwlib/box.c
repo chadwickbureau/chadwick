@@ -76,6 +76,36 @@ cw_boxscore_batting_add(CWBoxBatting *dest, CWBoxBatting *src)
   dest->cs += src->cs;
 }
 
+CWBoxFielding *
+cw_boxscore_fielding_create(void)
+{
+  CWBoxFielding *fielding = (CWBoxFielding *) malloc(sizeof(CWBoxFielding));
+  fielding->g = 0;
+  fielding->outs = 0;
+  fielding->bip = 0;
+  fielding->bf = 0;
+  fielding->po = 0;
+  fielding->a = 0;
+  fielding->e = 0;
+  fielding->dp = 0;
+  fielding->tp = 0;
+  return fielding;
+}
+
+void
+cw_boxscore_fielding_add(CWBoxFielding *dest, CWBoxFielding *src)
+{
+  dest->g += src->g;
+  dest->outs += src->outs;
+  dest->bip += src->bip;
+  dest->bf += src->bf;
+  dest->po += src->po;
+  dest->a += src->a;
+  dest->e += src->e;
+  dest->dp += src->dp;
+  dest->tp += src->tp;  
+}
+
 CWBoxPitching *
 cw_boxscore_pitching_create(void)
 {
@@ -127,10 +157,15 @@ cw_boxscore_pitching_add(CWBoxPitching *dest, CWBoxPitching *src)
 static CWBoxPlayer *
 cw_boxscore_player_create(char *player_id)
 {
+  int i;
+
   CWBoxPlayer *player = (CWBoxPlayer *) malloc(sizeof(CWBoxPlayer));
   player->player_id = (char *) malloc(sizeof(char) * (strlen(player_id) + 1));
   strcpy(player->player_id, player_id);
   player->batting = cw_boxscore_batting_create();
+  for (i = 0; i <= 9; i++) {
+    player->fielding[i] = NULL;
+  }
   player->prev = NULL;
   player->next = NULL;
   return player;
@@ -139,6 +174,12 @@ cw_boxscore_player_create(char *player_id)
 static void
 cw_boxscore_player_cleanup(CWBoxPlayer *player)
 {
+  int i;
+  for (i = 0; i <= 9; i++) {
+    if (player->fielding[i]) {
+      free(player->fielding[i]);
+    }
+  }
   free(player->batting);
   free(player->player_id);
 }
@@ -175,6 +216,10 @@ cw_boxscore_enter_starters(CWBoxscore *boxscore, CWGame *game)
       CWAppearance *app = cw_game_starter_find(game, t, i);
       boxscore->slots[i][t] = cw_boxscore_player_create(app->player_id);
       boxscore->slots[i][t]->batting->g = 1;
+      if (app->pos < 10) {
+	boxscore->slots[i][t]->fielding[app->pos] = cw_boxscore_fielding_create();
+	boxscore->slots[i][t]->fielding[app->pos]->g = 1;
+      }
       if (app->pos == 1) {
 	boxscore->pitchers[t] = cw_boxscore_pitcher_create(app->player_id);
 	boxscore->pitchers[t]->pitching->g = 1;
@@ -209,6 +254,15 @@ cw_boxscore_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
       player->prev = boxscore->slots[sub->slot][sub->team];
       boxscore->slots[sub->slot][sub->team] = player;
     }
+
+    if (sub->slot > 0 && sub->pos < 10) {
+      CWBoxFielding *fielding = boxscore->slots[sub->slot][sub->team]->fielding[sub->pos];
+      if (fielding == NULL) {
+	boxscore->slots[sub->slot][sub->team]->fielding[sub->pos] = cw_boxscore_fielding_create();
+	boxscore->slots[sub->slot][sub->team]->fielding[sub->pos]->g = 1;
+      }
+    }
+
     if (sub->pos == 1) {
       CWBoxPitcher *pitcher = cw_boxscore_pitcher_create(sub->player_id);
       pitcher->pitching->g = 1;
@@ -365,6 +419,64 @@ cw_boxscore_runner_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
 }
 
 static void
+cw_boxscore_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
+{
+  int pos, i;
+  CWBoxPlayer *player;
+
+  for (pos = 2; pos <= 9; pos++) {
+    int accepted = 0;
+
+    player = cw_boxscore_find_player(boxscore, 
+				     gameiter->fielders[pos][1-gameiter->half_inning]);
+    
+    player->fielding[pos]->outs += cw_event_outs_on_play(gameiter->event_data);
+
+    if (gameiter->event_data->event_type == EVENT_SINGLE ||
+	gameiter->event_data->event_type == EVENT_DOUBLE ||
+	gameiter->event_data->event_type == EVENT_TRIPLE ||
+	(gameiter->event_data->event_type == EVENT_HOMERUN &&
+	 gameiter->event_data->fielded_by > 0) ||
+	gameiter->event_data->event_type == EVENT_ERROR ||
+	gameiter->event_data->event_type == EVENT_GENERICOUT ||
+	gameiter->event_data->event_type == EVENT_FIELDERSCHOICE) {
+      player->fielding[pos]->bip++;
+    }
+
+
+    if (cw_event_outs_on_play(gameiter->event_data) > 0 &&
+	gameiter->event_data->fielded_by == pos) {
+      player->fielding[pos]->bf++;
+    }
+
+    for (i = 0; i <= 2; i++) {
+      if (gameiter->event_data->putouts[i] == pos) {
+	player->fielding[pos]->po++;
+	accepted = 1;
+      }
+    }
+
+    for (i = 0; i < 10; i++) {
+      if (gameiter->event_data->assists[i] == pos) {
+	player->fielding[pos]->a++;
+	accepted = 1;
+      }
+      if (gameiter->event_data->errors[i] == pos) {
+	player->fielding[pos]->e++;
+      }
+    }
+
+    if (accepted && gameiter->event_data->dp_flag) {
+      player->fielding[pos]->dp++;
+    }
+    if (accepted && gameiter->event_data->tp_flag) {
+      player->fielding[pos]->tp++;
+    }
+  }  
+
+}
+
+static void
 cw_boxscore_iterate_game(CWBoxscore *boxscore, CWGame *game)
 {
   CWGameIterator *gameiter = cw_gameiter_create(game);
@@ -373,6 +485,7 @@ cw_boxscore_iterate_game(CWBoxscore *boxscore, CWGame *game)
     if (strcmp(gameiter->event->event_text, "NP")) {
       cw_boxscore_batter_stats(boxscore, gameiter);
       cw_boxscore_runner_stats(boxscore, gameiter);
+      cw_boxscore_fielder_stats(boxscore, gameiter);
     }
     cw_boxscore_add_substitute(boxscore, gameiter);
     cw_gameiter_next(gameiter);

@@ -41,6 +41,7 @@ typedef struct cw_stats_player_struct {
   char *player_id;
   char *team;
   CWBoxBatting *batting;
+  CWBoxFielding *fielding[10];
   CWBoxPitching *pitching;
   struct cw_stats_player_struct *prev, *next;
 } CWStatsPlayer;
@@ -50,12 +51,20 @@ CWStatsPlayer *first_player = NULL, *last_player = NULL;
 CWStatsPlayer *
 cwstats_copy_player(CWBoxPlayer *player)
 {
+  int i;
+
   CWStatsPlayer *copy = (CWStatsPlayer *) malloc(sizeof(CWStatsPlayer));
   copy->player_id = (char *) malloc(sizeof(char) * 
 				    (strlen(player->player_id) + 1));
   strcpy(copy->player_id, player->player_id);
   copy->batting = cw_boxscore_batting_create();
   cw_boxscore_batting_add(copy->batting, player->batting);
+  for (i = 1; i <= 9; i++) {
+    copy->fielding[i] = cw_boxscore_fielding_create();
+    if (player->fielding[i] != NULL) {
+      cw_boxscore_fielding_add(copy->fielding[i], player->fielding[i]);
+    }
+  }
   copy->pitching = cw_boxscore_pitching_create();
   copy->prev = copy->next = NULL;
   return copy;
@@ -64,11 +73,16 @@ cwstats_copy_player(CWBoxPlayer *player)
 CWStatsPlayer *
 cwstats_copy_pitcher(CWBoxPitcher *pitcher)
 {
+  int i;
+
   CWStatsPlayer *copy = (CWStatsPlayer *) malloc(sizeof(CWStatsPlayer));
   copy->player_id = (char *) malloc(sizeof(char) *
 				    (strlen(pitcher->player_id) + 1));
   strcpy(copy->player_id, pitcher->player_id);
   copy->batting = cw_boxscore_batting_create();
+  for (i = 1; i <= 9; i++) {
+    copy->fielding[i] = cw_boxscore_fielding_create();
+  }
   copy->pitching = cw_boxscore_pitching_create();
   cw_boxscore_pitching_add(copy->pitching, pitcher->pitching);
   copy->prev = copy->next = NULL;
@@ -83,7 +97,16 @@ cwstats_add_batting_stats(CWBoxPlayer *player)
   while (iter != NULL) {
     if (!strcmp(iter->player_id, player->player_id)) {
       /* aggregate statistics */
+      int i;
+
       cw_boxscore_batting_add(iter->batting, player->batting);
+      
+      for (i = 1; i <= 9; i++) {
+	if (player->fielding[i] != NULL) {
+	  cw_boxscore_fielding_add(iter->fielding[i], player->fielding[i]);
+	}
+      }
+
       return;
     }
 
@@ -155,6 +178,32 @@ cwstats_print_batting_stats(void)
     player = player->next;
   }
 }
+
+void 
+cwstats_print_fielding_stats(int pos)
+{
+  CWStatsPlayer *player = first_player;
+
+  printf("ID         G    IF BIP  BF  PO   A  E  DP TP\n");
+
+  while (player != NULL) {
+    CWBoxFielding *fielding = player->fielding[pos];
+    if (fielding->g == 0) {
+      player = player->next;
+      continue;
+    }
+
+    printf("%8s %3d %3d.%d %3d %3d %3d %3d %2d %3d %2d\n",
+	   player->player_id, fielding->g,
+	   fielding->outs / 3, fielding->outs % 3,
+	   fielding->bip, fielding->bf,
+	   fielding->po, fielding->a, fielding->e,
+	   fielding->dp, fielding->tp);
+
+    player = player->next;
+  }
+}
+
 
 void
 cwstats_print_pitching_stats(void)
@@ -251,9 +300,16 @@ void (*cwtools_initialize)(void) = cwstats_initialize;
 void
 cwstats_cleanup(void)
 {
+  int pos;
+
   cwstats_print_batting_stats();
   printf("\n\n");
   cwstats_print_pitching_stats();
+
+  for (pos = 1; pos <= 9; pos++) {
+    printf("\n\n");
+    cwstats_print_fielding_stats(pos);
+  }
 }
 
 void (*cwtools_cleanup)(void) = cwstats_cleanup;

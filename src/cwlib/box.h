@@ -33,9 +33,14 @@ typedef struct cw_box_batting_struct {
   int g, ab, r, h, b2, b3, hr, bi, bb, ibb, so, gdp, hp, sh, sf, sb, cs;
 } CWBoxBatting;
 
+typedef struct cw_box_fielding_struct {
+  int g, outs, bip, bf, po, a, e, dp, tp;
+} CWBoxFielding;
+
 typedef struct cw_box_player_struct {
   char *player_id;
   CWBoxBatting *batting;
+  CWBoxFielding *fielding[10];
   struct cw_box_player_struct *prev, *next;
 } CWBoxPlayer;
 
@@ -74,6 +79,16 @@ CWBoxBatting *cw_boxscore_batting_create(void);
  * Add a boxscore batting line to another
  */
 void cw_boxscore_batting_add(CWBoxBatting *dest, CWBoxBatting *src);
+
+/*
+ * Create a new boxscore fielding line
+ */
+CWBoxFielding *cw_boxscore_fielding_create(void);
+
+/*
+ * Add a boxscore fielding line to another
+ */
+void cw_boxscore_fielding_add(CWBoxFielding *dest, CWBoxFielding *src);
 
 /*
  * Create a new boxscore pitching line
