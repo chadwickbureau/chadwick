@@ -27,3 +27,6 @@
 SUBDIRS = cwlib cwtools python score
 
 EXTRA_DIST = borland.mak
+
+install-exec-hook:
+	$(INSTALL) chadwick $(bindir)/chadwick
