@@ -83,8 +83,7 @@ class NarrativePanel(wxPanel):
         starters = [ ]
         text = ""
         for t in [0, 1]:
-            starters.append([ cw_game_starter_find(self.doc.GetGame(),
-                                                   t, slot)
+            starters.append([ self.doc.GetGame().GetStarter(t, slot)
                               for slot in xrange(1, 10) ])
 
         text += "Starting lineups:\n\n"
@@ -100,8 +99,7 @@ class NarrativePanel(wxPanel):
                       starters[1][slot].name,
                       positions[starters[1][slot].pos]))
 
-        pitchers = [ cw_game_starter_find(self.doc.GetGame(), t, 0)
-                     for t in [0, 1] ]
+        pitchers = [ self.doc.GetGame().GetStarter(t, 0) for t in [0, 1] ]
 
         if pitchers[0] != None or pitchers[1] != None:
             text += "P  "

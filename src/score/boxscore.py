@@ -85,12 +85,12 @@ class Boxscore:
         self.pitching = [ [], [] ]
         self.byInnings = [ [], [] ]
         for t in [0, 1]:
-            starters = [ cw_game_starter_find(self.game, t, slot) for slot in xrange(1, 10) ]
+            starters = [ self.game.GetStarter(t, slot) for slot in xrange(1, 10) ]
             self.stats[t] = [ [ self.NewBattingStats(x) ] for x in starters ]
             if self.game.GetStarter(t, 0) != None:
                 self.stats[t].append([ self.NewBattingStats(self.game.GetStarter(t, 0))])
 
-            pitcher = cw_game_starter_find_by_position(self.game, t, 1)
+            pitcher = self.game.GetStarterAtPos(t, 1)
             self.pitching[t] = [ self.NewPitchingStats(pitcher) ]
         
         # Number of double plays turned by teams
@@ -121,9 +121,9 @@ class Boxscore:
             pitcher = self.pitching[1-team][-1]
             event_data = gameiter.event_data
             
-            if cw_event_is_official_ab(event_data):
+            if event_data.IsOfficialAB():
                 batter["ab"] += 1
-            pitcher["outs"] += cw_event_outs_on_play(event_data)
+            pitcher["outs"] += event_data.GetOuts()
 
             if event_data.event_type == CW_EVENT_SINGLE:
                 batter["h"] += 1
@@ -158,7 +158,7 @@ class Boxscore:
             elif event_data.event_type == CW_EVENT_BALK:
                 pitcher["bk"] += 1
 
-            batter["bi"] += cw_event_rbi_on_play(event_data)
+            batter["bi"] += event_data.GetRBI()
 
             if event_data.sh_flag > 0:
                 batter["sh"] += 1
@@ -174,7 +174,7 @@ class Boxscore:
                 fielder["pb"] += 1
             if event_data.num_errors > 0:
                 for pos in range(1, 10):
-                    errors = cw_gameiter_get_fielder_errors(gameiter, pos)
+                    errors = event_data.GetErrors(pos)
                     if errors > 0:
                         fielder = self.FindStats(gameiter.GetFielder(1-team, pos))
                         fielder["e"] += errors
@@ -194,24 +194,24 @@ class Boxscore:
                 
                 runner = self.FindStats(gameiter.GetRunner(base))
 
-                if cw_gameiter_get_advancement(gameiter, base) >= 4:
+                if event_data.GetAdvance(base) >= 4:
                     self.byInnings[halfInning][inning-1] += 1
                     runner["r"] += 1
                     resppitcher = self.FindPitcher(gameiter.GetRespPitcher(base))
                     resppitcher["r"] += 1
-                    if cw_gameiter_get_advancement(gameiter, base) != 5:
+                    if event_data.GetAdvance(base) != 5:
                         resppitcher["er"] += 1
 
-                if cw_gameiter_get_sb_flag(gameiter, base) > 0:
+                if event_data.GetSBFlag(base) > 0:
                     runner["sb"] += 1
-                if cw_gameiter_get_cs_flag(gameiter, base) > 0:
+                if event_data.GetCSFlag(base) > 0:
                     runner["cs"] += 1
 
-            if cw_gameiter_get_advancement(gameiter, 0) >= 4:
+            if event_data.GetAdvance(0) >= 4:
                 self.byInnings[halfInning][inning-1] += 1
                 batter["r"] += 1
                 pitcher["r"] += 1
-                if cw_gameiter_get_advancement(gameiter, 0) != 5:
+                if event_data.GetAdvance(0) != 5:
                     pitcher["er"] += 1
 
             gameiter.NextEvent()

@@ -100,18 +100,17 @@ class WeatherPanel(wxPanel):
         self.Layout()
 
     def UpdateDocument(self, doc):
-        cw_game_info_set(doc.GetGame(), "temp",
-                         str(self.temp.GetValue()))
-        cw_game_info_set(doc.GetGame(), "sky",
-                         str(self.sky.GetStringSelection()).lower())
-        cw_game_info_set(doc.GetGame(), "fieldcond",
-                         str(self.field.GetStringSelection()).lower())
-        cw_game_info_set(doc.GetGame(), "windspeed",
-                         str(self.windSpeed.GetValue()))
+        doc.GetGame().SetInfo("temp", str(self.temp.GetValue()))
+        doc.GetGame().SetInfo("sky",
+                              str(self.sky.GetStringSelection()).lower())
+        doc.GetGame().SetInfo("fieldcond",
+                              str(self.field.GetStringSelection()).lower())
+        doc.GetGame().SetInfo("windspeed",
+                              str(self.windSpeed.GetValue()))
         winddirs = [ "unknown", "tolf", "tocf", "torf",
                      "ltor", "rtol", "fromlf", "fromcf", "fromrf" ]
-        cw_game_info_set(doc.GetGame(), "winddir",
-                         winddirs[self.windDir.GetSelection()])
+        doc.GetGame().SetInfo("winddir",
+                              winddirs[self.windDir.GetSelection()])
         
 
 class ScorerPanel(wxPanel):
@@ -161,14 +160,13 @@ class ScorerPanel(wxPanel):
         self.Layout()
 
     def UpdateDocument(self, doc):
-        cw_game_info_set(doc.GetGame(), "scorer",
-                         str(self.scorer.GetValue()))
-        cw_game_info_set(doc.GetGame(), "translator",
-                         str(self.translator.GetValue()))
-        cw_game_info_set(doc.GetGame(), "inputter",
-                         str(self.inputter.GetValue()))
-        cw_game_info_set(doc.GetGame(), "howscored",
-                         str(self.howScored.GetStringSelection()).lower())
+        doc.GetGame().SetInfo("scorer", str(self.scorer.GetValue()))
+        doc.GetGame().SetInfo("translator",
+                              str(self.translator.GetValue()))
+        doc.GetGame().SetInfo("inputter",
+                              str(self.inputter.GetValue()))
+        doc.GetGame().SetInfo("howscored",
+                              str(self.howScored.GetStringSelection()).lower())
 
 
 class UmpirePanel(wxPanel):
@@ -211,14 +209,10 @@ class UmpirePanel(wxPanel):
         self.Layout()
 
     def UpdateDocument(self, doc):
-        cw_game_info_set(doc.GetGame(), "umphome",
-                         str(self.home.GetValue()))
-        cw_game_info_set(doc.GetGame(), "ump1b",
-                         str(self.first.GetValue()))
-        cw_game_info_set(doc.GetGame(), "ump2b",
-                         str(self.second.GetValue()))
-        cw_game_info_set(doc.GetGame(), "ump3b",
-                         str(self.third.GetValue()))
+        doc.GetGame().SetInfo("umphome", str(self.home.GetValue()))
+        doc.GetGame().SetInfo("ump1b", str(self.first.GetValue()))
+        doc.GetGame().SetInfo("ump2b", str(self.second.GetValue()))
+        doc.GetGame().SetInfo("ump3b", str(self.third.GetValue()))
 
 class GeneralPanel(wxPanel):
     def __init__(self, parent, doc):
@@ -268,14 +262,14 @@ class GeneralPanel(wxPanel):
         self.Layout()
 
     def UpdateDocument(self, doc):
-        cw_game_info_set(doc.GetGame(), "starttime",
-                         str(self.startTime.GetValue()))
-        cw_game_info_set(doc.GetGame(), "daynight",
-                         str(self.dayNight.GetStringSelection()).lower())
-        cw_game_info_set(doc.GetGame(), "timeofgame",
-                         str(self.timeOfGame.GetValue()))
-        cw_game_info_set(doc.GetGame(), "attendance",
-                         str(self.attendance.GetValue()))
+        doc.GetGame().SetInfo("starttime",
+                              str(self.startTime.GetValue()))
+        doc.GetGame().SetInfo("daynight",
+                              str(self.dayNight.GetStringSelection()).lower())
+        doc.GetGame().SetInfo("timeofgame",
+                              str(self.timeOfGame.GetValue()))
+        doc.GetGame().SetInfo("attendance",
+                              str(self.attendance.GetValue()))
 
 class GamePropertyDialog(wxDialog):
     def __init__(self, parent, doc):

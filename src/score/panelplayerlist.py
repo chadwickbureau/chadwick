@@ -111,7 +111,7 @@ class AddPlayerDialog(wxDialog):
 
         sizer.Add(FormattedStaticText(self, "Team"),
                   0, wxALL | wxALIGN_CENTER, 5)
-        teamList = [ team.GetName() for team in book.IterateTeams() ]
+        teamList = [ team.GetName() for team in book.Teams() ]
         self.team = wxChoice(self, -1, wxDefaultPosition, wxSize(150, -1),
                              teamList)
         self.team.SetSelection(0)
@@ -158,7 +158,7 @@ class AddPlayerDialog(wxDialog):
     def OnIDChange(self, event):
         playerID = self.GetPlayerID()
         if (playerID == "" or
-            playerID in [ p.player_id for p in self.book.IteratePlayers() ]):
+            playerID in [ p.player_id for p in self.book.Players() ]):
             self.FindWindowById(wxID_OK).Enable(false)
             self.playerID.SetBackgroundColour(wxNamedColour("pink"))
         else:
@@ -173,7 +173,7 @@ class AddPlayerDialog(wxDialog):
     def GetThrows(self):
         return [ "?", "R", "L" ][self.throws.GetSelection()]
     def GetTeam(self):
-        return [ t for t in self.book.IterateTeams() ][self.team.GetSelection()].team_id
+        return [ t for t in self.book.Teams() ][self.team.GetSelection()].GetID()
     
 
 class EditPlayerDialog(wxDialog):
@@ -214,7 +214,7 @@ class EditPlayerDialog(wxDialog):
 
         #sizer.Add(FormattedStaticText(self, "Team"),
         #          0, wxALL | wxALIGN_CENTER, 5)
-        #teamList = [ team.GetName() for team in book.IterateTeams() ]
+        #teamList = [ team.GetName() for team in book.Teams() ]
         #self.team = wxChoice(self, -1, wxDefaultPosition, wxSize(150, -1),
         #                     teamList)
         #self.team.SetSelection(0)
@@ -364,7 +364,7 @@ class PlayerListGrid(wxGrid):
         self.AdjustScrollbars()
 
     def OnLeftDoubleClick(self, event):
-        for (i,player) in enumerate(self.book.IteratePlayers()):
+        for (i,player) in enumerate(self.book.Players()):
             if i == event.GetRow():
                 dialog = EditPlayerDialog(self, player)
                 if dialog.ShowModal() == wxID_OK:
@@ -377,14 +377,14 @@ class PlayerListGrid(wxGrid):
                 return
 
     def OnRightClick(self, event):
-        for (i,player) in enumerate(self.book.IteratePlayers()):
+        for (i,player) in enumerate(self.book.Players()):
             if i == event.GetRow():
                 self.menuPlayer = player
                 menu = wxMenu("Add %s to roster of" % player.GetName())
 
                 menuID = self.firstMenuID
-                for t in self.book.IterateTeams():
-                    if t.team_id not in player.GetTeams():
+                for t in self.book.Teams():
+                    if t.GetID() not in player.GetTeams():
                         menu.Append(menuID, t.GetName(),
                                     "Add to %s" % t.GetName())
                         menuID += 1
@@ -394,15 +394,15 @@ class PlayerListGrid(wxGrid):
     def OnMenu(self, event):
         menuID = self.firstMenuID
 
-        for t in self.book.IterateTeams():
-            if t.team_id not in self.menuPlayer.GetTeams():
+        for t in self.book.Teams():
+            if t.GetID() not in self.menuPlayer.GetTeams():
                 if menuID == event.GetId():
                     self.book.AddToTeam(self.menuPlayer.player_id,
                                         self.menuPlayer.GetFirstName(),
                                         self.menuPlayer.GetLastName(),
                                         self.menuPlayer.bats,
                                         self.menuPlayer.throws,
-                                        t.team_id)
+                                        t.GetID())
                     self.GetParent().GetGrandParent().OnUpdate()
                     return
                 menuID += 1

@@ -369,13 +369,13 @@ class ChadwickFrame(wxFrame):
         rosters = [ self.book.GetTeam(dialog.GetTeam(t)) for t in [0, 1] ]
 
         game = CreateGame(dialog.GetGameId(),
-                          rosters[0].team_id, rosters[1].team_id)
+                          rosters[0].GetID(), rosters[1].GetID())
         game.SetInfo("pitches", dialog.GetPitches())
         doc = GameEditor(game, rosters[0], rosters[1])
 
         for t in [0, 1]:
             # This gives a list of all games the team has already had entered
-            prevGames = [ y for y in self.book.IterateGames(lambda x: rosters[t].team_id in x.GetTeams()) ]
+            prevGames = [ y for y in self.book.Games(lambda x: rosters[t].GetId() in x.GetTeams()) ]
             dialog = LineupDialog(self, 
                                   "Starting Lineup for %s" % 
                                   rosters[t].GetName())
@@ -398,7 +398,7 @@ class ChadwickFrame(wxFrame):
                 # Set up the lineup dialog with the lineup from that game,
                 # figuring it's probably a decent first guess as to
                 # the lineup for this game
-                tm = pg.GetTeams().index(rosters[t].team_id)
+                tm = pg.GetTeams().index(rosters[t].GetID())
                 for slot in range(1, 10):
                     rec = pg.GetStarter(tm, slot)
                     dialog.SetPlayerInSlot(slot, rec.name, rec.pos)
@@ -415,7 +415,7 @@ class ChadwickFrame(wxFrame):
                 player = dialog.GetPlayerInSlot(10)
                 doc.SetStarter(player.player_id, player.GetName(),
                                t, 0, 1)
-                cw_game_info_set(doc.GetGame(), "usedh", "true")
+                doc.GetGame().SetInfo("usedh", "true")
                 
                                 
         doc.BuildBoxscore()
@@ -434,35 +434,35 @@ class ChadwickFrame(wxFrame):
                                   wxPD_APP_MODAL | wxPD_AUTO_HIDE |
                                   wxPD_CAN_ABORT | wxPD_ELAPSED_TIME |
                                   wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME)
-        try:
-            if statscan.ProcessFile(self.book, acc, dialog):
-                dialog.Show(false)
-                
-                dialog = ReportDialog(self, title, 
-                                      string.join([ str(x) for x in acc ],
-                                                  "\n\n"))
-                dialog.ShowModal()
-            else:
-                dialog.Show(false)
-        except:
+        #try:
+        if statscan.ProcessFile(self.book, acc, dialog):
             dialog.Show(false)
-
-            dialog = wxMessageDialog(self,
-                                     "An internal error occurred in "
-                                     "generating the report.\n"
-                                     "Please send a bug report to "
-                                     "the maintaner at "
-                                     "turocy@econmail.tamu.edu\n"
-                                     "It is helpful to include this scorebook "
-                                     "as an "
-                                     "attachment when you send the report.\n"
-                                     "The problem deals only with this "
-                                     "report: don't worry, "
-                                     "your data is unaffected.\n"
-                                     "We apologize for the inconvenience!\n",
-                                     "Oops! There's a bug in Chadwick",
-                                     wxOK | wxICON_EXCLAMATION)
+                
+            dialog = ReportDialog(self, title, 
+                                  string.join([ str(x) for x in acc ],
+                                              "\n\n"))
             dialog.ShowModal()
+        else:
+            dialog.Show(false)
+        #except:
+        #    dialog.Show(false)
+        #
+        #    dialog = wxMessageDialog(self,
+        #                             "An internal error occurred in "
+        #                             "generating the report.\n"
+        #                             "Please send a bug report to "
+        #                             "the maintaner at "
+        #                             "turocy@econmail.tamu.edu\n"
+        #                             "It is helpful to include this scorebook "
+        #                             "as an "
+        #                             "attachment when you send the report.\n"
+        #                             "The problem deals only with this "
+        #                             "report: don't worry, "
+        #                             "your data is unaffected.\n"
+        #                             "We apologize for the inconvenience!\n",
+        #                             "Oops! There's a bug in Chadwick",
+        #                             wxOK | wxICON_EXCLAMATION)
+        #    dialog.ShowModal()
         
     def OnReportRegisterBatting(self, event):
         self.RunReport("Compiling batting register", "Batting register",
@@ -490,14 +490,14 @@ class ChadwickFrame(wxFrame):
     def OnReportTeamBatting(self, event):
         self.RunReport("Compiling team-by-team batting",
                        "Team-by-team batting",
-                       [ statscan.TeamBattingRegister(self.book, t.team_id)
-                         for t in self.book.IterateTeams() ])
+                       [ statscan.TeamBattingRegister(self.book, t.GetID())
+                         for t in self.book.Teams() ])
 
     def OnReportTeamPitching(self, event):
         self.RunReport("Compiling team-by-team pitching",
                        "Team-by-team pitching",
-                       [ statscan.TeamPitchingRegister(self.book, t.team_id)
-                         for t in self.book.IterateTeams() ])
+                       [ statscan.TeamPitchingRegister(self.book, t.GetID())
+                         for t in self.book.Teams() ])
 
     def OnReportEventsSlams(self, event):
         self.RunReport("Compiling list of grand slams", "Grand slams",

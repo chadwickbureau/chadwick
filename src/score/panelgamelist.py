@@ -55,11 +55,11 @@ class GameListTable(wxPyGridTableBase):
 
     def SetScorebook(self, book):
         self.book = book
-        self.games = [ g for g in self.book.IterateGames(self.filter) ]
+        self.games = [ g for g in self.book.Games(self.filter) ]
 
     def SetFilter(self, f):
         self.filter = f
-        self.games = [ g for g in self.book.IterateGames(self.filter) ]
+        self.games = [ g for g in self.book.Games(self.filter) ]
 
     def GetAttr(self, row, col, kind):
         if col not in [2, 3]:
@@ -193,7 +193,7 @@ class GameListGrid(wxGrid):
         self.AdjustScrollbars()
 
     def OnLeftDoubleClick(self, event):
-        for (i,game) in enumerate(self.book.IterateGames(self.filter)):
+        for (i,game) in enumerate(self.book.Games(self.filter)):
             if i == event.GetRow():
                 teams = [ self.book.GetTeam(t) for t in game.GetTeams() ]
                 doc = GameEditor(game, teams[0], teams[1])
@@ -243,7 +243,7 @@ class GameListPanel(wxPanel):
         self.teamList.Clear()
         self.teamList.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
         self.teamList.Append("all teams")
-        for team in book.IterateTeams():
+        for team in book.Teams():
             self.teamList.Append(team.GetName())
         self.teamList.SetStringSelection(teamChoice)
         
@@ -253,6 +253,6 @@ class GameListPanel(wxPanel):
         if event.GetSelection() == 0:
             self.gameList.OnUpdate(self.book, lambda x: True)
         else:
-            team = [ x for x in self.book.IterateTeams() ][event.GetSelection() - 1]
+            team = [ x for x in self.book.Teams() ][event.GetSelection() - 1]
             self.gameList.OnUpdate(self.book,
-                                   lambda x: team.team_id in x.GetTeams())
+                                   lambda x: team.GetID() in x.GetTeams())

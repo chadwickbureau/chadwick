@@ -89,7 +89,7 @@ class AddTeamDialog(wxDialog):
             self.FindWindowById(wxID_OK).Enable(false)
             self.teamID.SetBackgroundColour(wxNamedColour("pink"))
         elif (str(self.teamID.GetValue()) in
-              [ x.team_id for x in self.book.IterateTeams() ]):
+              [ x.GetID() for x in self.book.Teams() ]):
             self.FindWindowById(wxID_OK).Enable(false)
             self.teamID.SetBackgroundColour(wxNamedColour("pink"))
         else:
@@ -124,7 +124,7 @@ class EditTeamDialog(wxDialog):
 
         sizer.Add(FormattedStaticText(self, "Team ID"),
                   0, wxALL | wxALIGN_CENTER, 5)
-        self.teamID = wxTextCtrl(self, -1, team.team_id,
+        self.teamID = wxTextCtrl(self, -1, team.GetID(),
                                  wxDefaultPosition, wxSize(150, -1))
         self.teamID.Enable(False)
         sizer.Add(self.teamID, 0, wxALL | wxALIGN_CENTER, 5)
@@ -187,12 +187,12 @@ class TeamListGrid(wxGrid):
         elif self.GetNumberRows() < book.NumTeams():
             self.InsertRows(0, book.NumTeams() - self.GetNumberRows())
 
-        for (i,team) in enumerate(book.IterateTeams()):
+        for (i,team) in enumerate(book.Teams()):
             self.SetCellValue(i, 0, team.GetCity())
             self.SetCellAlignment(i, 0, wxALIGN_LEFT, wxALIGN_CENTER)
             self.SetCellValue(i, 1, team.GetNickname())
             self.SetCellAlignment(i, 1, wxALIGN_LEFT, wxALIGN_CENTER)
-            self.SetCellValue(i, 2, team.team_id)
+            self.SetCellValue(i, 2, team.GetID())
             self.SetCellAlignment(i, 2, wxALIGN_CENTER, wxALIGN_CENTER)
             self.SetCellValue(i, 3, team.league)
             self.SetCellAlignment(i, 3, wxALIGN_CENTER, wxALIGN_CENTER)
@@ -203,11 +203,11 @@ class TeamListGrid(wxGrid):
         self.AdjustScrollbars()
 
     def OnLeftDoubleClick(self, event):
-        for (i,team) in enumerate(self.book.IterateTeams()):
+        for (i,team) in enumerate(self.book.Teams()):
             if i == event.GetRow():
                 dialog = EditTeamDialog(self, team)
                 if dialog.ShowModal() == wxID_OK:
-                    self.book.ModifyTeam(team.team_id,
+                    self.book.ModifyTeam(team.GetID(),
                                          dialog.GetCity(),
                                          dialog.GetNickname(),
                                          dialog.GetLeague())

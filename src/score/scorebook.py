@@ -101,12 +101,12 @@ class ChadwickScorebook:
         f.close()
         os.remove(name)
 
-        for team in self.IterateTeams():
+        for team in self.Teams():
             self.ReadTeam(zf, team)
 
     def ReadTeam(self, zf, team):
         fn = self.FindEntry(zf,
-                            [ team.team_id + str(self.year) + ".ROS" ])
+                            [ team.GetID() + str(self.year) + ".ROS" ])
         if fn != None:
             name = TempFile()
             f = file(name, "w")
@@ -120,8 +120,8 @@ class ChadwickScorebook:
             os.remove(name)
             
         fn = self.FindEntry(zf,
-                            [ str(self.year) + team.team_id + ".EV" + team.league,
-                              str(self.year % 100) + team.team_id + ".EV" + team.league ])
+                            [ str(self.year) + team.GetID() + ".EV" + team.league,
+                              str(self.year % 100) + team.GetID() + ".EV" + team.league ])
         if fn != None:
             name = TempFile()
             f = file(name, "w")
@@ -129,15 +129,15 @@ class ChadwickScorebook:
             f.close()
             
             f = file(name, "r")
-            self.books[team.team_id] = CWScorebook()
-            self.books[team.team_id].Read(f)
+            self.books[team.GetID()] = CWScorebook()
+            self.books[team.GetID()].Read(f)
             f.close()
             
             os.remove(name)
         else:
             # Just create an empty scorebook if event file is
             # not present.
-            self.books[team.team_id] = CWScorebook()
+            self.books[team.GetID()] = CWScorebook()
 
     def Write(self, filename):
         zf = zipfile.ZipFile(filename, "w", zipfile.ZIP_DEFLATED)
@@ -151,7 +151,7 @@ class ChadwickScorebook:
         f.close()
         os.remove(name)
 
-        for team in self.IterateTeams():
+        for team in self.Teams():
             self.WriteTeam(zf, team)
         
         zf.close()
@@ -159,7 +159,7 @@ class ChadwickScorebook:
         self.modified = False
 
     def WriteTeam(self, zf, team):
-        fn = team.team_id + str(self.year) + ".ROS"
+        fn = team.GetID() + str(self.year) + ".ROS"
         name = TempFile()
         f = file(name, "w")
         team.Write(f)
@@ -169,9 +169,9 @@ class ChadwickScorebook:
         zf.writestr(fn, f.read())
         f.close()
 
-        fn = str(self.year) + team.team_id + ".EV" + team.league
+        fn = str(self.year) + team.GetID() + ".EV" + team.league
         f = file(name, "w")
-        self.books[team.team_id].Write(f)
+        self.books[team.GetID()].Write(f)
         f.close()
         
         f = file(name, "r")
@@ -186,7 +186,7 @@ class ChadwickScorebook:
             x = x.next
         return i
 
-    def IterateTeams(self):
+    def Teams(self):
         x = self.league.first_roster
         while x != None:
             yield x
@@ -204,12 +204,12 @@ class ChadwickScorebook:
         self.games.sort(lambda x, y: cmp(x.GetDate(), y.GetDate()))
 
         self.playerDict = { }
-        for team in self.IterateTeams():
+        for team in self.Teams():
             x = team.first_player
             while x != None:
                 if x.player_id not in self.playerDict.keys():
                     self.playerDict[x.player_id] = x
-                self.playerDict[x.player_id].AddTeam(team.team_id)
+                self.playerDict[x.player_id].AddTeam(team.GetID())
                 x = x.next
         self.players = self.playerDict.keys()
         self.players.sort(lambda x, y: cmp(self.playerDict[x].GetSortName(),
@@ -221,13 +221,13 @@ class ChadwickScorebook:
     def GetGameNumber(self, i, crit=lambda x: True):
         return filter(crit, self.games)[i]
 
-    def IterateGames(self, crit=lambda x: True):
+    def Games(self, crit=lambda x: True):
         for g in self.games:
             if crit(g):  yield g
 
     def NumPlayers(self):  return len(self.playerDict)
 
-    def IteratePlayers(self):
+    def Players(self):
         keys = self.playerDict.keys()
         keys.sort()
         for p in keys: yield self.playerDict[p]
@@ -248,7 +248,7 @@ class ChadwickScorebook:
         p.AddTeam(team)
 
         roster = self.league.first_roster
-        while roster.team_id != team:  roster = roster.next
+        while roster.GetID() != team:  roster = roster.next
 
         roster.InsertPlayer(p)
         p.thisown = 0
@@ -262,7 +262,7 @@ class ChadwickScorebook:
         p = CWPlayer(playerID, lastName, firstName, bats, throws)
 
         roster = self.league.first_roster
-        while roster.team_id != team:  roster = roster.next
+        while roster.GetID() != team:  roster = roster.next
 
         roster.InsertPlayer(p)
         p.thisown = 0
@@ -276,7 +276,7 @@ class ChadwickScorebook:
         p.bats = bats
         p.throws = throws
 
-        for team in self.IterateTeams():
+        for team in self.Teams():
             p = team.FindPlayer(playerID)
             if p != None:
                 p.SetFirstName(firstName)
@@ -303,7 +303,7 @@ class ChadwickScorebook:
             self.league.last_roster = t
         else:
             x = self.league.first_roster
-            while x != None and x.team_id < t.team_id:
+            while x != None and x.GetID() < t.GetID():
                 x = x.next
             if x == None:
                 t.prev = self.league.last_roster
@@ -323,7 +323,7 @@ class ChadwickScorebook:
 
     def ModifyTeam(self, teamID, city, nickname, leagueID):
         team = self.league.first_roster
-        while team.team_id != teamID:  team = team.next
+        while team.GetID() != teamID:  team = team.next
 
         team.SetCity(city)
         team.SetNickname(nickname)

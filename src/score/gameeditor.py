@@ -35,45 +35,45 @@ def CreateGame(gameId, vis, home):
     'gameId' is in Retrosheet standard format, and 'vis' and
     'home' are the team IDs
     """
-    game = cw_game_create(gameId)
+    game = CWGame(gameId)
     
-    cw_game_set_version(game, "1")
-    cw_game_info_append(game, "inputprogvers", "Chadwick version 0.3.1")
-    cw_game_info_append(game, "visteam", vis)
-    cw_game_info_append(game, "hometeam", home)
-    cw_game_info_append(game, "date",
+    game.SetVersion("1")
+    game.AddInfo("inputprogvers", "Chadwick version 0.3.1")
+    game.AddInfo("visteam", vis)
+    game.AddInfo("hometeam", home)
+    game.AddInfo("date",
                         "%s/%s/%s" % (gameId[3:7],
                                       gameId[7:9],
                                       gameId[9:11]))
-    cw_game_info_append(game, "number", gameId[-1])
+    game.AddInfo("number", gameId[-1])
 
     # Fill in dummy values for other info fields
     # These generally correspond to standards for 'data unknown'
-    cw_game_info_append(game, "starttime", "0:00")
-    cw_game_info_append(game, "daynight", "unknown")
-    cw_game_info_append(game, "usedh", "false")
-    cw_game_info_append(game, "umphome", "")
-    cw_game_info_append(game, "ump1b", "")
-    cw_game_info_append(game, "ump2b", "")
-    cw_game_info_append(game, "ump3b", "")
-    cw_game_info_append(game, "scorer", "")
-    cw_game_info_append(game, "translator", "")
-    cw_game_info_append(game, "inputter", "")
-    cw_game_info_append(game, "inputtime",
+    game.AddInfo("starttime", "0:00")
+    game.AddInfo("daynight", "unknown")
+    game.AddInfo("usedh", "false")
+    game.AddInfo("umphome", "")
+    game.AddInfo("ump1b", "")
+    game.AddInfo("ump2b", "")
+    game.AddInfo("ump3b", "")
+    game.AddInfo("scorer", "")
+    game.AddInfo("translator", "")
+    game.AddInfo("inputter", "")
+    game.AddInfo("inputtime",
                         time.strftime("%Y/%m/%d %I:%M%p"))
-    cw_game_info_append(game, "howscored", "unknown")
-    cw_game_info_append(game, "pitches", "none")
-    cw_game_info_append(game, "temp", "0")
-    cw_game_info_append(game, "winddir", "unknown")
-    cw_game_info_append(game, "windspeed", "-1")
-    cw_game_info_append(game, "fieldcond", "unknown")
-    cw_game_info_append(game, "precip", "unknown")
-    cw_game_info_append(game, "sky", "unknown")
-    cw_game_info_append(game, "timeofgame", "0")
-    cw_game_info_append(game, "attendance", "0")
-    cw_game_info_append(game, "wp", "")
-    cw_game_info_append(game, "lp", "")
-    cw_game_info_append(game, "save", "")
+    game.AddInfo("howscored", "unknown")
+    game.AddInfo("pitches", "none")
+    game.AddInfo("temp", "0")
+    game.AddInfo("winddir", "unknown")
+    game.AddInfo("windspeed", "-1")
+    game.AddInfo("fieldcond", "unknown")
+    game.AddInfo("precip", "unknown")
+    game.AddInfo("sky", "unknown")
+    game.AddInfo("timeofgame", "0")
+    game.AddInfo("attendance", "0")
+    game.AddInfo("wp", "")
+    game.AddInfo("lp", "")
+    game.AddInfo("save", "")
 
     return game
 
@@ -94,11 +94,10 @@ class GameEditor:
     def BuildBoxscore(self):  self.boxscore.Build()
     
     def AddPlay(self, count, pitches, play):
-        cw_game_event_append(self.game,
-                             self.GetInning(),
-                             self.GetHalfInning(),
-                             self.GetCurrentBatter(),
-                             count, pitches, play)
+        self.game.AddEvent(self.GetInning(),
+                           self.GetHalfInning(),
+                           self.GetCurrentBatter(),
+                           count, pitches, play)
         self.gameiter.ToEnd()
         self.boxscore.Build()
 
@@ -117,33 +116,30 @@ class GameEditor:
         # If there isn't one, just complete silently;
         # otherwise, truncate and update everything
         if x != None:
-            cw_game_truncate(self.game, x)
+            self.game.Truncate(x)
             self.gameiter.ToEnd()
             self.boxscore.Build()
 
     def AddSubstitute(self, player, team, slot, pos):
-        cw_game_event_append(self.game,
-                             self.GetInning(),
-                             self.GetHalfInning(),
-                             self.GetCurrentBatter(),
-                             "??", "", "NP")
-        cw_game_substitute_append(self.game,
-                                  player.player_id,
-                                  player.GetName(),
-                                  team, slot, pos)
+        self.game.AddEvent(self.GetInning(),
+                           self.GetHalfInning(),
+                           self.GetCurrentBatter(),
+                           "??", "", "NP")
+        self.game.AddSubstitute(player.player_id, player.GetName(),
+                                team, slot, pos)
         self.gameiter.ToEnd()
         self.boxscore.Build()
 
     def AddComment(self, text):
-        cw_game_comment_append(self.game, text)
+        self.game.AddComment(text)
 
     def GetRoster(self, team):
         if team == 0:  return self.visRoster
         else:          return self.homeRoster
                             
     def SetStarter(self, player, name, team, slot, pos):
-        cw_game_starter_append(self.game, player, name, team, slot, pos)
-        cw_gameiter_reset(self.gameiter)
+        self.game.AddStarter(player, name, team, slot, pos)
+        self.gameiter.Reset()
 
     def GetState(self):   return self.gameiter
     
@@ -161,7 +157,7 @@ class GameEditor:
 
     def GetCurrentPosition(self, team, slot):
         playerId = self.gameiter.GetPlayer(team, slot)
-        return cw_gameiter_player_position(self.gameiter, team, playerId)
+        return self.gameiter.GetPosition(team, playerId)
 
     def GetInning(self):        return self.gameiter.GetInning()
     def GetHalfInning(self):    return self.gameiter.GetHalfInning()
@@ -180,7 +176,7 @@ class GameEditor:
         includes any players who have come to bat and are
         still on base.
         """
-        return cw_gameiter_left_on_base(self.gameiter, team)
+        return self.gameiter.GetLOB(team)
 
     def IsLeadoff(self):
         return self.game.first_event == None or self.gameiter.outs == 3

@@ -27,12 +27,6 @@
 from wxPython.wx import *
 from libchadwick import *
 
-def iterate_roster(roster):
-    x = roster.first_player
-    while x != None:
-        yield x
-        x = x.next
-
 class LineupDialog(wxDialog):
     def __init__(self, parent, title):
         wxDialog.__init__(self, parent, -1, title)
@@ -146,7 +140,7 @@ class LineupDialog(wxDialog):
         for ctrl in self.players:
             ctrl.Clear()
             ctrl.Append("")
-            for player in iterate_roster(self.roster):
+            for player in self.roster.Players():
                 ctrl.Append(player.GetName())
             ctrl.SetForegroundColour(fgColors[team])
             ctrl.SetSelection(0)
@@ -168,25 +162,25 @@ class LineupDialog(wxDialog):
             self.pitcherText.Show(true)
             self.players[-1].Show(true)
 
-            for player in iterate_roster(self.roster):
+            for player in self.roster.Players():
                 if player.player_id == pitcher:
                     self.players[-1].SetStringSelection(player.GetName())
 
         for slot in range(9):
             playerId = gameiter.GetPlayer(team, slot+1)
-            for player in iterate_roster(self.roster):
+            for player in self.roster.Players():
                 if player.player_id == playerId:
                     self.players[slot].SetStringSelection(player.GetName())
                     self.origPlayers.append(self.players[slot].GetSelection())
-            if cw_gameiter_player_position(gameiter, team, playerId) <= 10:
-                self.positions[slot].SetSelection(cw_gameiter_player_position(gameiter, team, playerId))
-            self.origPositions.append(cw_gameiter_player_position(gameiter, team, playerId))
+            if gameiter.GetPosition(team, playerId) <= 10:
+                self.positions[slot].SetSelection(gameiter.GetPosition(team, playerId))
+            self.origPositions.append(gameiter.GetPosition(team, playerId))
             
         if pitcher != None:
             self.origPlayers.append(self.players[-1].GetSelection())
 
     def GetPlayerInSlot(self, slot):
-        return [x for x in iterate_roster(self.roster)][self.players[slot-1].GetSelection()-1]
+        return [x for x in self.roster.Players()][self.players[slot-1].GetSelection()-1]
 
     def SetPlayerInSlot(self, slot, name, pos):
         if slot > 0:
@@ -254,7 +248,7 @@ class PinchDialog(wxDialog):
         self.roster = roster
 
         self.player.Clear()
-        for player in iterate_roster(self.roster):
+        for player in self.roster.Players():
             self.player.Append(player.GetName())
 
         if team == 0:
@@ -265,9 +259,9 @@ class PinchDialog(wxDialog):
     def WriteChanges(self, doc, oldPlayer, team, pos):
         player = self.GetPlayer()
         gameiter = doc.gameiter
-        slot = cw_gameiter_lineup_slot(gameiter, team, oldPlayer)
+        slot = gameiter.GetSlot(team, oldPlayer)
         doc.AddSubstitute(player, team, slot, pos)
 
     def GetPlayer(self):
-        return [x for x in iterate_roster(self.roster)][self.player.GetSelection()]
+        return [x for x in self.roster.Players()][self.player.GetSelection()]
 

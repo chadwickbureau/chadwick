@@ -31,63 +31,7 @@
 %{
 #include <chadwick.h>
 
-int cw_gameiter_get_advancement(CWGameIterator *iterator, int base)
-{
-  return iterator->event_data->advance[base];
-}
-
-int cw_gameiter_get_sb_flag(CWGameIterator *iterator, int base)
-{
-  return iterator->event_data->sb_flag[base];
-}
-
-int cw_gameiter_get_cs_flag(CWGameIterator *iterator, int base)
-{
-  return iterator->event_data->cs_flag[base];
-}
-
-int cw_gameiter_get_putouts(CWGameIterator *iterator, int pos)
-{
-  return ((iterator->event_data->putouts[0] == pos) ? 1 : 0 +
-	  (iterator->event_data->putouts[1] == pos) ? 1 : 0 +
-	  (iterator->event_data->putouts[2] == pos) ? 1 : 0);
-}
-
-int cw_gameiter_get_assists(CWGameIterator *iterator, int pos)
-{
-  int count = 0, i;
-  for (i = 0; i < iterator->event_data->num_assists; i++) {
-    count += (iterator->event_data->assists[i] == pos) ? 1 : 0;
-  }
-  return count;
-}
-
-int cw_gameiter_get_fielder_errors(CWGameIterator *iterator, int pos)
-{
-  int count = 0, i;
-  for (i = 0; i < iterator->event_data->num_errors; i++) {
-    count += (iterator->event_data->errors[i] == pos) ? 1 : 0;
-  }
-  return count;
-}
-
-void cw_game_set_er(CWGame *game, char *pitcher, int er)
-{
-  char **foo = (char **) malloc(4 * sizeof(char *));
-  foo[1] = (char *) malloc(3 * sizeof(char));
-  strcpy(foo[1], "er");
-  foo[2] = (char *) malloc((strlen(pitcher)+1) * sizeof(char));
-  strcpy(foo[2], pitcher);
-  foo[3] = (char *) malloc(10 * sizeof(char));
-  sprintf(foo[3], "%d", er);
-  cw_game_data_append(game, 3, foo);
-  free(foo[3]);
-  free(foo[2]);
-  free(foo[1]);
-  free(foo);
-}
-
-int IsValid(char *play)
+int IsValidPlay(char *play)
 {
   CWParsedEvent data;
   return cw_parse_event(play, &data); 
@@ -124,6 +68,8 @@ int IsValid(char *play)
            char *city, char *nickname)
     { return cw_roster_create(team_id, year, league, city, nickname); }
 
+  char *GetID(void) const   { return self->team_id; }
+
   void SetCity(char *name)  { cw_roster_set_city(self, name); }
   char *GetCity(void) const  { return self->city; }
 
@@ -148,6 +94,13 @@ int IsValid(char *play)
     { return cw_roster_player_find(self, id); }
   int NumPlayers(void)    { return cw_roster_player_count(self); }
 
+%pythoncode %{
+  def Players(self): 
+    x = self.first_player
+    while x != None:  yield x; x = x.next
+    raise StopIteration
+%}
+
   void Read(FILE *file)   { cw_roster_read(self, file); }
   void Write(FILE *file)  { cw_roster_write(self, file); }
 };
@@ -158,11 +111,19 @@ int IsValid(char *play)
     { return cw_player_create(player_id, last_name, first_name,
                               bats, throws); }
 
+  char *GetID(void) const { return self->player_id; }
+
   void SetFirstName(char *name)  { cw_player_set_first_name(self, name); }
-  char *GetFirstName(void) { return self->first_name; }
+  char *GetFirstName(void) const  { return self->first_name; }
 
   void SetLastName(char *name)  { cw_player_set_last_name(self, name); }
-  char *GetLastName(void)  { return self->last_name; }
+  char *GetLastName(void) const  { return self->last_name; }
+
+  void SetBats(char bats)    { self->bats = bats; }
+  char GetBats(void) const   { return self->bats; }
+
+  void SetThrows(char throws)  { self->throws = throws; }
+  char GetThrows(void) const   { return self->throws; }
 
 %pythoncode %{
   def GetName(self):   return self.GetFirstName() + " " + self.GetLastName()
@@ -191,6 +152,8 @@ int IsValid(char *play)
 };
 
 %extend CWGame {
+  CWGame(char *gameID)  { return cw_game_create(gameID); }
+
   char *GetGameID(void) { return self->game_id; }
   char *GetDate(void)   { return cw_game_info_lookup(self, "date"); }
   int GetNumber(void)   { return (int) (cw_game_info_lookup(self, "number")[0] - '0'); }
@@ -216,9 +179,28 @@ int IsValid(char *play)
       else return 0;
     }
 
+  void SetVersion(char *version) { cw_game_set_version(self, version); }
+
   char *GetInfo(char *label) { return cw_game_info_lookup(self, label); }
   void SetInfo(char *label, char *value)
     { cw_game_info_set(self, label, value); }
+  void AddInfo(char *label, char *value)
+    { cw_game_info_append(self, label, value); }
+
+
+  void AddStarter(char *player, char *name, int team, int slot, int pos)
+    { cw_game_starter_append(self, player, name, team, slot, pos); }
+
+  void AddEvent(int inning, int halfInning, char *batter,
+                char *count, char *pitches, char *play)
+    { cw_game_event_append(self, inning, halfInning,
+                           batter, count, pitches, play); }
+  void Truncate(CWEvent *atEvent)  { cw_game_truncate(self, atEvent); }
+
+  void AddSubstitute(char *player, char *name, int team, int slot, int pos)
+    { cw_game_substitute_append(self, player, name, team, slot, pos); }
+
+  void AddComment(char *text)  { cw_game_comment_append(self, text); }
 
   CWAppearance *GetStarter(int team, int slot)
      { return cw_game_starter_find(self, team, slot); }
@@ -228,6 +210,22 @@ int IsValid(char *play)
   char *GetWinningPitcher(void)   { return cw_game_info_lookup(self, "wp"); }
   char *GetLosingPitcher(void)    { return cw_game_info_lookup(self, "lp"); }
   char *GetSavePitcher(void)      { return cw_game_info_lookup(self, "save"); }
+
+  void SetER(char *pitcher, int er)  {
+    char **foo = (char **) malloc(4 * sizeof(char *));
+    foo[1] = (char *) malloc(3 * sizeof(char));
+    strcpy(foo[1], "er");
+    foo[2] = (char *) malloc((strlen(pitcher)+1) * sizeof(char));
+    strcpy(foo[2], pitcher);
+    foo[3] = (char *) malloc(10 * sizeof(char));
+    sprintf(foo[3], "%d", er);
+    cw_game_data_append(self, 3, foo);
+    free(foo[3]);
+    free(foo[2]);
+    free(foo[1]);
+    free(foo);
+  }
+
 };
 
 %extend CWGameIterator {
@@ -236,7 +234,9 @@ int IsValid(char *play)
 
   void NextEvent(void) { cw_gameiter_next(self); }
   void ToEnd(void)  
-    { cw_gameiter_reset(self); while (self->event != NULL)  cw_gameiter_next(self); } 
+    { cw_gameiter_reset(self); 
+      while (self->event != NULL)  cw_gameiter_next(self); } 
+  void Reset(void)  { cw_gameiter_reset(self); }
 
   int GetInning(void) {
     if (self->outs == 3) return self->inning + self->half_inning;
@@ -256,6 +256,10 @@ int IsValid(char *play)
 
   char *GetPlayer(int team, int slot)  { return self->lineups[slot][team].player_id; }
   char *GetFielder(int team, int pos)  { return self->fielders[pos][team]; }
+  int GetPosition(int team, char *playerID)
+    { return cw_gameiter_player_position(self, team, playerID); }
+  int GetSlot(int team, char *playerID)
+    { return cw_gameiter_lineup_slot(self, team, playerID); }
   char *GetNextBatter(int team)
     { return self->lineups[self->num_batters[team] % 9 + 1][team].player_id; }
 
@@ -266,13 +270,40 @@ int IsValid(char *play)
   int GetTeamScore(int team)           { return self->score[team]; }
   int GetTeamHits(int team)            { return self->hits[team]; }
   int GetTeamErrors(int team)          { return self->errors[team]; }
+  int GetTeamLOB(int team)  { return cw_gameiter_left_on_base(self, team); }
+
+  CWParsedEvent *GetEventData(void) const  { return self->event_data; }  
 };
 
-int cw_gameiter_get_advancement(CWGameIterator *iterator, int base);
-int cw_gameiter_get_sb_flag(CWGameIterator *iterator, int base);
-int cw_gameiter_get_cs_flag(CWGameIterator *iterator, int base);
-int cw_gameiter_get_putouts(CWGameIterator *iterator, int pos);
-int cw_gameiter_get_assists(CWGameIterator *iterator, int pos);
-int cw_gameiter_get_fielder_errors(CWGameIterator *iterator, int pos);
-void cw_game_set_er(CWGame *game, char *pitcher, int er);
-int IsValid(char *play);
+%extend CWParsedEvent {
+  int IsOfficialAB(void)  { return cw_event_is_official_ab(self); }
+  int GetRBI(void)    { return cw_event_rbi_on_play(self); }
+
+  int GetOuts(void) { return cw_event_outs_on_play(self); }
+  int GetAdvance(int base) const  { return self->advance[base]; }
+  int GetSBFlag(int base) const   { return self->sb_flag[base]; }
+  int GetCSFlag(int base) const   { return self->cs_flag[base]; }
+  int GetPutouts(int pos) const {
+    return ((self->putouts[0] == pos) ? 1 : 0 +
+	    (self->putouts[1] == pos) ? 1 : 0 +
+	    (self->putouts[2] == pos) ? 1 : 0);
+  }
+
+  int GetAssists(int pos) const {
+    int count = 0, i;
+    for (i = 0; i < self->num_assists; i++) {
+      count += (self->assists[i] == pos) ? 1 : 0;
+    }
+    return count;
+  }
+
+  int GetErrors(int pos) const {
+    int count = 0, i;
+    for (i = 0; i < self->num_errors; i++) {
+      count += (self->errors[i] == pos) ? 1 : 0;
+    }
+    return count;
+  }
+};
+
+int IsValidPlay(char *play);

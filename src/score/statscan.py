@@ -68,44 +68,43 @@ class BattingAccumulator:
 
 
     def OnEvent(self, game, gameiter):
-        event_data = gameiter.event_data
+        eventData = gameiter.eventData
         team = gameiter.GetHalfInning()
         
         batterId = gameiter.GetPlayer(team,
                                       gameiter.NumBatters(team) % 9 + 1)
         batter = self.stats[batterId]
 
-        if cw_event_is_official_ab(event_data):
-            batter["ab"] += 1
+        if eventData.IsOfficialAB(): batter["ab"] += 1
 
-        if event_data.event_type == CW_EVENT_SINGLE:
+        if eventData.event_type == CW_EVENT_SINGLE:
             batter["h"] += 1
-        elif event_data.event_type == CW_EVENT_DOUBLE:
+        elif eventData.event_type == CW_EVENT_DOUBLE:
             batter["h"] += 1
             batter["2b"] += 1
-        elif event_data.event_type == CW_EVENT_TRIPLE:
+        elif eventData.event_type == CW_EVENT_TRIPLE:
             batter["h"] += 1
             batter["3b"] += 1
-        elif event_data.event_type == CW_EVENT_HOMERUN:
+        elif eventData.event_type == CW_EVENT_HOMERUN:
             batter["h"] += 1
             batter["hr"] += 1
-        elif event_data.event_type == CW_EVENT_WALK:
+        elif eventData.event_type == CW_EVENT_WALK:
             batter["bb"] += 1
-        elif event_data.event_type == CW_EVENT_INTENTIONALWALK:
+        elif eventData.event_type == CW_EVENT_INTENTIONALWALK:
             batter["bb"] += 1
             batter["ibb"] += 1
-        elif event_data.event_type == CW_EVENT_STRIKEOUT:
+        elif eventData.event_type == CW_EVENT_STRIKEOUT:
             batter["so"] += 1
-        elif event_data.event_type == CW_EVENT_HITBYPITCH:
+        elif eventData.event_type == CW_EVENT_HITBYPITCH:
             batter["hp"] += 1
 
-        batter["bi"] += cw_event_rbi_on_play(event_data)
+        batter["bi"] += eventData.GetRBI()
 
-        if event_data.sh_flag > 0:
+        if eventData.sh_flag > 0:
             batter["sh"] += 1
-        if event_data.sf_flag > 0:
+        if eventData.sf_flag > 0:
             batter["sf"] += 1
-        if event_data.gdp_flag > 0:
+        if eventData.gdp_flag > 0:
             batter["gdp"] += 1
 
         for base in [1,2,3]:
@@ -113,15 +112,15 @@ class BattingAccumulator:
                 continue
             
             runner = self.stats[gameiter.GetRunner(base)]
-            destBase = cw_gameiter_get_advancement(gameiter, base)
+            destBase = eventData.GetAdvance(base)
             if destBase >= 4:
                 runner["r"] += 1
-            if cw_gameiter_get_sb_flag(gameiter, base) > 0:
+            if eventData.GetSBFlag(base) > 0:
                 runner["sb"] += 1
-            if cw_gameiter_get_cs_flag(gameiter, base) > 0:
+            if eventData.GetCSFlag(base) > 0:
                 runner["cs"] += 1
 
-        destBase = cw_gameiter_get_advancement(gameiter, 0)
+        destBase = eventData.GetAdvance(0)
         if destBase >= 4:
             batter["r"] += 1
 
@@ -207,7 +206,7 @@ class TeamBattingRegister:
 
 
     def OnEvent(self, game, gameiter):
-        event_data = gameiter.event_data
+        eventData = gameiter.eventData
         team = gameiter.GetHalfInning()
         
         if game.GetTeams()[team] != self.team:  return
@@ -216,37 +215,36 @@ class TeamBattingRegister:
                                       gameiter.NumBatters(team) % 9 + 1)
         batter = self.stats[batterId]
 
-        if cw_event_is_official_ab(event_data):
-            batter["ab"] += 1
+        if eventData.IsOfficialAB():   batter["ab"] += 1
 
-        if event_data.event_type == CW_EVENT_SINGLE:
+        if eventData.event_type == CW_EVENT_SINGLE:
             batter["h"] += 1
-        elif event_data.event_type == CW_EVENT_DOUBLE:
+        elif eventData.event_type == CW_EVENT_DOUBLE:
             batter["h"] += 1
             batter["2b"] += 1
-        elif event_data.event_type == CW_EVENT_TRIPLE:
+        elif eventData.event_type == CW_EVENT_TRIPLE:
             batter["h"] += 1
             batter["3b"] += 1
-        elif event_data.event_type == CW_EVENT_HOMERUN:
+        elif eventData.event_type == CW_EVENT_HOMERUN:
             batter["h"] += 1
             batter["hr"] += 1
-        elif event_data.event_type == CW_EVENT_WALK:
+        elif eventData.event_type == CW_EVENT_WALK:
             batter["bb"] += 1
-        elif event_data.event_type == CW_EVENT_INTENTIONALWALK:
+        elif eventData.event_type == CW_EVENT_INTENTIONALWALK:
             batter["bb"] += 1
             batter["ibb"] += 1
-        elif event_data.event_type == CW_EVENT_STRIKEOUT:
+        elif eventData.event_type == CW_EVENT_STRIKEOUT:
             batter["so"] += 1
-        elif event_data.event_type == CW_EVENT_HITBYPITCH:
+        elif eventData.event_type == CW_EVENT_HITBYPITCH:
             batter["hp"] += 1
 
-        batter["bi"] += cw_event_rbi_on_play(event_data)
+        batter["bi"] += eventData.GetRBI()
 
-        if event_data.sh_flag > 0:
+        if eventData.sh_flag > 0:
             batter["sh"] += 1
-        if event_data.sf_flag > 0:
+        if eventData.sf_flag > 0:
             batter["sf"] += 1
-        if event_data.gdp_flag > 0:
+        if eventData.gdp_flag > 0:
             batter["gdp"] += 1
 
         for base in [1,2,3]:
@@ -254,15 +252,15 @@ class TeamBattingRegister:
                 continue
             
             runner = self.stats[gameiter.GetRunner(base)]
-            destBase = cw_gameiter_get_advancement(gameiter, base)
+            destBase = eventData.GetAdvance(base)
             if destBase >= 4:
                 runner["r"] += 1
-            if cw_gameiter_get_sb_flag(gameiter, base) > 0:
+            if eventData.GetSBFlag(base) > 0:
                 runner["sb"] += 1
-            if cw_gameiter_get_cs_flag(gameiter, base) > 0:
+            if eventData.GetCSFlag(base) > 0:
                 runner["cs"] += 1
 
-        destBase = cw_gameiter_get_advancement(gameiter, 0)
+        destBase = eventData.GetAdvance(0)
         if destBase >= 4:
             batter["r"] += 1
 
@@ -313,8 +311,8 @@ class TeamBattingRegister:
 class TeamBattingAccumulator:
     def __init__(self, cwf):
         self.stats = { }
-        for team in cwf.IterateTeams():
-            self.stats[team.team_id] = self.NewBattingStats(team)
+        for team in cwf.Teams():
+            self.stats[team.GetID()] = self.NewBattingStats(team)
 
     def OnBeginGame(self, game, gameiter):
         for team in game.GetTeams():
@@ -324,69 +322,68 @@ class TeamBattingAccumulator:
         pass
 
     def OnEvent(self, game, gameiter):
-        event_data = gameiter.event_data
+        eventData = gameiter.eventData
         team = gameiter.GetHalfInning()
 
         batter = self.stats[game.GetTeams()[team]]
-        if cw_event_is_official_ab(event_data):
-            batter["ab"] += 1
+        if eventData.IsOfficialAB():  batter["ab"] += 1
 
-        if event_data.event_type == CW_EVENT_SINGLE:
+        if eventData.event_type == CW_EVENT_SINGLE:
             batter["h"] += 1
-        elif event_data.event_type == CW_EVENT_DOUBLE:
+        elif eventData.event_type == CW_EVENT_DOUBLE:
             batter["h"] += 1
             batter["2b"] += 1
-        elif event_data.event_type == CW_EVENT_TRIPLE:
+        elif eventData.event_type == CW_EVENT_TRIPLE:
             batter["h"] += 1
             batter["3b"] += 1
-        elif event_data.event_type == CW_EVENT_HOMERUN:
+        elif eventData.event_type == CW_EVENT_HOMERUN:
             batter["h"] += 1
             batter["hr"] += 1
-        elif event_data.event_type == CW_EVENT_WALK:
+        elif eventData.event_type == CW_EVENT_WALK:
             batter["bb"] += 1
-        elif event_data.event_type == CW_EVENT_INTENTIONALWALK:
+        elif eventData.event_type == CW_EVENT_INTENTIONALWALK:
             batter["bb"] += 1
             batter["ibb"] += 1
-        elif event_data.event_type == CW_EVENT_STRIKEOUT:
+        elif eventData.event_type == CW_EVENT_STRIKEOUT:
             batter["so"] += 1
-        elif event_data.event_type == CW_EVENT_HITBYPITCH:
+        elif eventData.event_type == CW_EVENT_HITBYPITCH:
             batter["hp"] += 1
 
-        batter["bi"] += cw_event_rbi_on_play(event_data)
+        batter["bi"] += eventData.GetRBI()
 
-        if event_data.sh_flag > 0:
+        if eventData.sh_flag > 0:
             batter["sh"] += 1
-        if event_data.sf_flag > 0:
+        if eventData.sf_flag > 0:
             batter["sf"] += 1
-        if event_data.gdp_flag > 0:
+        if eventData.gdp_flag > 0:
             batter["gdp"] += 1
 
         for base in [1,2,3]:
             if gameiter.GetRunner(base) == "":
                 continue
             
-            destBase = cw_gameiter_get_advancement(gameiter, base)
+            destBase = eventData.GetAdvance(base)
             if destBase >= 4:
                 batter["r"] += 1
-            if cw_gameiter_get_sb_flag(gameiter, base) > 0:
+            if eventData.GetSBFlag(base) > 0:
                 batter["sb"] += 1
-            if cw_gameiter_get_cs_flag(gameiter, base) > 0:
+            if eventData.GetCSFlag(base) > 0:
                 batter["cs"] += 1
 
-        destBase = cw_gameiter_get_advancement(gameiter, 0)
+        destBase = eventData.GetAdvance(0)
         if destBase >= 4:
             batter["r"] += 1
 
     def OnEndGame(self, game, gameiter):
         for t in [0,1]:
-            self.stats[game.GetTeams()[t]]["lob"] += cw_gameiter_left_on_base(gameiter, t)
+            self.stats[game.GetTeams()[t]]["lob"] += gameiter.GetTeamLOB(t)
 
     def NewBattingStats(self, team):
         """
         Generate a new batting stats entry (dictionary)
         for 'player', which is an appearance record.
         """
-        return { "id": team.team_id,
+        return { "id": team.GetID(),
                  "city": team.GetCity(), "nickname": team.GetNickname(),
                  "games": [ ],
                  "ab":0, "r":0, "h":0,
@@ -473,31 +470,31 @@ class PitchingAccumulator:
         pitcherId = gameiter.GetFielder(1-team, 1)
         pitcher = self.stats[pitcherId]
 
-        event_data = gameiter.event_data
-        pitcher["outs"] += cw_event_outs_on_play(event_data)
+        eventData = gameiter.eventData
+        pitcher["outs"] += eventData.GetOuts()
 
-        if event_data.event_type == CW_EVENT_SINGLE:
+        if eventData.event_type == CW_EVENT_SINGLE:
             pitcher["h"] += 1
-        elif event_data.event_type == CW_EVENT_DOUBLE:
+        elif eventData.event_type == CW_EVENT_DOUBLE:
             pitcher["h"] += 1
-        elif event_data.event_type == CW_EVENT_TRIPLE:
+        elif eventData.event_type == CW_EVENT_TRIPLE:
             pitcher["h"] += 1
-        elif event_data.event_type == CW_EVENT_HOMERUN:
+        elif eventData.event_type == CW_EVENT_HOMERUN:
             pitcher["h"] += 1
             pitcher["hr"] += 1
-        elif event_data.event_type == CW_EVENT_WALK:
+        elif eventData.event_type == CW_EVENT_WALK:
             pitcher["bb"] += 1
-        elif event_data.event_type == CW_EVENT_INTENTIONALWALK:
+        elif eventData.event_type == CW_EVENT_INTENTIONALWALK:
             pitcher["bb"] += 1
             pitcher["ibb"] += 1
-        elif event_data.event_type == CW_EVENT_STRIKEOUT:
+        elif eventData.event_type == CW_EVENT_STRIKEOUT:
             pitcher["so"] += 1
-        elif event_data.event_type == CW_EVENT_HITBYPITCH:
+        elif eventData.event_type == CW_EVENT_HITBYPITCH:
             pitcher["hb"] += 1
-        elif event_data.event_type == CW_EVENT_BALK:
+        elif eventData.event_type == CW_EVENT_BALK:
             pitcher["bk"] += 1
 
-        if event_data.wp_flag > 0:
+        if eventData.wp_flag > 0:
             pitcher["wp"] += 1
 
         for base in [1,2,3]:
@@ -505,13 +502,13 @@ class PitchingAccumulator:
                 continue
             
             resppitcher = self.stats[gameiter.GetRespPitcher(base)]
-            destBase = cw_gameiter_get_advancement(gameiter, base)
+            destBase = eventData.GetAdvance(base)
             if destBase >= 4:
                 resppitcher["r"] += 1
                 if destBase == 4 or destBase == 6:
                     resppitcher["er"] += 1
 
-        destBase = cw_gameiter_get_advancement(gameiter, 0)
+        destBase = eventData.GetAdvance(0)
         if destBase >= 4:
             pitcher["r"] += 1
             if destBase == 4 or destBase == 6:
@@ -632,31 +629,31 @@ class TeamPitchingRegister:
         pitcherId = gameiter.GetFielder(1-team, 1)
         pitcher = self.stats[pitcherId]
 
-        event_data = gameiter.event_data
-        pitcher["outs"] += cw_event_outs_on_play(event_data)
+        eventData = gameiter.eventData
+        pitcher["outs"] += eventData.GetOuts()
 
-        if event_data.event_type == CW_EVENT_SINGLE:
+        if eventData.event_type == CW_EVENT_SINGLE:
             pitcher["h"] += 1
-        elif event_data.event_type == CW_EVENT_DOUBLE:
+        elif eventData.event_type == CW_EVENT_DOUBLE:
             pitcher["h"] += 1
-        elif event_data.event_type == CW_EVENT_TRIPLE:
+        elif eventData.event_type == CW_EVENT_TRIPLE:
             pitcher["h"] += 1
-        elif event_data.event_type == CW_EVENT_HOMERUN:
+        elif eventData.event_type == CW_EVENT_HOMERUN:
             pitcher["h"] += 1
             pitcher["hr"] += 1
-        elif event_data.event_type == CW_EVENT_WALK:
+        elif eventData.event_type == CW_EVENT_WALK:
             pitcher["bb"] += 1
-        elif event_data.event_type == CW_EVENT_INTENTIONALWALK:
+        elif eventData.event_type == CW_EVENT_INTENTIONALWALK:
             pitcher["bb"] += 1
             pitcher["ibb"] += 1
-        elif event_data.event_type == CW_EVENT_STRIKEOUT:
+        elif eventData.event_type == CW_EVENT_STRIKEOUT:
             pitcher["so"] += 1
-        elif event_data.event_type == CW_EVENT_HITBYPITCH:
+        elif eventData.event_type == CW_EVENT_HITBYPITCH:
             pitcher["hb"] += 1
-        elif event_data.event_type == CW_EVENT_BALK:
+        elif eventData.event_type == CW_EVENT_BALK:
             pitcher["bk"] += 1
 
-        if event_data.wp_flag > 0:
+        if eventData.wp_flag > 0:
             pitcher["wp"] += 1
 
         for base in [1,2,3]:
@@ -664,13 +661,13 @@ class TeamPitchingRegister:
                 continue
             
             resppitcher = self.stats[gameiter.GetRespPitcher(base)]
-            destBase = cw_gameiter_get_advancement(gameiter, base)
+            destBase = eventData.GetAdvance(base)
             if destBase >= 4:
                 resppitcher["r"] += 1
                 if destBase == 4 or destBase == 6:
                     resppitcher["er"] += 1
 
-        destBase = cw_gameiter_get_advancement(gameiter, 0)
+        destBase = eventData.GetAdvance(0)
         if destBase >= 4:
             pitcher["r"] += 1
             if destBase == 4 or destBase == 6:
@@ -742,8 +739,8 @@ class TeamPitchingRegister:
 class TeamPitchingAccumulator:
     def __init__(self, cwf):
         self.stats = { }
-        for team in cwf.IterateTeams():
-            self.stats[team.team_id] = self.NewPitchingStats(team)
+        for team in cwf.Teams():
+            self.stats[team.GetID()] = self.NewPitchingStats(team)
 
     def OnBeginGame(self, game, gameiter):
         for team in game.GetTeams():
@@ -753,48 +750,48 @@ class TeamPitchingAccumulator:
         pass
 
     def OnEvent(self, game, gameiter):
-        event_data = gameiter.event_data
+        eventData = gameiter.eventData
         team = gameiter.GetHalfInning()
 
         pitcher = self.stats[game.GetTeams()[1-team]]
 
-        pitcher["outs"] += cw_event_outs_on_play(event_data)
+        pitcher["outs"] += eventData.GetOuts()
 
-        if event_data.event_type == CW_EVENT_SINGLE:
+        if eventData.event_type == CW_EVENT_SINGLE:
             pitcher["h"] += 1
-        elif event_data.event_type == CW_EVENT_DOUBLE:
+        elif eventData.event_type == CW_EVENT_DOUBLE:
             pitcher["h"] += 1
-        elif event_data.event_type == CW_EVENT_TRIPLE:
+        elif eventData.event_type == CW_EVENT_TRIPLE:
             pitcher["h"] += 1
-        elif event_data.event_type == CW_EVENT_HOMERUN:
+        elif eventData.event_type == CW_EVENT_HOMERUN:
             pitcher["h"] += 1
             pitcher["hr"] += 1
-        elif event_data.event_type == CW_EVENT_WALK:
+        elif eventData.event_type == CW_EVENT_WALK:
             pitcher["bb"] += 1
-        elif event_data.event_type == CW_EVENT_INTENTIONALWALK:
+        elif eventData.event_type == CW_EVENT_INTENTIONALWALK:
             pitcher["bb"] += 1
             pitcher["ibb"] += 1
-        elif event_data.event_type == CW_EVENT_STRIKEOUT:
+        elif eventData.event_type == CW_EVENT_STRIKEOUT:
             pitcher["so"] += 1
-        elif event_data.event_type == CW_EVENT_HITBYPITCH:
+        elif eventData.event_type == CW_EVENT_HITBYPITCH:
             pitcher["hb"] += 1
-        elif event_data.event_type == CW_EVENT_BALK:
+        elif eventData.event_type == CW_EVENT_BALK:
             pitcher["bk"] += 1
 
-        if event_data.wp_flag > 0:
+        if eventData.wp_flag > 0:
             pitcher["wp"] += 1
 
         for base in [1,2,3]:
             if gameiter.GetRunner(base) == "":
                 continue
             
-            destBase = cw_gameiter_get_advancement(gameiter, base)
+            destBase = eventData.GetAdvance(base)
             if destBase >= 4:
                 pitcher["r"] += 1
                 if destBase == 4:
                     pitcher["er"] += 1
 
-        destBase = cw_gameiter_get_advancement(gameiter, 0)
+        destBase = eventData.GetAdvance(0)
         if destBase >= 4:
             pitcher["r"] += 1
             if destBase == 4:
@@ -828,7 +825,7 @@ class TeamPitchingAccumulator:
         Generate a new pitching stats entry (dictionary)
         for 'team', which is a roster record
         """
-        return { "id": team.team_id,
+        return { "id": team.GetID(),
                  "city": team.GetCity(), "nickname": team.GetNickname(),
                  "games": [ ],
                  "gs":0, "cg":0, "sho":0, "gf":0,
@@ -906,31 +903,31 @@ class FieldingAccumulator:
 
 
     def OnEvent(self, game, gameiter):
-        event_data = gameiter.event_data
+        eventData = gameiter.eventData
         team = gameiter.GetHalfInning()
 
         fielderId = gameiter.GetFielder(1-team, self.pos)
         fielder = self.stats[fielderId]
 
-        event_data = gameiter.event_data
-        fielder["outs"] += cw_event_outs_on_play(event_data)
-        po = cw_gameiter_get_putouts(gameiter, self.pos)
+        eventData = gameiter.GetEventData()
+        fielder["outs"] += eventData.GetOuts()
+        po = eventData.GetPutouts(self.pos)
         fielder["po"] += po
-        a = cw_gameiter_get_assists(gameiter, self.pos)
+        a = eventData.GetAssists(self.pos)
         fielder["a"] += a
-        fielder["e"] += cw_gameiter_get_fielder_errors(gameiter, self.pos)
+        fielder["e"] += eventData.GetErrors(self.pos)
 
-        if event_data.dp_flag and po + a > 0:
+        if eventData.dp_flag and po + a > 0:
             fielder["dp"] += 1
-        elif event_data.tp_flag and po + a > 0:
+        elif eventData.tp_flag and po + a > 0:
             fielder["tp"] += 1
 
-        if event_data.fielded_by == self.pos and cw_event_outs_on_play(event_data) > 0:
+        if eventData.fielded_by == self.pos and eventData.GetOuts() > 0:
             fielder["bf"] += 1
-        if (event_data.fielded_by > 0 or
-            event_data.event_type in [CW_EVENT_SINGLE,
-                                      CW_EVENT_DOUBLE,
-                                      CW_EVENT_TRIPLE]):
+        if (eventData.fielded_by > 0 or
+            eventData.event_type in [CW_EVENT_SINGLE,
+                                     CW_EVENT_DOUBLE,
+                                     CW_EVENT_TRIPLE]):
             fielder["bip"] += 1
             
 
@@ -978,8 +975,8 @@ class FieldingAccumulator:
 class TeamFieldingAccumulator:
     def __init__(self, cwf):
         self.stats = { }
-        for team in cwf.IterateTeams():
-            self.stats[team.team_id] = self.NewFieldingStats(team)
+        for team in cwf.Teams():
+            self.stats[team.GetID()] = self.NewFieldingStats(team)
 
     def OnBeginGame(self, game, gameiter):
         for team in game.GetTeams():
@@ -989,21 +986,21 @@ class TeamFieldingAccumulator:
         pass
 
     def OnEvent(self, game, gameiter):
-        event_data = gameiter.event_data
+        eventData = gameiter.eventData
         team = gameiter.GetHalfInning()
 
         fielder = self.stats[game.GetTeams()[1-team]]
-        fielder["po"] += cw_event_outs_on_play(event_data)
-        fielder["a"] += event_data.num_assists
-        fielder["e"] += event_data.num_errors
+        fielder["po"] += eventData.GetOuts()
+        fielder["a"] += eventData.num_assists
+        fielder["e"] += eventData.num_errors
 
-        if event_data.dp_flag:    fielder["dp"] += 1
-        elif event_data.tp_flag:  fielder["tp"] += 1
+        if eventData.dp_flag:    fielder["dp"] += 1
+        elif eventData.tp_flag:  fielder["tp"] += 1
 
-        if event_data.fielded_by > 0 and cw_event_outs_on_play(event_data) > 0:
+        if eventData.fielded_by > 0 and eventData.GetOuts() > 0:
             fielder["bf"] += 1
-        if (event_data.fielded_by > 0 or
-            event_data.event_type in [CW_EVENT_SINGLE,
+        if (eventData.fielded_by > 0 or
+            eventData.event_type in [CW_EVENT_SINGLE,
                                       CW_EVENT_DOUBLE,
                                       CW_EVENT_TRIPLE]):
             fielder["bip"] += 1
@@ -1017,7 +1014,7 @@ class TeamFieldingAccumulator:
         Generate a new fielding stats entry (dictionary)
         for 'team', which is a team roster record
         """
-        return { "id": team.team_id,
+        return { "id": team.GetID(),
                  "city": team.GetCity(), "nickname": team.GetNickname(),
                  "games": [ ],
                  "bip":0, "bf":0,
@@ -1049,8 +1046,8 @@ class GameLogAccumulator:
     def __init__(self, cwf):
         self.cwf = cwf
         self.stats = { }
-        for team in cwf.IterateTeams():
-            self.stats[team.team_id] = [ ]
+        for team in cwf.Teams():
+            self.stats[team.GetID()] = [ ]
 
     def OnBeginGame(self, game, gameiter):  pass
     def OnSubstitution(self, game, gameiter): pass
@@ -1153,8 +1150,8 @@ class GameLogAccumulator:
 class RecordAccumulator:
     def __init__(self, cwf):
         self.stats = { }
-        for team in cwf.IterateTeams():
-            self.stats[team.team_id] = self.NewTeamStats(team)
+        for team in cwf.Teams():
+            self.stats[team.GetID()] = self.NewTeamStats(team)
 
     def OnBeginGame(self, game, gameiter):  pass
     def OnSubstitution(self, game, gameiter): pass
@@ -1200,7 +1197,7 @@ class RecordAccumulator:
         Generate a new team record stats entry (dictionary)
         for 'team', which is a roster record
         """
-        return { "id": team.team_id,
+        return { "id": team.GetID(),
                  "city": team.GetCity(), "nickname": team.GetNickname(),
                  "g":0, "w":0, "l":0, "t":0,
                  "hw":0, "hl":0,  # home record
@@ -1238,7 +1235,7 @@ class GrandSlamAccumulator:
     def OnSubstitution(self, game, gameiter): pass
 
     def OnEvent(self, game, gameiter):
-        if (gameiter.event_data.event_type == CW_EVENT_HOMERUN and
+        if (gameiter.eventData.event_type == CW_EVENT_HOMERUN and
             gameiter.GetRunner(1) != "" and
             gameiter.GetRunner(2) != "" and
             gameiter.GetRunner(3) != ""):
@@ -1305,7 +1302,7 @@ def ProcessFile(book, acclist, monitor=None):
     automatically works for this parameter.
     """
     numGames = book.NumGames()
-    for (i,game) in enumerate(book.IterateGames()):
+    for (i,game) in enumerate(book.Games()):
         ProcessGame(game, acclist)
         if monitor != None:
             if not monitor.Update(round(float(i)/float(numGames)*100)):

@@ -187,7 +187,7 @@ class StatePanel(wxPanel):
             self.playText.SetValue(x.upper())
             self.playText.SetInsertionPoint(y)
 
-        if IsValid(x.upper()):
+        if IsValidPlay(x.upper()):
             self.playText.SetBackgroundColour(wxSystemSettings_GetColour(wxSYS_COLOUR_WINDOW))
         else:
             self.playText.SetBackgroundColour(wxNamedColour("pink"))
@@ -195,7 +195,7 @@ class StatePanel(wxPanel):
             
     def OnPlayEnter(self, event):
         play = str(self.playText.GetValue()).upper()
-        if play == "" or not IsValid(play):
+        if play == "" or not IsValidPlay(play):
             wxBell()
         else:
             if hasattr(self, "pitches"):
@@ -295,14 +295,13 @@ class StatePanel(wxPanel):
             dialog = dialogdecision.DecisionDialog(self, self.doc)
             if dialog.ShowModal() != wxID_OK:  return
             
-            cw_game_info_set(self.doc.game, "wp", dialog.GetWinningPitcher())
-            cw_game_info_set(self.doc.game, "save", dialog.GetSavePitcher())
-            cw_game_info_set(self.doc.game, "lp", dialog.GetLosingPitcher())
+            self.doc.game.SetInfo("wp", dialog.GetWinningPitcher())
+            self.doc.game.SetInfo("save", dialog.GetSavePitcher())
+            self.doc.game.SetInfo("lp", dialog.GetLosingPitcher())
             
         for t in [0, 1]:
             for pitcher in self.doc.boxscore.pitching[t]:
-                cw_game_set_er(self.doc.game,
-                               pitcher["id"], pitcher["er"])
+                self.doc.game.SetER(pitcher["id"], pitcher["er"])
         event.Skip()
 
     def OnComment(self, event):
