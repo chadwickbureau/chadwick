@@ -4,7 +4,7 @@
  * $Revision$
  *
  * DESCRIPTION:
- * Top-level include file for Chadwick
+ * Declaration of boxscore data structures and API
  * 
  * This file is part of Chadwick, a library for baseball play-by-play and stats
  * Copyright (C) 2002, Ted Turocy (turocy@econ.tamu.edu)
@@ -24,17 +24,36 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef CW_CHADWICK_H
-#define CW_CHADWICK_H
+#ifndef CW_BOX_H
+#define CW_BOX_H
 
-#include "file.h"
 #include "game.h"
-#include "book.h"
-#include "roster.h"
-#include "league.h"
-#include "parse.h"
-#include "gameiter.h"
-#include "box.h"
 
-#endif   /* CW_CHADWICK_H */
+typedef struct cw_box_batting_struct {
+  int ab, r, h, bi, bb, so;
+} CWBoxBatting;
+
+typedef struct cw_box_player_struct {
+  char *player_id;
+  CWBoxBatting *batting;
+  struct cw_box_player_struct *prev, *next;
+} CWBoxPlayer;
+
+typedef struct cw_boxscore_struct {
+  CWBoxPlayer *slots[10][2];
+} CWBoxscore;
+
+/*
+ * Create a boxscore from the game 'game'
+ */
+CWBoxscore *cw_boxscore_create(CWGame *game);
+
+/*
+ * Cleans up internal memory allocation associated with 'boxscore'.
+ * Caller is responsiblefor free()ing the boxscore itself
+ */
+void cw_boxscore_cleanup(CWBoxscore *boxscore);
+
+#endif  /* CW_BOX_H */
+
 
