@@ -76,7 +76,75 @@ cwpbp_print_header(CWGame *game, CWRoster *visitors, CWRoster *home)
     printf("\n");
     break;
   }
-  printf("\n");
+}
+
+void
+cwpbp_print_defensive_credit(CWGameIterator *gameiter,
+			     CWRoster *defense, int base)
+{
+  int i;
+
+  printf("(");
+  for (i = 0; i < strlen(gameiter->event_data->play[base]); i++) {
+    if (i > 0) {
+      printf(" to ");
+    }
+    printf("%s",
+	   cw_roster_player_find(defense, gameiter->fielders[gameiter->event_data->play[base][i] - '0'][1-gameiter->half_inning])->last_name);
+      }
+  if (strlen(gameiter->event_data->play[base]) == 1) {
+    printf(" unassisted");
+  } 
+  printf(")");
+}
+
+void
+cwpbp_process_generic_out(CWGameIterator *gameiter,
+			  CWRoster *visitors, CWRoster *home)
+{
+  CWRoster *defense = ((gameiter->half_inning == 0) ? home : visitors);
+  CWRoster *offense = ((gameiter->half_inning == 0) ? visitors : home);
+
+  if (strcmp(gameiter->event_data->play[0], "")) {
+    switch (gameiter->event_data->batted_ball_type) {
+    case 'G':
+      printf(" grounded out ");
+      cwpbp_print_defensive_credit(gameiter, defense, 0);
+      break;
+    case 'F':
+      printf(" flied out to %s",
+	     cw_roster_player_find(defense, gameiter->fielders[gameiter->event_data->play[0][0] - '0'][1-gameiter->half_inning])->last_name);
+      break;
+    case 'L':
+      printf(" lined out to %s",
+	     cw_roster_player_find(defense, gameiter->fielders[gameiter->event_data->play[0][0] - '0'][1-gameiter->half_inning])->last_name);
+      break;
+    case 'P':
+      printf(" popped out to %s",
+	     cw_roster_player_find(defense, gameiter->fielders[gameiter->event_data->play[0][0] - '0'][1-gameiter->half_inning])->last_name);
+      break;
+    default:
+      printf(" made an out ");
+      break;
+    }
+  }
+  else if (gameiter->event_data->fc_flag[1]) {
+    printf(" forced %s ",
+	   cw_roster_player_find(offense, gameiter->runners[1])->last_name);
+    cwpbp_print_defensive_credit(gameiter, defense, 1);
+  }
+  else {
+    printf(" was put out");
+  }
+}
+
+void
+cwpbp_print_hit_fielder(CWGameIterator *gameiter, CWRoster *defense)
+{
+  if (gameiter->event_data->fielded_by > 0) {
+    printf(" to %s",
+	   cw_roster_player_find(defense, gameiter->fielders[gameiter->event_data->fielded_by][1-gameiter->half_inning])->last_name);
+  }
 }
 
 void
@@ -93,6 +161,10 @@ cwpbp_print_advance(CWGameIterator *gameiter,
     }
 
     if (gameiter->event_data->advance[base] == base) {
+      continue;
+    }
+
+    if (gameiter->event_data->fc_flag[base]) {
       continue;
     }
 
@@ -158,15 +230,23 @@ cwpbp_print_text(CWGameIterator *gameiter, CWRoster *visitors, CWRoster *home)
       switch (gameiter->event_data->event_type) {
       case EVENT_SINGLE:
 	printf(" singled");
+	cwpbp_print_hit_fielder(gameiter,
+				(gameiter->half_inning == 0) ? home : visitors);
 	break;
       case EVENT_DOUBLE:
 	printf(" doubled");
+	cwpbp_print_hit_fielder(gameiter,
+				(gameiter->half_inning == 0) ? home : visitors);
 	break;
       case EVENT_TRIPLE:
 	printf(" tripled");
+	cwpbp_print_hit_fielder(gameiter,
+				(gameiter->half_inning == 0) ? home : visitors);
 	break;
       case EVENT_HOMERUN:
 	printf(" homered");
+	cwpbp_print_hit_fielder(gameiter,
+				(gameiter->half_inning == 0) ? home : visitors);
 	break;
       case EVENT_WALK:
 	printf(" walked");
@@ -181,7 +261,7 @@ cwpbp_print_text(CWGameIterator *gameiter, CWRoster *visitors, CWRoster *home)
 	printf(" was hit by a pitch");
 	break;
       case EVENT_GENERICOUT:
-	printf(" was put out");
+	cwpbp_process_generic_out(gameiter, visitors, home);
 	break;
       case EVENT_ERROR:
 	printf(" reached on an error");
@@ -197,7 +277,7 @@ cwpbp_print_text(CWGameIterator *gameiter, CWRoster *visitors, CWRoster *home)
 	break;
       }
       cwpbp_print_advance(gameiter, visitors, home);
-      printf("\n");
+      printf("; ");
     }
     return;
   }
@@ -211,17 +291,31 @@ void cwpbp_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 
   while (gameiter->event != NULL) {
     if (inning != gameiter->inning || half_inning != gameiter->half_inning) {
-      printf("\n");
+      printf("\n\n");
       inning = gameiter->inning;
       half_inning = gameiter->half_inning;
-      printf("%s of inning %d:\n", (half_inning == 0) ? "Top" : "Bottom",
-	     inning);
+      if (inning % 10 == 1) {
+	printf("%s %dST: ", ((half_inning == 0) ? visitors : home)->nickname,
+	       inning);
+      }
+      else if (inning % 10 == 2) {
+	printf("%s %dND: ", ((half_inning == 0) ? visitors : home)->nickname,
+	       inning);
+      }
+      else if (inning % 10 == 3) {
+	printf("%s %dRD: ", ((half_inning == 0) ? visitors : home)->nickname,
+	       inning);
+      }
+      else {
+	printf("%s %dTH: ", ((half_inning == 0) ? visitors : home)->nickname,
+	       inning);
+      }
     }
     cwpbp_print_text(gameiter, visitors, home);
     cw_gameiter_next(gameiter);
   }
 
-  printf("\f");
+  printf("\n\f");
   cw_gameiter_cleanup(gameiter);
   free(gameiter);
 }
