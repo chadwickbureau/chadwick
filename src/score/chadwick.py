@@ -92,9 +92,11 @@ CW_MENU_REPORT_REGISTER = 2009
 CW_MENU_REPORT_REGISTER_BATTING = 2010
 CW_MENU_REPORT_REGISTER_PITCHING = 2011
 CW_MENU_REPORT_REGISTER_FIELDING = 2012
-CW_MENU_REPORT_LOG = 2014
-CW_MENU_REPORT_LOG_TEAM = 2015
-CW_MENU_REPORT_TEAM = 2013
+CW_MENU_REPORT_TEAM = 2020
+CW_MENU_REPORT_TEAM_TOTALS = 2021
+CW_MENU_REPORT_TEAM_GAMELOG = 2022
+CW_MENU_REPORT_TEAM_BATTING = 2023
+CW_MENU_REPORT_TEAM_PITCHING = 2024
 CW_MENU_REPORT_EVENTS = 2016
 CW_MENU_REPORT_EVENTS_SLAMS = 2017
 
@@ -140,8 +142,10 @@ class ChadwickFrame(wxFrame):
                  self.OnReportRegisterPitching)
         EVT_MENU(self, CW_MENU_REPORT_REGISTER_FIELDING,
                  self.OnReportRegisterFielding)
-        EVT_MENU(self, CW_MENU_REPORT_LOG_TEAM, self.OnReportLogTeam)
-        EVT_MENU(self, CW_MENU_REPORT_TEAM, self.OnReportTeam)
+        EVT_MENU(self, CW_MENU_REPORT_TEAM_TOTALS, self.OnReportTeamTotals)
+        EVT_MENU(self, CW_MENU_REPORT_TEAM_GAMELOG, self.OnReportTeamGameLog)
+        EVT_MENU(self, CW_MENU_REPORT_TEAM_BATTING, self.OnReportTeamBatting)
+        EVT_MENU(self, CW_MENU_REPORT_TEAM_PITCHING, self.OnReportTeamPitching)
         EVT_MENU(self, CW_MENU_REPORT_EVENTS_SLAMS, self.OnReportEventsSlams)
         EVT_BUTTON(self, panelstate.CW_BUTTON_SAVE, self.OnGameSave)
         EVT_CLOSE(self, self.OnClickClose)
@@ -168,29 +172,32 @@ class ChadwickFrame(wxFrame):
 
         reportRegisterMenu = wxMenu()
         reportRegisterMenu.Append(CW_MENU_REPORT_REGISTER_BATTING,
-                                  "&Batting", "Generate batting register")
+                                  "&Batting", "Compile batting register")
         reportRegisterMenu.Append(CW_MENU_REPORT_REGISTER_PITCHING,
-                                  "&Pitching", "Generate pitching register")
+                                  "&Pitching", "Compile pitching register")
         reportRegisterMenu.Append(CW_MENU_REPORT_REGISTER_FIELDING,
-                                  "&Fielding", "Generate fielding register")
+                                  "&Fielding", "Compile fielding register")
         reportMenu.AppendMenu(CW_MENU_REPORT_REGISTER, "&Register",
-                              reportRegisterMenu, "Generate registers")
+                              reportRegisterMenu, "Compile registers")
 
-        reportLogMenu = wxMenu()
-        reportLogMenu.Append(CW_MENU_REPORT_LOG_TEAM,
-                             "&Team", "Generate game log for teams")
-        reportMenu.AppendMenu(CW_MENU_REPORT_LOG, "Game &log",
-                              reportLogMenu, "Generate game logs")
-
-        reportMenu.Append(CW_MENU_REPORT_TEAM, "&Team",
-                          "Generate team-level statistics")
+        reportTeamMenu = wxMenu()
+        reportTeamMenu.Append(CW_MENU_REPORT_TEAM_TOTALS,
+                              "&Totals", "Compile team statistical totals")
+        reportTeamMenu.Append(CW_MENU_REPORT_TEAM_GAMELOG,
+                              "&Log", "Compile game logs for teams")
+        reportTeamMenu.Append(CW_MENU_REPORT_TEAM_BATTING,
+                              "&Batting", "Compile individual batting by team")
+        reportTeamMenu.Append(CW_MENU_REPORT_TEAM_PITCHING,
+                              "&Pitching", "Compile individual pitching by team")
+        reportMenu.AppendMenu(CW_MENU_REPORT_TEAM, "&Team",
+                              reportTeamMenu, "Compile team-by-team reports")
 
         reportEventsMenu = wxMenu()
         reportEventsMenu.Append(CW_MENU_REPORT_EVENTS_SLAMS,
                                 "&Grand slams",
-                                "Generate log of grand slam home runs")
+                                "Compile log of grand slam home runs")
         reportMenu.AppendMenu(CW_MENU_REPORT_EVENTS, "&Events",
-                              reportEventsMenu, "Generate logs of events")
+                              reportEventsMenu, "Compile logs of events")
         
         
         helpMenu = wxMenu()
@@ -458,16 +465,28 @@ class ChadwickFrame(wxFrame):
         self.RunReport("Compiling fielding register", "Fielding register",
                        [ statscan.FieldingAccumulator(p+1) for p in range(9) ])
 
-    def OnReportTeam(self, event):
-        self.RunReport("Compiling team statistics", "Team statistics",
+    def OnReportTeamTotals(self, event):
+        self.RunReport("Compiling team totals", "Team totals",
                        [ statscan.RecordAccumulator(self.book),
                          statscan.TeamBattingAccumulator(self.book),
                          statscan.TeamPitchingAccumulator(self.book),
                          statscan.TeamFieldingAccumulator(self.book) ])
 
-    def OnReportLogTeam(self, event):
-        self.RunReport("Compiling game logs", "Game logs",
+    def OnReportTeamGameLog(self, event):
+        self.RunReport("Compiling team game logs", "Team game logs",
                        [ statscan.GameLogAccumulator(self.book) ])
+
+    def OnReportTeamBatting(self, event):
+        self.RunReport("Compiling team-by-team batting",
+                       "Team-by-team batting",
+                       [ statscan.TeamBattingRegister(self.book, t.team_id)
+                         for t in self.book.IterateTeams() ])
+
+    def OnReportTeamPitching(self, event):
+        self.RunReport("Compiling team-by-team pitching",
+                       "Team-by-team pitching",
+                       [ statscan.TeamPitchingRegister(self.book, t.team_id)
+                         for t in self.book.IterateTeams() ])
 
     def OnReportEventsSlams(self, event):
         self.RunReport("Compiling list of grand slams", "Grand slams",
