@@ -92,14 +92,6 @@ CWRoster *cwscore_read_roster(char *team_id)
   return roster;
 }
 
-char *cwscore_get_info(char *prompt, char *data)
-{
-  printf("%s\n", prompt);
-  cwscore_get_line(data);
-  return data;
-}
-
-
 CWGame *cwscore_create_game(char *game_id, char *visitors, char *home)
 {
   char buffer[256];
@@ -108,63 +100,175 @@ CWGame *cwscore_create_game(char *game_id, char *visitors, char *home)
   CWGame *game = cw_game_create(game_id);
   cw_game_set_version(game, "1");
   
-  cw_game_info_append(game, "inputprogvers",
-		      "Chadwick version " VERSION);
-  cw_game_info_append(game, "visteam", visitors);
-  cw_game_info_append(game, "hometeam", home);
-
-  cw_game_info_append(game, "site", 
-		      cwscore_get_info("Site: (CCCNN)", buffer));
-  cw_game_info_append(game, "date", 
-		      cwscore_get_info("Date: (YYYY/MM/DD)", buffer));
-  cw_game_info_append(game, "number",
-		      cwscore_get_info("Game number:", buffer));
-  cw_game_info_append(game, "starttime",
-		      cwscore_get_info("Start time: (0:00PM if unknown)", buffer));
-  cw_game_info_append(game, "daynight",
-		      cwscore_get_info("Day/night: (day night unknown)", buffer));
-  cw_game_info_append(game, "usedh",
-		      cwscore_get_info("Use DH? (false true)", buffer));
-  cw_game_info_append(game, "umphome",
-		      cwscore_get_info("Home umpire:", buffer));
-  cw_game_info_append(game, "ump1b",
-		      cwscore_get_info("1b umpire:", buffer));
-  cw_game_info_append(game, "ump2b",
-		      cwscore_get_info("2b umpire:", buffer));
-  cw_game_info_append(game, "ump3b",
-		      cwscore_get_info("3b umpire:", buffer));
-  cw_game_info_append(game, "scorer",
-		      cwscore_get_info("Scorer:", buffer));
-  cw_game_info_append(game, "translator",
-		      cwscore_get_info("Translator:", buffer));
-  cw_game_info_append(game, "inputter",
-		      cwscore_get_info("Inputter:", buffer));
-
+  cw_game_info_set(game, "inputprogvers", "Chadwick version " VERSION);
+  cw_game_info_set(game, "visteam", visitors);
+  cw_game_info_set(game, "hometeam", home);
+  cw_game_info_set(game, "site", "");
+  cw_game_info_set(game, "date", "");
+  cw_game_info_set(game, "number", "0");
+  cw_game_info_set(game, "starttime", "0:00PM");
+  cw_game_info_set(game, "daynight", "unknown");
+  cw_game_info_set(game, "usedh", "false");
+  cw_game_info_set(game, "umphome", "");
+  cw_game_info_set(game, "ump1b", "");
+  cw_game_info_set(game, "ump2b", "");
+  cw_game_info_set(game, "ump3b", "");
+  cw_game_info_set(game, "scorer", "");
+  cw_game_info_set(game, "translator", "");
+  cw_game_info_set(game, "inputter", "");
   curtime = time(NULL);
-  loctime = localtime (&curtime);
-  strftime (buffer, 256, "%Y/%m/%d %I:%M%p", loctime);
-  cw_game_info_append(game, "inputtime", buffer);
-  cw_game_info_append(game, "howscored", 
-		      cwscore_get_info("How scored: (park radio tv unknown)", buffer));
-  cw_game_info_append(game, "pitches", "none");
-  cw_game_info_append(game, "temp", 
-		      cwscore_get_info("Temperature: (0 if unknown)", buffer));
-  cw_game_info_append(game, "winddir",
-		      cwscore_get_info("Wind direction: (fromlf fromcf fromrf ltor rtol tolf tocf torf unknown)", buffer));
-  cw_game_info_append(game, "windspeed",
-		      cwscore_get_info("Wind speed: (-1 if unknown)", buffer));
-  cw_game_info_append(game, "fieldcond",
-		      cwscore_get_info("Field condition: (dry wet soaked unknown)", buffer));
-  cw_game_info_append(game, "precip",
-		      cwscore_get_info("Precipitation: (none drizzle rain showers snow unknown)", buffer));
-  cw_game_info_append(game, "sky",
-		      cwscore_get_info("Sky: (sunny cloudy overcast night dome unknown)", buffer));
-  cw_game_info_append(game, "timeofgame",
-		      cwscore_get_info("Time of game: (in minutes, 0 if unknown)", buffer));
-  cw_game_info_append(game, "attendance",
-		      cwscore_get_info("Attendance: (0 if unknown)", buffer));
+  loctime = localtime(&curtime);
+  strftime(buffer, 256, "%Y/%m/%d %I:%M%p", loctime);
+  cw_game_info_set(game, "inputtime", buffer);
+  cw_game_info_set(game, "howscored", "unknown");
+  cw_game_info_set(game, "pitches", "none");
+  cw_game_info_set(game, "temp", "0");
+  cw_game_info_set(game, "winddir", "unknown");
+  cw_game_info_set(game, "windspeed", "-1");
+  cw_game_info_set(game, "fieldcond", "unknown");
+  cw_game_info_set(game, "precip", "unknown");
+  cw_game_info_set(game, "sky", "unknown");
+  cw_game_info_set(game, "timeofgame", "0");
+  cw_game_info_set(game, "attendance", "0");
 
   return game;
+}
+
+int cwscore_get_info_count(CWGame *game)
+{
+  int count = 0;
+  CWInfo *info = game->first_info;
+
+  while (info != NULL) {
+    count++;
+    info = info->next;
+  }
+
+  return count;
+}
+
+CWInfo *cwscore_get_info_number(CWGame *game, int index)
+{
+  int i = 0;
+  CWInfo *info = game->first_info;
+
+  while (info != NULL) {
+    if (i == index) {
+      return info;
+    }
+    else {
+      info = info->next;
+      i++;
+    }
+  }
+
+  return NULL;
+}
+
+void cwscore_print_info(CWGame *game)
+{
+  int num_info = cwscore_get_info_count(game);
+  int i, offset = num_info / 2 + num_info % 2;
+  
+  for (i = 0; i < offset; i++) {
+    CWInfo *info = cwscore_get_info_number(game, i);
+    printf("%-13s: %-23s ", info->label, info->data);
+    info = cwscore_get_info_number(game, i + offset);
+    if (info != NULL) {
+      printf("%-13s: %-23s", info->label, info->data);
+    }
+    printf("\n");
+  }
+}
+
+void
+cwscore_edit_info(CWGame *game)
+{
+  char buffer1[256], buffer2[256];
+
+  while (1) {
+    cwscore_print_info(game);
+    printf("Enter field to modify (end to finish)\n");
+    cwscore_get_line(buffer1);
+
+    if (!strcmp(buffer1, "end")) {
+      break;
+    }
+
+    if (!strcmp(buffer1, "site")) {
+      printf("Enter site: (format: CCCNN)\n");
+    }
+    else if (!strcmp(buffer1, "date")) {
+      printf("Enter date: (format: YYYY/MM/DD)\n");
+    }
+    else if (!strcmp(buffer1, "number")) {
+      printf("Enter game number:\n");
+    }
+    else if (!strcmp(buffer1, "starttime")) {
+      printf("Enter start time: (0:00PM if unknown)\n");
+    }
+    else if (!strcmp(buffer1, "daynight")) {
+      printf("Enter day/night: (day night unknown)\n");
+    }
+    else if (!strcmp(buffer1, "usedh")) {
+      printf("Enter usedh: (false true)\n");
+    }
+    else if (!strcmp(buffer1, "umphome")) {
+      printf("Enter home plate umpire:\n");
+    }
+    else if (!strcmp(buffer1, "ump1b")) {
+      printf("Enter first base umpire:\n");
+    }
+    else if (!strcmp(buffer1, "ump2b")) {
+      printf("Enter second base umpire:\n");
+    }
+    else if (!strcmp(buffer1, "ump3b")) {
+      printf("Enter third base umpire:\n");
+    }
+    else if (!strcmp(buffer1, "scorer")) {
+      printf("Enter scorer:\n");
+    }
+    else if (!strcmp(buffer1, "translator")) {
+      printf("Enter translator:\n");
+    }
+    else if (!strcmp(buffer1, "inputter")) {
+      printf("Enter inputter:\n");
+    }
+    else if (!strcmp(buffer1, "howscored")) {
+      printf("Enter how scored: (park radio tv unknown)\n");
+    }
+    else if (!strcmp(buffer1, "temp")) {
+      printf("Enter temperature: (0 if unknown)\n");
+    }
+    else if (!strcmp(buffer1, "winddir")) {
+      printf("Enter wind direction: (fromlf fromcf fromrf ltor rtol tolf tocf torf unknown)\n");
+    }
+    else if (!strcmp(buffer1, "windspeed")) {
+      printf("Enter wind speed: (-1 if unknown)\n");
+    }
+    else if (!strcmp(buffer1, "fieldcond")) {
+      printf("Enter field condition: (dry wet soaked unknown)\n");
+    }
+    else if (!strcmp(buffer1, "precip")) {
+      printf("Enter precipitation: (none drizzle rain showers snow unknown)\n");
+    }
+    else if (!strcmp(buffer1, "sky")) {
+      printf("Enter sky: (sunny cloudy overcase night dome unknown)\n");
+    }
+    else if (!strcmp(buffer1, "timeofgame")) {
+      printf("Enter time of game: (0 if unknown)\n");
+    }
+    else if (!strcmp(buffer1, "attendance")) {
+      printf("Enter attendance: (0 if unknown)\n");
+    }
+    else {
+      printf("Unknown field '%s'\n", buffer1);
+      continue;
+    }
+
+    cwscore_get_line(buffer2);
+    cw_game_info_set(game, buffer1, buffer2); 
+  }
 }
 
 CWPlayer *cwscore_get_player_number(CWRoster *roster, int index)
@@ -503,7 +607,7 @@ void cwscore_enter_game(CWScorebook *scorebook)
   printf("Enter game ID: (CCCYYYYMMDDG)\n");
   cwscore_get_line(buffer);
   game = cwscore_create_game(buffer, visitor->team_id, home->team_id);
-
+  cwscore_edit_info(game);
   cwscore_get_lineup(game, visitor, 0);
   cwscore_get_lineup(game, home, 1);
   cwscore_enter_events(game, visitor, home);
