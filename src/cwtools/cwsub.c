@@ -232,7 +232,7 @@ void
 cwsub_print_welcome_message(char *argv0)
 {
   fprintf(stderr,
-	  "\nChadwick substitute descriptor, version " CHADWICK_VERSION); 
+	  "\nChadwick substitute descriptor, version " VERSION); 
   fprintf(stderr, "\n  Type '%s -h' for help.\n", argv0);
   fprintf(stderr, "This is free software, "
 	  "subject to the terms of the GNU GPL license.\n\n");
