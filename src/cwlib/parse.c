@@ -1769,11 +1769,11 @@ int cw_parse_event(char *text, CWParsedEvent *event)
 	(*primary_table[i].parse_func)(&state, event, 1);
 	break;
       }
+    }
 
-      if (!strcmp(primary_table[i].event_string, "")) {
-	cw_parse_cleanup(&state);
-	return 0;
-      }
+    if (!strcmp(primary_table[i].event_string, "")) {
+      cw_parse_cleanup(&state);
+      return 0;
     }
   }
 
