@@ -298,7 +298,7 @@ class ChadwickFrame(wxFrame):
             dialog = LineupDialog(self, 
                                   "Starting Lineup for %s" % 
                                   (rosters[t].city + " " + rosters[t].nickname))
-            dialog.LoadRoster(doc.GetRoster(t), t)
+            dialog.LoadRoster(doc.GetRoster(t), t, True)
             if dialog.ShowModal() != wxID_OK:
                 return
                 

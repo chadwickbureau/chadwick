@@ -131,9 +131,12 @@ class LineupDialog(wxDialog):
         
         self.FindWindowById(wxID_OK).Enable(lineupOK)
 
-    def LoadRoster(self, roster, team):
+    def LoadRoster(self, roster, team, useDH):
         self.roster = roster
-        posList = [ "p", "c", "1b", "2b", "3b", "ss", "lf", "cf", "rf", "dh" ]
+        if useDH:
+            posList = [ "p", "c", "1b", "2b", "3b", "ss", "lf", "cf", "rf", "dh" ]
+        else:
+            posList = [ "p", "c", "1b", "2b", "3b", "ss", "lf", "cf", "rf" ]
 
         fgColors = [ wxRED, wxBLUE ]
 
@@ -165,18 +168,6 @@ class LineupDialog(wxDialog):
             for player in iterate_roster(self.roster):
                 if player.player_id == pitcher:
                     self.players[-1].SetStringSelection(player.first_name + " " + player.last_name)
-        else:
-            # Remove the DH position from the lineup controls
-            for ctrl in self.positions:
-                posList = [ "-", "p", "c", "1b", "2b", "3b", "ss", "lf", "cf", "rf" ]
-                ctrl.Clear()
-                for entry in posList:    ctrl.Append(entry)
-                if team == 0:
-                    ctrl.SetForegroundColour(wxRED)
-                else:
-                    ctrl.SetForegroundColour(wxBLUE)
-                ctrl.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-                ctrl.SetSelection(0)
 
         for slot in range(9):
             playerId = cw_gameiter_get_player(gameiter, team, slot+1)

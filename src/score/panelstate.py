@@ -189,7 +189,9 @@ class StatePanel(wxPanel):
                                            (self.doc.GetRoster(team).city,
                                             self.doc.GetRoster(team).nickname))
 
-        dialog.LoadRoster(self.doc.GetRoster(team), team)
+        hasDH = (cw_gameiter_get_player(self.doc.GetState(), team, 0) != None)
+
+        dialog.LoadRoster(self.doc.GetRoster(team), team, hasDH)
         dialog.LoadLineup(self.doc, team)
 
         if dialog.ShowModal() == wxID_OK:
