@@ -96,13 +96,17 @@ cwstats_print_batting_stats(void)
 {
   CWStatsPlayer *player = first_player;
 
-  printf("ID        AB   R   H  BI  BB  SO\n");
+  printf("ID        AB   R   H 2B 3B HR  BI  BB IW  SO DP HP SH SF\n");
 
   while (player != NULL) {
-    printf("%8s %3d %3d %3d %3d %3d %3d\n",
-	   player->player_id, player->batting->ab, player->batting->r,
-	   player->batting->h, player->batting->bi, 
-	   player->batting->bb, player->batting->so);
+    printf("%8s %3d %3d %3d %2d %2d %2d %3d %3d %2d %3d %2d %2d %2d %2d\n",
+	   player->player_id,
+	   player->batting->ab, player->batting->r, player->batting->h,
+	   player->batting->b2, player->batting->b3, player->batting->hr,
+	   player->batting->bi,
+	   player->batting->bb, player->batting->ibb, player->batting->so,
+	   player->batting->gdp, player->batting->hp,
+	   player->batting->sh, player->batting->sf);
     
     player = player->next;
   }
@@ -126,8 +130,6 @@ cwstats_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
       }
     }
   }
-
-  cwstats_print_batting_stats();
 
   cw_boxscore_cleanup(boxscore);
   free(boxscore);
@@ -173,6 +175,7 @@ void (*cwtools_initialize)(void) = cwstats_initialize;
 void
 cwstats_cleanup(void)
 {
+  cwstats_print_batting_stats();
 }
 
 void (*cwtools_cleanup)(void) = cwstats_cleanup;

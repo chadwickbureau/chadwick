@@ -37,9 +37,17 @@ cw_boxscore_batting_create(void)
   batting->ab = 0;
   batting->r = 0;
   batting->h = 0;
+  batting->b2 = 0;
+  batting->b3 = 0;
+  batting->hr = 0;
   batting->bi = 0;
   batting->bb = 0;
+  batting->ibb = 0;
   batting->so = 0;
+  batting->gdp = 0;
+  batting->hp = 0;
+  batting->sh = 0;
+  batting->sf = 0;
   return batting;
 }
 
@@ -49,9 +57,17 @@ cw_boxscore_batting_add(CWBoxBatting *dest, CWBoxBatting *src)
   dest->ab += src->ab;
   dest->r += src->r;
   dest->h += src->h;
+  dest->b2 += src->b2;
+  dest->b3 += src->b3;
+  dest->hr += src->hr;
   dest->bi += src->bi;
   dest->bb += src->bb;
+  dest->ibb += src->ibb;
   dest->so += src->so;
+  dest->gdp += src->gdp;
+  dest->hp += src->hp;
+  dest->sh += src->sh;
+  dest->sf += src->sf;
 }
 
 /************************************************************************
@@ -206,7 +222,14 @@ cw_boxscore_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
 	event_data->event_type <= EVENT_HOMERUN) {
       player->batting->h++;
       pitcher->pitching->h++;
-      if (event_data->event_type == EVENT_HOMERUN) {
+      if (event_data->event_type == EVENT_DOUBLE) {
+	player->batting->b2++;
+      }
+      else if (event_data->event_type == EVENT_TRIPLE) {
+	player->batting->b3++;
+      }
+      else if (event_data->event_type == EVENT_HOMERUN) {
+	player->batting->hr++;
 	pitcher->pitching->hr++;
       }
     }
@@ -214,11 +237,23 @@ cw_boxscore_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       player->batting->so++;
       pitcher->pitching->so++;
     }
+    else if (event_data->gdp_flag) {
+      player->batting->gdp++;
+    }
   }
   else if (event_data->event_type == EVENT_WALK ||
 	   event_data->event_type == EVENT_INTENTIONALWALK) {
     player->batting->bb++;
     pitcher->pitching->bb++;
+  }
+  else if (event_data->event_type == EVENT_HITBYPITCH) {
+    player->batting->hp++;
+  }
+  else if (event_data->sh_flag) {
+    player->batting->sh++;
+  }
+  else if (event_data->sf_flag) {
+    player->batting->sf++;
   }
 
   if (event_data->advance[0] >= 4) {

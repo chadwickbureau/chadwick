@@ -30,7 +30,7 @@
 #include "game.h"
 
 typedef struct cw_box_batting_struct {
-  int ab, r, h, bi, bb, so;
+  int ab, r, h, b2, b3, hr, bi, bb, ibb, so, gdp, hp, sh, sf;
 } CWBoxBatting;
 
 typedef struct cw_box_player_struct {
