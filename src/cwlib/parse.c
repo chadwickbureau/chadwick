@@ -173,9 +173,6 @@ cw_parse_nextsym(CWParserState *state)
 static int
 cw_parse_error(CWParserState *state)
 {
-  fprintf(stderr, "Error: unexpected character at %d in %s\n",
-	  state->inputPos, state->inputString);
-  exit(1);
   return 0;
 }
 
