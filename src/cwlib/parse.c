@@ -306,7 +306,7 @@ static int parse_fielding_credit(CWParserState *state, CWParsedEvent *event,
   if (state->sym == 'E') {
     cw_parse_nextsym(state);
     if (!isfielder(state->sym)) {
-      cw_parse_error(state);
+      return cw_parse_error(state);
     }
     if (isdigit(state->sym)) {
       event->errors[event->num_errors] = state->sym - '0';
@@ -345,7 +345,7 @@ static int parse_fielding_credit(CWParserState *state, CWParsedEvent *event,
       *(play++) = 'E';
       cw_parse_nextsym(state);
       if (!isdigit(state->sym)) {
-	cw_parse_error(state);
+	return cw_parse_error(state);
       }
       event->errors[event->num_errors] = state->sym - '0';
       event->error_types[event->num_errors++] = 'F';
@@ -451,8 +451,7 @@ static int parse_advance_modifier(CWParserState *state, CWParsedEvent *event,
 	/* FC5.2X3(5/G) appears in 81TEX.EVA; accept silently */
       }
       else {
-	cw_parse_error(state);
-	return 0;
+	return cw_parse_error(state);
       }
     }
 
@@ -510,8 +509,7 @@ static int parse_advance_modifier(CWParserState *state, CWParsedEvent *event,
       /* silently accept interference flag */
     }
     else {
-      cw_parse_error(state);
-      return 0;
+      return cw_parse_error(state);
     }
   }
 
@@ -520,8 +518,7 @@ static int parse_advance_modifier(CWParserState *state, CWParsedEvent *event,
     return 1;
   }
   else {
-    cw_parse_error(state);
-    return 0;
+    return cw_parse_error(state);
   }
 }
 
@@ -740,21 +737,21 @@ static int parse_stolen_base(CWParserState *state, CWParsedEvent *event,
 	cw_parse_nextsym(state);
       }
       if (state->sym != 'U') {
-	cw_parse_error(state);
+	return cw_parse_error(state);
       }
       cw_parse_nextsym(state);
       if (state->sym != 'R') {
-	cw_parse_error(state);
+	return cw_parse_error(state);
       }
       cw_parse_nextsym(state);
       if (state->sym != ')') {
-	cw_parse_error(state);
+	return cw_parse_error(state);
       }
       cw_parse_nextsym(state);
     }
   }
   else {
-    cw_parse_error(state);
+    return cw_parse_error(state);
   }
 
   if (state->sym == ';') {
@@ -765,8 +762,7 @@ static int parse_stolen_base(CWParserState *state, CWParsedEvent *event,
       parse_stolen_base(state, event, 0);
     }
     else {
-      cw_parse_error(state);
-      return 0;
+      return cw_parse_error(state);
     }
   }
 
@@ -777,8 +773,7 @@ static int parse_stolen_base(CWParserState *state, CWParsedEvent *event,
       /* accept /INT flag silently */
     }
     else {
-      cw_parse_error(state);
-      return 0;
+      return cw_parse_error(state);
     }
   }
 
@@ -795,8 +790,7 @@ static int parse_caught_stealing(CWParserState *state, CWParsedEvent *event,
     event->cs_flag[runner = state->sym - '1'] = 1;
   }
   else {
-    cw_parse_error(state);
-    return 0;
+    return cw_parse_error(state);
   }
     
   while (cw_parse_nextsym(state) == '(') {
@@ -818,13 +812,11 @@ static int parse_caught_stealing(CWParserState *state, CWParsedEvent *event,
 	event->advance[runner] = 6;
       }
       else {
-	cw_parse_error(state);
-	return 0;
+	return cw_parse_error(state);
       }
 
       if (state->sym != ')') {
-	cw_parse_error(state);
-	return 0;
+	return cw_parse_error(state);
       }
     }
   }
@@ -838,8 +830,7 @@ static int parse_caught_stealing(CWParserState *state, CWParsedEvent *event,
       parse_caught_stealing(state, event, 0);
     }
     else {
-      cw_parse_error(state);
-      return 0;
+      return cw_parse_error(state);
     }
   }
 
@@ -861,8 +852,7 @@ static int parse_caught_stealing(CWParserState *state, CWParsedEvent *event,
       /* silently accept interference flag */
     }
     else {
-      cw_parse_error(state);
-      return 0;
+      return cw_parse_error(state);
     }
   }
 
@@ -889,8 +879,7 @@ static int parse_safe_on_error(CWParserState *state,
   event->advance[0] = 1;
   
   if (state->sym < '1' || state->sym > '9') {
-    cw_parse_error(state);
-    return 0;
+    return cw_parse_error(state);
   }
 
   event->errors[event->num_errors] = (state->sym - '0');
@@ -974,8 +963,7 @@ static int parse_foul_error(CWParserState *state, CWParsedEvent *event,
     cw_parse_nextsym(state);
   }
   else {
-    cw_parse_error(state);
-    return 0;
+    return cw_parse_error(state);
   }
 
   if (flags && state->sym == '/') {
@@ -1108,8 +1096,7 @@ static int parse_interference(CWParserState *state, CWParsedEvent *event,
     parse_flag(state);
 
     if (state->token[0] == 'E' && event->num_errors > 0) {
-      cw_parse_error(state);
-      return 0;
+      return cw_parse_error(state);
     }
 
     if (!strcmp(state->token, "E2")) {
