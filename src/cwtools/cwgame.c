@@ -809,3 +809,18 @@ cwgame_print_welcome_message(char *argv0)
 }
 
 void (*cwtools_print_welcome_message)(char *) = cwgame_print_welcome_message;
+
+void
+cwgame_initialize(void)
+{
+}
+
+void (*cwtools_initialize)(void) = cwgame_initialize;
+
+void
+cwgame_cleanup(void)
+{
+}
+
+void (*cwtools_cleanup)(void) = cwgame_cleanup;
+

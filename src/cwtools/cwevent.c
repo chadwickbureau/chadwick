@@ -1116,5 +1116,16 @@ cwevent_print_welcome_message(char *argv0)
 
 void (*cwtools_print_welcome_message)(char *) = cwevent_print_welcome_message;
 
+void
+cwevent_initialize(void)
+{
+}
 
+void (*cwtools_initialize)(void) = cwevent_initialize;
 
+void
+cwevent_cleanup(void)
+{
+}
+
+void (*cwtools_cleanup)(void) = cwevent_cleanup;

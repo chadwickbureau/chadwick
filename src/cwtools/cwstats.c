@@ -163,5 +163,18 @@ cwstats_print_welcome_message(char *argv0)
 
 void (*cwtools_print_welcome_message)(char *) = cwstats_print_welcome_message;
 
+void
+cwstats_initialize(void)
+{
+}
+
+void (*cwtools_initialize)(void) = cwstats_initialize;
+
+void
+cwstats_cleanup(void)
+{
+}
+
+void (*cwtools_cleanup)(void) = cwstats_cleanup;
 
 

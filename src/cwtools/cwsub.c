@@ -240,5 +240,18 @@ cwsub_print_welcome_message(char *argv0)
 
 void (*cwtools_print_welcome_message)(char *) = cwsub_print_welcome_message;
 
+void
+cwsub_initialize(void)
+{
+}
+
+void (*cwtools_initialize)(void) = cwsub_initialize;
+
+void
+cwsub_cleanup(void)
+{
+}
+
+void (*cwtools_cleanup)(void) = cwsub_cleanup;
 
 

@@ -201,3 +201,17 @@ cwbox_print_welcome_message(char *argv0)
 }
 
 void (*cwtools_print_welcome_message)(char *) = cwbox_print_welcome_message;
+
+void
+cwbox_initialize(void)
+{
+}
+
+void (*cwtools_initialize)(void) = cwbox_initialize;
+
+void
+cwbox_cleanup(void)
+{
+}
+
+void (*cwtools_cleanup)(void) = cwbox_cleanup;

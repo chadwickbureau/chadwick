@@ -59,6 +59,11 @@ extern void (*cwtools_print_help)(void);
 /* Hook to function to process game */
 extern void (*cwtools_process_game)(CWGame *, CWRoster *, CWRoster *);
 
+/* Hook to function to initialize data */
+extern void (*cwtools_initialize)(void);
+
+/* Hook to function to clean up data */
+extern void (*cwtools_cleanup)(void);
 
 /* Year for TEAMyyyy access */
 char year[5] = "";
@@ -302,11 +307,11 @@ int main(int argc, char *argv[])
   (*cwtools_print_welcome_message)(argv[0]);
   i = cwevent_parse_command_line(argc, argv);
   cwtools_read_rosters(league);
-
+  cwtools_initialize();
   for (; i < argc; i++) {
     cwtools_process_filespec(league, argv[i]);
   }
-
+  cwtools_cleanup();
   cw_league_cleanup(league);
   free(league);
 
