@@ -94,12 +94,16 @@ static void cw_game_cleanup_starters(CWGame *game)
 
 /*
  * Private auxiliary function to cleanup memory from events list
- * 'event' is the event at which to start
+ * 'event' is the event at which to start; if a null pointer,
+ * remove all events from the game.
  */
 static void cw_game_cleanup_events(CWGame *game, CWEvent *event)
 {
   if (event->prev != NULL) {
     event->prev->next = NULL;
+  }
+  else {
+    game->first_event = NULL;
   }
   game->last_event = event->prev;
 
