@@ -52,7 +52,7 @@ int fields[82] = {
 
 int max_field = 81;
 
-char program_name[] = "cwgame";
+char program_name[20] = "cwgame";
 
 
 /*************************************************************************

@@ -45,7 +45,7 @@ extern unsigned int max_field;
 extern int fields[];
 
 /* The name of the program */
-extern char *program_name;
+extern char program_name[20];
 
 /* Hook to function to print program identifying message */
 extern void (*cwtools_print_welcome_message)(char *);

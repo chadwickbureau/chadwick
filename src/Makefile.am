@@ -26,3 +26,4 @@
 
 SUBDIRS = cwlib cwtools
 
+EXTRA_DIST = borland.mak

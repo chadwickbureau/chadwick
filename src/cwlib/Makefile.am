@@ -26,6 +26,8 @@
 
 lib_LTLIBRARIES = libchadwick.la
 
+EXTRA_DIST = borland.cfg borland.mak
+
 libchadwick_la_SOURCES = \
 	chadwick.h \
 	book.c \

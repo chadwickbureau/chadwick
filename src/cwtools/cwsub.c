@@ -44,7 +44,7 @@ int fields[10] = {
 
 int max_field = 9;
 
-char program_name[] = "cwsub";
+char program_name[20] = "cwsub";
 
 /*************************************************************************
  * Functions to output fields

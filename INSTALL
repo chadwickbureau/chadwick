@@ -6,8 +6,11 @@ simply unzip the programs into the directory where you would like to
 put them.  The command-line tools require no special installation setup.
 
 If you're building from source using the Borland C++ 5.5 compiler,
-go to the chadwick-x.y.z directory (created when you unpacked the
-source distribution), and type 'make -f borland'.
+go to the chadwick-x.y.z\src directory (created when you unpacked the
+source distribution).  Modify borland.mak in that directory to set
+CHADWICK_TOP to the directory where you unpacked the chadwick
+sources, and then type 'make -f borland'.  The binary tools will
+be built in chadwick-x.y.z\src\cwtools.
 
 We are looking for contributions of makefiles and/or patches for other
 tools.

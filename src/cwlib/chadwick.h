@@ -1,7 +1,12 @@
 /*
  * $Source$
+<<<<<<< chadwick.h
  * $Date$
  * $Revision$
+=======
+ * $Date$
+ * $Revision$
+>>>>>>> 1.1.2.1
  *
  * DESCRIPTION:
  * Top-level include file for Chadwick

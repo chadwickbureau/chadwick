@@ -1117,8 +1117,8 @@ static int parse_interference(CWParserState *state, CWParsedEvent *event,
       /* silently accept redundant /INT flag */
     }
     else {
-      cw_parse_error(state);
-      return 0;
+      /* silently accept other flags and do nothing */
+      /* there exists a C/E1/INT/G4 in Retrosheet 1991 datafiles */
     }
   }
 
@@ -1410,6 +1410,9 @@ static int parse_strikeout(CWParserState *state, CWParsedEvent *event,
     else if (!strcmp(state->token, "CS")) {
       parse_caught_stealing(state, event, 0);
     }
+    else if (!strcmp(state->token, "DI")) {
+      parse_indifference(state, event, 0);
+    }
     else if (!strcmp(state->token, "OA") ||
 	     !strcmp(state->token, "OBA")) {
       /* we don't need to do anything special for K+OA */
@@ -1446,27 +1449,13 @@ static int parse_strikeout(CWParserState *state, CWParsedEvent *event,
     else if (!strcmp(state->token, "TP")) {
       event->tp_flag = 1;
     }
-    else if (!strcmp(state->token, "2") || !strcmp(state->token, "23")) {
-      /* 'K/2' appears in 1988, 'K/23' in 1969 */
-    }
-    else if (!strcmp(state->token, "C") ||
-	     !strcmp(state->token, "B") ||
-	     !strcmp(state->token, "BF") ||
-	     !strcmp(state->token, "BP") ||
-	     !strcmp(state->token, "BG") ||
-	     !strcmp(state->token, "FL") ||
-	     !strcmp(state->token, "L") ||
-	     !strcmp(state->token, "F") ||
-	     !strcmp(state->token, "FO") ||
-	     !strcmp(state->token, "INT") ||
-	     !strcmp(state->token, "TH")) {
-      /* accept these flags silently; though 'K/L' is a bit weird... */
-    }
-    else if (!strcmp(state->token, "")) {
-      /* a 'K/' event appears in 80SFN.EVN */
-    }
     else {
-      return cw_parse_error(state);
+      /* Do nothing.  In theory, there shouldn't be any other flags other
+       * than the list above.  In practice, there are in the Retrosheet
+       * files; some are just inconsistencies in scoring, others are just
+       * plain weird (K/L?).  Rather than enumerate them, best practice
+       * at the moment simply seems to be to accept them silently.
+       */
     }
   }
 
@@ -1517,6 +1506,9 @@ static int parse_walk(CWParserState *state, CWParsedEvent *event, int flags)
     }
     else if (!strcmp(state->token, "CS")) {
       if (!parse_caught_stealing(state, event, 0)) return 0;
+    }
+    else if (!strcmp(state->token, "DI")) {
+      if (!parse_indifference(state, event, 0)) return 0;
     }
     else if (!strcmp(state->token, "OA") ||
 	     !strcmp(state->token, "OBA")) {

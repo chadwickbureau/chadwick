@@ -26,6 +26,8 @@
 
 bin_PROGRAMS = cwbox cwevent cwgame cwpbp cwscore cwstats cwsub 
 
+EXTRA_DIST = borland.cfg borland.mak
+
 AM_CPPFLAGS = -I$(top_srcdir)/src
 
 

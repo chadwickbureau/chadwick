@@ -24,7 +24,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # 
 
-CHADWICK_TOP = c:\chadwick
+CHADWICK_TOP = c:\cvstrees\chadwick-0.3
 
 all:  cwlib cwtools
 
