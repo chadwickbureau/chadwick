@@ -195,3 +195,40 @@ cw_scorebook_write(CWScorebook *scorebook, FILE *file)
     game = game->next;
   }
 }
+
+CWScorebookIterator *
+cw_scorebook_iterate(CWScorebook *scorebook,
+		     int (*f)(CWGame *))
+{
+  CWScorebookIterator *iter =
+    (CWScorebookIterator *) malloc(sizeof(CWScorebookIterator));
+  iter->current = scorebook->first_game;
+  iter->f = f;
+  return iter;
+}
+
+void
+cw_scorebook_iterator_cleanup(CWScorebookIterator *iterator)
+{
+  /* For now, no actions need to be taken.
+   * This is provided now for possible future extensions and
+   * internal implementation changes.
+   */
+}
+
+CWGame *
+cw_scorebook_iterator_next(CWScorebookIterator *iterator)
+{
+  if (!iterator->current) {
+    return NULL;
+  }
+
+  while (iterator->current) {
+    CWGame *game = iterator->current;
+    iterator->current = iterator->current->next;
+    if (!iterator->f || (*iterator->f)(game)) {
+      return game;
+    }
+  }
+  return NULL;
+}

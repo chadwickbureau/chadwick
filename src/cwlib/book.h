@@ -74,4 +74,32 @@ int cw_scorebook_read(CWScorebook *scorebook, char *path);
 void cw_scorebook_write(CWScorebook *scorebook, FILE *file);
 
 
+typedef struct cw_scorebook_iter_struct {
+  CWGame *current;
+  int (*f)(CWGame *);
+} CWScorebookIterator;
+
+/*
+ * Returns an iterator object for 'scorebook'.
+ * 'f' points to a filter function that returns nonzero for games
+ * the iterator should return, and zero for games the iterator should
+ * skip.  Passing NULL for 'f' gives an iterator that will return all
+ * games in the scorebook.
+ */
+CWScorebookIterator *cw_scorebook_iterate(CWScorebook *scorebook,
+					  int (*f)(CWGame *));
+
+/*
+ * Cleans up internal memory allocation associated with 'iterator'.
+ * Caller is responsible for free()ing the scorebook itself.
+ */
+void cw_scorebook_iterator_cleanup(CWScorebookIterator *iterator);
+
+/*
+ * Returns the next game in the scorebook associated with 'iterator'.
+ * Returns NULL when the end of the scorebook has been reached
+ */
+CWGame *cw_scorebook_iterator_next(CWScorebookIterator *iterator);
+
+
 #endif  /* CW_BOOK_H */

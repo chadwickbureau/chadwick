@@ -120,25 +120,29 @@ cwtools_game_in_range(CWGame *game, char *first_date, char *last_date)
 	  strcmp(date_string, last_date) <= 0);
 }
 
+int
+cwtools_select_game(CWGame *game)
+{
+  return ((!strcmp(game_id, "") ||
+	   !strcmp(game_id, game->game_id)) &&
+	  cwtools_game_in_range(game, first_date, last_date));
+}
+
 void
 cwtools_iterate_games(CWScorebook *scorebook, CWLeague *league)
 {
-  CWGame *game = scorebook->first_game;
-  CWRoster *visitors, *home;
+  CWScorebookIterator *iterator = cw_scorebook_iterate(scorebook,
+						       cwtools_select_game);
+  CWGame *game;
 
-  while (game != NULL) {
-    if ((!strcmp(game_id, "") ||
-	 !strcmp(game_id, game->game_id)) &&
-	cwtools_game_in_range(game, first_date, last_date)) {
-      char home_id[4];
-      strncpy(home_id, game->game_id, 3);
-      home_id[3] = '\0';
-      visitors = cw_league_roster_find(league,
-				       cw_game_info_lookup(game, "visteam"));
-      home = cw_league_roster_find(league, home_id);
-      (*cwtools_process_game)(game, visitors, home);
-    }
-    game = game->next;
+  while ((game = cw_scorebook_iterator_next(iterator)) != NULL) {
+    (*cwtools_process_game)(game,
+			    cw_league_roster_find(league,
+						  cw_game_info_lookup(game,
+								      "visteam")),
+			    cw_league_roster_find(league,
+						  cw_game_info_lookup(game,
+								      "hometeam")));
   }
 }
 
