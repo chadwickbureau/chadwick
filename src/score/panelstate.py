@@ -40,6 +40,7 @@ import panellinescore
 import panelrunners
 
 # IDs for controls
+CW_PITCHES_CTRL = 1009
 CW_PLAYTEXT_CTRL = 1010
 CW_BUTTON_DEFSUB = 1011
 CW_BUTTON_SAVE = 1012
@@ -51,8 +52,25 @@ CW_BUTTON_UNDO = 1015
 # updates to all relevant windows
 CW_BUTTON_UPDATE = 1016
 
+
+def GetCount(pitches):
+    """
+    Returns the count associated with a pitch sequence.
+    Note that the last pitch is not counted.
+    """
+
+    b = 0
+    s = 0
+    for c in pitches[:-1]:
+        if c in [ 'B', 'I', 'P', 'V' ]:
+            b += 1
+        elif c in [ 'C', 'F', 'K', 'L', 'M', 'O', 'Q',
+                    'R', 'S', 'T' ]:
+            s += 1
+    return "%d%d" % (b,s)
+
 class StatePanel(wxPanel):
-    def __init__(self, parent):
+    def __init__(self, parent, doc):
         wxPanel.__init__(self, parent, -1)
 
         self.lineups = [ gridlineup.LineupGrid(self, t) for t in [0, 1] ]
@@ -66,6 +84,17 @@ class StatePanel(wxPanel):
 
         self.runners = panelrunners.RunnersPanel(self)
         stateSizer.Add(self.runners, 0, wxALL | wxEXPAND, 5)
+
+        if doc.GetGame().GetInfo("pitches") == "pitches":
+            pitchesSizer = wxBoxSizer(wxHORIZONTAL)
+            pitchesSizer.Add(FormattedStaticText(self, "Pitches"),
+                             0, wxALL | wxALIGN_CENTER, 5)
+
+            self.pitches = wxTextCtrl(self, CW_PITCHES_CTRL, "",
+                                      wxDefaultPosition, wxSize(150, -1))
+            self.pitches.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+            pitchesSizer.Add(self.pitches, 0, wxALL | wxALIGN_CENTER, 5)
+            stateSizer.Add(pitchesSizer, 0, wxALL | wxEXPAND, 5)
 
         playTextSizer = wxBoxSizer(wxHORIZONTAL)
         playTextSizer.Add(FormattedStaticText(self, "Play text"),
@@ -122,6 +151,7 @@ class StatePanel(wxPanel):
         EVT_BUTTON(self, panelrunners.CW_BUTTON_PINCH[0], self.OnPinchHit)
 
         # Events from controls on this panel
+        EVT_TEXT(self, CW_PITCHES_CTRL, self.OnPitchesText)
         EVT_TEXT(self, CW_PLAYTEXT_CTRL, self.OnPlayText)
         EVT_TEXT_ENTER(self, CW_PLAYTEXT_CTRL, self.OnPlayEnter)
         EVT_BUTTON(self, CW_BUTTON_DEFSUB, self.OnDefensiveSub)
@@ -137,6 +167,13 @@ class StatePanel(wxPanel):
         self.lineups[0].SetDocument(doc)
         self.lineups[1].SetDocument(doc)
         self.OnUpdate()
+
+    def OnPitchesText(self, event):
+        x = str(self.pitches.GetValue())
+        if x.upper() != x:
+            y = self.pitches.GetInsertionPoint()
+            self.pitches.SetValue(x.upper())
+            self.pitches.SetInsertionPoint(y)
 
     def OnPlayText(self, event):
         """
@@ -161,7 +198,12 @@ class StatePanel(wxPanel):
         if play == "" or not IsValid(play):
             wxBell()
         else:
-            self.doc.AddPlay(play)
+            if hasattr(self, "pitches"):
+                pitches = str(self.pitches.GetValue())
+                self.doc.AddPlay(GetCount(pitches), pitches, play)
+                self.pitches.Clear()
+            else:
+                self.doc.AddPlay("??", "", play)
 
             self.playText.Clear()
             self.playText.SetBackgroundColour(wxNamedColour("pink"))
@@ -287,9 +329,17 @@ class StatePanel(wxPanel):
         
         # Only allow play text entry if defense is valid
         self.playText.Enable(not self.doc.IsGameOver())
+        if hasattr(self, "pitches"):
+            self.pitches.Enable(not self.doc.IsGameOver())
+
         for slot in range(9):
             if self.doc.GetCurrentPosition(1-self.doc.GetHalfInning(),
                                            slot+1) > 10:
                 self.playText.Enable(false)
-        if self.playText.IsEnabled():
+                if hasattr(self, "pitches"):
+                    self.pitches.Enable(false)
+                    
+        if hasattr(self, "pitches") and self.pitches.IsEnabled():
+            self.pitches.SetFocus()
+        elif self.playText.IsEnabled():
             self.playText.SetFocus()

@@ -370,6 +370,7 @@ class ChadwickFrame(wxFrame):
 
         game = CreateGame(dialog.GetGameId(),
                           rosters[0].team_id, rosters[1].team_id)
+        game.SetInfo("pitches", dialog.GetPitches())
         doc = GameEditor(game, rosters[0], rosters[1])
 
         for t in [0, 1]:
@@ -418,7 +419,7 @@ class ChadwickFrame(wxFrame):
                 
                                 
         doc.BuildBoxscore()
-        self.entryFrame = GameEntryFrame(self) 
+        self.entryFrame = GameEntryFrame(self, doc) 
         self.entryFrame.SetDocument(doc)
         self.entryFrame.Show(true)
         

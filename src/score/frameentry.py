@@ -37,7 +37,7 @@ from panelnarrative import NarrativePanel
 import sys
 
 class GameEntryFrame(wxFrame):
-    def __init__(self, parent):
+    def __init__(self, parent, doc):
         wxFrame.__init__(self, parent, -1, "Chadwick Game Entry",
                          wxDefaultPosition, wxSize(800, 600))
 
@@ -46,7 +46,7 @@ class GameEntryFrame(wxFrame):
 
         self.notebook = wxNotebook(self, -1)
 
-        self.statePanel = panelstate.StatePanel(self.notebook)
+        self.statePanel = panelstate.StatePanel(self.notebook, doc)
         self.notebook.AddPage(self.statePanel, "Current State")
 
         self.boxscorePanel = BoxscorePanel(self.notebook)

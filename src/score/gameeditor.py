@@ -93,12 +93,12 @@ class GameEditor:
     def GetBoxscore(self):   return self.boxscore
     def BuildBoxscore(self):  self.boxscore.Build()
     
-    def AddPlay(self, text):
+    def AddPlay(self, count, pitches, play):
         cw_game_event_append(self.game,
                              self.GetInning(),
                              self.GetHalfInning(),
                              self.GetCurrentBatter(),
-                             "??", "", text)
+                             count, pitches, play)
         self.gameiter.ToEnd()
         self.boxscore.Build()
 
