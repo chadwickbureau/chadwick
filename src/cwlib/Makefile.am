@@ -44,3 +44,14 @@ libchadwick_la_SOURCES = \
 	parse.h \
 	roster.c \
 	roster.h
+
+pkginclude_HEADERS = \
+	chadwick.h \
+	book.h \
+	box.h \
+	file.h \
+	game.h \
+	gameiter.h \
+	league.h \
+	parse.h \
+	roster.h
