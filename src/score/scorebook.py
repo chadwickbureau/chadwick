@@ -232,7 +232,7 @@ class ChadwickScorebook:
         return self.players[playerID]
 
     def UniquePlayerID(self, first, last):
-        playerID = last[:4].lower()
+        playerID = (last.replace(" ", "").replace("'", ""))[:4].lower()
         while len(playerID) < 4: playerID += "-"
         playerID += first[0].lower()
         i = 1

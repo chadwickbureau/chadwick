@@ -26,8 +26,51 @@
 
 from wxPython.wx import *
 from wxPython.grid import *
+import string
 
 from wxutils import FormattedStaticText
+
+class NameValidator(wxPyValidator):
+    """
+    This validates a text control as a valid name.  We permit
+    letters, whitespace, and apostrophes.
+    """
+    def __init__(self, pyVar=None):
+        wxPyValidator.__init__(self)
+        EVT_CHAR(self, self.OnChar)
+
+    def TransferToWindow(self):     return True
+    def TransferFromWindow(self):   return True 
+    def Clone(self):                return NameValidator()
+
+    def Validate(self, win):
+        textCtrl = self.GetWindow()
+        val = str(textCtrl.GetValue())
+        
+        for x in val:
+            if x not in string.letters and x not in [ " ", "'" ]:
+                return false
+
+        return true
+
+    def OnChar(self, event):
+        key = event.KeyCode()
+
+        if key < wx.WXK_SPACE or key == wx.WXK_DELETE or key > 255:
+            event.Skip()
+            return
+
+        if chr(key) in string.letters or chr(key) in [ " ", "'" ]:
+            event.Skip()
+            return
+
+        if not wx.Validator_IsSilent():
+            wxBell()
+
+        # Returning without calling even.Skip eats the event before it
+        # gets to the text control
+        return
+
 
 class NewPlayerDialog(wxDialog):
     def __init__(self, parent, book):
@@ -40,12 +83,14 @@ class NewPlayerDialog(wxDialog):
                   0, wxALL | wxALIGN_CENTER, 5)
         self.firstName = wxTextCtrl(self, -1, "",
                                     wxDefaultPosition, wxSize(150, -1))
+        self.firstName.SetValidator(NameValidator())
         sizer.Add(self.firstName, 0, wxALL | wxALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "Last name"),
                   0, wxALL | wxALIGN_CENTER, 5)
         self.lastName = wxTextCtrl(self, -1, "",
                                    wxDefaultPosition, wxSize(150, -1))
+        self.lastName.SetValidator(NameValidator())
         sizer.Add(self.lastName, 0, wxALL | wxALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "Bats"),
@@ -101,8 +146,8 @@ class NewPlayerDialog(wxDialog):
         EVT_BUTTON(self, generateButton.GetId(), self.OnGenerateID)
 
     def OnGenerateID(self, event):
-        self.playerID.SetValue(self.book.UniquePlayerID(str(self.firstName.GetValue()),
-                                                        str(self.lastName.GetValue())))
+        self.playerID.SetValue(self.book.UniquePlayerID(self.GetFirstName(),
+                                                        self.GetLastName()))
         self.FindWindowById(wxID_OK).Enable(true)
 
     def OnIDChange(self, event):
@@ -113,9 +158,9 @@ class NewPlayerDialog(wxDialog):
         else:
             self.FindWindowById(wxID_OK).Enable(true)
         
-    def GetPlayerID(self):   return str(self.playerID.GetValue())
-    def GetFirstName(self):  return str(self.firstName.GetValue())
-    def GetLastName(self):   return str(self.lastName.GetValue())
+    def GetPlayerID(self):   return str(self.playerID.GetValue()).strip()
+    def GetFirstName(self):  return str(self.firstName.GetValue()).strip()
+    def GetLastName(self):   return str(self.lastName.GetValue()).strip()
     def GetBats(self):
         return [ "?", "R", "L", "B" ][self.bats.GetSelection()]
     def GetThrows(self):
