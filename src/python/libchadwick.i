@@ -29,7 +29,7 @@
 %include file.i
 
 %{
-#include <chadwick/chadwick.h>
+#include <chadwick.h>
 
 int cw_gameiter_get_advancement(CWGameIterator *iterator, int base)
 {
@@ -95,16 +95,16 @@ int IsValid(char *play)
 
 %}
 
-%include <chadwick/chadwick.h>
+%include <chadwick.h>
 
-%include <chadwick/book.h>
-%include <chadwick/box.h>
-%include <chadwick/file.h>
-%include <chadwick/game.h>
-%include <chadwick/gameiter.h>
-%include <chadwick/league.h>
-%include <chadwick/parse.h>
-%include <chadwick/roster.h>
+%include <book.h>
+%include <box.h>
+%include <file.h>
+%include <game.h>
+%include <gameiter.h>
+%include <league.h>
+%include <parse.h>
+%include <roster.h>
 
 %extend CWLeague {
   CWLeague(void)        { return cw_league_create(); }

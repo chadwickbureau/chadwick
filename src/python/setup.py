@@ -9,5 +9,6 @@ setup(name="_libchadwick",
       url="http://chadwick.sourceforge.net",
       ext_modules=[Extension('_libchadwick',
                              ['libchadwick_python.c'],
+                             include_dirs=['../cwlib'],
                              libraries=['chadwick'] )])
 

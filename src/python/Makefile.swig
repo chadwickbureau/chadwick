@@ -24,9 +24,5 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-#
-# The -I flag assumes Chadwick is installed in /usr/local;
-# modify as appropriate to your installation.
-#
 libchadwick_python.c:	libchadwick.i
-	swig -python -I/usr/local/include -o libchadwick_python.c libchadwick.i
+	swig -python -I../cwlib -o libchadwick_python.c libchadwick.i
