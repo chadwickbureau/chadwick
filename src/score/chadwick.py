@@ -375,7 +375,7 @@ class ChadwickFrame(wxFrame):
 
         for t in [0, 1]:
             # This gives a list of all games the team has already had entered
-            prevGames = [ y for y in self.book.Games(lambda x: rosters[t].GetId() in x.GetTeams()) ]
+            prevGames = [ y for y in self.book.Games(lambda x: rosters[t].GetID() in x.GetTeams()) ]
             dialog = LineupDialog(self, 
                                   "Starting Lineup for %s" % 
                                   rosters[t].GetName())
