@@ -105,7 +105,7 @@ cw_league_read(CWLeague *rosterList, FILE *file)
     }
 
     cw_league_roster_append(rosterList, 
-			    cw_roster_create(tokens[0], 0, tokens[1][0],
+			    cw_roster_create(tokens[0], 0, tokens[1],
 					     tokens[2], tokens[3]));
   }
 

@@ -47,10 +47,20 @@ CWPlayer *cw_player_create(char *player_id,
  */
 void cw_player_cleanup(CWPlayer *player);
 
+/*
+ * Sets the first name of a player
+ */
+void cw_player_set_first_name(CWPlayer *player, char *name);
+
+/*
+ * Sets the last name of a player
+ */
+void cw_player_set_last_name(CWPlayer *player, char *name);
+
+
 typedef struct cw_roster_struct {
-  char *team_id, *city, *nickname;
+  char *team_id, *city, *nickname, *league;
   int year;
-  char league;
   CWPlayer *first_player, *last_player;
   struct cw_roster_struct *prev, *next;
 } CWRoster;
@@ -59,7 +69,7 @@ typedef struct cw_roster_struct {
  * Allocates and initializes a new CWRoster.  Roster initially has no
  * players.  Caller is responsible for memory management of returned pointer.
  */
-CWRoster *cw_roster_create(char *team_id, int year, char league,
+CWRoster *cw_roster_create(char *team_id, int year, char *league,
 			   char *city, char *nickname);
 
 /*
@@ -68,6 +78,21 @@ CWRoster *cw_roster_create(char *team_id, int year, char league,
  */
 void cw_roster_cleanup(CWRoster *roster);
 
+
+/*
+ * Sets the city which the team represents
+ */
+void cw_roster_set_city(CWRoster *roster, char *city);
+
+/*
+ * Sets the nickname of the team
+ */
+void cw_roster_set_nickname(CWRoster *roster, char *nickname);
+
+/*
+ * Sets the league to which the team belongs
+ */
+void cw_roster_set_league(CWRoster *roster, char *league);
 
 /*
  * Insert a new player to the roster.  This assumes that players are

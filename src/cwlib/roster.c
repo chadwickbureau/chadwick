@@ -62,8 +62,28 @@ cw_player_cleanup(CWPlayer *player)
 }
 
 
+void
+cw_player_set_first_name(CWPlayer *player, char *name)
+{
+  char *x = (char *) malloc(sizeof(char) * (strlen(name) + 1));
+  if (x == NULL)  return;
+  strcpy(x, name);
+  free(player->first_name);
+  player->first_name = x;    
+}
+
+void
+cw_player_set_last_name(CWPlayer *player, char *name)
+{
+  char *x = (char *) malloc(sizeof(char) * (strlen(name) + 1));
+  if (x == NULL)  return;
+  strcpy(x, name);
+  free(player->last_name);
+  player->last_name = x;    
+}
+
 CWRoster *
-cw_roster_create(char *team_id, int year, char league,
+cw_roster_create(char *team_id, int year, char *league,
 		 char *city, char *nickname)
 {
   CWRoster *roster = (CWRoster *) malloc(sizeof(CWRoster));
@@ -76,8 +96,10 @@ cw_roster_create(char *team_id, int year, char league,
   roster->nickname = (char *) malloc(sizeof(char) * (strlen(nickname) + 1));
   strcpy(roster->nickname, nickname);
 
+  roster->league = (char *) malloc(sizeof(char) * (strlen(league) + 1));
+  strcpy(roster->league, league);
+
   roster->year = year;
-  roster->league = league;
 
   roster->first_player = NULL;
   roster->last_player = NULL;
@@ -102,7 +124,39 @@ cw_roster_cleanup(CWRoster *roster)
   free(roster->team_id);
   free(roster->city);
   free(roster->nickname);
+  free(roster->league);
 }
+
+void
+cw_roster_set_city(CWRoster *roster, char *city)
+{
+  char *x = (char *) malloc(sizeof(char) * (strlen(city) + 1));
+  if (x == NULL)  return;
+  strcpy(x, city);
+  free(roster->city);
+  roster->city = x;    
+}
+
+void
+cw_roster_set_nickname(CWRoster *roster, char *nickname)
+{
+  char *x = (char *) malloc(sizeof(char) * (strlen(nickname) + 1));
+  if (x == NULL)  return;
+  strcpy(x, nickname);
+  free(roster->nickname);
+  roster->nickname = x;    
+}
+
+void
+cw_roster_set_league(CWRoster *roster, char *league)
+{
+  char *x = (char *) malloc(sizeof(char) * (strlen(league) + 1));
+  if (x == NULL)  return;
+  strcpy(x, league);
+  free(roster->league);
+  roster->league = x;    
+}
+
 
 void
 cw_roster_player_insert(CWRoster *roster, CWPlayer *player)
