@@ -306,6 +306,16 @@ class PitchingAccumulator:
                         self.stats[player.player_id]["games"].append(game.GetGameID())
                     self.stats[player.player_id]["gs"] += 1
 
+            if game.GetStarter(t, 0) != None:
+                player = game.GetStarter(t, 0)
+                
+                if player.player_id not in self.stats:
+                    self.stats[player.player_id] = self.NewPitchingStats(player)
+                    if game.GetGameID() not in self.stats[player.player_id]["games"]:
+                        self.stats[player.player_id]["games"].append(game.GetGameID())
+                    self.stats[player.player_id]["gs"] += 1
+                
+
     def OnSubstitution(self, game, gameiter):
         rec = gameiter.event.first_sub
 
@@ -570,6 +580,15 @@ class FieldingAccumulator:
                     if player.player_id not in self.stats:
                         self.stats[player.player_id] = self.NewFieldingStats(player)
                     
+                    if game.GetGameID() not in self.stats[player.player_id]["games"]:
+                        self.stats[player.player_id]["games"].append(game.GetGameID())
+                    self.stats[player.player_id]["gs"] += 1
+
+            if self.pos == 1 and game.GetStarter(t, 0) != None:
+                player = game.GetStarter(t, 0)
+                
+                if player.player_id not in self.stats:
+                    self.stats[player.player_id] = self.NewFieldingStats(player)
                     if game.GetGameID() not in self.stats[player.player_id]["games"]:
                         self.stats[player.player_id]["games"].append(game.GetGameID())
                     self.stats[player.player_id]["gs"] += 1
@@ -968,14 +987,12 @@ def ProcessGame(game, acclist):
     map(lambda x: x.OnBeginGame(game, gameiter), acclist)
 
     while gameiter.event != None:
-        if gameiter.event.event_text == "NP":
-            # Note that there exist some Retrosheet files that have subs
-            # that aren't preceded by NP...
-            map(lambda x: x.OnSubstitution(game, gameiter), acclist)
-            gameiter.NextEvent()
-            continue
+        if gameiter.event.event_text != "NP":
+            map(lambda x: x.OnEvent(game, gameiter), acclist)
 
-        map(lambda x: x.OnEvent(game, gameiter), acclist)
+        if gameiter.event.first_sub != None:
+            map(lambda x: x.OnSubstitution(game, gameiter), acclist)
+
         gameiter.NextEvent()
 
     map(lambda x: x.OnEndGame(game, gameiter), acclist)
