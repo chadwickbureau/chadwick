@@ -1625,7 +1625,7 @@ static int parse_advancement(CWParserState *state, CWParsedEvent *event)
 {
   do {
     cw_parse_nextsym(state);
-    parse_runner_advance(state, event);
+    if (!parse_runner_advance(state, event))  return 0;
   } while (state->sym == ';');
 
   return (state->sym == '\0');
