@@ -85,8 +85,15 @@ cwtools_read_rosters(CWLeague *league)
   teamfile = fopen(filename, "r");
 
   if (teamfile == NULL) {
-    fprintf(stderr, "Can't find teamfile (%s)\n", filename);
-    exit(1);
+    /* Also try lowercase version */
+    sprintf(filename, "team%s", year);
+
+    teamfile = fopen(filename, "r");
+    
+    if (teamfile == NULL) {
+      fprintf(stderr, "Can't find teamfile (%s)\n", filename);
+      exit(1);
+    }
   }
 
   cw_league_read(league, teamfile);
