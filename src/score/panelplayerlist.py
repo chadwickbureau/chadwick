@@ -120,6 +120,8 @@ class NewPlayerDialog(wxDialog):
                   0, wxALL | wxALIGN_CENTER, 5)
         self.playerID = wxTextCtrl(self, -1, "", wxDefaultPosition,
                                    wxSize(150, -1))
+        # The player ID starts out blank, which is invalid
+        self.playerID.SetBackgroundColour(wxNamedColour("pink"))
         sizer.Add(self.playerID, 0, wxALL | wxALIGN_CENTER, 5)
 
         generateButton = wxButton(self, -1, "Generate unique ID")
@@ -148,6 +150,7 @@ class NewPlayerDialog(wxDialog):
     def OnGenerateID(self, event):
         self.playerID.SetValue(self.book.UniquePlayerID(self.GetFirstName(),
                                                         self.GetLastName()))
+        self.playerID.SetBackgroundColour(wxSystemSettings_GetColour(wxSYS_COLOUR_WINDOW))
         self.FindWindowById(wxID_OK).Enable(true)
 
     def OnIDChange(self, event):
@@ -155,8 +158,10 @@ class NewPlayerDialog(wxDialog):
         if (playerID == "" or
             playerID in [ p.player_id for p in self.book.IteratePlayers() ]):
             self.FindWindowById(wxID_OK).Enable(false)
+            self.playerID.SetBackgroundColour(wxNamedColour("pink"))
         else:
             self.FindWindowById(wxID_OK).Enable(true)
+            self.playerID.SetBackgroundColour(wxSystemSettings_GetColour(wxSYS_COLOUR_WINDOW))
         
     def GetPlayerID(self):   return str(self.playerID.GetValue()).strip()
     def GetFirstName(self):  return str(self.firstName.GetValue()).strip()

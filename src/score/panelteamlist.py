@@ -54,6 +54,8 @@ class NewTeamDialog(wxDialog):
                   0, wxALL | wxALIGN_CENTER, 5)
         self.teamID = wxTextCtrl(self, -1, "",
                                  wxDefaultPosition, wxSize(150, -1))
+        # A blank team ID is invalid, so flag this as invalid
+        self.teamID.SetBackgroundColour(wxNamedColour("pink"))
         sizer.Add(self.teamID, 0, wxALL | wxALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "League"),
@@ -83,11 +85,14 @@ class NewTeamDialog(wxDialog):
     def OnTeamIDChange(self, event):
         if str(self.teamID.GetValue()) == "":
             self.FindWindowById(wxID_OK).Enable(false)
+            self.teamID.SetBackgroundColour(wxNamedColour("pink"))
         elif (str(self.teamID.GetValue()) in
               [ x.team_id for x in self.book.IterateTeams() ]):
             self.FindWindowById(wxID_OK).Enable(false)
+            self.teamID.SetBackgroundColour(wxNamedColour("pink"))
         else:
             self.FindWindowById(wxID_OK).Enable(true)
+            self.teamID.SetBackgroundColour(wxSystemSettings_GetColour(wxSYS_COLOUR_WINDOW))
               
     def GetCity(self):       return str(self.city.GetValue())
     def GetNickname(self):   return str(self.nickname.GetValue())
