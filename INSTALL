@@ -1,3 +1,31 @@
+Windows users
+=============
+
+If you've downloaded the binary distribution (chadwick-x.y.z-bin.zip),
+simply unzip the programs into the directory where you would like to 
+put them.  The command-line tools require no special installation setup.
+
+If you're building from source using the Borland C++ 5.5 compiler,
+go to the chadwick-x.y.z directory (created when you unpacked the
+source distribution), and type 'make -f borland'.
+
+We are looking for contributions of makefiles and/or patches for other
+tools.
+
+Macintosh users
+===============
+
+We are looking for contributions of makefiles and/or patches to get
+Chadwick building on Mac.
+
+Unix users
+==========
+
+Chadwick uses the standard "./configure; make; make install" method
+for configuration and building.  The generic instructions below come
+standard from autotools.
+
+
 Basic Installation
 ==================
 

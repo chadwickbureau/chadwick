@@ -4,7 +4,7 @@
 ## $Revision$
 ##
 ## DESCRIPTION:
-## Top-level automake input file for Chadwick
+## Automake input file for Chadwick
 ##
 ## This file is part of Chadwick, a library for baseball play-by-play and stats
 ## Copyright (C) 2002, Ted Turocy (turocy@econ.tamu.edu)
@@ -24,4 +24,5 @@
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ##
 
-SUBDIRS = src
+SUBDIRS = cwlib cwtools
+
