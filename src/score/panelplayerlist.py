@@ -134,6 +134,7 @@ class AddPlayerDialog(wxDialog):
         buttonSizer.Add(wxButton(self, wxID_OK, "OK"), 0,
                         wxALL | wxALIGN_CENTER, 5)
         self.FindWindowById(wxID_OK).Enable(false)
+        self.FindWindowById(wxID_OK).SetDefault()
 
         topSizer = wxBoxSizer(wxVERTICAL)
 
@@ -232,6 +233,7 @@ class EditPlayerDialog(wxDialog):
                                  0, wxALL | wxALIGN_CENTER, 5)
         buttonSizer.Add(wxButton(self, wxID_OK, "OK"), 0,
                         wxALL | wxALIGN_CENTER, 5)
+        self.FindWindowById(wxID_OK).SetDefault()
 
         topSizer = wxBoxSizer(wxVERTICAL)
 
