@@ -434,58 +434,59 @@ class ChadwickFrame(wxFrame):
                                   wxPD_APP_MODAL | wxPD_AUTO_HIDE |
                                   wxPD_CAN_ABORT | wxPD_ELAPSED_TIME |
                                   wxPD_ESTIMATED_TIME | wxPD_REMAINING_TIME)
-        #try:
-        if statscan.ProcessFile(self.book, acc, dialog):
-            dialog.Show(false)
+        try:
+            if statscan.ProcessFile(self.book, acc, dialog):
+                dialog.Show(false)
                 
-            dialog = ReportDialog(self, title, 
-                                  string.join([ str(x) for x in acc ],
-                                              "\n\n"))
-            dialog.ShowModal()
-        else:
+                dialog = ReportDialog(self, title, 
+                                      string.join([ str(x) for x in acc ],
+                                                  "\n\n"))
+                dialog.ShowModal()
+            else:
+                dialog.Show(false)
+        except:
             dialog.Show(false)
-        #except:
-        #    dialog.Show(false)
-        #
-        #    dialog = wxMessageDialog(self,
-        #                             "An internal error occurred in "
-        #                             "generating the report.\n"
-        #                             "Please send a bug report to "
-        #                             "the maintaner at "
-        #                             "turocy@econmail.tamu.edu\n"
-        #                             "It is helpful to include this scorebook "
-        #                             "as an "
-        #                             "attachment when you send the report.\n"
-        #                             "The problem deals only with this "
-        #                             "report: don't worry, "
-        #                             "your data is unaffected.\n"
-        #                             "We apologize for the inconvenience!\n",
-        #                             "Oops! There's a bug in Chadwick",
-        #                             wxOK | wxICON_EXCLAMATION)
-        #    dialog.ShowModal()
+        
+            dialog = wxMessageDialog(self,
+                                     "An internal error occurred in "
+                                     "generating the report.\n"
+                                     "Please send a bug report to "
+                                     "the maintaner at "
+                                     "turocy@econmail.tamu.edu\n"
+                                     "It is helpful to include this scorebook "
+                                     "as an "
+                                     "attachment when you send the report.\n"
+                                     "The problem deals only with this "
+                                     "report: don't worry, "
+                                     "your data is unaffected.\n"
+                                     "We apologize for the inconvenience!\n",
+                                     "Oops! There's a bug in Chadwick",
+                                     wxOK | wxICON_EXCLAMATION)
+            dialog.ShowModal()
         
     def OnReportRegisterBatting(self, event):
         self.RunReport("Compiling batting register", "Batting register",
-                       [ statscan.BattingAccumulator() ])
+                       [ statscan.BattingRegister(self.book) ])
 
     def OnReportRegisterPitching(self, event):
         self.RunReport("Compiling pitching register", "Pitching register",
-                       [ statscan.PitchingAccumulator() ])
+                       [ statscan.PitchingRegister(self.book) ])
 
     def OnReportRegisterFielding(self, event):
         self.RunReport("Compiling fielding register", "Fielding register",
-                       [ statscan.FieldingAccumulator(p+1) for p in range(9) ])
+                       [ statscan.FieldingRegister(self.book, p+1)
+                         for p in range(9) ])
 
     def OnReportTeamTotals(self, event):
         self.RunReport("Compiling team totals", "Team totals",
-                       [ statscan.RecordAccumulator(self.book),
-                         statscan.TeamBattingAccumulator(self.book),
-                         statscan.TeamPitchingAccumulator(self.book),
-                         statscan.TeamFieldingAccumulator(self.book) ])
+                       [ statscan.TeamRecordTotals(self.book),
+                         statscan.TeamBattingTotals(self.book),
+                         statscan.TeamPitchingTotals(self.book),
+                         statscan.TeamFieldingTotals(self.book) ])
 
     def OnReportTeamGameLog(self, event):
         self.RunReport("Compiling team game logs", "Team game logs",
-                       [ statscan.GameLogAccumulator(self.book) ])
+                       [ statscan.TeamGameLog(self.book) ])
 
     def OnReportTeamBatting(self, event):
         self.RunReport("Compiling team-by-team batting",
@@ -501,7 +502,7 @@ class ChadwickFrame(wxFrame):
 
     def OnReportEventsSlams(self, event):
         self.RunReport("Compiling list of grand slams", "Grand slams",
-                       [ statscan.GrandSlamAccumulator(self.book) ])
+                       [ statscan.GrandSlamLog(self.book) ])
 
     def OnUpdate(self):
         title = "Chadwick: [%s] %d" % (self.book.GetFilename(),
