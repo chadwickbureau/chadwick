@@ -586,10 +586,34 @@ int cwscore_display_state(CWGameIterator *gameiter,
 
   *batter = gameiter->lineups[gameiter->num_batters[*half_inning] % 9 + 1][*half_inning].player_id;
 
-  printf("B: %8s  1: %8s  2: %8s  3: %8s  PA: %2d I: %2d  O: %d  S: %2d-%2d\n", 
-	 *batter, runners[1], runners[2], runners[3],
-	 gameiter->num_batters[*half_inning] + 1,
-	 *inning, outs, gameiter->score[0], gameiter->score[1]);
+  printf("\n");
+  printf("Team   R  H  E\n");
+  printf("%3s   %2d %2d %2d     Outs: %d\n",
+	 cw_game_info_lookup(gameiter->game, "visteam"),
+	 gameiter->score[0], gameiter->hits[0], gameiter->errors[0],
+	 outs);
+  printf("%3s   %2d %2d %2d     Inning: %d\n\n",
+	 cw_game_info_lookup(gameiter->game, "hometeam"),
+	 gameiter->score[1], gameiter->hits[1], gameiter->errors[1],
+	 *inning);
+
+  printf("Batter:  %s\n",
+	 gameiter->lineups[gameiter->num_batters[*half_inning] % 9 + 1][*half_inning].name);
+  for (i = 1; i <= 3; i++) {
+    char buffer[256];
+    if (strcmp(runners[i], "")) {
+      sprintf(buffer, "%s %s", 
+	      cw_roster_player_find((*half_inning == 0) ? visitors : home,
+				    runners[i])->first_name,
+	      cw_roster_player_find((*half_inning == 0) ? visitors : home,
+				    runners[i])->last_name);
+    }
+    else {
+      strcpy(buffer, "");
+    }
+    printf("Runner%d: %s\n", i, buffer);
+	  
+  }
   return 1;
 }
 
