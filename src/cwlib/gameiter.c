@@ -273,6 +273,16 @@ cw_gameiter_process_subs(CWGameIterator *gameiter, CWEvent *event)
 	(char *) malloc(sizeof(char) * (strlen(sub->player_id) + 1));
       strcpy(gameiter->fielders[sub->pos][sub->team],
 	     sub->player_id);
+      if (sub->pos == 1 && sub->slot > 0 &&
+	  gameiter->lineups[0][sub->team].player_id != NULL) {
+	/* Substituting a pitcher into the batting order, eliminating
+	 * the DH.  Clear out slot zero.
+	 */
+	free(gameiter->lineups[0][sub->team].player_id);
+	gameiter->lineups[0][sub->team].player_id = NULL;
+	free(gameiter->lineups[0][sub->team].name);
+	gameiter->lineups[0][sub->team].name = NULL;
+      }
     }
     else if (sub->pos == 11) {
       gameiter->removed_for_ph = removedPlayer;
