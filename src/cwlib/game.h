@@ -125,6 +125,17 @@ void cw_game_starter_append(CWGame *game, char *player_id, char *name,
 			    int team, int slot, int pos);
 
 /*
+ * Find the starter record for the 'slot' in the batting order for 'team'
+ */
+CWAppearance *cw_game_starter_find(CWGame *game, int team, int slot);
+
+/*
+ * Find the starter record for the player at position 'pos'
+ */
+CWAppearance *cw_game_starter_find_by_position(CWGame *game, 
+					       int team, int pos);
+
+/*
  * Add an event record to the game
  */
 void cw_game_event_append(CWGame *p_game, int inning, int halfInning,

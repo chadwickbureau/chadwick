@@ -4,7 +4,7 @@
  * $Revision$
  *
  * DESCRIPTION:
- * Declaration of convenience routines for reading/writing scorebook files
+ * Top-level include file for Chadwick
  * 
  * This file is part of Chadwick, a library for baseball play-by-play and stats
  * Copyright (C) 2002, Ted Turocy (turocy@econ.tamu.edu)
@@ -24,32 +24,18 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef CW_FILE_H
-#define CW_FILE_H
+#ifndef CW_CHADWICK_H
+#define CW_CHADWICK_H
 
-/*
- * These constants are used for creating token arrays
- */
-#define CW_MAX_TOKENS        20
-#define CW_MAX_TOKEN_LENGTH 100
+#define CHADWICK_VERSION "0.1.0"
 
-/*
- * Tokenize 'line' into tokens, which are separated by commas.
- * If an even number of quotation marks appear in the line, quotes
- * are used to 'escape' commas.
- */
-int cw_file_tokenize_line(char *line, char **tokens);
+#include "file.h"
+#include "game.h"
+#include "book.h"
+#include "roster.h"
+#include "league.h"
+#include "parse.h"
+#include "gameiter.h"
 
-/*
- * Searches for the game 'game_id' in 'file'; sets the file pointer to
- * the first record of the game, if present.
- * Returns nonzero if the game is found.
- */
-int cw_file_find_game(char *game_id, FILE *file);
+#endif   /* CW_CHADWICK_H */
 
-/*
- * Finds the first game record in 'file'.
- */
-int cw_file_find_first_game(FILE *file);
-
-#endif  /* CW_FILE_H */

@@ -33,7 +33,8 @@ typedef struct cw_game_iter_struct {
   CWGame *game;
   CWEvent *event;
   CWParsedEvent *event_data;
-  int event_count, inning, half_inning, outs, visscore, homescore;
+  int event_count, inning, half_inning, outs;
+  int score[2], hits[2], errors[2], times_out[2];
   int num_batters[2], dh_slot[2];
   int is_leadoff, ph_flag;
   struct {
@@ -100,6 +101,14 @@ char *cw_gameiter_charged_batter(CWGameIterator *gameiter);
  * (almost always the actual pitcher, except as indicated in rule 10.18(h)
  */
 char *cw_gameiter_charged_pitcher(CWGameIterator *gameiter);
+
+/*
+ * Returns the number of runners left on base by 'team'.
+ * Current baserunners are included in this count (to match official
+ * definition)
+ */
+int cw_gameiter_left_on_base(CWGameIterator *gameiter, int team);
+
 
 #endif   /* CW_STATE_H */
 

@@ -4,7 +4,7 @@
 ## $Revision$
 ##
 ## DESCRIPTION:
-## Automake input file for Chadwick library
+## Automake input file for Chadwick command-line tools
 ##
 ## This file is part of Chadwick, a library for baseball play-by-play and stats
 ## Copyright (C) 2002, Ted Turocy (turocy@econ.tamu.edu)
@@ -24,18 +24,21 @@
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ##
 
-lib_LIBRARIES = libchadwick.a
+bin_PROGRAMS = cwevent cwgame cwsub
 
-libchadwick_a_SOURCES = \
-	book.c \
-	file.c \
-	game.c \
-	gameiter.c \
-	league.c \
-	parse.c \
-	roster.c
+AM_CPPFLAGS = -I$(top_srcdir)/src
+
+cwevent_SOURCES = cwevent.c cwtools.c
+
+cwevent_LDADD = $(top_builddir)/src/cwlib/libchadwick.a
 
 
+cwgame_SOURCES = cwgame.c cwtools.c
+
+cwgame_LDADD = $(top_builddir)/src/cwlib/libchadwick.a
 
 
+cwsub_SOURCES = cwsub.c cwtools.c
+
+cwsub_LDADD = $(top_builddir)/src/cwlib/libchadwick.a
 

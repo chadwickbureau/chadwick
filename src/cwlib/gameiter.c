@@ -135,8 +135,10 @@ cw_gameiter_reset(CWGameIterator *gameiter)
   gameiter->inning = 1;
   gameiter->half_inning = 0;
   gameiter->outs = 0;
-  gameiter->visscore = 0;
-  gameiter->homescore = 0;
+  gameiter->score[0] = gameiter->score[1] = 0;
+  gameiter->hits[0] = gameiter->hits[1] = 0;
+  gameiter->errors[0] = gameiter->errors[1] = 0;
+  gameiter->times_out[0] = gameiter->times_out[1] = 0;
   gameiter->num_batters[0] = gameiter->num_batters[1] = 0;
   gameiter->dh_slot[0] = gameiter->dh_slot[1] = 0;
   gameiter->is_leadoff = 1;
@@ -302,50 +304,50 @@ cw_gameiter_process_advance(CWGameIterator *gameiter)
   strncpy(gameiter->pitchers[0],
 	  gameiter->fielders[1][1-gameiter->half_inning], 49);
   
-  if (gameiter->event_data->m_advance[3] >= 4 ||
+  if (gameiter->event_data->advance[3] >= 4 ||
       cw_event_runner_put_out(gameiter->event_data, 3)) {
-    if (gameiter->event_data->m_fcFlag[3]) {
+    if (gameiter->event_data->fc_flag[3]) {
       strcpy(gameiter->pitchers[0], gameiter->pitchers[3]);
     }
     strcpy(gameiter->runners[3], "");
     strcpy(gameiter->pitchers[3], "");
   }
 
-  if (gameiter->event_data->m_advance[2] == 3) {
+  if (gameiter->event_data->advance[2] == 3) {
     strcpy(gameiter->runners[3], gameiter->runners[2]);
     strcpy(gameiter->pitchers[3], gameiter->pitchers[2]);
   }
-  if (gameiter->event_data->m_advance[2] >= 3 ||
+  if (gameiter->event_data->advance[2] >= 3 ||
       cw_event_runner_put_out(gameiter->event_data, 2)) {
-    if (gameiter->event_data->m_fcFlag[2]) {
+    if (gameiter->event_data->fc_flag[2]) {
       strcpy(gameiter->pitchers[0], gameiter->pitchers[2]);
     }
     strcpy(gameiter->runners[2], "");
     strcpy(gameiter->pitchers[2], "");
   }
     
-  if (gameiter->event_data->m_advance[1] == 2) {
+  if (gameiter->event_data->advance[1] == 2) {
     strcpy(gameiter->runners[2], gameiter->runners[1]);
     strcpy(gameiter->pitchers[2], gameiter->pitchers[1]);
   }
-  else if (gameiter->event_data->m_advance[1] == 3) {
+  else if (gameiter->event_data->advance[1] == 3) {
     strcpy(gameiter->runners[3], gameiter->runners[1]);
     strcpy(gameiter->pitchers[3], gameiter->pitchers[1]);
   }
-  if (gameiter->event_data->m_advance[1] >= 2 || 
+  if (gameiter->event_data->advance[1] >= 2 || 
       cw_event_runner_put_out(gameiter->event_data, 1)) {
-    if (gameiter->event_data->m_fcFlag[1]) {
+    if (gameiter->event_data->fc_flag[1]) {
       strcpy(gameiter->pitchers[0], gameiter->pitchers[1]);
     }
     strcpy(gameiter->runners[1], "");
     strcpy(gameiter->pitchers[1], "");
   }
 
-  if (gameiter->event_data->m_advance[0] >= 1 &&
-      gameiter->event_data->m_advance[0] <= 3) {
-    strncpy(gameiter->runners[gameiter->event_data->m_advance[0]], 
+  if (gameiter->event_data->advance[0] >= 1 &&
+      gameiter->event_data->advance[0] <= 3) {
+    strncpy(gameiter->runners[gameiter->event_data->advance[0]], 
 	    gameiter->event->batter, 49);
-    strcpy(gameiter->pitchers[gameiter->event_data->m_advance[0]], 
+    strcpy(gameiter->pitchers[gameiter->event_data->advance[0]], 
 	   gameiter->pitchers[0]);
   }
 }
@@ -359,13 +361,15 @@ cw_gameiter_next(CWGameIterator *gameiter)
     int i;
     gameiter->event_count++;
 
-    if (event->half_inning == 0) {
-      gameiter->visscore += cw_event_runs_on_play(gameiter->event_data);
-    }
-    else {
-      gameiter->homescore += cw_event_runs_on_play(gameiter->event_data);
-    }
-
+    gameiter->score[gameiter->half_inning] += 
+      cw_event_runs_on_play(gameiter->event_data);
+    gameiter->hits[gameiter->half_inning] +=
+      (gameiter->event_data->event_type >= EVENT_SINGLE &&
+       gameiter->event_data->event_type <= EVENT_HOMERUN) ? 1 : 0;
+    gameiter->errors[1 - gameiter->half_inning] += 
+      gameiter->event_data->num_errors;
+    gameiter->times_out[gameiter->half_inning] += 
+      cw_event_outs_on_play(gameiter->event_data);
     gameiter->outs += cw_event_outs_on_play(gameiter->event_data);
 
     cw_gameiter_process_advance(gameiter);
@@ -398,7 +402,8 @@ cw_gameiter_next(CWGameIterator *gameiter)
       }
     }
 
-    if (gameiter->outs >= 3) {
+    if (gameiter->outs >= 3 && gameiter->event->next != NULL) {
+      /* Suppress changing sides if game is over */
       cw_gameiter_change_sides(gameiter);
     }
   }
@@ -409,24 +414,24 @@ cw_gameiter_next(CWGameIterator *gameiter)
     int i;
     cw_parse_event(gameiter->event->event_text, gameiter->event_data);
     for (i = 1; i <= 3; i++) {
-      if (gameiter->event_data->m_advance[i] == 0 &&
+      if (gameiter->event_data->advance[i] == 0 &&
 	  strcmp(gameiter->runners[i], "") &&
 	  !cw_event_runner_put_out(gameiter->event_data, i)) {
-	gameiter->event_data->m_advance[i] = i;
+	gameiter->event_data->advance[i] = i;
       }
     }
 
-    if (gameiter->event_data->m_eventType == EVENT_ERROR &&
+    if (gameiter->event_data->event_type == EVENT_ERROR &&
 	gameiter->outs == 2 &&
-	gameiter->event_data->m_rbiFlag[3] == 1) {
+	gameiter->event_data->rbi_flag[3] == 1) {
       /* No RBIs should be awarded, even if not explicitly noted (NR)
        * in event text*/
-      gameiter->event_data->m_rbiFlag[3] = 0;
+      gameiter->event_data->rbi_flag[3] = 0;
     }
 
     for (i = 0; i <= 3; i++) {
-      if (gameiter->event_data->m_rbiFlag[i] == 2) {
-	gameiter->event_data->m_rbiFlag[i] = 1;
+      if (gameiter->event_data->rbi_flag[i] == 2) {
+	gameiter->event_data->rbi_flag[i] = 1;
       }
     }
 
@@ -482,7 +487,7 @@ cw_gameiter_player_position(CWGameIterator *gameiter,
 char *
 cw_gameiter_charged_batter(CWGameIterator *gameiter)
 {
-  if (gameiter->event_data->m_eventType == EVENT_STRIKEOUT &&
+  if (gameiter->event_data->event_type == EVENT_STRIKEOUT &&
       gameiter->strikeout_batter != NULL) {
     return gameiter->strikeout_batter;
   }
@@ -494,8 +499,8 @@ cw_gameiter_charged_batter(CWGameIterator *gameiter)
 char *
 cw_gameiter_charged_pitcher(CWGameIterator *gameiter)
 {
-  if ((gameiter->event_data->m_eventType == EVENT_WALK || 
-       gameiter->event_data->m_eventType == EVENT_INTENTIONALWALK) &&
+  if ((gameiter->event_data->event_type == EVENT_WALK || 
+       gameiter->event_data->event_type == EVENT_INTENTIONALWALK) &&
       gameiter->walk_pitcher != NULL) {
     return gameiter->walk_pitcher;
   }
@@ -504,3 +509,9 @@ cw_gameiter_charged_pitcher(CWGameIterator *gameiter)
   }
 }
 
+int
+cw_gameiter_left_on_base(CWGameIterator *gameiter, int team)
+{
+  return (gameiter->num_batters[team] - gameiter->score[team] -
+	  gameiter->times_out[team]);
+}

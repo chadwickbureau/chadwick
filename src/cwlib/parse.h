@@ -54,19 +54,19 @@
 #define EVENT_MISSINGPLAY 24
 
 typedef struct cw_parsed_event_struct {
-  int m_eventType;
-  /* m_rbiFlag: 2 == (RBI) actually in play text */
-  int m_advance[4], m_rbiFlag[4], m_fcFlag[4];
-  char m_play[4][20];
-  int m_shFlag, m_sfFlag, m_dpFlag, m_gdpFlag, m_tpFlag;
-  int m_wpFlag, m_pbFlag, m_foulFlag, m_buntFlag;
-  int m_sbFlag[4], m_csFlag[4], m_poFlag[4];
-  int m_fieldedBy;
-  int m_numPutouts, m_numAssists, m_numErrors;
-  int m_putouts[3], m_assists[10], m_errors[10];
-  char m_errorTypes[10];
-  char m_battedBallType;
-  char m_hitLocation[20];
+  int event_type;
+  /* rbiFlag: 2 == (RBI) actually in play text */
+  int advance[4], rbi_flag[4], fc_flag[4];
+  char play[4][20];
+  int sh_flag, sf_flag, dp_flag, gdp_flag, tp_flag;
+  int wp_flag, pb_flag, foul_flag, bunt_flag;
+  int sb_flag[4], cs_flag[4], po_flag[4];
+  int fielded_by;
+  int num_putouts, num_assists, num_errors;
+  int putouts[3], assists[10], errors[10];
+  char error_types[10];
+  char batted_ball_type;
+  char hit_location[20];
 } CWParsedEvent;
 
 int cw_parse_event(char *text, CWParsedEvent *event);

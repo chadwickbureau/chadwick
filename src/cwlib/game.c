@@ -220,6 +220,34 @@ void cw_game_starter_append(CWGame *game, char *player_id, char *name,
   game->last_starter = starter;
 }
 
+CWAppearance *
+cw_game_starter_find(CWGame *game, int team, int slot)
+{
+  CWAppearance *starter = game->first_starter;
+  while (starter != NULL) {
+    if (starter->team == team && starter->slot == slot) {
+      return starter;
+    }
+    starter = starter->next;
+  }
+
+  return NULL;
+}
+
+CWAppearance *
+cw_game_starter_find_by_position(CWGame *game, int team, int pos)
+{
+  CWAppearance *starter = game->first_starter;
+  while (starter != NULL) {
+    if (starter->team == team && starter->pos == pos) {
+      return starter;
+    }
+    starter = starter->next;
+  }
+
+  return NULL;
+}
+
 void cw_game_event_append(CWGame *game, int inning, int half_inning,
 			  char *batter, char *count, char *pitches,
 			  char *event_text)
