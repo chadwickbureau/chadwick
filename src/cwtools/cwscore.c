@@ -510,7 +510,7 @@ void cwscore_get_pinch_hitter(CWGameIterator *gameiter, CWRoster *roster,
 			     batter, "??", "", "NP");
 	sprintf(buffer, "%s %s", player->first_name, player->last_name);
 	cw_game_substitute_append(gameiter->game, player->player_id,
-				  batter, team, slot, 11);
+				  buffer, team, slot, 11);
 	return;
       }
     }
