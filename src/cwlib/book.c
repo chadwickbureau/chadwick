@@ -80,6 +80,34 @@ cw_scorebook_append_game(CWScorebook *scorebook, CWGame *game)
   return 1;
 }
 
+void
+cw_scorebook_remove_game(CWScorebook *scorebook, char *game_id)
+{
+  CWGame *game = scorebook->first_game;
+
+  while (game != NULL) {
+    if (!strcmp(game->game_id, game_id)) {
+      if (game->prev != NULL) {
+	game->prev->next = game->next;
+      }
+      if (game->next != NULL) {
+	game->next->prev = game->prev;
+      }
+      if (scorebook->first_game == game) {
+	scorebook->first_game = game->next;
+      }
+      if (scorebook->last_game == game) {
+	scorebook->last_game = game->prev;
+      }
+
+      cw_game_cleanup(game);
+      free(game);
+      return;
+    }
+    game = game->next;
+  }
+}
+
 static void
 cw_scorebook_read_comments(CWScorebook *scorebook, FILE *file)
 {
