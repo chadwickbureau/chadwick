@@ -102,7 +102,7 @@ cw_league_read(CWLeague *rosterList, FILE *file)
     numTokens = cw_file_tokenize_line(buf, tokens);
 
     cw_league_roster_append(rosterList, 
-			    cw_roster_create(tokens[0], 0, tokens[1][1],
+			    cw_roster_create(tokens[0], 0, tokens[1][0],
 					     tokens[2], tokens[3]));
   }
 
