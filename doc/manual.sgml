@@ -261,6 +261,15 @@ to a different location, use the <guimenuitem>Save as</guimenuitem>
 item on the <guimenu>File</guimenu> menu instead.
 </para>
 
+<note>
+<para>
+When you use the <guimenuitem>Save</guimenuitem> command to save
+a scorebook, if a previous copy of the scorebook exists with that name,
+that copy is renamed to the filename plus a tilde (~) to server as
+a backup.
+</para>
+</note>
+
 </sect1>
 
 <sect1 id="gui.playersteams">
