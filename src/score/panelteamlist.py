@@ -103,12 +103,15 @@ class AddTeamDialog(wxDialog):
 
 
 class EditTeamDialog(wxDialog):
-    def __init__(self, parent, team):
+    def __init__(self, parent, book, team):
         wxDialog.__init__(self, parent, -1, "Edit team")
 
+        self.book = book
+        self.team = team
+        
         self.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL))
 
-        sizer = wxFlexGridSizer(4)
+        sizer = wxFlexGridSizer(2)
 
         sizer.Add(FormattedStaticText(self, "City"),
                   0, wxALL | wxALIGN_CENTER, 5)
@@ -135,6 +138,48 @@ class EditTeamDialog(wxDialog):
                                  wxDefaultPosition, wxSize(150, -1))
         sizer.Add(self.league, 0, wxALL | wxALIGN_CENTER, 5)
 
+
+        playerBox = wxStaticBoxSizer(wxStaticBox(self, wxID_STATIC,
+                                                 "Players on team"),
+                                     wxHORIZONTAL)
+        self.players = wxListView(self, -1, wxDefaultPosition,
+                                  wxSize(250, 150))
+        self.players.InsertColumn(0, "Name (ID)", width=230)
+        self.playerIDs = [ x.GetID() for x in team.Players() ]
+        for (pl,player) in enumerate(team.Players()):
+            self.players.InsertStringItem(pl,
+                                          "%s (%s)" % (player.GetSortName(),
+                                                       player.GetID()))
+            self.players.SetItemTextColour(pl, wxBLUE)
+            
+        playerBox.Add(self.players, 0, wxALL, 5)
+        
+        allPlayerBox = wxStaticBoxSizer(wxStaticBox(self, wxID_STATIC,
+                                                    "All players"),
+                                        wxHORIZONTAL)
+        self.allPlayers = wxListView(self, -1, wxDefaultPosition,
+                                     wxSize(250, 150), style=wxLC_REPORT)
+        self.allPlayers.InsertColumn(0, "Name (ID)", width=230)
+        self.allPlayerIDs = [ x.GetID() for x in book.Players() ]
+        for (pl,player) in enumerate(book.Players()):
+            self.allPlayers.InsertStringItem(pl,
+                                             "%s (%s)" % (player.GetSortName(),
+                                                          player.GetID()))
+            if team.FindPlayer(player.GetID()) != None:
+                self.allPlayers.SetItemTextColour(pl, wxBLUE)
+            else:
+                self.allPlayers.SetItemTextColour(pl, wxBLACK)
+
+        EVT_LIST_ITEM_SELECTED(self, self.allPlayers.GetId(),
+                               self.OnPlayerSelected)
+            
+        allPlayerBox.Add(self.allPlayers, 0, wxALL, 5)
+
+
+        playerSizer = wxBoxSizer(wxHORIZONTAL)
+        playerSizer.Add(playerBox, 0, wxALL, 5)
+        playerSizer.Add(allPlayerBox, 0, wxALL, 5)
+
         buttonSizer = wxBoxSizer(wxHORIZONTAL)
         buttonSizer.Add(wxButton(self, wxID_CANCEL, "Cancel"),
                                  0, wxALL | wxALIGN_CENTER, 5)
@@ -144,6 +189,7 @@ class EditTeamDialog(wxDialog):
         topSizer = wxBoxSizer(wxVERTICAL)
 
         topSizer.Add(sizer, 0, wxALL, 5)
+        topSizer.Add(playerSizer, 0, wxALL, 5)
         topSizer.Add(buttonSizer, 0, wxALIGN_RIGHT, 5)
 
         self.SetSizer(topSizer)
@@ -154,6 +200,28 @@ class EditTeamDialog(wxDialog):
     def GetNickname(self):   return str(self.nickname.GetValue())
     def GetLeague(self):     return str(self.league.GetValue())
 
+    def OnPlayerSelected(self, event):
+        playerID = self.allPlayerIDs[event.GetIndex()]
+        if self.team.FindPlayer(playerID) == None:
+            player = self.book.GetPlayer(playerID)
+            entry = "%s (%s)" % (player.GetSortName(), player.GetID())
+            self.playerIDs.append(playerID)
+            self.playerIDs.sort(lambda x, y:
+                                cmp(self.book.GetPlayer(x).GetSortName().upper(),
+                                    self.book.GetPlayer(y).GetSortName().upper()))
+            self.players.InsertStringItem(self.playerIDs.index(playerID), entry)
+            self.players.SetItemTextColour(self.playerIDs.index(playerID),
+                                           wxColour(0, 192, 0))
+            self.allPlayers.SetItemTextColour(event.GetIndex(), wxBLUE)
+
+    def UpdateTeam(self):
+        for p in self.playerIDs:
+            if self.team.FindPlayer(p) == None:
+                player = self.book.GetPlayer(p)
+                self.book.AddToTeam(p,
+                                    player.GetFirstName(), player.GetLastName(),
+                                    player.GetBats(), player.GetThrows(),
+                                    self.team.GetID())
 
 class TeamListGrid(wxGrid):
     def __init__(self, parent):
@@ -205,12 +273,13 @@ class TeamListGrid(wxGrid):
     def OnLeftDoubleClick(self, event):
         for (i,team) in enumerate(self.book.Teams()):
             if i == event.GetRow():
-                dialog = EditTeamDialog(self, team)
+                dialog = EditTeamDialog(self, self.book, team)
                 if dialog.ShowModal() == wxID_OK:
                     self.book.ModifyTeam(team.GetID(),
                                          dialog.GetCity(),
                                          dialog.GetNickname(),
                                          dialog.GetLeague())
+                    dialog.UpdateTeam()
                     self.GetParent().GetGrandParent().OnUpdate()
                 return
 

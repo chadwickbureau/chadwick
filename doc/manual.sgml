@@ -315,6 +315,20 @@ in the Teams tab for human consumption, and is not used anywhere
 else.
 </para>
 
+<para>
+Once created, team information (other than the team ID) may be
+edited by double-clicking the team's row entry.  The editing 
+dialog shows a list of players currently listed as being on that
+team's roster, as well as a list of all players in the scorebook.
+A player not on the team's roster may be added by clicking on the
+player's entry in the list of all players.  Players on the team's
+roster are indicated in blue; players not on the team's roster
+are indicated in black.  A player who has been selected to be added
+to the team's roster appears in the team roster in green.  Note that
+players are only added to the roster if changes to the roster are
+accepted using the <guilabel>OK</guilabel> button.
+</para>
+
 </sect2>
 
 <sect2 id="gui.playersteams.players">
