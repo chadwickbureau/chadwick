@@ -30,6 +30,16 @@
 #include <ctype.h>
 #include "cwlib/chadwick.h"
  
+char *cwscore_position_from_number(int position)
+{
+  static char positions[13][3] = {
+    "", "p", "c", "1b", "2b", "3b", "ss", "lf", "cf", "rf",
+    "dh", "ph", "pr"
+  };
+
+  return positions[position];
+}
+
 /*
  * cwscore_get_line: Get a line of text
  */
@@ -99,6 +109,7 @@ CWGame *cwscore_create_game(char *game_id, char *visitors, char *home)
 		      "Chadwick version " VERSION);
   cw_game_info_append(game, "visteam", visitors);
   cw_game_info_append(game, "hometeam", home);
+
   cw_game_info_append(game, "site", 
 		      cwscore_get_info("Site: (CCCNN)", buffer));
   cw_game_info_append(game, "date", 
@@ -145,38 +156,136 @@ CWGame *cwscore_create_game(char *game_id, char *visitors, char *home)
 		      cwscore_get_info("Time of game: (in minutes, 0 if unknown)", buffer));
   cw_game_info_append(game, "attendance",
 		      cwscore_get_info("Attendance: (0 if unknown)", buffer));
+
   return game;
+}
+
+CWPlayer *cwscore_get_player_number(CWRoster *roster, int index)
+{
+  CWPlayer *player = roster->first_player;
+  int i = 0;
+  
+  while (player != NULL) {
+    if (i == index) {
+      return player;
+    }
+    else {
+      player = player->next;
+      i++;
+    }
+  }
+
+  return NULL;
+}
+
+void cwscore_print_lineup(CWRoster *roster, 
+			  char lineup[10][9], int positions[10])
+{
+  int num_players = cw_roster_player_count(roster);
+  int i, offset = num_players / 2 + num_players % 2;
+
+  for (i = 0; i < offset; i++) {
+    char name[256];
+    CWPlayer *player = cwscore_get_player_number(roster, i);
+    sprintf(name, "%2d %s, %s", i, player->last_name, player->first_name);
+    printf("%-25s", name);
+
+    player = cwscore_get_player_number(roster, i + offset);
+    if (player != NULL) {
+      sprintf(name, "%2d %s, %s", i + offset,
+	      player->last_name, player->first_name);
+      printf("%-25s", name);
+    }
+
+    if (i <= 9 && strcmp(lineup[i], "")) {
+      player = cw_roster_player_find(roster, lineup[i]);
+      sprintf(name, "%d: %s, %s", i, player->last_name, player->first_name);
+      printf("%-25s %-2s", name, 
+	     cwscore_position_from_number(positions[i]));
+    }
+    printf("\n");
+  }
 }
 
 void cwscore_get_lineup(CWGame *game, CWRoster *roster, int team)
 {
-  int slot;
-  char buffer[256];
+  int slot, positions[10];
+  char lineup[10][9];
   CWPlayer *player;
 
-  printf("Enter lineup for %d %s\n", roster->year, roster->team_id);
+  for (slot = 0; slot <= 9; slot++) {
+    positions[slot] = 0;
+    strcpy(lineup[slot], "");
+  }
 
-  for (slot = 1; slot <= 9; slot++) {
-    char name[256];
-    int position;
+  while (1) {
+    char buffer[256], name[256];
+    int slot, position, index;
 
-    printf("Slot %d\n", slot);
+    printf("Enter lineup for %d %s\n", roster->year, roster->team_id);
+    cwscore_print_lineup(roster, lineup, positions);
+
+    printf("Enter: name <space> slot <space> position; END to end\n", slot);
     cwscore_get_line(buffer);
-    sscanf(buffer, "%s %d", name, &position);
+    if (!strcmp(buffer, "END")) {
+      break;
+    }
+    if (isdigit(buffer[0])) {
+      if (sscanf(buffer, "%d %d %d", &index, &slot, &position) != 3) {
+	continue;
+      }
 
-    for (player = roster->first_player; player; player = player->next) {
-      if (!strcmp(player->last_name, name)) {
-	sprintf(buffer, "%s %s", player->first_name, player->last_name);
-	cw_game_starter_append(game, player->player_id, buffer,
-			       team, slot, position);
-	break;
+      if (slot < 1 || slot > 9) {
+	continue;
+      }
+
+      if (position < 1 || position > 9) {
+	continue;
+      }
+      
+      if (index >= 0 && index < cw_roster_player_count(roster)) {
+	player = cwscore_get_player_number(roster, index);
+	strcpy(lineup[slot], player->player_id);
+	positions[slot] = position;
+      }
+      else {
+	printf("Invalid player number '%d'\n", index);
+      } 
+    }
+    else {
+      if (sscanf(buffer, "%s %d %d", name, &slot, &position) != 3) {
+	continue;
+      }
+
+      if (slot < 1 || slot > 9) {
+	continue;
+      }
+
+      if (position < 1 || position > 9) {
+	continue;
+      }
+
+      for (player = roster->first_player; player; player = player->next) {
+	if (!strcmp(player->last_name, name)) {
+	  strcpy(lineup[slot], player->player_id);
+	  positions[slot] = position;
+	  break;
+	}
+      }
+      
+      if (player == NULL) {
+	printf("Couldn't figure out who '%s' is\n", name);
+	slot--;
       }
     }
+  }
 
-    if (player == NULL) {
-      printf("Couldn't figure out who '%s' is\n", name);
-      slot--;
-    }
+  for (slot = 1; slot <= 9; slot++) {
+    CWPlayer *player = cw_roster_player_find(roster, lineup[slot]);
+    char name[256];
+    sprintf(name, "%s %s", player->first_name, player->last_name); 
+    cw_game_starter_append(game, player->player_id, name, 
+			   team, slot, positions[slot]);
   }
 }
 
