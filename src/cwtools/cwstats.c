@@ -134,11 +134,16 @@ cwstats_print_batting_stats(void)
 {
   CWStatsPlayer *player = first_player;
 
-  printf("ID        AB   R   H 2B 3B HR  BI  BB IW  SO DP HP SH SF SB CS\n");
+  printf("ID         G  AB   R   H 2B 3B HR  BI  BB IW  SO DP HP SH SF SB CS\n");
 
   while (player != NULL) {
-    printf("%8s %3d %3d %3d %2d %2d %2d %3d %3d %2d %3d %2d %2d %2d %2d %2d %2d\n",
-	   player->player_id,
+    if (player->batting->g == 0) {
+      player = player->next;
+      continue;
+    }
+
+    printf("%8s %3d %3d %3d %3d %2d %2d %2d %3d %3d %2d %3d %2d %2d %2d %2d %2d %2d\n",
+	   player->player_id, player->batting->g,
 	   player->batting->ab, player->batting->r, player->batting->h,
 	   player->batting->b2, player->batting->b3, player->batting->hr,
 	   player->batting->bi,
@@ -156,15 +161,17 @@ cwstats_print_pitching_stats(void)
 {
   CWStatsPlayer *player = first_player;
 
-  printf("ID          IP   R  ER   H HR  BB  SO WP BK\n");
+  printf("ID         G GS CG SH GF    IP   R  ER   H HR  BB  SO WP BK\n");
 
   while (player != NULL) {
     if (player->pitching->bf == 0) {
       player = player->next;
       continue;
     }
-    printf("%8s %3d.%d %3d %3d %3d %2d %3d %3d %2d %2d\n",
-	   player->player_id,
+    printf("%8s %3d %2d %2d %2d %2d %3d.%d %3d %3d %3d %2d %3d %3d %2d %2d\n",
+	   player->player_id, player->pitching->g,
+	   player->pitching->gs, player->pitching->cg,
+	   player->pitching->sho, player->pitching->gf,
 	   player->pitching->outs / 3, player->pitching->outs % 3,
 	   player->pitching->r, player->pitching->er,
 	   player->pitching->h, player->pitching->hr,

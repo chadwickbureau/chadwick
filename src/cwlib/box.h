@@ -30,7 +30,7 @@
 #include "game.h"
 
 typedef struct cw_box_batting_struct {
-  int ab, r, h, b2, b3, hr, bi, bb, ibb, so, gdp, hp, sh, sf, sb, cs;
+  int g, ab, r, h, b2, b3, hr, bi, bb, ibb, so, gdp, hp, sh, sf, sb, cs;
 } CWBoxBatting;
 
 typedef struct cw_box_player_struct {
@@ -40,7 +40,7 @@ typedef struct cw_box_player_struct {
 } CWBoxPlayer;
 
 typedef struct cw_box_pitching_struct {
-  int outs, r, er, h, hr, bb, ibb, so, bf, bk, wp;
+  int g, gs, cg, sho, gf, outs, r, er, h, hr, bb, ibb, so, bf, bk, wp;
 } CWBoxPitching;
 
 typedef struct cw_box_pitcher_struct {
