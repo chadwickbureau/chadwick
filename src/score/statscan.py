@@ -76,6 +76,15 @@ class BattingStatline:
         if eventData.GetSBFlag(base) > 0: self.stats["sb"] += 1
         if eventData.GetCSFlag(base) > 0: self.stats["cs"] += 1
 
+    def __add__(self, x):
+        y = BattingStatline()
+        for key in self.stats:
+            y.stats[key] = self.stats[key] + x.stats[key]
+        return y
+
+    def __iadd__(self, x):
+        for key in self.stats: self.stats[key] += x.stats[key]
+        return self
 
     def __getitem__(self, attr):  return self.stats[attr]
     def __setitem__(self, attr, value):  self.stats[attr] = value
@@ -147,6 +156,16 @@ class PitchingStatline:
             self.stats["er"] += 1
             self.stats["tur"] += 1
         
+    def __add__(self, x):
+        y = PitchingStatline()
+        for key in self.stats:
+            y.stats[key] = self.stats[key] + x.stats[key]
+        return y
+
+    def __iadd__(self, x):
+        for key in self.stats: self.stats[key] += x.stats[key]
+        return self
+
     def __getitem__(self, attr):  return self.stats[attr]
     def __setitem__(self, attr, value):  self.stats[attr] = value
 
@@ -178,6 +197,16 @@ class FieldingStatline:
                                      CW_EVENT_TRIPLE]):
             self.stats["bip"] += 1
         
+    def __add__(self, x):
+        y = FieldingStatline()
+        for key in self.stats:
+            y.stats[key] = self.stats[key] + x.stats[key]
+        return y
+
+    def __iadd__(self, x):
+        for key in self.stats: self.stats[key] += x.stats[key]
+        return self
+
     def __getitem__(self, attr):  return self.stats[attr]
     def __setitem__(self, attr, value):  self.stats[attr] = value
 
@@ -202,6 +231,16 @@ class TeamFieldingStatline:
                                      CW_EVENT_DOUBLE,
                                      CW_EVENT_TRIPLE]):
             self.stats["bip"] += 1
+
+    def __add__(self, x):
+        y = TeamFieldingStatline()
+        for key in self.stats:
+            y.stats[key] = self.stats[key] + x.stats[key]
+        return y
+
+    def __iadd__(self, x):
+        for key in self.stats: self.stats[key] += x.stats[key]
+        return self
 
     def __getitem__(self, attr):  return self.stats[attr]
     def __setitem__(self, attr, value):  self.stats[attr] = value
@@ -377,6 +416,26 @@ class TeamBattingRegister:
                  stat["sh"], stat["sf"],
                  stat["sb"], stat["cs"]))
 
+        stat = reduce(lambda x,y: x+y, [self.stats[key] for key in self.stats])
+
+        s += ("%-20s %s %s %s    %4d    %4d   %3d   %4d    %3d     %2d    %2d    %2d\n" %
+              ("Totals",
+               FormatAverage(stat["h"], stat["ab"]),
+               FormatAverage(stat["h"] + stat["2b"] +
+                             2*stat["3b"] + 3*stat["hr"],
+                             stat["ab"]),
+               FormatAverage(stat["h"] + stat["bb"] + stat["hp"],
+                             stat["ab"] + stat["bb"] + stat["hp"] + stat["sf"]),
+               stat["ab"], stat["h"], stat["3b"],
+               stat["bi"], stat["ibb"], 
+               stat["gdp"], stat["sh"], stat["sb"]))
+
+        s += ("%-20s %s %s %s%4d    %4d    %3d   %3d     %3d   %4d   %3d   %3d   %3d\n" %
+              ("", "     ", "     ", "     ",
+               len(stat["games"]),
+               stat["r"], stat["2b"], stat["hr"], stat["bb"], stat["so"],
+               stat["hp"], stat["sf"], stat["cs"]))
+
         return s
 
 class TeamBattingTotals:
@@ -437,6 +496,24 @@ class TeamBattingTotals:
                  stat["gdp"], stat["hp"],
                  stat["sh"], stat["sf"],
                  stat["sb"], stat["cs"], stat["lob"]))
+
+        stat = reduce(lambda x,y: x+y, [self.stats[key] for key in self.stats])
+        s += ("%-13s %s %s %s %3d %4d %3d %4d %3d %2d %3d %3d %3d %2d %4d %3d %2d %2d %2d %3d %2d %4d\n" %
+              ("Totals",
+               FormatAverage(stat["h"], stat["ab"]),
+               FormatAverage(stat["h"] + stat["2b"] +
+                             2*stat["3b"] + 3*stat["hr"],
+                             stat["ab"]),
+               FormatAverage(stat["h"] + stat["bb"] + stat["hp"],
+                             stat["ab"] + stat["bb"] + stat["hp"] + stat["sf"]),
+               len(stat["games"])/2,
+               stat["ab"], stat["r"], stat["h"],
+               stat["2b"], stat["3b"], stat["hr"],
+               stat["bi"],
+               stat["bb"], stat["ibb"], stat["so"],
+               stat["gdp"], stat["hp"],
+               stat["sh"], stat["sf"],
+               stat["sb"], stat["cs"], stat["lob"]))
 
         return s
 
@@ -656,6 +733,24 @@ class TeamPitchingRegister:
                  stat["bb"], stat["ibb"], stat["so"],
                  stat["bk"], stat["wp"], stat["hb"]))
 
+        stat = reduce(lambda x,y: x+y, [self.stats[key] for key in self.stats])
+
+        if stat["outs"] == 0:
+            era = "-----"
+        else:
+            era = "%5.2f" % (float(stat["er"]) / float(stat["outs"]) * 27)
+        s += ("%-20s %s %2d %2d %2d %2d %2d %2d-%2d %2d %3d.%1d %3d %3d %3d %2d %3d %2d %3d %2d %2d %2d\n" %
+              ("Totals", era,
+               len(stat["games"]),
+               stat["gs"], stat["cg"], stat["sho"],
+               stat["gf"],
+               stat["w"], stat["l"], stat["sv"],
+               stat["outs"] / 3, stat["outs"] % 3,
+               stat["r"], stat["er"],
+               stat["h"], stat["hr"],
+               stat["bb"], stat["ibb"], stat["so"],
+               stat["bk"], stat["wp"], stat["hb"]))
+
         return s
 
 
@@ -714,6 +809,8 @@ class TeamPitchingTotals:
         keys.sort()
 
         s = ""
+        league = PitchingStatline()
+        
         for (i,key) in enumerate(keys):
             stat = self.stats[key]
             team = self.book.GetTeam(key)
@@ -734,6 +831,24 @@ class TeamPitchingTotals:
                  stat["h"], stat["hr"],
                  stat["bb"], stat["ibb"], stat["so"],
                  stat["bk"], stat["wp"], stat["hb"]))
+
+        stat = reduce(lambda x,y: x+y, [self.stats[key] for key in self.stats])
+
+        if stat["outs"] == 0:
+            era = "-----"
+        else:
+            era = "%5.2f" % (float(stat["er"]) / float(stat["outs"]) * 27)
+
+        s += ("%-13s %s %3d %2d %2d %3d-%3d %2d %4d.%1d %3d %3d %4d %3d %3d %2d %4d %2d %2d %2d\n" %
+              ("Totals", era,
+               len(stat["games"])/2,
+               stat["cg"], stat["sho"],
+               stat["w"], stat["l"], stat["sv"],
+               stat["outs"] / 3, stat["outs"] % 3,
+               stat["r"], stat["er"]-stat["tur"],
+               stat["h"], stat["hr"],
+               stat["bb"], stat["ibb"], stat["so"],
+               stat["bk"], stat["wp"], stat["hb"]))
 
         return s
         
@@ -864,6 +979,17 @@ class TeamFieldingTotals:
                  stat["po"], stat["a"], stat["e"],
                  stat["dp"], stat["tp"],
                  stat["bip"], stat["bf"]))
+
+
+        stat = reduce(lambda x,y: x+y, [self.stats[key] for key in self.stats])
+        s += ("%-13s %s %3d %4d %4d %3d %3d %2d %4d %4d\n" %
+              ("Totals",
+               FormatAverage(stat["po"] + stat["a"],
+                             stat["po"] + stat["a"] + stat["e"]),
+               len(stat["games"])/2,
+               stat["po"], stat["a"], stat["e"],
+               stat["dp"], stat["tp"],
+               stat["bip"], stat["bf"]))
 
         return s
 
@@ -1119,7 +1245,7 @@ def ProcessGame(game, acclist):
 
     map(lambda x: x.OnEndGame(game, gameiter), acclist)
 
-def ProcessFile(book, acclist, monitor=None):
+def ProcessFile(book, acclist, f=lambda x: True, monitor=None):
     """
     Process the games in scorebook 'book' through the list of
     accumulators in 'acclist'.  Instrumented so that if
@@ -1128,7 +1254,7 @@ def ProcessFile(book, acclist, monitor=None):
     automatically works for this parameter.
     """
     numGames = book.NumGames()
-    for (i,game) in enumerate(book.Games()):
+    for (i,game) in enumerate(book.Games(f)):
         ProcessGame(game, acclist)
         if monitor != None:
             if not monitor.Update(round(float(i)/float(numGames)*100)):
@@ -1147,11 +1273,7 @@ if __name__ == "__main__":
     x = [ TeamRecordTotals(book),
           TeamBattingTotals(book),
           TeamPitchingTotals(book),
-          TeamFieldingTotals(book),
-          TeamGameLog(book),
-          BattingRegister(book), PitchingRegister(book) ]
-    for pos in range(9):
-        x.append(FieldingRegister(book, pos+1))
+          TeamFieldingTotals(book) ]
     ProcessFile(book, x)
 
     for acc in x:
