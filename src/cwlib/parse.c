@@ -465,7 +465,7 @@ static int parse_advance_modifier(CWParserState *state, CWParsedEvent *event,
 
     /* This loop is here to tolerate weird things, like '2XH(9S)', which
      * appears in 1989 files */
-    while (state->sym != ')') {
+    while (state->sym != ')' && state->sym != '\0') {
       cw_parse_nextsym(state);
     }
   }
