@@ -54,12 +54,7 @@ cwstats_copy_player(CWBoxPlayer *player)
 				    (strlen(player->player_id) + 1));
   strcpy(copy->player_id, player->player_id);
   copy->batting = cw_boxscore_batting_create();
-  copy->batting->ab = player->batting->ab;
-  copy->batting->r = player->batting->r;
-  copy->batting->h = player->batting->h;
-  copy->batting->bi = player->batting->bi;
-  copy->batting->bb = player->batting->bb;
-  copy->batting->so = player->batting->so;
+  cw_boxscore_batting_add(copy->batting, player->batting);
   copy->prev = copy->next = NULL;
   return copy;
 }
@@ -96,17 +91,18 @@ cwstats_print_batting_stats(void)
 {
   CWStatsPlayer *player = first_player;
 
-  printf("ID        AB   R   H 2B 3B HR  BI  BB IW  SO DP HP SH SF\n");
+  printf("ID        AB   R   H 2B 3B HR  BI  BB IW  SO DP HP SH SF SB CS\n");
 
   while (player != NULL) {
-    printf("%8s %3d %3d %3d %2d %2d %2d %3d %3d %2d %3d %2d %2d %2d %2d\n",
+    printf("%8s %3d %3d %3d %2d %2d %2d %3d %3d %2d %3d %2d %2d %2d %2d %2d %2d\n",
 	   player->player_id,
 	   player->batting->ab, player->batting->r, player->batting->h,
 	   player->batting->b2, player->batting->b3, player->batting->hr,
 	   player->batting->bi,
 	   player->batting->bb, player->batting->ibb, player->batting->so,
 	   player->batting->gdp, player->batting->hp,
-	   player->batting->sh, player->batting->sf);
+	   player->batting->sh, player->batting->sf,
+	   player->batting->sb, player->batting->cs);
     
     player = player->next;
   }

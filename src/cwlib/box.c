@@ -48,6 +48,8 @@ cw_boxscore_batting_create(void)
   batting->hp = 0;
   batting->sh = 0;
   batting->sf = 0;
+  batting->sb = 0;
+  batting->cs = 0;
   return batting;
 }
 
@@ -68,6 +70,8 @@ cw_boxscore_batting_add(CWBoxBatting *dest, CWBoxBatting *src)
   dest->hp += src->hp;
   dest->sh += src->sh;
   dest->sf += src->sf;
+  dest->sb += src->sb;
+  dest->cs += src->cs;
 }
 
 /************************************************************************
@@ -293,6 +297,14 @@ cw_boxscore_runner_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       if (gameiter->event_data->advance[base] != 5) {
 	pitcher->pitching->er++;
       }
+    }
+
+    if (gameiter->event_data->sb_flag[base]) {
+      player->batting->sb++;
+    }
+
+    if (gameiter->event_data->cs_flag[base]) {
+      player->batting->cs++;
     }
   }
 }
