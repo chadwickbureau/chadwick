@@ -45,13 +45,16 @@ class Boxscore:
         return None
 
     def NewBattingStats(self, player):
+        # Note that we also put passed balls and errors in here,
+        # even though they aren't batting stats...
         return { "id": player.player_id, "name": player.name,
                  "pos": [ player.pos ],
                  "ab":0, "r":0, "h":0,
                  "2b":0, "3b":0, "hr":0, "bi":0,
                  "bb":0, "ibb":0, "so":0,
                  "gdp":0, "hp":0, "sh":0, "sf":0,
-                 "sb":0, "cs":0 }
+                 "sb":0, "cs":0,
+                 "pb":0, "e":0 }
                  
     def NewPitchingStats(self, player):
         return { "id": player.player_id, "name": player.name,
@@ -90,10 +93,12 @@ class Boxscore:
         
         # Number of double plays turned by teams
         self.dp = [ 0, 0 ]
+
+        # Decisions
         self.win = ""
         self.loss = ""
         self.save = ""
-        
+
         self.Tabulate(self.game)
         
             
@@ -162,6 +167,18 @@ class Boxscore:
             if event_data.wp_flag > 0:
                 pitcher["wp"] += 1
 
+            if event_data.pb_flag > 0:
+                fielder = self.FindStats(cw_gameiter_get_fielder(gameiter,
+                                                                 1-team, 2))
+                fielder["pb"] += 1
+            if event_data.num_errors > 0:
+                for pos in range(1, 10):
+                    errors = cw_gameiter_get_fielder_errors(gameiter, pos)
+                    if errors > 0:
+                        fielder = self.FindStats(cw_gameiter_get_fielder(gameiter,
+                                                                         1-team, pos))
+                        fielder["e"] += errors
+                
             if event_data.dp_flag > 0:
                 self.dp[1-team] += 1
 

@@ -106,7 +106,7 @@ class BoxscorePanel(wxPanel):
         self.text.AppendText("\n")
 
     def PrintBatting(self, box):
-        self.text.AppendText("\n                    BATTING\n\n")
+        self.text.AppendText("\n              BATTING AND FIELDING\n\n")
         for t in [0, 1]:
             ros = self.doc.GetRoster(t)
             totals = { "ab":0, "r":0, "h":0, "bi":0, "bb":0, "so":0 }
@@ -144,6 +144,8 @@ class BoxscorePanel(wxPanel):
             self.PrintOffensiveCaption(box.stats[t], "ibb", "IBB - ")
             self.PrintOffensiveCaption(box.stats[t], "sb", "SB - ")
             self.PrintOffensiveCaption(box.stats[t], "cs", "CS - ")
+            self.PrintOffensiveCaption(box.stats[t], "e", "E - ")
+            self.PrintOffensiveCaption(box.stats[t], "pb", "PB - ")
             
             self.text.AppendText("\n")
 
