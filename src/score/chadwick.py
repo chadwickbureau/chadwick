@@ -337,10 +337,35 @@ class ChadwickFrame(wxFrame):
         doc = GameEditor(game, rosters[0], rosters[1])
 
         for t in [0, 1]:
+            # This gives a list of all games the team has already had entered
+            prevGames = [ y for y in self.book.IterateGames(lambda x: rosters[t].team_id in x.GetTeams()) ]
             dialog = LineupDialog(self, 
                                   "Starting Lineup for %s" % 
                                   (rosters[t].city + " " + rosters[t].nickname))
             dialog.LoadRoster(doc.GetRoster(t), t, True)
+
+            if len(prevGames) > 0:
+                # Find the game that was previous to the current one.
+                # If the game being entered was earlier than all others,
+                # just use the first one
+                if prevGames[0].GetDate() > cw_game_info_lookup(game, "date"):
+                    pg = prevGames[0]
+                else:
+                    pg = None
+                    for g in prevGames:
+                        if g.GetDate() >= cw_game_info_lookup(game, "date"):
+                            pg = g
+                            break
+                    if pg == None:  pg = prevGames[-1]
+
+                # Set up the lineup dialog with the lineup from that game,
+                # figuring it's probably a decent first guess as to
+                # the lineup for this game
+                tm = pg.GetTeams().index(rosters[t].team_id)
+                for slot in range(1, 10):
+                    rec = pg.GetStarter(tm, slot)
+                    dialog.SetPlayerInSlot(slot, rec.name, rec.pos)
+                
             if dialog.ShowModal() != wxID_OK:
                 return
                 

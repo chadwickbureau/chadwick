@@ -71,6 +71,9 @@ class ChadwickGame:
         finally:
             cw_gameiter_cleanup(gameiter)
 
+    def GetStarter(self, team, slot):
+        return cw_game_starter_find(self.game, team, slot)
+
 
 class ChadwickScorebook:
     def __init__(self, year=2005):

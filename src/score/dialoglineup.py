@@ -94,11 +94,13 @@ class LineupDialog(wxDialog):
         event.Skip()
 
     def OnSetEntry(self, event):
+        self.CheckValidity()
+
+    def CheckValidity(self):
         """
         Check the status of the lineup after an entry (either a player or his
         position) is set.  Activate the OK button iff the lineup is valid.
         """
-        
         self.pitcherText.Show(self.HasDH())
         self.players[-1].Show(self.HasDH())
 
@@ -184,6 +186,14 @@ class LineupDialog(wxDialog):
 
     def GetPlayerInSlot(self, slot):
         return [x for x in iterate_roster(self.roster)][self.players[slot-1].GetSelection()-1]
+
+    def SetPlayerInSlot(self, slot, name, pos):
+        if slot > 0:
+            self.players[slot-1].SetStringSelection(name)
+            self.positions[slot-1].SetSelection(pos)
+        else:
+            self.players[-1].SetStringSelection(name)
+        self.CheckValidity()
 
     def GetPositionInSlot(self, slot):
         return self.positions[slot-1].GetSelection()
