@@ -43,16 +43,23 @@ class GameListGrid(wxGrid):
         self.EnableEditing(false)
         self.SetSelectionMode(wxGrid.wxGridSelectRows)
 
+        self.filter = lambda x: True
+
         EVT_GRID_CELL_LEFT_DCLICK(self, self.OnLeftDoubleClick)
 
-    def OnUpdate(self, book):
+    def OnUpdate(self, book, f):
+        """
+        Update grid to list all games in scorebook 'book' matching
+        filter function 'f'
+        """
         self.book = book
-        if self.GetNumberRows() > book.NumGames():
-            self.DeleteRows(0, self.GetNumberRows() - book.NumGames())
-        elif self.GetNumberRows() < book.NumGames():
-            self.InsertRows(0, book.NumGames() - self.GetNumberRows())
+        self.filter = f
+        if self.GetNumberRows() > book.NumGames(self.filter):
+            self.DeleteRows(0, self.GetNumberRows() - book.NumGames(self.filter))
+        elif self.GetNumberRows() < book.NumGames(self.filter):
+            self.InsertRows(0, book.NumGames(self.filter) - self.GetNumberRows())
         
-        for (i,game) in enumerate(book.IterateGames()):
+        for (i,game) in enumerate(book.IterateGames(self.filter)):
             number = game.GetNumber()
             if number == 1:
                 self.SetCellValue(i, 0, game.GetDate() + " (G1)")
@@ -73,7 +80,7 @@ class GameListGrid(wxGrid):
         self.AdjustScrollbars()
 
     def OnLeftDoubleClick(self, event):
-        for (i,game) in enumerate(self.book.IterateGames()):
+        for (i,game) in enumerate(self.book.IterateGames(self.filter)):
             if i == event.GetRow():
                 teams = [ self.book.GetTeam(t) for t in game.GetTeams() ]
                 # FIXME: here we pass from the wrapper to the base game
@@ -81,6 +88,8 @@ class GameListGrid(wxGrid):
                 dialog = BoxscoreViewDialog(self, doc)
                 dialog.ShowModal()
                 return
+
+    def GetFilter(self):  return self.filter
 
 CW_MENU_GAME_NEW = 2000
 
@@ -92,6 +101,8 @@ class GameListPanel(wxPanel):
         filterSizer.Add(FormattedStaticText(self, "Show games involving"),
                         0, wxALL | wxALIGN_CENTER, 5)
         self.teamList = wxChoice(self, -1, wxDefaultPosition, wxSize(250, -1))
+        self.teamList.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+        self.teamList.Clear()
         self.teamList.Append("all teams")
         self.teamList.SetSelection(0)
         filterSizer.Add(self.teamList, 0, wxALL | wxALIGN_CENTER, 5)
@@ -105,6 +116,7 @@ class GameListPanel(wxPanel):
 
         toolSizer = wxBoxSizer(wxHORIZONTAL)
         toolSizer.Add(filterSizer, 0, wxALL | wxALIGN_CENTER, 5)
+        toolSizer.Add(wxSize(30, 1))
         toolSizer.Add(newGameButton, 0, wxALL | wxALIGN_CENTER, 5)
         sizer.Add(toolSizer, 0, wxALL | wxALIGN_CENTER, 5)
         sizer.Add(self.gameList, 1, wxEXPAND, 0)
@@ -114,15 +126,21 @@ class GameListPanel(wxPanel):
         EVT_CHOICE(self, self.teamList.GetId(), self.OnTeamFilter)
 
     def OnUpdate(self, book):
+        self.book = book
         teamChoice = self.teamList.GetStringSelection()
         self.teamList.Clear()
+        self.teamList.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
         self.teamList.Append("all teams")
         for team in book.IterateTeams():
             self.teamList.Append(team.city + " " + team.nickname)
         self.teamList.SetStringSelection(teamChoice)
         
-        self.gameList.OnUpdate(book)
-
+        self.gameList.OnUpdate(book, self.gameList.GetFilter())
 
     def OnTeamFilter(self, event):
-        pass
+        if event.GetSelection() == 0:
+            self.gameList.OnUpdate(self.book, lambda x: True)
+        else:
+            team = [ x for x in self.book.IterateTeams() ][event.GetSelection() - 1]
+            self.gameList.OnUpdate(self.book,
+                                   lambda x: team.team_id in x.GetTeams())
