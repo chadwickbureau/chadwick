@@ -347,6 +347,7 @@ void cw_game_data_append(CWGame *game, int num_data, char **data)
 
   d->num_data = num_data;
   d->data = (char **) malloc(sizeof(char *) * num_data);
+  d->next = NULL;
   
   for (i = 1; i <= num_data; i++) {
     d->data[i-1] = (char *) malloc(sizeof(char) * (strlen(data[i]) + 1));
