@@ -254,7 +254,7 @@ class PlayerListTable(wxPyGridTableBase):
     def __init__(self, parent):
         wxPyGridTableBase.__init__(self)
         self.parent = parent
-        self.attr = [ wxGridCellAttr() for i in range(4) ]
+        self.attr = [ wxGridCellAttr() for i in range(5) ]
 
         for x in self.attr:
             x.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL))
@@ -265,6 +265,7 @@ class PlayerListTable(wxPyGridTableBase):
         self.attr[1].SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER)
         self.attr[2].SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER)
         self.attr[3].SetAlignment(wxALIGN_LEFT, wxALIGN_CENTER)
+        self.attr[4].SetAlignment(wxALIGN_LEFT, wxALIGN_CENTER)
 
     def SetScorebook(self, book):   self.book = book
 
@@ -279,7 +280,7 @@ class PlayerListTable(wxPyGridTableBase):
             return 0
 
     def GetNumberCols(self):
-        return 4
+        return 5
 
     def IsEmptyCell(self, row, col):
         return False
@@ -295,15 +296,17 @@ class PlayerListTable(wxPyGridTableBase):
                      "B": "Both", "?": "Unknown" }[player.bats]
         elif col == 2:
             return { "R": "Right", "L": "Left", "?": "Unknown" }[player.throws]
-        else:
+        elif col == 3:
             return player.player_id
+        else:
+            return string.join(player.GetTeams(), ", ")
         
 
     def SetValue(self, row, col, value):
         pass
 
     def GetColLabelValue(self, col):
-        return [ "Player", "Bats", "Throws", "ID" ][col]
+        return [ "Player", "Bats", "Throws", "ID", "Teams" ][col]
 
     def AppendRows(self, howMany):
         msg = wxGridTableMessage(self,
@@ -322,6 +325,8 @@ class PlayerListGrid(wxGrid):
     def __init__(self, parent):
         wxGrid.__init__(self, parent, -1)
         self.table = PlayerListTable(self)
+        self.firstMenuID = 4000
+
         self.SetBackgroundColour(wxColour(242, 242, 242))
         self.SetTable(self.table, True)
         self.SetRowLabelSize(1)
@@ -336,9 +341,13 @@ class PlayerListGrid(wxGrid):
         self.SetColSize(1, 75)
         self.SetColSize(2, 75)
         self.SetColSize(3, 100)
-
+        self.SetColSize(4, 150)
+        
         EVT_GRID_CELL_LEFT_DCLICK(self, self.OnLeftDoubleClick)
-
+        EVT_GRID_CELL_RIGHT_CLICK(self, self.OnRightClick)
+        EVT_MENU_RANGE(self, self.firstMenuID, self.firstMenuID + 100,
+                       self.OnMenu)
+        
     def OnUpdate(self, book):
         self.table.SetScorebook(book)
         self.book = book
@@ -364,6 +373,37 @@ class PlayerListGrid(wxGrid):
                                            dialog.GetThrows())
                     self.GetParent().GetGrandParent().OnUpdate()
                 return
+
+    def OnRightClick(self, event):
+        for (i,player) in enumerate(self.book.IteratePlayers()):
+            if i == event.GetRow():
+                self.menuPlayer = player
+                menu = wxMenu("Add %s to roster of" % player.GetName())
+
+                menuID = self.firstMenuID
+                for t in self.book.IterateTeams():
+                    if t.team_id not in player.GetTeams():
+                        menu.Append(menuID, t.GetName(),
+                                    "Add to %s" % t.GetName())
+                        menuID += 1
+
+                self.PopupMenu(menu)
+
+    def OnMenu(self, event):
+        menuID = self.firstMenuID
+
+        for t in self.book.IterateTeams():
+            if t.team_id not in self.menuPlayer.GetTeams():
+                if menuID == event.GetId():
+                    self.book.AddToTeam(self.menuPlayer.player_id,
+                                        self.menuPlayer.GetFirstName(),
+                                        self.menuPlayer.GetLastName(),
+                                        self.menuPlayer.bats,
+                                        self.menuPlayer.throws,
+                                        t.team_id)
+                    self.GetParent().GetGrandParent().OnUpdate()
+                    return
+                menuID += 1
 
 class PlayerListPanel(wxPanel):
     def __init__(self, parent):

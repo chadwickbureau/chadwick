@@ -159,15 +159,24 @@ int IsValid(char *play)
                               bats, throws); }
 
   void SetFirstName(char *name)  { cw_player_set_first_name(self, name); }
-  char *GetFirstName(void) const { return self->first_name; }
+  char *GetFirstName(void) { return self->first_name; }
 
   void SetLastName(char *name)  { cw_player_set_last_name(self, name); }
-  char *GetLastName(void) const  { return self->last_name; }
+  char *GetLastName(void)  { return self->last_name; }
 
 %pythoncode %{
   def GetName(self):   return self.GetFirstName() + " " + self.GetLastName()
   def GetSortName(self):
     return self.GetLastName() + ", " + self.GetFirstName()
+
+  def GetTeams(self):
+    if not hasattr(self, "teams"):  self.teams = [ ]
+    return self.teams
+
+  def AddTeam(self, teamID):
+    if not hasattr(self, "teams"):  self.teams = [ ]
+    self.teams.append(teamID)
+    self.teams.sort()
 %}
 };
 
