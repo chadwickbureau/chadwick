@@ -1565,7 +1565,7 @@ static int parse_runner_advance(CWParserState *state, CWParsedEvent *event)
 {
   int baseFrom = 0, baseTo = 0, safe = 0;
 
-  if (state->sym < '1' && state->sym > '3' && state->sym != 'B') {
+  if ((state->sym < '1' || state->sym > '3') && state->sym != 'B') {
     return cw_parse_error(state);
   }
   baseFrom = (state->sym == 'B') ? 0 : (state->sym - '0');
@@ -1577,7 +1577,7 @@ static int parse_runner_advance(CWParserState *state, CWParsedEvent *event)
   safe = (state->sym == '-') ? 1 : 0;
 
   cw_parse_nextsym(state);
-  if (state->sym < '1' && state->sym > '3' && state->sym != 'H') {
+  if ((state->sym < '1' || state->sym > '3') && state->sym != 'H') {
     return cw_parse_error(state);
   }
   baseTo = (state->sym == 'H') ? 4 : (state->sym - '0');
