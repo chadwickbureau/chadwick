@@ -76,6 +76,7 @@ int cw_event_is_official_ab(CWParsedEvent *event);
 int cw_event_runner_put_out(CWParsedEvent *event, int runner);
 int cw_event_outs_on_play(CWParsedEvent *event);
 int cw_event_runs_on_play(CWParsedEvent *event);
+int cw_event_rbi_on_play(CWParsedEvent *event);
 
 #endif  /* CW_PARSE_H */
 

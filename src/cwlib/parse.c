@@ -90,6 +90,15 @@ cw_event_runs_on_play(CWParsedEvent *event)
 	  ((event->advance[3] >= 4) ? 1 : 0));
 }
 
+int
+cw_event_rbi_on_play(CWParsedEvent *event)
+{
+  return (((event->rbi_flag[0] > 0) ? 1 : 0) +
+	  ((event->rbi_flag[1] > 0) ? 1 : 0) +
+	  ((event->rbi_flag[2] > 0) ? 1 : 0) +
+	  ((event->rbi_flag[3] > 0) ? 1 : 0));
+}
+
 /*
  * CWParserState holds the state of the parser as it proceeds through
  * the event string.
