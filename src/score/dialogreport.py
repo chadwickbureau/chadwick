@@ -33,7 +33,7 @@ class ReportDialog(wxDialog):
 
         self.text = wxTextCtrl(self, -1, contents,
                                wxDefaultPosition, wxDefaultSize,
-                               wxTE_MULTILINE | wxTE_READONLY)
+                               wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL)
         self.text.SetFont(wxFont(10, wxMODERN, wxNORMAL, wxNORMAL))
 
         sizer = wxBoxSizer(wxVERTICAL)

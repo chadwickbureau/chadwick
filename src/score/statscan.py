@@ -32,7 +32,7 @@ def FormatAverage(num, den):
     Does not create a leading zero, and prints dashes for
     divide-by-zero.
     """
-    if den == 0:  return "-----"
+    if den == 0:  return "   - "
     avg = float(num) / float(den)
     if avg >= 1.0:
         return "%5.3f" % avg
@@ -272,9 +272,10 @@ class TeamBattingAccumulator:
         for (i,key) in enumerate(keys):
             stat = self.stats[key]
             if i % 20 == 0:
-                s += "\nClub           AVG   SLG   OBP   G  AB   R   H 2B 3B HR RBI  BB IW  SO DP HP SH SF SB CS  LOB\n"
+                s += "\nClub           AVG   SLG   OBP   G   AB   R    H  2B 3B  HR RBI  BB IW   SO  DP HP SH SF  SB CS  LOB\n"
+
             
-            s += ("%-12s %s %s %s %3d %3d %3d %3d %2d %2d %2d %3d %3d %2d %3d %2d %2d %2d %2d %2d %2d %4d\n" %
+            s += ("%-12s %s %s %s %3d %4d %3d %4d %3d %2d %3d %3d %3d %2d %4d %3d %2d %2d %2d %3d %2d %4d\n" %
                 (stat["city"],
                  FormatAverage(stat["h"], stat["ab"]),
                  FormatAverage(stat["h"] + stat["2b"] +
@@ -553,8 +554,8 @@ class TeamPitchingAccumulator:
             else:
                 era = "%5.2f" % (float(stat["er"]) / float(stat["outs"]) * 27)
             if i % 20 == 0:
-                s += "\nClub           ERA  G CG SH  W- L SV    IP   R  ER   H HR  BB IW  SO BK WP HB\n"
-            s += ("%-12s %s %2d %2d %2d %2d-%2d %2d %3d.%1d %3d %3d %3d %2d %3d %2d %3d %2d %2d %2d\n" %
+                s += "\nClub           ERA   G CG SH   W-  L SV     IP   R  ER    H  HR  BB IW   SO BK WP HB\n"
+            s += ("%-12s %s %3d %2d %2d %3d-%3d %2d %4d.%1d %3d %3d %4d %3d %3d %2d %4d %2d %2d %2d\n" %
                 (stat["city"], era,
                  len(stat["games"]),
                  stat["cg"], stat["sho"],
@@ -733,9 +734,9 @@ class TeamFieldingAccumulator:
         for (i,key) in enumerate(keys):
             stat = self.stats[key]
             if i % 20 == 0:
-                s += "\nClub           PCT   G   PO   A  E  DP TP  BIP  BF\n"
+                s += "\nClub           PCT   G   PO    A   E  DP TP  BIP   BF\n"
             
-            s += ("%-12s %s %3d %4d %3d %2d %3d %2d %4d %3d\n" %
+            s += ("%-12s %s %3d %4d %4d %3d %3d %2d %4d %4d\n" %
                 (stat["city"],
                  FormatAverage(stat["po"] + stat["a"],
                                stat["po"] + stat["a"] + stat["e"]),
@@ -746,6 +747,115 @@ class TeamFieldingAccumulator:
 
         return s
 
+
+class GameLogAccumulator:
+    def __init__(self, cwf):
+        self.cwf = cwf
+        self.stats = { }
+        for team in cwf.IterateTeams():
+            self.stats[team.team_id] = [ ]
+
+    def OnBeginGame(self, game, gameiter):  pass
+    def OnSubstitution(self, game, gameiter): pass
+    def OnEvent(self, game, gameiter):  pass
+
+    def OnEndGame(self, game, gameiter):
+        ids = [ cw_game_info_lookup(game, "visteam"),
+                cw_game_info_lookup(game, "hometeam") ]
+        scores = [ cw_gameiter_get_score(gameiter, t) for t in [0,1] ]
+
+        for t in [0,1]:
+            self.stats[ids[t]].append({ "date": cw_game_info_lookup(game, "date"),
+                                        "number": cw_game_info_lookup(game, "number"),
+                                        "teams": ids,
+                                        "scores": scores,
+                                        "innings": game.last_event.inning,
+                                        "wp": cw_game_info_lookup(game, "wp"),
+                                        "lp": cw_game_info_lookup(game, "lp"),
+                                        "save": cw_game_info_lookup(game, "save") })
+   
+    def __str__(self):
+        keys = self.stats.keys()
+        keys.sort()
+
+        s = ""
+
+        for team in keys:
+            self.stats[team].sort(lambda x, y: cmp(x["date"] + x["number"],
+                                                   y["date"] + y["number"]))
+            roster = self.cwf.GetTeam(team)
+
+            s += "\nGame log for %s %s\n" % (roster.city, roster.nickname)
+
+            wins = 0
+            losses = 0
+            
+            for (i,game) in enumerate(self.stats[team]):
+                if i % 20 == 0:
+                    s += "\nDate       #  Opponent Result         Record  Win              Loss             Save\n"
+                
+                if game["wp"] != "":
+                    wp = self.cwf.GetPlayer(game["wp"])
+                    wpname = wp.first_name[0] + ". " + wp.last_name
+                else:
+                    wpname = ""
+                    
+                if game["lp"] != "":
+                    lp = self.cwf.GetPlayer(game["lp"])
+                    lpname = lp.first_name[0] + ". " + lp.last_name
+                else:
+                    lpname = ""
+                    
+                if game["save"] != "":
+                    save = self.cwf.GetPlayer(game["save"])
+                    savename = save.first_name[0] + ". " + save.last_name
+                else:
+                    savename = ""
+
+                if game["number"] == "0":
+                    game["number"] = " ";
+
+                if game["innings"] == 9:
+                    inningStr = ""
+                else:
+                    inningStr = "(%d)" % game["innings"]
+                    
+                if game["teams"][0] == team:
+                    # Visitors
+                    if game["scores"][0] > game["scores"][1]:
+                        dec = "W"
+                        wins += 1
+                    elif game["scores"][0] < game["scores"][1]:
+                        dec = "L"
+                        losses += 1
+                    else:
+                        dec = " "
+                
+                    s += ("%s %s   at %s  %s %2d-%2d %-4s  %3d-%3d  %-16s %-16s %-16s\n" %
+                          (game["date"], game["number"],
+                           game["teams"][1], dec, 
+                           game["scores"][0], game["scores"][1], inningStr,
+                           wins, losses, wpname, lpname, savename))
+                else:
+                    # Home team
+                    if game["scores"][0] > game["scores"][1]:
+                        dec = "L"
+                        losses += 1
+                    elif game["scores"][0] < game["scores"][1]:
+                        dec = "W"
+                        wins += 1
+                    else:
+                        dec = " "
+
+                    s += ("%s %s   vs %s  %s %2d-%2d %-4s  %3d-%3d  %-16s %-16s %-16s\n" %
+                          (game["date"], game["number"],
+                           game["teams"][0], dec,
+                           game["scores"][1], game["scores"][0], inningStr,
+                           wins, losses, wpname, lpname, savename))
+                    
+            s += "\n"
+
+        return s
 
 class RecordAccumulator:
     def __init__(self, cwf):
@@ -823,7 +933,62 @@ class RecordAccumulator:
                  stat["xw"], stat["xl"]))
 
         return s
-    
+
+class GrandSlamAccumulator:
+    """
+    Compiles a list of all grand slams hit.
+    """
+    def __init__(self, cwf):
+        self.cwf = cwf
+        self.stats = [ ]
+
+    def OnBeginGame(self, game, gameiter):  pass
+    def OnSubstitution(self, game, gameiter): pass
+
+    def OnEvent(self, game, gameiter):
+        if (gameiter.event_data.event_type == CW_EVENT_HOMERUN and
+            cw_gameiter_get_runner(gameiter, 1) != "" and
+            cw_gameiter_get_runner(gameiter, 2) != "" and
+            cw_gameiter_get_runner(gameiter, 3) != ""):
+            inning = cw_gameiter_get_inning(gameiter)
+            halfInning = cw_gameiter_get_halfinning(gameiter)
+            if halfInning == 0:
+                team = cw_game_info_lookup(game, "visteam")
+                opp = cw_game_info_lookup(game, "hometeam")
+                site = opp
+            else:
+                team = cw_game_info_lookup(game, "hometeam")
+                opp = cw_game_info_lookup(game, "visteam")
+                site = team
+                
+            self.stats.append({ "date": cw_game_info_lookup(game, "date"),
+                                "number": cw_game_info_lookup(game, "number"),
+                                
+                                "inning": inning,
+                                "halfInning": halfInning,
+                                "batter": cw_gameiter_get_batter(gameiter),
+                                "pitcher": cw_gameiter_get_fielder(gameiter, 1-halfInning, 1),
+                                "team": team, "opp": opp, "site": site })
+        
+    def OnEndGame(self, game, gameiter):  pass
+   
+    def __str__(self):
+        self.stats.sort(lambda x, y: cmp(x["date"] + x["number"],
+                                         y["date"] + y["number"]))
+
+        s = "\nDate       # Site Batter               Pitcher           Inning\n"
+        for rec in self.stats:
+            if rec["number"] == "0":  rec["number"] = " "
+            batter = self.cwf.GetPlayer(rec["batter"])
+            pitcher = self.cwf.GetPlayer(rec["pitcher"])
+
+            s += ("%s %s %s  %-20s %-20s %d\n" % 
+                  (rec["date"], rec["number"], rec["site"],
+                   batter.first_name[0] + ". " + batter.last_name + " (" + rec["team"] + ")",
+                   pitcher.first_name[0] + ". " + pitcher.last_name + " (" + rec["opp"] + ")",
+                   rec["inning"]))
+        return s
+
 def ProcessGame(game, acclist):
     gameiter = cw_gameiter_create(game)
     map(lambda x: x.OnBeginGame(game, gameiter), acclist)
@@ -842,9 +1007,21 @@ def ProcessGame(game, acclist):
     map(lambda x: x.OnEndGame(game, gameiter), acclist)
     cw_gameiter_cleanup(gameiter)
 
-def ProcessFile(book, acclist):
-    for game in book.IterateGames():
+def ProcessFile(book, acclist, monitor=None):
+    """
+    Process the games in scorebook 'book' through the list of
+    accumulators in 'acclist'.  Instrumented so that if
+    'monitor' is None, progress indications (via calls to
+    monitor.Update) are given -- thus the wxWidgets wxProgressDialog
+    automatically works for this parameter.
+    """
+    numGames = book.NumGames()
+    for (i,game) in enumerate(book.IterateGames()):
         ProcessGame(game, acclist)
+        if monitor != None:
+            if not monitor.Update(round(float(i)/float(numGames)*100)):
+                return False
+    return True
 
 if __name__ == "__main__":
     import sys
@@ -854,10 +1031,12 @@ if __name__ == "__main__":
 
     book = scorebook.ChadwickScorebook()
     book.Read(fn)
+
     x = [ RecordAccumulator(book),
           TeamBattingAccumulator(book),
           TeamPitchingAccumulator(book),
           TeamFieldingAccumulator(book),
+          GameLogAccumulator(book),
           BattingAccumulator(), PitchingAccumulator() ]
     for pos in range(9):
         x.append(FieldingAccumulator(pos+1))

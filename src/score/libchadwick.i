@@ -51,6 +51,12 @@ int cw_gameiter_get_halfinning(CWGameIterator *iterator)
   }
 }
 
+char *cw_gameiter_get_batter(CWGameIterator *iterator)
+{
+  int halfInning = cw_gameiter_get_halfinning(iterator);
+  return iterator->lineups[iterator->num_batters[halfInning] % 9 + 1][halfInning].player_id;
+}
+
 char *cw_gameiter_get_player(CWGameIterator *iterator, 
                              int team, int slot)
 {
@@ -163,6 +169,7 @@ void cw_game_set_er(CWGame *game, char *pitcher, int er)
 
 int cw_gameiter_get_inning(CWGameIterator *iterator);
 int cw_gameiter_get_halfinning(CWGameIterator *iterator);
+char *cw_gameiter_get_batter(CWGameIterator *iterator);
 char *cw_gameiter_get_player(CWGameIterator *iterator, int team, int slot);
 char *cw_gameiter_get_fielder(CWGameIterator *iterator, int team, int pos);
 int cw_gameiter_num_batters(CWGameIterator *iterator, int team);

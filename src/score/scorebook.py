@@ -229,6 +229,9 @@ class ChadwickScorebook:
         keys.sort()
         for p in keys: yield self.players[p]
 
+    def GetPlayer(self, playerID):
+        return self.players[playerID]
+
     def UniquePlayerID(self, first, last):
         playerID = last[:4].lower()
         while len(playerID) < 4: playerID += "-"
