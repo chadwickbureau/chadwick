@@ -227,7 +227,6 @@ class ChadwickFrame(wxFrame):
             book = scorebook.ChadwickScorebook()
             book.Read(filename)
             self.book = book
-            self.OnUpdate()
         except:
             dialog = wxMessageDialog(self,
                                      "An error occurred in reading "
@@ -235,6 +234,9 @@ class ChadwickFrame(wxFrame):
                                      "Error opening scorebook",
                                      wxOK | wxICON_ERROR)
             dialog.ShowModal()
+            return
+
+        self.OnUpdate()
             
 
     def OnFileNew(self, event):

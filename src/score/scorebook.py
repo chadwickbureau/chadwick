@@ -40,6 +40,38 @@ def TempFile():
     os.close(f[0])
     return name    
     
+class ChadwickGame:
+    """
+    This is a convenience class used by ChadwickScorebook
+    to 'wrap' the CWGame type to make it more object-like, and to hide
+    details of dealing with the underlying C library.
+    TODO: Much of this stuff is actually computed -- this is intended to
+    be a temporary, 'const' sort of object, and so a lot could be cached.
+    """
+    def __init__(self, game):
+        """
+        Initialize the wrapper around a CWGame 'game'.
+        """
+        self.game = game
+
+    def GetGameID(self):  return self.game.game_id
+    def GetDate(self):    return cw_game_info_lookup(self.game, "date")
+    def GetNumber(self):  return int(cw_game_info_lookup(self.game, "number"))
+
+    def GetTeams(self):
+        return [ cw_game_info_lookup(self.game, "visteam"),
+                 cw_game_info_lookup(self.game, "hometeam") ]
+
+    def GetScore(self):
+        gameiter = cw_gameiter_create(self.game)
+
+        try:
+            while gameiter.event != None:  cw_gameiter_next(gameiter)
+            return [ cw_gameiter_get_score(gameiter, t) for t in [0,1] ]
+        finally:
+            cw_gameiter_cleanup(gameiter)
+
+
 class ChadwickScorebook:
     def __init__(self, year=2005):
         self.books = { }
@@ -216,10 +248,13 @@ class ChadwickScorebook:
                 self.players[x.player_id] = x
                 x = x.next
 
-    def NumGames(self): return len(self.games)
+    def NumGames(self, crit=lambda x: True):
+        return len(filter(crit, [ ChadwickGame(g) for g in self.games ]))
 
-    def IterateGames(self):
-        for g in self.games: yield g
+    def IterateGames(self, crit=lambda x: True):
+        for g in self.games:
+            game = ChadwickGame(g)
+            if crit(game):  yield game
 
     def NumPlayers(self):  return len(self.players)
 

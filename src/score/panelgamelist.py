@@ -28,20 +28,20 @@ from wxPython.wx import *
 from wxPython.grid import *
 from libchadwick import *
 
+from wxutils import FormattedStaticText
 from dialogboxview import BoxscoreViewDialog
 from gameeditor import GameEditor
 
 class GameListGrid(wxGrid):
     def __init__(self, parent):
         wxGrid.__init__(self, parent, -1)
-        self.CreateGrid(0, 4)
-        self.SetColLabelValue(0, "Game ID")
-        self.SetColLabelValue(1, "Date")
-        self.SetColLabelValue(2, "Visitors")
-        self.SetColLabelValue(3, "Home")
+        self.CreateGrid(0, 2)
+        self.SetColLabelValue(0, "Date")
+        self.SetColLabelValue(1, "Result")
         self.SetDefaultCellFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
         self.SetDefaultCellAlignment(wxALIGN_CENTER, wxALIGN_CENTER)
         self.EnableEditing(false)
+        self.SetSelectionMode(wxGrid.wxGridSelectRows)
 
         EVT_GRID_CELL_LEFT_DCLICK(self, self.OnLeftDoubleClick)
 
@@ -53,23 +53,31 @@ class GameListGrid(wxGrid):
             self.InsertRows(0, book.NumGames() - self.GetNumberRows())
 
         for (i,game) in enumerate(book.IterateGames()):
-            self.SetCellValue(i, 0, game.game_id)
-            self.SetCellValue(i, 1, cw_game_info_lookup(game, "date"))
-            self.SetCellValue(i, 2, cw_game_info_lookup(game, "visteam"))
-            self.SetCellValue(i, 3, cw_game_info_lookup(game, "hometeam"))
+            number = game.GetNumber()
+            if number == 1:
+                self.SetCellValue(i, 0, game.GetDate() + " (G1)")
+            elif number == 2:
+                self.SetCellValue(i, 0, game.GetDate() + " (G2)")
+            else:
+                self.SetCellValue(i, 0, game.GetDate())
 
+            teams = [ book.GetTeam(t) for t in game.GetTeams() ]
+            score = game.GetScore()
+            result = ("%s %s %d at %s %s %d" %
+                      (teams[0].city, teams[0].nickname, score[0],
+                       teams[1].city, teams[1].nickname, score[1]))
+            self.SetCellValue(i, 1, result)
+            
         self.AutoSizeRows()
         self.AutoSizeColumns()
         self.AdjustScrollbars()
 
     def OnLeftDoubleClick(self, event):
-        for game in self.book.IterateGames():
-            if game.game_id == str(self.GetCellValue(event.GetRow(), 0)):
-                vis = str(self.GetCellValue(event.GetRow(), 2))
-                home = str(self.GetCellValue(event.GetRow(), 3))
-                doc = GameEditor(game,
-                                 self.book.GetTeam(vis),
-                                 self.book.GetTeam(home))
+        for (i,game) in enumerate(self.book.IterateGames()):
+            if i == event.GetRow():
+                teams = [ self.book.GetTeam(t) for t in game.GetTeams() ]
+                # FIXME: here we pass from the wrapper to the base game
+                doc = GameEditor(game.game, teams[0], teams[1])
                 dialog = BoxscoreViewDialog(self, doc)
                 dialog.ShowModal()
                 return
@@ -80,15 +88,41 @@ class GameListPanel(wxPanel):
     def __init__(self, parent):
         wxPanel.__init__(self, parent, -1)
 
+        filterSizer = wxBoxSizer(wxHORIZONTAL)
+        filterSizer.Add(FormattedStaticText(self, "Show games involving"),
+                        0, wxALL | wxALIGN_CENTER, 5)
+        self.teamList = wxChoice(self, -1, wxDefaultPosition, wxSize(250, -1))
+        self.teamList.Append("all teams")
+        self.teamList.SetSelection(0)
+        filterSizer.Add(self.teamList, 0, wxALL | wxALIGN_CENTER, 5)
+
         newGameButton = wxButton(self, CW_MENU_GAME_NEW, "Enter new game")
         newGameButton.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+
         self.gameList = GameListGrid(self)
 
         sizer = wxBoxSizer(wxVERTICAL)
-        sizer.Add(newGameButton, 0, wxALL | wxALIGN_CENTER, 5)
+
+        toolSizer = wxBoxSizer(wxHORIZONTAL)
+        toolSizer.Add(filterSizer, 0, wxALL | wxALIGN_CENTER, 5)
+        toolSizer.Add(newGameButton, 0, wxALL | wxALIGN_CENTER, 5)
+        sizer.Add(toolSizer, 0, wxALL | wxALIGN_CENTER, 5)
         sizer.Add(self.gameList, 1, wxEXPAND, 0)
         self.SetSizer(sizer)
         self.Layout()
 
+        EVT_CHOICE(self, self.teamList.GetId(), self.OnTeamFilter)
+
     def OnUpdate(self, book):
+        teamChoice = self.teamList.GetStringSelection()
+        self.teamList.Clear()
+        self.teamList.Append("all teams")
+        for team in book.IterateTeams():
+            self.teamList.Append(team.city + " " + team.nickname)
+        self.teamList.SetStringSelection(teamChoice)
+        
         self.gameList.OnUpdate(book)
+
+
+    def OnTeamFilter(self, event):
+        pass
