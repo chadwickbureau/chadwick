@@ -10,9 +10,9 @@
       <surname>Turocy</surname>
     </author>
     <edition>Version 0.1.0</edition>
-    <pubdate>July, 2002</pubdate>
+    <pubdate>March, 2003</pubdate>
     <copyright>
-      <year>2002</year>
+      <year>2003</year>
       <holder>Theodore Turocy</holder>
     </copyright>
   </bookinfo>
@@ -691,7 +691,61 @@ Since there is no corresponding standard application, <application>cwsub</applic
     <sect1 id="cwtools.cmdline">
       <title>Command-line options</title>
       <para>Each of the command-line tools shares a common set of
-options controlling their behavior.</para>
+options controlling their behavior.  These are detailed in the 
+following table.</para>
+
+      <table>
+	<title>Common command-line options and their effects</title>
+	<tgroup cols='2'>
+	  <thead>
+	    <row><entry>Switch</entry><entry>Description</entry></row>
+	    </thead>
+
+	  <tbody>
+	    <row>
+	    <entry><option>-a</option></entry>
+            <entry>Generate ASCII comma-delimited files (default)</entry>
+            </row>
+	    <row>
+	    <entry><option>-d</option></entry>
+            <entry>Print a list of the available fields and descriptions (for use with <option>-f</option>.</entry>
+            </row>
+	    <row>
+	    <entry><option>-e</option> <parameter>mmdd</parameter></entry>
+            <entry>The latest date to process (inclusive).</entry>
+            </row>
+	    <row>
+	    <entry><option>-f</option> <parameter>flist</parameter></entry>
+            <entry>List of fields to output.  The default list can be
+viewed with <option>-h</option>; the list of available fields can be
+viewed with <option>-d</option>.</entry>
+            </row>
+	    <row>
+	    <entry><option>-ft</option></entry>
+            <entry>Generate FORTRAN format files.  (Note: this is less
+            tested in Chadwick than the ASCII version.  Please report any
+            problems you might encounter.)</entry>
+            </row>
+	    <row>
+	    <entry><option>-h</option></entry>
+	    <entry>Prints description and usage information for the tool.</entry>
+            </row>
+            <row>
+            <entry><option>-i</option> <parameter>gameid</parameter></entry>
+            <entry>Only process the game with ID <parameter>gameid</parameter>.</entry>
+	    </row>
+	    <row>
+	    <entry><option>-s</option> <parameter>mmdd</parameter></entry>
+            <entry>The earliest date to process (inclusive).</entry>
+            </row>
+	    <row>
+	    <entry><option>-y</option></entry>
+            <entry>Specifies the year to use (four digits).  This is currently required; hopefully future versions can intelligently discern the year from the input files.</entry>
+            </row>
+	    </tbody>
+	  </tgroup>
+	</table>
+
       </sect1>
 
   </chapter>
@@ -828,8 +882,609 @@ options controlling their behavior.</para>
     <sect1 id="notation.pitch">
       <title>Pitch-by-pitch notation</title>
 
-      <para></para>
+      <para>
+      The following table contains the pitch codes which may appear in
+      Retrosheet files with pitch-by-pitch information.  (This list is
+      based on a list posted by David Vincent to the Retrosheet mailing
+      list in August, 2002.)  As of this writing, Chadwick does not
+      do any actual processing of pitch strings; it merely stores and
+      reports them verbatim.
+
+      <table>
+	<title>Meanings for pitch codes in pitch-by-pitch notation</title>
+	<tgroup cols='2'>
+	  <thead>
+	    <row><entry>Code</entry><entry>Description</entry></row>
+	    </thead>
+
+	  <tbody>
+	    <row><entry>B</entry><entry>Ball</entry></row>
+	    <row><entry>I</entry><entry>Intentional ball</entry></row>
+            <row><entry>P</entry><entry>Pitchout</entry></row>
+	    <row><entry>H</entry><entry>Hit by pitch</entry></row>
+	    <row><entry>V</entry><entry>Pitcher went to mouth (penalty ball)</entry></row>
+            <row><entry>X</entry><entry>Ball in play</entry></row>
+	    <row><entry>C</entry><entry>Called strike</entry></row>
+	    <row><entry>S</entry><entry>Swinging strike</entry></row>
+	    <row><entry>K</entry><entry>Unknown strike</entry></row>
+            <row><entry>F</entry><entry>Foul ball</entry></row>
+	    <row><entry>M</entry><entry>Missed bunt</entry></row>
+	    <row><entry>L</entry><entry>Foul bunt</entry></row>
+            <row><entry>Q</entry><entry>Swinging strike on pitchout</entry></row>
+            <row><entry>R</entry><entry>Foul ball on pitchout</entry></row>
+	    <row><entry>Y</entry><entry>Ball in play on pitchout</entry></row>
+            <row><entry>T</entry><entry>Foul tip</entry></row>
+            <row><entry>O</entry><entry>Foul tip on bunt</entry></row>
+            <row><entry>N</entry><entry>No pitch (e.g., pitch thrown but time called)</entry></row>
+	    <row><entry>U</entry><entry>Unknown pitch</entry></row>
+	    <row><entry>.</entry><entry>Event marker (used to indicate timing of substitutions, balks, etc.)</entry></row>
+	    <row><entry>1</entry><entry>Pickoff attempt at first by pitcher</entry></row>
+	    <row><entry>2</entry><entry>Pickoff attempt at second by pitcher</entry></row>
+	    <row><entry>3</entry><entry>Pickoff attempt at third by pitcher</entry></row>
+	    <row><entry>+1</entry><entry>Pickoff attempt at first by catcher (modifies previous pitch)</entry></row>
+	    <row><entry>+2</entry><entry>Pickoff attempt at second by catcher (modifies previous pitch)</entry></row>
+	    <row><entry>+3</entry><entry>Pickoff attempt at third by catcher (modifies previous pitch)</entry></row>
+	    <row><entry>></entry><entry>Runner going (modifies subsequent pitch)</entry></row>
+            <row><entry>*</entry><entry>Blocked ball (modifies subsequent pitch; generally used with B)</entry></row>
+
+	    </tbody>
+	  </tgroup>
+	</table>
+
+      Note that when an event occurs in the middle of a plate appearance,
+the entire pitch sequence is repeated in subsequent play records, not
+just the portion occurring after the mid-PA event.
+      </para>
       </sect1>
   </chapter>
+
+<chapter id="api">
+<title>The Chadwick Library</title>
+
+<para>
+This chapter documents the API for the underlying library itself.
+This library can read, write, and manipulate files in the Retrosheet
+format.
+</para>
+
+<para>
+The internals of the library are currently designed with the
+explicit purpose of reading and writing Retrosheet notation files.
+In the future, these may evolve to more general-purpose play-by-play
+representations.
+</para>
+
+    <sect1 id="api.book">
+      <title><type>CWScorebook</type> -- A collection of games</title>
+
+<para>
+A <type>CWScorebook</type> is a collection of games.  In Retrosheet
+terms, a <type>CWScorebook</type> can be used to read, write, and
+manipulate an individual event file (generally
+<filename>*.EVA</filename> or <filename>*.EVN</filename> in released
+files).
+</para>
+
+<para>
+Internally, a <type>CWScorebook</type> contains two linked lists.
+A linked list of <type>CWComment</type> stores comment records that
+appear before the first game in the file.  These are used by
+Retrosheet for copyright and related information about the file.
+A linked list of <type>CWGame</type> stores the games themselves.
+</para>
+
+<sect2 id="api.book.lifecycle">
+	<title>Creating and destroying</title>
+
+<funcsynopsis>
+<funcprototype><funcdef>CWScorebook *<function>cw_scorebook_create</function></funcdef>
+<paramdef>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Allocates an initializes a new empty scorebook.
+Caller is responsible for maintaining returned pointer.
+</para>
+
+<funcsynopsis>
+<funcprototype><funcdef>void <function>cw_scorebook_cleanup</function></funcdef>
+<paramdef>
+<parameter>CWScorebook *scorebook</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Cleans up internal memory allocation associated with
+<parameter>scorebook</parameter>.
+Caller is responsible for freeing <parameter>scorebook</parameter>.
+</para>
+
+</sect2>
+
+      <sect2 id="api.book.io">
+	<title>Reading and writing</title>
+
+<funcsynopsis>
+<funcprototype><funcdef>int <function>cw_scorebook_read</function></funcdef>
+<paramdef>
+<parameter>CWScorebook *scorebook</parameter>
+<parameter>char *path</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Reads the contents of the scorebook file in filename <parameter>path</parameter>
+into the scorebook <parameter>scorebook</parameter>  Returns the number
+of games successfully read, or -1 if the file could not be opened.
+</para>
+
+<funcsynopsis>
+<funcprototype><funcdef>void <function>cw_scorebook_write</function></funcdef>
+<paramdef>
+<parameter>CWScorebook *scorebook</parameter>
+<parameter>FILE *file</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Writes the contents of <parameter>scorebook</parameter> to
+<parameter>file</parameter>.
+</para>
+
+</sect2>
+
+      <sect2 id="api.book.games">
+	<title>Manipulating games</title>
+
+<funcsynopsis>
+<funcprototype><funcdef>int <function>cw_scorebook_append_game</function></funcdef>
+<paramdef>
+<parameter>CWScorebook *scorebook</parameter>
+<parameter>CWGame *game</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Appends <parameter>game</parameter> to <parameter>scorebook</parameter>.
+Returns nonzero if successful, 0 if unsuccessful.  (Failure occurs,
+for example, if <parameter>game</parameter> is null.)
+After a successful append, <parameter>scorebook</parameter> is responsible
+for the memory associated with <parameter>game</parameter>.
+</para>
+	
+<funcsynopsis>
+<funcprototype><funcdef>int <function>cw_scorebook_remove_game</function></funcdef>
+<paramdef>
+<parameter>CWScorebook *scorebook</parameter>
+<parameter>char *game_id</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Removes the game with game ID <parameter>game_id</parameter> from
+<parameter>scorebook</parameter>.  If no game with that ID is present,
+no action is taken.
+</para>
+
+</sect2>
+
+
+      </sect1>
+
+    <sect1 id="api.file">
+      <title>file</title>
+
+      <para>
+
+      </para>
+      </sect1>
+    
+    <sect1 id="api.game">
+      <title><type>CWGame</type> -- Play-by-play for a game</title>
+
+      <para>
+      The <type>CWGame</type> datatype contains the play-by-play and other
+information for a game.  Lists of <type>CWGame</type>s are often kept in a
+<type>CWScorebook</type>.
+      </para>
+
+<sect2 id="api.game.lifecycle">
+	<title>Creating and destroying</title>
+
+<funcsynopsis>
+<funcprototype><funcdef>CWGame *<function>cw_game_create</function></funcdef>
+<paramdef>
+<parameter>char *game_id</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Allocates an initializes a new game with id <parameter>game_id</parameter>.
+Caller is responsible for maintaining returned pointer.
+</para>
+
+<funcsynopsis>
+<funcprototype><funcdef>void <function>cw_game_cleanup</function></funcdef>
+<paramdef>
+<parameter>CWGame *game</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Cleans up internal memory allocation associated with 
+<parameter>game</parameter>.  Caller is responsible for freeing the
+<type>CWGame</type> itself.
+</para>
+
+</sect2>
+
+      <sect2 id="api.game.io">
+	<title>Reading and writing</title>
+
+<funcsynopsis>
+<funcprototype><funcdef>CWGame *<function>cw_game_read</function></funcdef>
+<paramdef>
+<parameter>FILE *file</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Creates a game by reading from a file; returns a null pointer if
+read is unsuccessful.  (This function is useful primarily for the
+<type>CWScorebook</type> implementation and is probably not generally
+useful for user code.)
+</para>
+
+<funcsynopsis>
+<funcprototype><funcdef>void <function>cw_game_write</function></funcdef>
+<paramdef>
+<parameter>CWGame *game</parameter>
+<parameter>FILE *file</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Writes the <parameter>game</parameter> to <parameter>file</parameter>
+in Retrosheet format.
+</para>
+</sect2>
+
+      <sect2 id="api.game.info">
+	<title>General game information</title>
+
+<funcsynopsis>
+<funcprototype><funcdef>void <function>cw_game_set_version</function></funcdef>
+<paramdef>
+<parameter>CWGame *game</parameter>
+<parameter>char *version</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Sets the version number (for file format and game notation)
+</para>
+
+<funcsynopsis>
+<funcprototype><funcdef>void <function>cw_game_info_append</function></funcdef>
+<paramdef>
+<parameter>CWGame *game</parameter>
+<parameter>char *label</parameter>
+<parameter>char *data</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Add an info record to the game.
+</para>
+
+<funcsynopsis>
+<funcprototype><funcdef>void <function>cw_game_info_set</function></funcdef>
+<paramdef>
+<parameter>CWGame *game</parameter>
+<parameter>char *label</parameter>
+<parameter>char *data</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Modify an existing info record in the game.
+</para>
+
+<funcsynopsis>
+<funcprototype><funcdef>void <function>cw_game_info_lookup</function></funcdef>
+<paramdef>
+<parameter>CWGame *game</parameter>
+<parameter>char *label</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Scans the info records for <parameter>label</parameter>
+and returns the associated data.
+The pointer returned is internal to the <type>CWGame</type> structure, so it
+should not be deleted, nor its contents changed.
+The list is scanned from the tail first, to return the last seen
+record in the case of multiple records; this is particularly useful in
+the case of multiple edit date records.
+</para>
+
+</sect2>
+
+      <sect2 id="api.game.starters">
+	<title>The starting lineup</title>
+
+<funcsynopsis>
+<funcprototype><funcdef>void <function>cw_game_starter_append</function></funcdef>
+<paramdef>
+<parameter>CWGame *game</parameter>
+<parameter>char *player_id</parameter>
+<parameter>char *name</parameter>
+<parameter>int team</parameter>
+<parameter>int slot</parameter>
+<parameter>int pos</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Adds a new start record to the game.
+</para>
+
+<funcsynopsis>
+<funcprototype><funcdef>CWAppearance *<function>cw_game_starter_find</function></funcdef>
+<paramdef>
+<parameter>CWGame *game</parameter>
+<parameter>int team</parameter>
+<parameter>int slot</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Returns the appearance record for the starter for <parameter>team</parameter>
+in batting order position <parameter>slot</parameter>.
+</para>
+
+<funcsynopsis>
+<funcprototype><funcdef>CWAppearance *<function>cw_game_starter_find_by_position</function></funcdef>
+<paramdef>
+<parameter>CWGame *game</parameter>
+<parameter>int team</parameter>
+<parameter>int pos</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Returns the appearance record for the starter for <parameter>team</parameter>
+at position <parameter>pos</parameter>.
+</para>
+
+</sect2>
+
+      <sect2 id="api.game.event">
+	<title>Play-by-play events</title>
+
+<funcsynopsis>
+<funcprototype><funcdef>void <function>cw_game_event_append</function></funcdef>
+<paramdef>
+<parameter>CWGame *game</parameter>
+<parameter>int inning</parameter>
+<parameter>int halfInning</parameter>
+<parameter>char *batter</parameter>
+<parameter>char *count</parameter>
+<parameter>char *pitches</parameter>
+<parameter>char *event_text</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Adds an event record to the game.
+</para>
+
+<funcsynopsis>
+<funcprototype><funcdef>void <function>cw_game_truncate</function></funcdef>
+<paramdef>
+<parameter>CWGame *game</parameter>
+<parameter>CWEvent *event</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Truncate a game, by deleting event records beginning with 
+<parameter>event</parameter>.
+</para>
+
+</sect2>
+
+      <sect2 id="api.game.sub">
+	<title>Substitutions</title>
+
+<funcsynopsis>
+<funcprototype><funcdef>void <function>cw_game_substitute_append</function></funcdef>
+<paramdef>
+<parameter>CWGame *game</parameter>
+<parameter>char *playerID</parameter>
+<parameter>char *name</parameter>
+<parameter>int team</parameter>
+<parameter>int slot</parameter>
+<parameter>int pos</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Add a substitute record to the game
+</para>
+
+</sect2>
+
+      <sect2 id="api.game.data">
+	<title>Data lines</title>
+
+<funcsynopsis>
+<funcprototype><funcdef>void <function>cw_game_data_append</function></funcdef>
+<paramdef>
+<parameter>CWGame *game</parameter>
+<parameter>int num_data</parameter>
+<parameter>char **data</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Add a data record to the game.
+</para>
+
+</sect2>
+
+      <sect2 id="api.game.comment">
+	<title>Comment lines</title>
+
+<funcsynopsis>
+<funcprototype><funcdef>void <function>cw_game_comment_append</function></funcdef>
+<paramdef>
+<parameter>CWGame *game</parameter>
+<parameter>char *comment</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Add a comment record to the game.
+</para>
+
+</sect2>
+      </sect1>
+
+    <sect1 id="api.gameiter">
+      <title><type>CWGameIterator</type> -- Keeping track of the state of a game</title>
+
+      <para>
+
+      </para>
+      </sect1>
+
+    <sect1 id="api.league">
+      <title><type>CWLeague</type> -- League definition file</title>
+
+      <para>
+      A <type>CWLeague</type> represents a collection of <type>CWRoster</type>, mapping roughly to the files named <filename>TEAMyyyy</filename> in Retrosheet data.
+      </para>
+
+      <para>
+      Internally, a <type>CWLeague</type> is just a linked list of 
+      <type>CWRoster</type>s.
+      </para>
+
+      <sect2 id="api.league.lifecycle">
+	<title>Creating and destroying</title>
+
+<funcsynopsis>
+<funcprototype><funcdef>CWLeague *<function>cw_league_create</function></funcdef>
+<paramdef>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Allocates and initializes a new <type>CWLeague</type> structure.
+Caller is responsible for memory management of the created pointer.
+</para>
+
+<funcsynopsis>
+<funcprototype><funcdef>void <function>cw_league_cleanup</function></funcdef>
+<paramdef>
+<parameter>CWLeague *league</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Cleans up internal memory associated with <parameter>league</parameter>.
+Caller is responsible for freeing the <parameter>league</parameter> 
+pointer itself.
+</para>
+
+</sect2>	
+
+      <sect2 id="api.league.io">
+	<title>Reading and writing</title>
+
+<funcsynopsis>
+<funcprototype><funcdef>void <function>cw_league_read</function></funcdef>
+<paramdef>
+<parameter>CWLeague *league</parameter>
+<parameter>FILE *file</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Read a leaguefile (in Retrosheet convention, <filename>TEAMyyyy</filename>)
+from the stream <parameter>file</parameter>.  Rosters are created for
+each team, but are left empty.
+</para>
+
+<funcsynopsis>
+<funcprototype><funcdef>void <function>cw_league_write</function></funcdef>
+<paramdef>
+<parameter>CWLeague *league</parameter>
+<parameter>FILE *file</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Write a leaguefile (in Retrosheet convention, <filename>TEAMyyyy</filename>)
+to the stream <parameter>file</parameter>.
+</para>
+
+</sect2>
+
+      <sect2 id="api.league.rosters">
+	<title>Roster manipulation</title>
+
+<funcsynopsis>
+<funcprototype><funcdef>void <function>cw_league_roster_append</function></funcdef>
+<paramdef>
+<parameter>CWLeague *league</parameter>
+<parameter>CWRoster *roster</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Append <parameter>roster</parameter> to the league.  The 
+<parameter>league</parameter> takes responsibility for the memory
+allocated to pointer <parameter>roster</parameter>.
+</para>
+
+<funcsynopsis>
+<funcprototype><funcdef>CWRoster *<function>cw_league_roster_find</function></funcdef>
+<paramdef>
+<parameter>CWLeague *league</parameter>
+<parameter>char *team</parameter>
+</paramdef>
+</funcprototype>
+</funcsynopsis>
+<para>
+Returns a pointer to the roster of the team with ID
+<parameter>team</parameter>.  The Retrosheet convention is for
+<parameter>team</parameter> to be three characters long, but
+longer or shorter IDs are accepted by the library.
+</para>
+
+</sect2>
+
+      </sect1>
+
+    <sect1 id="api.parse">
+      <title>parse</title>
+
+      <para>
+
+      </para>
+      </sect1>
+
+    <sect1 id="api.roster">
+      <title><type>CWRoster</type> -- Team rosters</title>
+
+      <para>
+
+      </para>
+      </sect1>
+
+    </chapter>
 
 </book>
