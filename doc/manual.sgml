@@ -1,0 +1,835 @@
+<!DOCTYPE Book PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
+]>
+
+<book id="chadwick">
+  <bookinfo>
+    <title>Chadwick</title>
+    <subtitle>Software for Baseball Game Scoring and Record-Keeping</subtitle>
+    <author>
+      <firstname>Theodore</firstname>
+      <surname>Turocy</surname>
+    </author>
+    <edition>Version 0.1.0</edition>
+    <pubdate>July, 2002</pubdate>
+    <copyright>
+      <year>2002</year>
+      <holder>Theodore Turocy</holder>
+    </copyright>
+  </bookinfo>
+
+<chapter id="intro">
+    <title>Introduction</title>
+    <para>
+Chadwick is an Open Source Software project dedicated to making
+available a quality suite of tools for use in baseball scorekeeping and
+statistics collection.
+</para>
+
+    <sect1 id="intro.why">
+      <title>Why does Chadwick exist?</title>
+
+      <para>If one takes the writings of Eric S. Raymond literally,
+then Chadwick exists because I needed to scratch an itch, which in
+my case was the need to be able to very efficiently scan Retrosheet
+files to extract actual future runs scored from a variety of
+game situations.  The <application>bevent</application> program 
+which DiamondWare generously has licensed for use on Retrosheet data
+is not convenient for doing this, since even after extracting the
+data, I would either need to write my own program to read in the output
+and analyze it, or use a database.  In the former case, I would still
+be doing a decent amount of work to get to the point I needed to;
+in the latter case, attempts to write efficient queries over the
+whole of the Retrosheet data set (running around 20 seasons at this
+writing) were, to put it mildly, inefficient.</para>
+
+      <para>In the 1980s, after the ancestor of this scoring notation
+was first described in one of Bill James' Abstracts at the dawn of
+Project Scoresheet, I wrote some simple BASIC code which parsed a
+stripped-down version of the notation and generated statistics from it.
+Later on, after some computer science training, I understood the
+beauty of the notation, which is that all allowable play codes can be
+parsed by only looking at the next character in the string (called
+an LL grammar).  So, I knew just how to go about writing code to parse
+the notation on my own.</para>
+
+      <para>Finally, as I was going to set out to write some of my own
+code, I looked around and realized that not infrequently, someone would
+post to the Retrosheet mailing list asking about the availability
+of input tools to create Retrosheet-style files for scorekeeping and
+statistics gathering, or about the availability of more modern (that is,
+non-command-line) tools for extracting information from Retrosheet files,
+or about the availability of tools to run natively on operating systems
+other than Windows.  Some interpid souls have produced programs which
+act as front ends for the DiamondWare tools, or which use processed output
+from them as input into a customized database program.  Both approaches
+definitely took some effort, yet still are quite kludgy.  Being able to
+incorporate the ability to read, parse, and write the actual Retrosheet
+files within an application remained impossible, since the DiamondWare
+engine is proprietary.</para>
+
+      <para>So, as I wrote my application, I wrote new code that 
+manipulates Retrosheet files, and it is this code that forms the
+basis of Chadwick.  This toolset and programs built on it focus on
+the DiamondWare/Retrosheet notation, both because it is an efficient
+and elegant way of recording what occurs on a baseball play, and because
+the existence of the DiamondWare tools provides an excellent standard.
+The DiamondWare tools are stable and time-tested, and, to use the
+metaphor, are excellent taillights to chase at the start of this project.
+</para>
+
+      <para>Currently, Chadwick still mostly provides replacements for
+DiamondWare tools, plus small companion utilities, like the
+<application>cwsub</application> program to report on player substitutions,
+that fill in gaps in the DiamondWare tools.  As the library matures,
+it is an ideal candidate for inclusion in more elaborate programs to
+enter, edit, and analyze baseball games graphically, in scorebook and
+statistics reporting applications.</para>
+
+      <para>This is where <emphasis>you</emphasis> come
+in: the project is looking for individuals interested in helping to
+design and code such an application, using the library as a core.
+There are many scorekeeping applications available; I've tried a number
+of them, and found them all lacking.  I believe there's quite a 
+sizeable niche available for a well-designed Open Source scorekeeping
+application.</para>
+
+      <para>For now, welcome.  I hope you will find Chadwick useful
+in its current state, and encourage you to contribute to the project,
+by contributing code if you can, or at least by contributing bug reports and
+feature suggestions.</para>
+
+      </sect1>
+
+    <sect1 id="intro.objectives">
+      <title>Current objectives of the project</title>
+
+    <para>
+To operationalize the overall goal of Chadwick, the project has the
+following objectives:
+<orderedlist>
+	  <listitem>
+	    <para>To provide a portable library of Open Source code
+            which permits the
+	    representation of the events in a baseball game;</para>
+	  </listitem>
+	  <listitem>
+	    <para>To read, write, and manipulate events coded in the
+            Project Scoresheet / DiamondWare / Retrosheet notation;</para>
+	    </listitem>
+	  <listitem>
+	    <para>To implement Open Source alternatives to the DiamondWare
+            tools <application>bevent</application> and 
+            <application>bgame</application>
+            available on the Retrosheet website, matching their interface
+            and output as closely as possible</para>
+	    </listitem>
+</orderedlist>
+</para>
+</sect1>
+
+<sect1 id="intro.contacting">
+<title>Contacting the developers</title>
+<para>
+Chadwick's homepage is hosted by SourceForge, and can be found at
+http://chadwick.sourceforge.net.
+</para>
+</sect1>
+
+<sect1 id="intro.about">
+<title>About this documentation</title>
+<para>
+This documentation is a work in progress, and is updated regularly
+on the Chadwick website.  Some sections are currently obviously
+missing or under construction.  We appreciate your patience while
+we get this together.
+</para>
+</sect1>
+
+<sect1 id="intro.thanks">
+<title>Acknowledgements</title>
+<para>
+The Chadwick project does not have the endorsement of anyone but
+its authors.  However, we'd like to thank everyone involved in the
+creation of the scoring notation and file format.  In particular,
+we extend a special thanks to David Smith of Retrosheet, who in
+his always gracious manner quickly and thoroughly answered several
+questions regarding the notation and Retrosheet &quot;preferred
+style&quot;.
+</para>
+
+<para>
+There are many places in this documentation which refer to bugs in
+other software tools.  These should in no way be construed as being
+derogatory to those tools or their authors.  In fact, the
+Chadwick project has a large advantage in being able to, as the saying
+goes, &quot;chase taillights&quot;, and we are most grateful for having
+such wonderful taillights to chase.  Almost every bug in those tools noted
+in this
+documentation is, in truth, trivial, and the vast majority are probably
+not of crucial interest to most people.
+</para>
+</sect1>
+
+  </chapter>
+
+<chapter id="cwtools">
+    <title>Command-line tools</title>
+    <para>Chadwick provides the following command-line programs for
+extracting information from Retrosheet play-by-play event files:
+<itemizedlist>
+	<listitem>
+	  <para><application>cwevent</application>, an expanded event
+          descriptor, which is intended to replace a similarly-named
+          program available from the Retrosheet website.</para>
+        </listitem>
+	<listitem>
+	  <para><application>cwgame</application>, a game information
+          extractor, which is intended to replace a similarly-named
+          program available from the Retrosheet website.</para>
+	</listitem>
+	<listitem>
+	  <para><application>cwsub</application>, which extracts information
+          about in-game player substitutions.  This program is unique
+          to Chadwick.</para>
+	</listitem>
+</itemizedlist>
+Each tool is documented separately in its own section below; the
+command-line options common to the tools are described in their
+own section afterwards.
+</para>
+
+    <sect1 id="cwtools.cwevent">
+      <title>cwevent: Expanded event descriptor</title>
+
+      <para><application>cwevent</application> is a command-line tool
+      which extracts detailed information about individual events (plays)
+      in the data file.  There are 97 possible fields which 
+      <application>cwevent</application> can output for each play; these
+      are listed below, and are specified using the -f flag.
+      </para>
+
+      <table>
+	<title>Field numbers for <application>cwevent</application></title>
+	<tgroup cols='2'>
+	  <thead>
+	    <row><entry>Field number</entry><entry>Description</entry></row>
+	    </thead>
+
+	  <tbody>
+	    <row><entry>0</entry><entry>Game ID</entry></row>
+	    <row><entry>1</entry><entry>Visiting team</entry></row>
+	    <row><entry>2</entry><entry>Inning</entry></row>
+	    <row><entry>3</entry><entry>Batting team</entry></row>
+	    <row><entry>4</entry><entry>Outs</entry></row>
+	    <row><entry>5</entry><entry>Balls</entry></row>
+	    <row><entry>6</entry><entry>Strikes</entry></row>
+	    <row><entry>7</entry><entry>Pitch sequence</entry></row>
+	    <row><entry>8</entry><entry>Visitor score</entry></row>
+	    <row><entry>9</entry><entry>Home score</entry></row>
+	    <row><entry>10</entry><entry>Batter (see <xref linkend="cwtools.cwevent.resplayers">)</entry></row>
+	    <row><entry>11</entry><entry>Batter hand (see <xref linkend="cwtools.cwevent.resplayers">)</entry></row>
+	    <row><entry>12</entry><entry>Result batter (see <xref linkend="cwtools.cwevent.resplayers">)</entry></row>
+	    <row><entry>13</entry><entry>Result batter hand (see <xref linkend="cwtools.cwevent.resplayers">)</entry></row>
+	    <row><entry>14</entry><entry>Pitcher (see <xref linkend="cwtools.cwevent.resplayers">)</entry></row>
+	    <row><entry>15</entry><entry>Pitcher hand (see <xref linkend="cwtools.cwevent.resplayers">)</entry></row>
+	    <row><entry>16</entry><entry>Result pitcher (see <xref linkend="cwtools.cwevent.resplayers">)</entry></row>
+	    <row><entry>17</entry><entry>Result pitcher hand (see <xref linkend="cwtools.cwevent.resplayers">)</entry></row>
+	    <row><entry>18</entry><entry>Catcher</entry></row>
+	    <row><entry>19</entry><entry>First baseman</entry></row>
+	    <row><entry>20</entry><entry>Second baseman</entry></row>
+	    <row><entry>21</entry><entry>Third baseman</entry></row>
+	    <row><entry>22</entry><entry>Shortstop</entry></row>
+	    <row><entry>23</entry><entry>Left fielder</entry></row>
+	    <row><entry>24</entry><entry>Center fielder</entry></row>
+	    <row><entry>25</entry><entry>Right fielder</entry></row>
+	    <row><entry>26</entry><entry>Runner on first</entry></row>
+	    <row><entry>27</entry><entry>Runner on second</entry></row>
+	    <row><entry>28</entry><entry>Runner on third</entry></row>
+	    <row><entry>29</entry><entry>Event text</entry></row>
+	    <row><entry>30</entry><entry>Leadoff flag</entry></row>
+	    <row><entry>31</entry><entry>Pinch-hit flag (see <xref linkend="cwtools.cwevent.phflag">)</entry></row>
+	    <row><entry>32</entry><entry>Defensive position</entry></row>
+	    <row><entry>33</entry><entry>Lineup position</entry></row>
+	    <row><entry>34</entry><entry>Event type (see <xref linkend="cwtools.cwevent.eventtype">)</entry></row>
+	    <row><entry>35</entry><entry>Batter event flag</entry></row>
+	    <row><entry>36</entry><entry>Official time at bat flag (see <xref linkend="cwtools.cwevent.sacflags">)</entry></row>
+	    <row><entry>37</entry><entry>Hit value</entry></row>
+	    <row><entry>38</entry><entry>Sacrifice hit flag (see <xref linkend="cwtools.cwevent.sacflags">)</entry></row>
+	    <row><entry>39</entry><entry>Sacrifice fly flag (see <xref linkend="cwtools.cwevent.sacflags">)</entry></row>
+	    <row><entry>40</entry><entry>Outs on play</entry></row>
+	    <row><entry>41</entry><entry>Double play flag</entry></row>
+	    <row><entry>42</entry><entry>Triple play flag</entry></row>
+	    <row><entry>43</entry><entry>RBI on play</entry></row>
+	    <row><entry>44</entry><entry>Wild pitch flag</entry></row>
+	    <row><entry>45</entry><entry>Passed ball flag</entry></row>
+	    <row><entry>46</entry><entry>Fielded by</entry></row>
+	    <row><entry>47</entry><entry>Batted ball type</entry></row>
+	    <row><entry>48</entry><entry>Bunt flag</entry></row>
+	    <row><entry>49</entry><entry>Foul flag</entry></row>
+	    <row><entry>50</entry><entry>Hit location</entry></row>
+	    <row><entry>51</entry><entry>Number of errors (see <xref linkend="cwtools.cwevent.errors">)</entry></row>
+	    <row><entry>52</entry><entry>1st error player (see <xref linkend="cwtools.cwevent.errors">)</entry></row>
+	    <row><entry>53</entry><entry>1st error type (see <xref linkend="cwtools.cwevent.errors">)</entry></row>
+	    <row><entry>54</entry><entry>2nd error player (see <xref linkend="cwtools.cwevent.errors">)</entry></row>
+	    <row><entry>55</entry><entry>2nd error type (see <xref linkend="cwtools.cwevent.errors">)</entry></row>
+	    <row><entry>56</entry><entry>3rd error player (see <xref linkend="cwtools.cwevent.errors">)</entry></row>
+	    <row><entry>57</entry><entry>3rd error type (see <xref linkend="cwtools.cwevent.errors">)</entry></row>
+	    <row><entry>58</entry><entry>Batter destination (see <xref linkend="cwtools.cwevent.plays">)</entry></row>
+	    <row><entry>59</entry><entry>Runner on first destination (see <xref linkend="cwtools.cwevent.plays">)</entry></row>
+	    <row><entry>60</entry><entry>Runner on second destination (see <xref linkend="cwtools.cwevent.plays">)</entry></row>
+	    <row><entry>61</entry><entry>Runner on third destination (see <xref linkend="cwtools.cwevent.plays">)</entry></row>
+	    <row><entry>62</entry><entry>Play on batter (see <xref linkend="cwtools.cwevent.plays">)</entry></row>
+	    <row><entry>63</entry><entry>Play on runner on first (see <xref linkend="cwtools.cwevent.plays">)</entry></row>
+	    <row><entry>64</entry><entry>Play on runner on second (see <xref linkend="cwtools.cwevent.plays">)</entry></row>
+	    <row><entry>65</entry><entry>Play on runner on third (see <xref linkend="cwtools.cwevent.plays">)</entry></row>
+	    <row><entry>66</entry><entry>Stolen base for runner on first</entry></row>
+	    <row><entry>67</entry><entry>Stolen base for runner on second</entry></row>
+	    <row><entry>68</entry><entry>Stolen base for runner on third</entry></row>
+	    <row><entry>69</entry><entry>Caught stealing for runner on first</entry></row>
+	    <row><entry>70</entry><entry>Caught stealing for runner on second</entry></row>
+	    <row><entry>71</entry><entry>Caught stealing for runner on third</entry></row>
+	    <row><entry>72</entry><entry>Pickoff of runner on first</entry></row>
+	    <row><entry>73</entry><entry>Pickoff of runner on second</entry></row>
+	    <row><entry>74</entry><entry>Pickoff of runner on third</entry></row>
+	    <row><entry>75</entry><entry>Pitcher charged with runner on first</entry></row>
+	    <row><entry>76</entry><entry>Pitcher charged with runner on second</entry></row>
+	    <row><entry>77</entry><entry>Pitcher charged with runner on third</entry></row>
+	    <row><entry>78</entry><entry>New game flag</entry></row>
+	    <row><entry>79</entry><entry>End game flag</entry></row>
+	    <row><entry>80</entry><entry>Pinch-runner on first</entry></row>
+	    <row><entry>81</entry><entry>Pinch-runner on second</entry></row>
+	    <row><entry>82</entry><entry>Pinch-runner on third</entry></row>
+	    <row><entry>83</entry><entry>Runner removed for pinch-runner on first</entry></row>
+	    <row><entry>84</entry><entry>Runner removed for pinch-runner on second</entry></row>
+	    <row><entry>85</entry><entry>Runner removed for pinch-runner on third</entry></row>
+	    <row><entry>86</entry><entry>Batter removed for pinch-hitter</entry></row>
+	    <row><entry>87</entry><entry>Position of batter removed for pinch-hitter</entry></row>
+	    <row><entry>88</entry><entry>Fielder with first putout (see <xref linkend="cwtools.cwevent.fielding">)</entry></row>
+	    <row><entry>89</entry><entry>Fielder with second putout (see <xref linkend="cwtools.cwevent.fielding">)</entry></row>
+	    <row><entry>90</entry><entry>Fielder with third putout (see <xref linkend="cwtools.cwevent.fielding">)</entry></row>
+	    <row><entry>91</entry><entry>Fielder with first assist (see <xref linkend="cwtools.cwevent.fielding">)</entry></row>
+	    <row><entry>92</entry><entry>Fielder with second assist (see <xref linkend="cwtools.cwevent.fielding">)</entry></row>
+	    <row><entry>93</entry><entry>Fielder with third assist (see <xref linkend="cwtools.cwevent.fielding">)</entry></row>
+	    <row><entry>94</entry><entry>Fielder with fourth assist (see <xref linkend="cwtools.cwevent.fielding">)</entry></row>
+	    <row><entry>95</entry><entry>Fielder with fifth assist (see <xref linkend="cwtools.cwevent.fielding">)</entry></row>
+	    <row><entry>96</entry><entry>Event number</entry></row>
+	    </tbody>
+	  </tgroup>
+	</table>
+
+      <sect2 id="cwtools.cwevent.resplayers">
+	<title>Result batters and pitchers (fields 10-17)</title>
+
+	<para>In most cases, the pitcher and batter charged or credited
+with the event (when a batter event) are the ones in the game when the
+event occurs.  However, Rules 10.17 and 10.18 have special clauses 
+discussing how to charge walks to pitchers when a relief pitcher enters
+in the middle of the plate appearance, and how to charge strikeouts
+to batters when a pinch hitter enters in the middle of the plate appearance.
+The <literal>batter</literal> and <literal>pitcher</literal> fields always
+give the identity of the batter and pitcher in the game at the time of the
+event; the <literal>result batter</literal> and <literal>result pitcher</literal> give the batter and pitcher credited or charged with the event.</para>
+
+	<para>There is one known bug in the Retrosheet-provided tools
+regarding the result pitcher.  When a relief pitcher enters the game, and
+then the next batter is retired on a fielder's choice, the pitcher
+responsible for the runner put out is shown in the <literal>result
+pitcher</literal> field.  While it is correct that the batter reaching base
+in this case would be charged to the former pitcher should he score, the
+purpose of the <literal>result pitcher</literal> field is to indicate the
+pitcher charged with the outcome of this particular event.  In this case,
+for example, the relief pitcher is awarded one-third of an inning pitched;
+therefore, he should be the <literal>result pitcher</literal>, and then
+the previous pitcher should be (and is) listed in the <literal>responsible
+pitcher</literal> field for the batter in subsequent events.</para>
+
+	<para>In the case of switch-hitters, the <literal>batter hand</literal>
+and <literal>result batter hand</literal> fields are set to 
+<literal>L</literal> or <literal>R</literal>, as appropriate, based upon
+the hand with which the pitcher throws.  If the pitcher's throwing hand
+is unknown, or if the batter's batting hand is unknown, a question mark 
+appears in these fields.</para>
+
+	</sect2>
+
+      <sect2 id="cwtools.cwevent.phflag">
+	<title>Pinch-hit flag (field 31)</title>
+
+	<para>This field is <literal>T</literal> if the batter is a
+pinch-hitter, and <literal>F</literal> if he is not.  For the purposes
+of this field, Chadwick differs from the Retrosheet-provided tools
+in that, should a pinch-hitter bat a second time in an inning because
+his team has batted around, this field is <literal>F</literal> for his
+second and subsequent apperances at the plate.  Implementing this field
+this way makes sense, since those subsequent appearances are not
+technically considered &quot;pinch-hitting&quot; appearances in statistics.
+Furthermore, there is no real loss, since one can always check whether
+the <literal>defensive position</literal> field (field 32) is equal to 11.
+</para>
+
+	</sect2>
+
+      <sect2 id="cwtools.cwevent.eventtype">
+	<title>Event type code (field 34)</title>
+
+	<para>All plays are categorized by their primary event type.
+Here is a list of all types and the corresponding codes used in this
+field.</para>
+
+      <table>
+	<title>Primary event type codes</title>
+	<tgroup cols='2'>
+	  <thead>
+	    <row><entry>Code</entry><entry>Primary event</entry></row>
+	    </thead>
+
+	  <tbody>
+	    <row><entry>0</entry><entry>Unknown (should not appear)</entry></row>
+	    <row><entry>1</entry><entry>None (should not appear)</entry></row>
+	    <row><entry>2</entry><entry>Generic out</entry></row>
+	    <row><entry>3</entry><entry>Strikeout</entry></row>
+	    <row><entry>4</entry><entry>Stolen base</entry></row>
+	    <row><entry>5</entry><entry>Defensive indifference</entry></row>
+	    <row><entry>6</entry><entry>Caught stealing</entry></row>
+	    <row><entry>7</entry><entry>Pickoff error</entry></row>
+	    <row><entry>8</entry><entry>Pickoff</entry></row>
+	    <row><entry>9</entry><entry>Wild pitch</entry></row>
+	    <row><entry>10</entry><entry>Passed ball</entry></row>
+	    <row><entry>11</entry><entry>Balk</entry></row>
+	    <row><entry>12</entry><entry>Other advance (out advancing)</entry></row>
+	    <row><entry>13</entry><entry>Foul error</entry></row>
+	    <row><entry>14</entry><entry>Walk</entry></row>
+	    <row><entry>15</entry><entry>Intentional walk</entry></row>
+	    <row><entry>16</entry><entry>Hit by pitch</entry></row>
+	    <row><entry>17</entry><entry>Interference</entry></row>
+	    <row><entry>18</entry><entry>Error</entry></row>
+	    <row><entry>19</entry><entry>Fielder's choice</entry></row>
+	    <row><entry>20</entry><entry>Single</entry></row>
+	    <row><entry>21</entry><entry>Double</entry></row>
+	    <row><entry>22</entry><entry>Triple</entry></row>
+	    <row><entry>23</entry><entry>Home run</entry></row>
+	    <row><entry>24</entry><entry>Missing play</entry></row>
+	    </tbody>
+	  </tgroup>
+	</table>
+
+
+	</sect2>
+
+      <sect2 id="cwtools.cwevent.sacflags">
+	<title>Sacrifice flags and eras (fields 36, 38, 39)</title>
+
+	<para>Chadwick in all cases applies the modern rules concerning
+the awarding of sacrifice hits, sacrifice flies, and official times at
+bat, regardless of the year indicated with the -y flag.</para>
+
+	</sect2>
+
+      <sect2 id="cwtools.cwevent.plays">
+	<title>Plays on runners (fields 58-65)</title>
+
+	<para>Fields 58 through 65 give the eventual destination of
+all runners, including the batter, as well as the fielding play made
+on them, if any.  For the purposes of the destination fields, a code
+of 5 indicates the runner scored, and is charged as unearned, and a code
+of 6 indicates the runner scored, and is charged as unearned to the team,
+but earned to the pitcher.  Note that these codes only appear when
+the <literal>(NR)</literal> or <literal>(TUR)</literal> modifiers are
+explicitly used on the advancement code; there is no internal logic in
+Chadwick to ferret out which runs should be earned or unearned, as in many
+cases there is insufficient information, or the situation requires the
+judgment of the official scorer.  Runners which are put out are reported
+as having an advancement of 0.</para>
+
+	<para>In most cases, the play on a runner indicates the fielding
+credits involved in putting him out.  Chadwick also reports a fielding
+play on a runner when the runner is safe on a dropped throw, such as
+<literal>3E1</literal> or <literal>FC6.1X2(6E4)</literal>.</para>
+	</sect2>
+      
+      <sect2 id="cwtools.cwevent.errors">
+	<title>Fielding errors (fields 51-57)</title>
+
+	<para>Up to three errors can be indicated in <application>cwevent</application> output.  Supported error types are <literal>F</literal> for generic fielding errors, and <literal>T</literal> for throwing errors; no distinction
+is made between bobbled batted balls, muffed throws or fly balls, and so forth.</para>
+
+	<para>Known bugs in these fields corrected by Chadwick are:
+<itemizedlist>
+<listitem><para>On catcher's interference plays scored as 
+<literal>C</literal>, as opposed to the preferred
+<literal>C/E2</literal>, the Retrosheet-provided tools do not charge an
+error to the catcher.</para></listitem>
+<listitem><para>On some advancement plays, the Retrosheet-provided tools
+give a putout to a fielder who muffs a throw, rather than an assist.
+Example: For <literal>1X2(3E6)</literal>, in some cases, the Retrosheet-provided
+tools give the shortstop a putout and not an error.  Chadwick correctly 
+charges the shortstop with an error (and gives the first baseman an
+assist).</para></listitem>
+</itemizedlist>
+
+</para>
+</sect2>
+
+      <sect2 id="cwtools.cwevent.fielding">
+	<title>Fielding credits (fields 88-95)</title>
+
+	<para>Most of the known bugs in the tools available on the
+Retrosheet website deal with correctly assigning fielding credits on plays. 
+These are irrelevant or trivial for most applications, but effort has been made to correctly implement the scoring rules for fielding credits in Chadwick.</para>
+
+<itemizedlist>
+<listitem><para>On strikeout plays with the play on the batter listed
+in the baserunning section, the Retrosheet-provided tools give a
+putout to the catcher, instead of assigning credit for the actual
+play.  Example: <literal>K.BX1(23)</literal>: Chadwick awards the
+catcher an assist and the first baseman a putout.  (Presumably,
+<literal>K23</literal> would be preferred for this, but there can be
+cases like <literal>K+WP.BX2(26)</literal> where the advancement is
+important.)
+</para>
+</listitem>
+
+<listitem><para>On long rundown plays, Chadwick awards all assists
+as appropriate; in some cases, the Retrosheet-provided tools only issue
+up to four assists.</para></listitem>
+
+<listitem><para>On rundown plays that end in an error, Chadwick does not
+give a putout to the player who made the error, as the Retrosheet-provided
+tools do.</para></listitem>
+
+<listitem><para>Chadwick gives assists to players on dropped-throw primary
+events.  Example: <literal>3E1</literal>: Chadwick gives an assist to the
+first baseman; the Retrosheet-provided tools do not.</para></listitem>
+
+<listitem><para>Chadwick treats the question mark (<literal>?</literal>) as
+a missing fielder placeholder.  This is, in fact, a deprecated usage,
+as the question mark now is used instead to indicate a questionable play,
+and preferred style is to invent fielding credit and leave a comment in
+the file.  Example: <literal>4?</literal>, in the new style, would indicate
+a pop fly caught by the second baseman, perhaps after some difficulty;
+in the old usage, this would indicate a play on which the second baseman
+got an assist, and an unknown player got the putout.  This is one instance
+where Chadwick implements the old style instead of the preferred new style,
+since almost all, if not all, plays with question marks in Retrosheet
+released files are of the old style.  Therefore, Chadwick gives the
+second baseman an assist (and nobody a putout) on <literal>4?</literal>,
+whereas the Retrosheet-provided tools give the second baseman a putout,
+reflecting the new-style convention.</para>
+<important>
+<para>It is likely that future versions of Chadwick will switch to the
+new-style convention, with the old-style convention available via a flag.
+</para>
+</important>
+</listitem>
+</itemizedlist>
+
+<para>Also worth noting is that in certain rare cases, the order in
+which Chadwick and the Retrosheet-provided tools list putouts and assists
+may vary.  The number of plays on which this occurs is quite few, and
+generally in cases where there is a putout in the primary event as well
+as one in the baserunning modifiers.  The words &quot;first&quot;,
+&quot;second&quot; and so on do not necessarily indicate chronological
+order of the credits, though in most cases they do.</para>
+
+	</sect2>
+
+      </sect1>
+
+    <sect1 id="cwtools.cwgame">
+      <title>cwgame: Game information extractor</title>
+      
+      <para><application>cwgame</application> reports game-level information for each game.</para>
+
+      <para>There are only two known sources of discrepancies between
+<application>cwgame</application> and its counterpart application on
+the Retrosheet website:
+<itemizedlist>
+<listitem><para>Chadwick correctly handles catcher's intereference when it
+is coded as a bare <literal>C</literal>, instead of the preferred
+<literal>C/E2</literal>.  Therefore, in games where this occurs,
+<application>cwgame</application> reports the correct number of errors.
+</para></listitem>
+<listitem><para>The maximum field number for both programs is 81; however,
+the default behavor (when the -f flag is not specified) for the
+Retrosheet-provided program is to output only fields 0 through 80.
+<application>cwgame</application> prints all fields by default
+</para></listitem>
+</itemizedlist>
+</para>
+
+      <para>The following table gives the contents of each of the 82 fields
+<application>cwgame</application> outputs.</para>
+
+      <table>
+	<title>Field numbers for <application>cwgame</application></title>
+	<tgroup cols='2'>
+	  <thead>
+	    <row><entry>Field number</entry><entry>Description</entry></row>
+	    </thead>
+
+	  <tbody>
+	    <row><entry>0</entry><entry>Game ID</entry></row>
+	    <row><entry>1</entry><entry>Date</entry></row>
+	    <row><entry>2</entry><entry>Game number</entry></row>
+	    <row><entry>3</entry><entry>Day of week</entry></row>
+	    <row><entry>4</entry><entry>Start time</entry></row>
+	    <row><entry>5</entry><entry>DH used flag</entry></row>
+	    <row><entry>6</entry><entry>Day/night flag</entry></row>
+	    <row><entry>7</entry><entry>Visiting team</entry></row>
+	    <row><entry>8</entry><entry>Home team</entry></row>
+	    <row><entry>9</entry><entry>Game site</entry></row>
+	    <row><entry>10</entry><entry>Visitors starting pitcher</entry></row>
+	    <row><entry>11</entry><entry>Home starting pitcher</entry></row>
+	    <row><entry>12</entry><entry>Home plate umpire</entry></row>
+	    <row><entry>13</entry><entry>First base umpire</entry></row>
+	    <row><entry>14</entry><entry>Second base umpire</entry></row>
+	    <row><entry>15</entry><entry>Third base umpire</entry></row>
+	    <row><entry>16</entry><entry>Left field umpire</entry></row>
+	    <row><entry>17</entry><entry>Right field umpire</entry></row>
+	    <row><entry>18</entry><entry>Attendance</entry></row>
+	    <row><entry>19</entry><entry>PS scorer</entry></row>
+	    <row><entry>20</entry><entry>Translator</entry></row>
+	    <row><entry>21</entry><entry>Inputter</entry></row>
+	    <row><entry>22</entry><entry>Input time</entry></row>
+	    <row><entry>23</entry><entry>Edit time</entry></row>
+	    <row><entry>24</entry><entry>How scored</entry></row>
+	    <row><entry>25</entry><entry>Pitches entered</entry></row>
+	    <row><entry>26</entry><entry>Temperature</entry></row>
+	    <row><entry>27</entry><entry>Wind direction</entry></row>
+	    <row><entry>28</entry><entry>Wind speed</entry></row>
+	    <row><entry>29</entry><entry>Field condition</entry></row>
+	    <row><entry>30</entry><entry>Precipitation</entry></row>
+	    <row><entry>31</entry><entry>Sky</entry></row>
+	    <row><entry>32</entry><entry>Time of game</entry></row>
+	    <row><entry>33</entry><entry>Number of innings</entry></row>
+	    <row><entry>34</entry><entry>Visitor final score</entry></row>
+	    <row><entry>35</entry><entry>Home final score</entry></row>
+	    <row><entry>36</entry><entry>Visitor hits</entry></row>
+	    <row><entry>37</entry><entry>Home hits</entry></row>
+	    <row><entry>38</entry><entry>Visitor errors</entry></row>
+	    <row><entry>39</entry><entry>Home errors</entry></row>
+	    <row><entry>40</entry><entry>Visitor left on base</entry></row>
+	    <row><entry>41</entry><entry>Home left on base</entry></row>
+	    <row><entry>42</entry><entry>Winning pitcher</entry></row>
+	    <row><entry>43</entry><entry>Losing pitcher</entry></row>
+	    <row><entry>44</entry><entry>Save</entry></row>
+	    <row><entry>45</entry><entry>Game-winning RBI</entry></row>
+	    <row><entry>46</entry><entry>Visitor batter 1</entry></row>
+	    <row><entry>47</entry><entry>Visitor batter 1 position</entry></row>
+	    <row><entry>48</entry><entry>Visitor batter 2</entry></row>
+	    <row><entry>49</entry><entry>Visitor batter 2 position</entry></row>
+	    <row><entry>50</entry><entry>Visitor batter 3</entry></row>
+	    <row><entry>51</entry><entry>Visitor batter 3 position</entry></row>
+	    <row><entry>52</entry><entry>Visitor batter 4</entry></row>
+	    <row><entry>53</entry><entry>Visitor batter 4 position</entry></row>
+	    <row><entry>54</entry><entry>Visitor batter 5</entry></row>
+	    <row><entry>55</entry><entry>Visitor batter 5 position</entry></row>
+	    <row><entry>56</entry><entry>Visitor batter 6</entry></row>
+	    <row><entry>57</entry><entry>Visitor batter 6 position</entry></row>
+	    <row><entry>58</entry><entry>Visitor batter 7</entry></row>
+	    <row><entry>59</entry><entry>Visitor batter 7 position</entry></row>
+	    <row><entry>60</entry><entry>Visitor batter 8</entry></row>
+	    <row><entry>61</entry><entry>Visitor batter 8 position</entry></row>
+	    <row><entry>62</entry><entry>Visitor batter 9</entry></row>
+	    <row><entry>63</entry><entry>Visitor batter 9 position</entry></row>
+	    <row><entry>64</entry><entry>Home batter 1</entry></row>
+	    <row><entry>65</entry><entry>Home batter 1 position</entry></row>
+	    <row><entry>66</entry><entry>Home batter 2</entry></row>
+	    <row><entry>67</entry><entry>Home batter 2 position</entry></row>
+	    <row><entry>68</entry><entry>Home batter 3</entry></row>
+	    <row><entry>69</entry><entry>Home batter 3 position</entry></row>
+	    <row><entry>70</entry><entry>Home batter 4</entry></row>
+	    <row><entry>71</entry><entry>Home batter 4 position</entry></row>
+	    <row><entry>72</entry><entry>Home batter 5</entry></row>
+	    <row><entry>73</entry><entry>Home batter 5 position</entry></row>
+	    <row><entry>74</entry><entry>Home batter 6</entry></row>
+	    <row><entry>75</entry><entry>Home batter 6 position</entry></row>
+	    <row><entry>76</entry><entry>Home batter 7</entry></row>
+	    <row><entry>77</entry><entry>Home batter 7 position</entry></row>
+	    <row><entry>78</entry><entry>Home batter 8</entry></row>
+	    <row><entry>79</entry><entry>Home batter 8 position</entry></row>
+	    <row><entry>80</entry><entry>Home batter 9</entry></row>
+	    <row><entry>81</entry><entry>Home batter 9 position</entry></row>
+	    </tbody>
+	  </tgroup>
+	</table>
+
+      </sect1>
+
+    <sect1 id="cwtools.cwsub">
+      <title>cwsub: Player substitution descriptor</title>
+
+      <para><application>cwsub</application> extracts information about in-game player substitutions.  It is designed to be used in conjunction with <application>cwevent</application> to mitigate a blind spot in the existing tools.
+Since there is no corresponding standard application, <application>cwsub</application> may still contain some bugs; please especially report any problems or questions you might have about how this program operates.</para>
+
+      <para><application>cwsub</application> outputs up to ten pieces of information about each substitution.  All are included by default; which ones are generated is controlled by the -f switch.</para>
+
+      <table>
+	<title>Field numbers for <application>cwsub</application></title>
+	<tgroup cols='2'>
+	  <thead>
+	    <row><entry>Field number</entry><entry>Description</entry></row>
+	    </thead>
+
+	  <tbody>
+	    <row><entry>0</entry><entry>Game ID</entry></row>
+	    <row><entry>1</entry><entry>Inning</entry></row>
+	    <row><entry>2</entry><entry>Batting team</entry></row>
+	    <row><entry>3</entry><entry>Substitute</entry></row>
+	    <row><entry>4</entry><entry>Team</entry></row>
+	    <row><entry>5</entry><entry>Lineup position</entry></row>
+	    <row><entry>6</entry><entry>Fielding position</entry></row>
+	    <row><entry>7</entry><entry>Removed player</entry></row>
+	    <row><entry>8</entry><entry>Position of removed player</entry></row>
+	    <row><entry>9</entry><entry>Event number</entry></row>
+	    </tbody>
+	  </tgroup>
+	</table>
+
+      </sect1>
+
+    <sect1 id="cwtools.cmdline">
+      <title>Command-line options</title>
+      <para>Each of the command-line tools shares a common set of
+options controlling their behavior.</para>
+      </sect1>
+
+  </chapter>
+
+<chapter id="notation">
+    <title>File format and the scoring notation</title>
+    <para>Description of the scoring notation</para>
+
+    <sect1 id="notation.file">
+      <title>The Retrosheet play-by-play file format</title>
+
+      <para></para>
+      </sect1>
+
+    <sect1 id="notation.events">
+      <title>Event notation</title>
+
+      <para></para>
+
+
+      <sect2 id="notation.events.primary">
+      <title>Primary events</title>
+
+      <para>
+      <table>
+      <title>Primary events recognized by Chadwick parser</title>
+      <tgroup cols='2'>
+      <thead>
+      <row><entry>Code</entry><entry>Description</entry></row>
+      </thead>
+      <tbody>
+      <row><entry>BK</entry><entry>Balk</entry></row>
+      <row><entry>C</entry><entry>Catcher's interference</entry></row>
+      <row><entry>CS</entry><entry>Caught stealing</entry></row>
+      <row><entry>D</entry><entry>Double</entry></row>
+      <row><entry>DI</entry><entry>Defensive indifference</entry></row>
+      <row><entry>E</entry><entry>Error</entry></row>
+      <row><entry>FC</entry><entry>Fielder's choice</entry></row>
+      <row><entry>FLE</entry><entry>Foul error</entry></row>
+      <row><entry>H</entry><entry>Home run</entry></row>
+      <row><entry>HBP</entry><entry>Hit by pitch</entry></row>
+      <row><entry>HP</entry><entry>Hit by pitch</entry></row>
+      <row><entry>HR</entry><entry>Home run</entry></row>
+      <row><entry>I</entry><entry>Intentional walk</entry></row>
+      <row><entry>IW</entry<entry>Intentional walk</entry></row>
+      <row><entry>K</entry><entry>Strikeout</entry></row>
+      <row><entry>OA</entry><entry>Other advance</entry></row>
+      <row><entry>OBA</entry><entry>Other advance</entry></row>
+      <row><entry>PB</entry><entry>Passed ball</entry></row>
+      <row><entry>PO</entry><entry>Pickoff</entry></row>
+      <row><entry>POE</entry><entry>Pickoff error (deprecated)</entry></row>
+      <row><entry>T</entry><entry>Triple</entry></row>
+      <row><entry>W</entry><entry>Walk</entry></row>
+      <row><entry>WP</entry><entry>Wild pitch</entry</row>
+      </tbody>
+      </tgroup>
+      </table>
+      </para>
+
+      <sect3 id="notation.primary.bk">
+      <title>Balk</title>
+      
+      <para>
+      </para>
+
+      </sect3>
+
+      <sect3 id="notation.primary.c">
+      <title>Catcher's interference</title>
+
+      <para>
+      Accepted flags are 
+      <literal>/E1</literal>,
+      <literal>/E2</literal>,
+      <literal>/E3</literal>,
+      <literal>/INT</literal>.
+      If none of /E1, /E2, or /E3 is present, an error is charged to
+      the catcher.  /E1 and /E3 handle cases where the batter is awarded
+      first on interference by the pitcher or first baseman, respectively.
+      Even though these are not catcher's interference, this is Retrosheet
+      usage.  The /INT flag is redundant and unnecessary, and is accepted
+      silently by the parser.      
+      </para>
+
+      </sect3>
+
+      <sect3 id="notation.primary.di">
+      <title>Defensive indifference</title>
+      <para>
+      </para>
+      </sect3>
+
+      <sect3 id="notation.primary.hp">
+      <title>Hit by pitch</title>
+      <para>
+      Event implies advancement of batter to first base.
+      </para>
+      </sect3>
+      
+      <sect3 id="notation.primary.oa">
+      <title>Other advance (or Out advancing)</title>
+
+      <para>
+      Accepted flags are
+      <literal>/INT</literal>,
+      <literal>/DP</literal>,
+      <literal>/TP</literal>.
+      This is sometimes called out advancing, since most instances of
+      it occur when a runner attempts to advance on a would-be wild
+      pitch or passed ball, but is thrown out.  However, it can also
+      occur in cases like advancement on a wild return throw from the
+      catcher to the pitcher, which would be scored
+      <literal>OA.1-2(E2)</literal>.
+      </para>
+      </sect3>
+
+      <sect3 id="notation.primary.pb">
+      <title>Passed ball</title>
+      <para>
+      </para>
+      </sect3>
+
+      <sect3 id="notation.primary.wp">
+      <title>Wild pitch</title>
+
+      <para>
+      </para>
+      </sect3>
+
+      </sect2>
+
+      </sect1>
+
+    <sect1 id="notation.pitch">
+      <title>Pitch-by-pitch notation</title>
+
+      <para></para>
+      </sect1>
+  </chapter>
+
+</book>
