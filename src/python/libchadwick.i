@@ -217,6 +217,8 @@ int IsValid(char *play)
     }
 
   char *GetInfo(char *label) { return cw_game_info_lookup(self, label); }
+  void SetInfo(char *label, char *value)
+    { cw_game_info_set(self, label, value); }
 
   CWAppearance *GetStarter(int team, int slot)
      { return cw_game_starter_find(self, team, slot); }
