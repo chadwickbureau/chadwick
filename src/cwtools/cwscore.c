@@ -674,6 +674,41 @@ void cwscore_enter_events(CWGame *game, CWRoster *visitors, CWRoster *home)
   free(gameiter);
 }
 
+void cwscore_compute_earned_runs(CWGame *game)
+{
+  int t;
+  /* For simplicity, just generate a boxscore */
+  CWBoxscore *boxscore = cw_boxscore_create(game);
+
+  for (t = 0; t <= 1; t++) {
+    CWBoxPitcher *pitcher = boxscore->pitchers[t];
+    while (pitcher->prev != NULL) {
+      pitcher = pitcher->prev;
+    }
+
+    while (pitcher != NULL) {
+      char **data;
+      data = (char **) malloc(sizeof(char *) * 4);
+      /* cw_game_data_append ignores the first entry in the array */
+      data[1] = (char *) malloc(sizeof(char) * 3);
+      strcpy(data[1], "er");
+      data[2] = (char *) malloc(sizeof(char)*(strlen(pitcher->player_id) + 1));
+      strcpy(data[2], pitcher->player_id);
+      data[3] = (char *) malloc(sizeof(char) * 10);
+      sprintf(data[3], "%d", pitcher->pitching->er);
+      cw_game_data_append(game, 2, data);
+      free(data[3]);
+      free(data[2]);
+      free(data[1]);
+      free(data);
+      pitcher = pitcher->next;
+    }
+  }
+  
+  cw_boxscore_cleanup(boxscore);
+  free(boxscore);
+}
+
 void cwscore_enter_game(CWScorebook *scorebook)
 {
   char buffer[20];
@@ -692,6 +727,7 @@ void cwscore_enter_game(CWScorebook *scorebook)
   cwscore_get_lineup(game, visitor, 0);
   cwscore_get_lineup(game, home, 1);
   cwscore_enter_events(game, visitor, home);
+  cwscore_compute_earned_runs(game);
 
   cw_scorebook_append_game(scorebook, game);
 
