@@ -56,6 +56,12 @@ void cw_scorebook_cleanup(CWScorebook *scorebook);
 int cw_scorebook_append_game(CWScorebook *scorebook, CWGame *game);
 
 /*
+ * Inserts 'game' to 'scorebook'.  Inserts the game in chronological
+ * order.  Returns 1 if successful, 0 if not.
+ */
+int cw_scorebook_insert_game(CWScorebook *scorebook, CWGame *game);
+
+/*
  * Removes the game with game ID 'game_id' from scorebook.
  * If 'game_id' is not present, no action is taken.
  */
