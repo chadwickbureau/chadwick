@@ -43,7 +43,9 @@ Macintosh users
 ===============
 
 For MacOS X users, you should be able to just follow the Unix users'
-instructions.
+instructions.  There is *one* change you need to make: in the file
+src/chadwick in the unpacked tarball, change the 'python' in the first
+line to 'pythonw', before doing the build.
 
 There is no build system for earlier versions of MacOS; please
 contact the author if you can contribute one.
