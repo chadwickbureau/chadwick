@@ -61,4 +61,10 @@ int cw_scorebook_append_game(CWScorebook *scorebook, CWGame *game);
  */ 
 int cw_scorebook_read(CWScorebook *scorebook, char *path);
 
+/*
+ * Writes the contents of the scorebook to file 'file'.
+ */
+void cw_scorebook_write(CWScorebook *scorebook, FILE *file);
+
+
 #endif  /* CW_BOOK_H */

@@ -31,14 +31,16 @@
 #include "game.h"
 #include "book.h"
 
-CWScorebook *cw_scorebook_create(void)
+CWScorebook *
+cw_scorebook_create(void)
 {
   CWScorebook *scorebook = (CWScorebook *) malloc(sizeof(CWScorebook));
   scorebook->first_game = scorebook->last_game = NULL;
   return scorebook;
 }
 
-void cw_scorebook_cleanup(CWScorebook *scorebook)
+void
+cw_scorebook_cleanup(CWScorebook *scorebook)
 {
   CWGame *game = scorebook->first_game;
   
@@ -50,7 +52,8 @@ void cw_scorebook_cleanup(CWScorebook *scorebook)
   }
 }
 
-int cw_scorebook_append_game(CWScorebook *scorebook, CWGame *game)
+int
+cw_scorebook_append_game(CWScorebook *scorebook, CWGame *game)
 {
   if (game == NULL) {
     return 0;
@@ -68,7 +71,8 @@ int cw_scorebook_append_game(CWScorebook *scorebook, CWGame *game)
   return 1;
 }
 
-int cw_scorebook_read(CWScorebook *scorebook, char *path)
+int
+cw_scorebook_read(CWScorebook *scorebook, char *path)
 {
   int game_count = 0;
   FILE *file = fopen(path, "r");
@@ -88,5 +92,16 @@ int cw_scorebook_read(CWScorebook *scorebook, char *path)
   }
   else {
     return -1;
+  }
+}
+
+void
+cw_scorebook_write(CWScorebook *scorebook, FILE *file)
+{
+  CWGame *game = scorebook->first_game;
+
+  while (game != NULL) {
+    cw_game_write(game, file);
+    game = game->next;
   }
 }

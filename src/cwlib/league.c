@@ -111,3 +111,17 @@ cw_league_read(CWLeague *rosterList, FILE *file)
   }
   free(tokens);
 }
+
+void
+cw_league_write(CWLeague *league, FILE *file)
+{
+  CWRoster *roster = league->first_roster;
+
+  while (roster != NULL) {
+    fprintf(file, "%s,%c,%s,%s\n", 
+	    roster->team_id, roster->league, roster->city, roster->nickname);
+    roster = roster->next;
+  }
+}
+
+

@@ -324,7 +324,8 @@ void cw_game_data_append(CWGame *game, int num_data, char **data)
   game->last_data = d;
 }
 
-CWGame *cw_game_read(FILE *file)
+CWGame *
+cw_game_read(FILE *file)
 {
   char buf[256];
   char **tokens;
@@ -404,7 +405,90 @@ CWGame *cw_game_read(FILE *file)
   return game;
 }
 
+static void
+cw_game_write_header(CWGame *game, FILE *file)
+{
+  CWInfo *info = game->first_info;
 
+  fprintf(file, "id,%s\n", game->game_id);
+  fprintf(file, "version,%s\n", game->version);
+
+  while (info != NULL) {
+    if (!strstr(info->data, ",")) {
+      fprintf(file, "info,%s,%s\n", info->label, info->data);
+    }
+    else {
+      fprintf(file, "info,%s,\"%s\"\n", info->label, info->data);
+    }
+    info = info->next;
+  }
+}
+
+static void
+cw_game_write_starters(CWGame *game, FILE *file)
+{
+  CWAppearance *starter = game->first_starter;
+
+  while (starter != NULL) {
+    fprintf(file, "start,%s,\"%s\",%d,%d,%d\n",
+	    starter->player_id, starter->name,
+	    starter->team, starter->slot, starter->pos);
+    starter = starter->next;
+  }
+}
+
+static void
+cw_game_write_events(CWGame *game, FILE *file)
+{
+  CWEvent *event = game->first_event;
+
+  while (event != NULL) {
+    if (event->batter_hand != ' ') {
+      fprintf(file, "badj,%s,%c\n", event->batter, event->batter_hand);
+    }
+	      
+    fprintf(file, "play,%d,%d,%s,%s,%s,%s\n",
+	    event->inning, event->half_inning,
+	    event->batter, event->count, event->pitches,
+	    event->event_text);
+    if (event->first_sub != NULL) {
+      CWAppearance *sub = event->first_sub;
+      while (sub != NULL) {
+	fprintf(file, "sub,%s,\"%s\",%d,%d,%d\n",
+		sub->player_id, sub->name, 
+		sub->team, sub->slot, sub->pos);
+	sub = sub->next;
+      }
+    }
+    event = event->next;
+  }
+}
+
+static void
+cw_game_write_data(CWGame *game, FILE *file)
+{
+  CWData *data = game->first_data;
+  
+  while (data != NULL) {
+    int i;
+
+    fprintf(file, "data");
+    for (i = 0; i < data->num_data; i++) {
+      fprintf(file, ",%s", data->data[i]);
+    }
+    fprintf(file, "\n");
+    data = data->next;
+  }
+}
+
+void
+cw_game_write(CWGame *game, FILE *file)
+{
+  cw_game_write_header(game, file);
+  cw_game_write_starters(game, file);
+  cw_game_write_events(game, file);
+  cw_game_write_data(game, file);
+}
 
 
 

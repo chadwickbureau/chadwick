@@ -75,9 +75,20 @@ void cw_roster_cleanup(CWRoster *roster);
 void cw_roster_player_append(CWRoster *roster, CWPlayer *player);
 
 /*
+ * Finds the record for the player with the given player_id.
+ * Returns null if the player_id is not on the roster
+ */
+CWPlayer *cw_roster_player_find(CWRoster *roster, char *player_id);
+
+/*
  * Read in a roster (in Retrosheet format) from file 'file'.
  */
 void cw_roster_read(CWRoster *roster, FILE *file);
+
+/*
+ * Write a roster (in Retrosheet format) to file 'file'.
+ */
+void cw_roster_write(CWRoster *roster, FILE *file);
 
 /*
  * Get the batting hand of player with ID 'player_id'.  Returns '?' if

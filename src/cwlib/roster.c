@@ -119,6 +119,26 @@ cw_roster_player_append(CWRoster *roster, CWPlayer *player)
   roster->last_player = player;
 }
 
+CWPlayer *
+cw_roster_player_find(CWRoster *roster, char *player_id)
+{
+  CWPlayer *player = roster->first_player;
+
+  if (player_id == NULL) {
+    return NULL;
+  }
+
+  while (player != NULL) {
+    if (!strcmp(player->player_id, player_id)) {
+      return player;
+    }
+
+    player = player->next;
+  }
+
+  return NULL;
+}
+
 void
 cw_roster_read(CWRoster *roster, FILE *file)
 {
@@ -146,6 +166,20 @@ cw_roster_read(CWRoster *roster, FILE *file)
     free(tokens[i]);
   }
   free(tokens);
+}
+
+void
+cw_roster_write(CWRoster *roster, FILE *file)
+{
+  CWPlayer *player = roster->first_player;
+
+  while (player != NULL) {
+    fprintf(file, "\"%s\",\"%s\",\"%s\",%c,%c\n",
+	    player->player_id, player->last_name, player->first_name,
+	    player->bats, player->throws);
+
+    player = player->next;
+  }
 }
 
 char

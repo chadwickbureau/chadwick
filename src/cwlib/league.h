@@ -66,4 +66,10 @@ CWRoster *cw_league_roster_find(CWLeague *league, char *team);
  */
 void cw_league_read(CWLeague *league, FILE *file);
 
+/*
+ * Write a leaguefile (in Retrosheet convention, TEAMyyyy) to the
+ * stream 'file'.
+ */
+void cw_league_write(CWLeague *league, FILE *file);
+
 #endif  /* CW_LEAGUE_H */

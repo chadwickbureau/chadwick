@@ -94,6 +94,11 @@ CWGame *cw_game_create(char *game_id);
 CWGame *cw_game_read(FILE *file);
 
 /*
+ * Writes 'game' to 'file'.
+ */
+void cw_game_write(CWGame *game, FILE *file);
+
+/*
  * Cleans up internal memory allocation associated with 'game'.
  * Caller is responsible for free()ing the game itself
  */
