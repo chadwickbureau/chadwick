@@ -68,6 +68,14 @@ CWRoster *cw_roster_create(char *team_id, int year, char league,
  */
 void cw_roster_cleanup(CWRoster *roster);
 
+
+/*
+ * Insert a new player to the roster.  This assumes that players are
+ * sorted in ascending order by player ID, and maintains that sort
+ * order.
+ */
+void cw_roster_player_insert(CWRoster *roster, CWPlayer *player);
+
 /*
  * Append a new player to the roster.  The roster assumes responsibility
  * for the pointer 'player'.

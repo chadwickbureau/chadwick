@@ -105,6 +105,38 @@ cw_roster_cleanup(CWRoster *roster)
 }
 
 void
+cw_roster_player_insert(CWRoster *roster, CWPlayer *player)
+{
+  if (roster->first_player == NULL) {
+    roster->first_player = player;
+    roster->last_player = player;
+  }
+  else {
+    CWPlayer *x = roster->first_player;
+    while (x != NULL && strcmp(x->player_id, player->player_id) < 0) {
+      x = x->next;
+    }
+
+    if (x == NULL) {
+      player->prev = roster->last_player;
+      roster->last_player->next = player;
+      roster->last_player = player;
+    }
+    else if (x->prev == NULL) {
+      roster->first_player->prev = player;
+      player->next = roster->first_player;
+      roster->first_player = player;
+    }
+    else {
+      player->prev = x->prev;
+      player->prev->next = player;
+      x->prev = player;
+      player->next = x;
+    }
+  }
+}
+
+void
 cw_roster_player_append(CWRoster *roster, CWPlayer *player)
 {
   player->prev = roster->last_player;

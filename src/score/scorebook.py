@@ -40,7 +40,6 @@ def TempFile():
     os.close(f[0])
     return name    
     
-
 class ChadwickScorebook:
     def __init__(self, year=2005):
         self.books = { }
@@ -246,29 +245,7 @@ class ChadwickScorebook:
         roster = self.league.first_roster
         while roster.team_id != team:  roster = roster.next
 
-        # We try to keep rosters in playerID order.
-        # This really ought to be part of the underlying C library
-        if roster.first_player == None:
-            roster.first_player = p
-            roster.last_player = p
-        else:
-            x = roster.first_player
-            while x != None and x.player_id < p.player_id:
-                x = x.next
-            if x == None:
-                p.prev = roster.last_player
-                roster.last_player.next = p
-                roster.last_player = p
-            elif x.prev == None:
-                roster.first_player.prev = p
-                p.next = roster.first_player
-                roster.first_player = p
-            else:
-                p.prev = x.prev
-                p.prev.next = p
-                x.prev = p
-                p.next = x
-        
+        cw_roster_player_insert(roster, p)
         self.players[playerID] = p
         self.modified = True
         
