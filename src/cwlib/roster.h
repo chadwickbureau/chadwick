@@ -80,6 +80,12 @@ void cw_roster_player_append(CWRoster *roster, CWPlayer *player);
  */
 CWPlayer *cw_roster_player_find(CWRoster *roster, char *player_id);
 
+
+/*
+ * Returns the number of players on the roster 
+ */
+int cw_roster_player_count(CWRoster *roster);
+
 /*
  * Read in a roster (in Retrosheet format) from file 'file'.
  */

@@ -139,6 +139,19 @@ cw_roster_player_find(CWRoster *roster, char *player_id)
   return NULL;
 }
 
+int
+cw_roster_player_count(CWRoster *roster)
+{
+  CWPlayer *player = roster->first_player;
+  int count = 0;
+
+  while (player != NULL) {
+    count++;
+    player = player->next;
+  }
+  return count;
+}
+
 void
 cw_roster_read(CWRoster *roster, FILE *file)
 {
@@ -154,8 +167,11 @@ cw_roster_read(CWRoster *roster, FILE *file)
   }
 
   while (!feof(file)) {
+    strcpy(buf, "");
     fgets(buf, 256, file);
-    numTokens = cw_file_tokenize_line(buf, tokens);
+    if ((numTokens = cw_file_tokenize_line(buf, tokens)) != 5) {
+      continue;
+    }
 
     cw_roster_player_append(roster, 
 			    cw_player_create(tokens[0], tokens[1], tokens[2],
