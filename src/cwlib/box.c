@@ -136,6 +136,11 @@ cw_boxscore_enter_starters(CWBoxscore *boxscore, CWGame *game)
 	boxscore->pitchers[t] = cw_boxscore_pitcher_create(app->player_id);
       }
     }
+
+    if (!strcmp(cw_game_info_lookup(game, "usedh"), "true")) {
+      CWAppearance *app = cw_game_starter_find(game, t, 0);
+      boxscore->pitchers[t] = cw_boxscore_pitcher_create(app->player_id);
+    }
   }
 }
 
@@ -148,7 +153,8 @@ cw_boxscore_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
   CWAppearance *sub = gameiter->event->first_sub;
 
   while (sub != NULL) {
-    if (strcmp(sub->player_id, 
+    if (sub->slot > 0 &&
+	strcmp(sub->player_id, 
 	       boxscore->slots[sub->slot][sub->team]->player_id)) {
       CWBoxPlayer *player = cw_boxscore_player_create(sub->player_id);
       boxscore->slots[sub->slot][sub->team]->next = player;

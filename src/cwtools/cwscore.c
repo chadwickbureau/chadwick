@@ -323,6 +323,7 @@ void cwscore_get_lineup(CWGame *game, CWRoster *roster, int team)
   int slot, positions[10];
   char lineup[10][9];
   CWPlayer *player;
+  int usedh = (strcmp(cw_game_info_lookup(game, "usedh"), "true") == 0);
 
   for (slot = 0; slot <= 9; slot++) {
     positions[slot] = 0;
@@ -346,14 +347,22 @@ void cwscore_get_lineup(CWGame *game, CWRoster *roster, int team)
 	continue;
       }
 
-      if (slot < 1 || slot > 9) {
+      if (slot < 0 || slot > 9) {
 	continue;
       }
 
-      if (position < 1 || position > 9) {
+      if (slot == 0 && !usedh) {
+	continue;
+      }
+
+      if (position < 1 || position > 10) {
 	continue;
       }
       
+      if (position == 10 && !usedh) {
+	continue;
+      }
+
       if (index >= 0 && index < cw_roster_player_count(roster)) {
 	player = cwscore_get_player_number(roster, index);
 	strcpy(lineup[slot], player->player_id);
@@ -368,11 +377,19 @@ void cwscore_get_lineup(CWGame *game, CWRoster *roster, int team)
 	continue;
       }
 
-      if (slot < 1 || slot > 9) {
+      if (slot < 0 || slot > 9) {
 	continue;
       }
 
-      if (position < 1 || position > 9) {
+      if (slot == 0 && !usedh) {
+	continue;
+      }
+
+      if (position < 1 || position > 10) {
+	continue;
+      }
+
+      if (position == 10 && !usedh) {
 	continue;
       }
 
@@ -397,6 +414,14 @@ void cwscore_get_lineup(CWGame *game, CWRoster *roster, int team)
     sprintf(name, "%s %s", player->first_name, player->last_name); 
     cw_game_starter_append(game, player->player_id, name, 
 			   team, slot, positions[slot]);
+  }
+
+  if (usedh) {
+    CWPlayer *player = cw_roster_player_find(roster, lineup[0]);
+    char name[256];
+    sprintf(name, "%s %s", player->first_name, player->last_name);
+    cw_game_starter_append(game, player->player_id, name,
+			   team, 0, 1);
   }
 }
 
@@ -475,7 +500,7 @@ void cwscore_get_pinch_hitter(CWGameIterator *gameiter, CWRoster *roster,
     cw_gameiter_next(gameiter);
   }
 
-  for (slot = 1; slot <= 9; slot++) {
+  for (slot = 0; slot <= 9; slot++) {
     strcpy(lineup[slot], gameiter->lineups[slot][team].player_id);
     positions[slot] = gameiter->lineups[slot][team].position;
   }
@@ -551,6 +576,14 @@ void cwscore_display_lineups(CWGameIterator *gameiter,
 	   positions[gameiter->lineups[i][0].position],
 	   gameiter->lineups[i][1].name,
 	   positions[gameiter->lineups[i][1].position]);
+  }
+  if (gameiter->lineups[0][0].name || gameiter->lineups[0][1].name) {
+    /* At least one team has a non-batting pitcher */
+    printf("%-20s %-2s   %-20s %-2s\n",
+	   (gameiter->lineups[0][0].name) ? gameiter->lineups[0][0].name : "",
+	   (gameiter->lineups[0][0].name) ? "p" : "",
+	   (gameiter->lineups[0][1].name) ? gameiter->lineups[0][1].name : "",
+	   (gameiter->lineups[0][1].name) ? "p" : "");
   }
 }
 
