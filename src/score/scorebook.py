@@ -259,7 +259,7 @@ class ChadwickScorebook:
                 p.prev = roster.last_player
                 roster.last_player.next = p
                 roster.last_player = p
-            elif x == roster.first_player:
+            elif x.prev == None:
                 roster.first_player.prev = p
                 p.next = roster.first_player
                 roster.first_player = p
