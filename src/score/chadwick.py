@@ -41,6 +41,7 @@ from panelteamlist import TeamListPanel
 from dialognewgame import NewGameDialog
 from dialoglineup import LineupDialog
 from dialogreport import ReportDialog
+from dialogabout import AboutDialog
 
 import statscan
 
@@ -122,6 +123,7 @@ class ChadwickFrame(wxFrame):
         EVT_MENU_RANGE(self, wxID_FILE1, wxID_FILE9, self.OnFileMRU)
         EVT_MENU(self, wxID_SAVE, self.OnFileSave)
         EVT_MENU(self, wxID_EXIT, self.OnFileExit)
+        EVT_MENU(self, wxID_ABOUT, self.OnHelpAbout)
         EVT_BUTTON(self, CW_MENU_GAME_NEW, self.OnGameNew)
         EVT_MENU(self, CW_MENU_REPORT_BATTING, self.OnReportBatting)
         EVT_MENU(self, CW_MENU_REPORT_PITCHING, self.OnReportPitching)
@@ -249,6 +251,10 @@ class ChadwickFrame(wxFrame):
         self.fileHistory.Save(wxConfig("Chadwick"))
         global app
         app.ExitMainLoop()
+
+    def OnHelpAbout(self, event):
+        dialog = AboutDialog(self)
+        dialog.ShowModal()
         
     def OnGameNew(self, event):
         dialog = NewGameDialog(self, self.book)
