@@ -69,6 +69,18 @@ CWBoxPlayer *cwbox_get_starter(CWBoxscore *boxscore, int team, int slot)
   return player;
 }
 
+CWBoxPitcher *cwbox_get_starting_pitcher(CWBoxscore *boxscore, int team)
+{
+  CWBoxPitcher *pitcher = boxscore->pitchers[team];
+
+  while (pitcher->prev != NULL) {
+    pitcher = pitcher->prev;
+  }
+
+  return pitcher;
+}
+
+
 void
 cwbox_print_header(CWGame *game, CWRoster *visitors, CWRoster *home)
 {
@@ -108,6 +120,21 @@ cwbox_print_player(CWBoxPlayer *player, CWRoster *roster)
 	 player->batting->bb, player->batting->so);
 }
 
+void
+cwbox_print_pitcher(CWBoxPitcher *pitcher, CWRoster *roster)
+{
+  CWPlayer *bio = cw_roster_player_find(roster, pitcher->player_id);
+  char name[256];
+  sprintf(name, "%s %s", bio->first_name, bio->last_name);
+
+  printf("%-25s %2d.%1d %2d %2d %2d %2d %2d %2d %2d\n",
+	 name, pitcher->pitching->outs / 3, pitcher->pitching->outs % 3,
+	 pitcher->pitching->r, pitcher->pitching->er,
+	 pitcher->pitching->h, pitcher->pitching->hr,
+	 pitcher->pitching->bb, pitcher->pitching->so,
+	 pitcher->pitching->bf);
+}
+
 void cwbox_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 {
   int i, t;
@@ -128,6 +155,18 @@ void cwbox_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 
     printf("\n");
   }
+
+  for (t = 0; t <= 1; t++) {
+    CWBoxPitcher *pitcher = cwbox_get_starting_pitcher(boxscore, t);
+    printf("%-25s   ip  r er  h hr bb so bf\n", 
+	   ((t == 0) ? visitors : home)->nickname);
+    while (pitcher != NULL) {
+      cwbox_print_pitcher(pitcher, (t == 0) ? visitors : home);
+      pitcher = pitcher->next;
+    }
+    printf("\n");
+  }
+    
 
   printf("\f");
   cw_boxscore_cleanup(boxscore);

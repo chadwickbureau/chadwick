@@ -24,7 +24,7 @@
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ##
 
-bin_PROGRAMS = cwbox cwevent cwgame cwscore cwsub 
+bin_PROGRAMS = cwbox cwevent cwgame cwpbp cwscore cwsub 
 
 AM_CPPFLAGS = -I$(top_srcdir)/src
 
@@ -42,6 +42,11 @@ cwevent_LDADD = $(top_builddir)/src/cwlib/libchadwick.la
 cwgame_SOURCES = cwgame.c cwtools.c
 
 cwgame_LDADD = $(top_builddir)/src/cwlib/libchadwick.la
+
+
+cwpbp_SOURCES = cwpbp.c cwtools.c
+
+cwpbp_LDADD = $(top_builddir)/src/cwlib/libchadwick.la
 
 
 cwscore_SOURCES = cwscore.c

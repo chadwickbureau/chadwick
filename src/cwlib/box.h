@@ -39,8 +39,19 @@ typedef struct cw_box_player_struct {
   struct cw_box_player_struct *prev, *next;
 } CWBoxPlayer;
 
+typedef struct cw_box_pitching_struct {
+  int outs, r, er, h, hr, bb, so, bf;
+} CWBoxPitching;
+
+typedef struct cw_box_pitcher_struct {
+  char *player_id;
+  CWBoxPitching *pitching;
+  struct cw_box_pitcher_struct *prev, *next;
+} CWBoxPitcher;
+
 typedef struct cw_boxscore_struct {
   CWBoxPlayer *slots[10][2];
+  CWBoxPitcher *pitchers[2];
 } CWBoxscore;
 
 /*
