@@ -49,7 +49,7 @@ $(SOURCE_SUFFIX).obj:
 
 OPT = -Od
 
-CPPFLAGS = -DMSDOS -I$(BCCDIR)\INCLUDE -I.. @$(CFG)
+CPPFLAGS = -DMSDOS -DVERSION=\"0.3.0\" -I$(BCCDIR)\INCLUDE -I.. @$(CFG) 
 
 all: cwevent cwgame cwsub
 
