@@ -124,6 +124,7 @@ int IsValid(char *play)
   ~CWScorebook()        { cw_scorebook_cleanup(self);  free(self); }
 
   int AppendGame(CWGame *game) { return cw_scorebook_append_game(self, game); }
+  int InsertGame(CWGame *game) { return cw_scorebook_insert_game(self, game); }
   int Read(FILE *file)         { return cw_scorebook_read(self, file); }
   void Write(FILE *file)       { cw_scorebook_write(self, file); }
 };

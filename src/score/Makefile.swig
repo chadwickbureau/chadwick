@@ -47,7 +47,6 @@ libchadwick_python.o:	libchadwick_python.c
 python:	libchadwick_python.o
 	gcc -shared libchadwick_python.o -L/usr/local/lib -lchadwick -o _libchadwick.so
 
-
 clean:
 	rm -f libchadwick_python.c 
 	rm -f libchadwick_python.o 

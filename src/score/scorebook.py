@@ -158,23 +158,19 @@ class ChadwickScorebook:
         self.modified = False
 
     def WriteTeam(self, zf, team):
-        print "writing roster"
         fn = team.team_id + str(self.year) + ".ROS"
         name = TempFile()
         f = file(name, "w")
         team.Write(f)
-        print "roster written"
         f.close()
         
         f = file(name, "r")
         zf.writestr(fn, f.read())
         f.close()
 
-        print "writing scorebook"
         fn = str(self.year) + team.team_id + ".EV" + team.league
         f = file(name, "w")
         self.books[team.team_id].Write(f)
-        print "scorebook written"
         f.close()
         
         f = file(name, "r")
@@ -282,7 +278,7 @@ class ChadwickScorebook:
 
     def AddGame(self, game):
         hometeam = game.GetTeam(1)
-        self.books[hometeam].AppendGame(game)
+        self.books[hometeam].InsertGame(game)
         self.games.append(game)
         self.games.sort(lambda x, y: cmp(x.GetDate(), y.GetDate()))
         self.modified = True
