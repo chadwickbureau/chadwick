@@ -47,6 +47,7 @@ class ChadwickScorebook:
         self.modified = False
         self.year = 2005
         self.league = cw_league_create()
+        self.games = [ ]
 
     def __del__(self):
         #for book in self.books:
@@ -60,6 +61,7 @@ class ChadwickScorebook:
         self.books = { }
 
         self.ReadLeague(zf)
+        self.BuildIndices()
         self.modified = False
 
     def FindLeagueEntry(self, zf):
@@ -190,32 +192,116 @@ class ChadwickScorebook:
             yield x
             x = x.next
         raise StopIteration
-    
-    def NumGames(self):
-        i = 0
+
+    def BuildIndices(self):
+        self.games = [ ]
         for x in self.books.keys():
             g = self.books[x].first_game
             while g != None:
-                i += 1
+                self.games.append(g)
                 g = g.next
-        return i
-        
+
+        self.games.sort(lambda x, y: cmp(cw_game_info_lookup(x, "date"),
+                                         cw_game_info_lookup(y, "date")))
+
+        self.players = { }
+        for team in self.IterateTeams():
+            x = team.first_player
+            while x != None:
+                self.players[x.player_id] = x
+                x = x.next
+
+    def NumGames(self): return len(self.games)
+
     def IterateGames(self):
-        for x in self.books.keys():
-            g = self.books[x].first_game
-            while g != None:
-                yield g
-                g = g.next
-        raise StopIteration
-                
+        for g in self.games: yield g
+
+    def NumPlayers(self):  return len(self.players)
+
+    def IteratePlayers(self):
+        keys = self.players.keys()
+        keys.sort()
+        for p in keys: yield self.players[p]
+
+    def UniquePlayerID(self, first, last):
+        playerID = last[:4].lower()
+        while len(playerID) < 4: playerID += "-"
+        playerID += first[0].lower()
+        i = 1
+        while "%s%03d" % (playerID,i) in self.players.keys(): i += 1
+        return "%s%03d" % (playerID,i)
+
+    def AddPlayer(self, playerID, firstName, lastName, bats, throws, team):
+        p = cw_player_create(playerID, lastName, firstName, bats, throws)
+
+        roster = self.league.first_roster
+        while roster.team_id != team:  roster = roster.next
+
+        # We try to keep rosters in playerID order.
+        # This really ought to be part of the underlying C library
+        if roster.first_player == None:
+            roster.first_player = p
+            roster.last_player = p
+        else:
+            x = roster.first_player
+            while x != None and x.player_id < p.player_id:
+                x = x.next
+            if x == None:
+                p.prev = roster.last_player
+                roster.last_player.next = p
+                roster.last_player = p
+            elif x == roster.first_player:
+                roster.first_player.prev = p
+                p.next = roster.first_player
+                roster.first_player = p
+            else:
+                p.prev = x.prev
+                p.prev.next = p
+                x.prev = p
+                p.next = x
+        
+        self.players[playerID] = p
+        self.modified = True
+        
     def GetTeam(self, teamId):
         return cw_league_roster_find(self.league, teamId)
 
     def GetYear(self):    return self.year
 
+    def AddTeam(self, teamID, city, nickname, leagueID):
+        t = cw_roster_create(teamID, self.year, leagueID,
+                             city, nickname)
+        
+        # We try to keep teams in playerID order.
+        # This really ought to be part of the underlying C library
+        if self.league.first_roster == None:
+            self.league.first_roster = t
+            self.league.last_roster = t
+        else:
+            x = self.league.first_roster
+            while x != None and x.team_id < t.team_id:
+                x = x.next
+            if x == None:
+                t.prev = self.league.last_roster
+                self.league.last_roster.next = t
+                self.league.last_roster = t
+            elif x.prev == None:
+                self.league.first_roster.prev = t
+                t.next = self.league.first_roster
+                self.league.first_roster = t
+            else:
+                t.prev = x.prev
+                t.prev.next = t
+                x.prev = t
+                t.next = x
+        self.modified = True
+
     def AddGame(self, game):
         hometeam = cw_game_info_lookup(game, "hometeam")
         cw_scorebook_append_game(self.books[hometeam], game)
+        self.games.append(game)
+        self.games.sort(lambda x, y: cmp(cw_game_info_lookup(x, "date"),
+                                         cw_game_info_lookup(y, "date")))
         self.modified = True
 
     def IsModified(self):   return self.modified

@@ -34,113 +34,19 @@ import panelstate
 
 from gameeditor import GameEditor, CreateGame
 from frameentry import GameEntryFrame
+from panelgamelist import *
+from panelplayerlist import PlayerListPanel
+from panelteamlist import TeamListPanel
+
 from dialognewgame import NewGameDialog
 from dialoglineup import LineupDialog
-
-from dialogboxview import BoxscoreViewDialog
+from dialogreport import ReportDialog
 
 import statscan
 
 
-class TeamListGrid(wxGrid):
-    def __init__(self, parent):
-        wxGrid.__init__(self, parent, -1)
-        self.CreateGrid(0, 4)
-        self.SetColLabelValue(0, "Team ID")
-        self.SetColLabelValue(1, "City")
-        self.SetColLabelValue(2, "Nickname")
-        self.SetColLabelValue(3, "League ID")
-        self.SetDefaultCellFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-        self.EnableEditing(false)
-
-    def OnUpdate(self, book):
-        if self.GetNumberRows() > book.NumTeams():
-            self.DeleteRows(self.GetNumberRows() - book.NumTeams())
-        elif self.GetNumberRows() < book.NumTeams():
-            self.InsertRows(0, book.NumTeams() - self.GetNumberRows())
-
-        for (i,team) in enumerate(book.IterateTeams()):
-            self.SetCellValue(i, 0, team.team_id)
-            self.SetCellAlignment(i, 0, wxALIGN_CENTER, wxALIGN_CENTER)
-            self.SetCellValue(i, 1, team.city)
-            self.SetCellValue(i, 2, team.nickname)
-            self.SetCellValue(i, 3, team.league)
-            self.SetCellAlignment(i, 3, wxALIGN_CENTER, wxALIGN_CENTER)
-            
-        self.AutoSizeRows()
-        self.AutoSizeColumns()
-        self.AdjustScrollbars()
-
-
-class GameListGrid(wxGrid):
-    def __init__(self, parent):
-        wxGrid.__init__(self, parent, -1)
-        self.CreateGrid(0, 4)
-        self.SetColLabelValue(0, "Game ID")
-        self.SetColLabelValue(1, "Date")
-        self.SetColLabelValue(2, "Visitors")
-        self.SetColLabelValue(3, "Home")
-        self.SetDefaultCellFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-        self.EnableEditing(false)
-
-        EVT_GRID_CELL_LEFT_DCLICK(self, self.OnLeftDoubleClick)
-
-    def OnUpdate(self, book):
-        self.book = book
-        if self.GetNumberRows() > book.NumGames():
-            self.DeleteRows(self.GetNumberRows() - book.NumGames())
-        elif self.GetNumberRows() < book.NumGames():
-            self.InsertRows(0, book.NumGames() - self.GetNumberRows())
-
-        for (i,game) in enumerate(book.IterateGames()):
-            self.SetCellValue(i, 0, game.game_id)
-            self.SetCellAlignment(i, 0, wxALIGN_CENTER, wxALIGN_CENTER)
-            self.SetCellValue(i, 1, cw_game_info_lookup(game, "date"))
-            self.SetCellAlignment(i, 1, wxALIGN_CENTER, wxALIGN_CENTER)
-            self.SetCellValue(i, 2, cw_game_info_lookup(game, "visteam"))
-            self.SetCellAlignment(i, 2, wxALIGN_CENTER, wxALIGN_CENTER)
-            self.SetCellValue(i, 3, cw_game_info_lookup(game, "hometeam"))
-            self.SetCellAlignment(i, 3, wxALIGN_CENTER, wxALIGN_CENTER)
-
-        self.AutoSizeRows()
-        self.AutoSizeColumns()
-        self.AdjustScrollbars()
-
-    def OnLeftDoubleClick(self, event):
-        for game in self.book.IterateGames():
-            if game.game_id == str(self.GetCellValue(event.GetRow(), 0)):
-                vis = str(self.GetCellValue(event.GetRow(), 2))
-                home = str(self.GetCellValue(event.GetRow(), 3))
-                doc = GameEditor(game,
-                                 self.book.GetTeam(vis),
-                                 self.book.GetTeam(home))
-                dialog = BoxscoreViewDialog(self, doc)
-                dialog.ShowModal()
-                return
-
-class ReportDialog(wxDialog):
-    def __init__(self, parent, title, contents):
-        wxDialog.__init__(self, parent, -1, title,
-                          wxDefaultPosition, wxSize(800, 600))
-
-        self.text = wxTextCtrl(self, -1, contents,
-                               wxDefaultPosition, wxDefaultSize,
-                               wxTE_MULTILINE | wxTE_READONLY)
-        self.text.SetFont(wxFont(10, wxMODERN, wxNORMAL, wxNORMAL))
-
-        sizer = wxBoxSizer(wxVERTICAL)
-        sizer.Add(self.text, 1, wxALL | wxEXPAND, 5)
-        
-        buttonSizer = wxBoxSizer(wxHORIZONTAL)
-        buttonSizer.Add(wxButton(self, wxID_OK, "OK"), 0,
-                        wxALL | wxALIGN_CENTER, 5)
-        sizer.Add(buttonSizer, 0, wxALIGN_RIGHT, 5)
-
-        self.SetSizer(sizer)
-        self.Layout()
 
 # IDs for our menu command events
-CW_MENU_GAME_NEW = 2000
 CW_MENU_REPORT_BATTING = 2010
 CW_MENU_REPORT_PITCHING = 2011
 CW_MENU_REPORT_FIELDING = 2012
@@ -158,11 +64,14 @@ class ChadwickFrame(wxFrame):
         sizer = wxBoxSizer(wxVERTICAL)
         
         notebook = wxNotebook(self, -1)
-        self.teamList = TeamListGrid(notebook)
-        notebook.AddPage(self.teamList, "Teams")
-        
-        self.gameList = GameListGrid(notebook)
+        self.gameList = GameListPanel(notebook)
         notebook.AddPage(self.gameList, "Games")
+        
+        self.teamList = TeamListPanel(notebook)
+        notebook.AddPage(self.teamList, "Teams")
+
+        self.playerList = PlayerListPanel(notebook)
+        notebook.AddPage(self.playerList, "Players")
         
         sizer.Add(notebook, 1, wxEXPAND, 0)
 
@@ -173,7 +82,7 @@ class ChadwickFrame(wxFrame):
         EVT_MENU_RANGE(self, wxID_FILE1, wxID_FILE9, self.OnFileMRU)
         EVT_MENU(self, wxID_SAVE, self.OnFileSave)
         EVT_MENU(self, wxID_EXIT, self.OnFileExit)
-        EVT_MENU(self, CW_MENU_GAME_NEW, self.OnGameNew)
+        EVT_BUTTON(self, CW_MENU_GAME_NEW, self.OnGameNew)
         EVT_MENU(self, CW_MENU_REPORT_BATTING, self.OnReportBatting)
         EVT_MENU(self, CW_MENU_REPORT_PITCHING, self.OnReportPitching)
         EVT_MENU(self, CW_MENU_REPORT_FIELDING, self.OnReportFielding)
@@ -195,9 +104,6 @@ class ChadwickFrame(wxFrame):
         self.fileHistory.UseMenu(fileMenu)
         self.fileHistory.AddFilesToMenu()
         
-        gameMenu = wxMenu()
-        gameMenu.Append(CW_MENU_GAME_NEW, "New game", "Enter a new game")
-
         reportMenu = wxMenu()
         reportMenu.Append(CW_MENU_REPORT_BATTING, "Batting",
                           "Show batting statistics")
@@ -213,7 +119,6 @@ class ChadwickFrame(wxFrame):
 
         menuBar = wxMenuBar()
         menuBar.Append(fileMenu, "&File")
-        menuBar.Append(gameMenu, "&Game")
         menuBar.Append(reportMenu, "&Report")
         menuBar.Append(helpMenu, "&Help")
 
@@ -377,7 +282,9 @@ class ChadwickFrame(wxFrame):
     def OnUpdate(self):
         self.teamList.OnUpdate(self.book)
         self.gameList.OnUpdate(self.book)
+        self.playerList.OnUpdate(self.book)
 
+        
 class ChadwickApp(wxApp):
     def OnInit(self):
         frame = ChadwickFrame(NULL)
