@@ -74,6 +74,39 @@ cw_boxscore_batting_add(CWBoxBatting *dest, CWBoxBatting *src)
   dest->cs += src->cs;
 }
 
+CWBoxPitching *
+cw_boxscore_pitching_create(void)
+{
+  CWBoxPitching *pitching = (CWBoxPitching *) malloc(sizeof(CWBoxPitching));
+  pitching->outs = 0;
+  pitching->r = 0;
+  pitching->er = 0;
+  pitching->h = 0;
+  pitching->hr = 0;
+  pitching->bb = 0;
+  pitching->ibb = 0;
+  pitching->so = 0;
+  pitching->bf = 0; 
+  pitching->wp = 0;
+  pitching->bk = 0;
+}
+
+void
+cw_boxscore_pitching_add(CWBoxPitching *dest, CWBoxPitching *src)
+{
+  dest->outs += src->outs;
+  dest->r += src->r;
+  dest->er += src->er;
+  dest->h += src->h;
+  dest->hr += src->hr;
+  dest->bb += src->bb;
+  dest->ibb += src->ibb;
+  dest->so += src->so;
+  dest->bf += src->bf;
+  dest->wp += src->wp;
+  dest->bk += src->bk;
+}
+
 /************************************************************************
  * Private routines for dealing with auxiliary struct init and dealloc
  ************************************************************************/
@@ -103,15 +136,7 @@ cw_boxscore_pitcher_create(char *player_id)
   CWBoxPitcher *pitcher = (CWBoxPitcher *) malloc(sizeof(CWBoxPitcher));
   pitcher->player_id = (char *) malloc(sizeof(char) * (strlen(player_id) + 1));
   strcpy(pitcher->player_id, player_id);
-  pitcher->pitching = (CWBoxPitching *) malloc(sizeof(CWBoxPitching));
-  pitcher->pitching->outs = 0;
-  pitcher->pitching->r = 0;
-  pitcher->pitching->er = 0;
-  pitcher->pitching->h = 0;
-  pitcher->pitching->hr = 0;
-  pitcher->pitching->bb = 0;
-  pitcher->pitching->so = 0;
-  pitcher->pitching->bf = 0;
+  pitcher->pitching = cw_boxscore_pitching_create();
   pitcher->prev = NULL;
   pitcher->next = NULL;
   return pitcher;
@@ -255,9 +280,19 @@ cw_boxscore_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
 	   event_data->event_type == EVENT_INTENTIONALWALK) {
     player->batting->bb++;
     pitcher->pitching->bb++;
+    if (event_data->event_type == EVENT_INTENTIONALWALK) {
+      player->batting->ibb++;
+      pitcher->pitching->ibb++;
+    }
   }
   else if (event_data->event_type == EVENT_HITBYPITCH) {
     player->batting->hp++;
+  }
+  else if (event_data->event_type == EVENT_BALK) {
+    pitcher->pitching->bk++;
+  }
+  else if (event_data->wp_flag) {
+    pitcher->pitching->wp++;
   }
   else if (event_data->sh_flag) {
     player->batting->sh++;

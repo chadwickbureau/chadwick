@@ -41,6 +41,7 @@ typedef struct cw_stats_player_struct {
   char *player_id;
   char *team;
   CWBoxBatting *batting;
+  CWBoxPitching *pitching;
   struct cw_stats_player_struct *prev, *next;
 } CWStatsPlayer;
 
@@ -55,6 +56,21 @@ cwstats_copy_player(CWBoxPlayer *player)
   strcpy(copy->player_id, player->player_id);
   copy->batting = cw_boxscore_batting_create();
   cw_boxscore_batting_add(copy->batting, player->batting);
+  copy->pitching = cw_boxscore_pitching_create();
+  copy->prev = copy->next = NULL;
+  return copy;
+}
+
+CWStatsPlayer *
+cwstats_copy_pitcher(CWBoxPitcher *pitcher)
+{
+  CWStatsPlayer *copy = (CWStatsPlayer *) malloc(sizeof(CWStatsPlayer));
+  copy->player_id = (char *) malloc(sizeof(char) *
+				    (strlen(pitcher->player_id) + 1));
+  strcpy(copy->player_id, pitcher->player_id);
+  copy->batting = cw_boxscore_batting_create();
+  copy->pitching = cw_boxscore_pitching_create();
+  cw_boxscore_pitching_add(copy->pitching, pitcher->pitching);
   copy->prev = copy->next = NULL;
   return copy;
 }
@@ -87,6 +103,33 @@ cwstats_add_batting_stats(CWBoxPlayer *player)
 }
 
 void
+cwstats_add_pitching_stats(CWBoxPitcher *pitcher)
+{
+  CWStatsPlayer *iter = first_player;
+
+  while (iter != NULL) {
+    if (!strcmp(iter->player_id, pitcher->player_id)) {
+      /* aggregate statistics */
+      cw_boxscore_pitching_add(iter->pitching, pitcher->pitching);
+      return;
+    }
+
+    iter = iter->next;
+  }
+
+  /* If we get here, player not found; add him */
+  if (last_player != NULL) {
+    last_player->next = cwstats_copy_pitcher(pitcher);
+    last_player->next->prev = last_player;
+    last_player = last_player->next;
+  }
+  else {
+    last_player = cwstats_copy_pitcher(pitcher);
+    first_player = last_player;
+  }
+}
+
+void
 cwstats_print_batting_stats(void)
 {
   CWStatsPlayer *player = first_player;
@@ -109,6 +152,30 @@ cwstats_print_batting_stats(void)
 }
 
 void
+cwstats_print_pitching_stats(void)
+{
+  CWStatsPlayer *player = first_player;
+
+  printf("ID          IP   R  ER   H HR  BB  SO WP BK\n");
+
+  while (player != NULL) {
+    if (player->pitching->bf == 0) {
+      player = player->next;
+      continue;
+    }
+    printf("%8s %3d.%d %3d %3d %3d %2d %3d %3d %2d %2d\n",
+	   player->player_id,
+	   player->pitching->outs / 3, player->pitching->outs % 3,
+	   player->pitching->r, player->pitching->er,
+	   player->pitching->h, player->pitching->hr,
+	   player->pitching->bb, player->pitching->so,
+	   player->pitching->wp, player->pitching->bk);
+    
+    player = player->next;
+  }
+}
+
+void
 cwstats_process_game(CWGame *game, CWRoster *visitors, CWRoster *home) 
 {
   int i, t;
@@ -124,6 +191,12 @@ cwstats_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 	 * tail of the list of players */
 	player = player->prev;
       }
+    }
+
+    CWBoxPitcher *pitcher = boxscore->pitchers[t];
+    while (pitcher != NULL) {
+      cwstats_add_pitching_stats(pitcher);
+      pitcher = pitcher->prev;
     }
   }
 
@@ -172,6 +245,8 @@ void
 cwstats_cleanup(void)
 {
   cwstats_print_batting_stats();
+  printf("\n\n");
+  cwstats_print_pitching_stats();
 }
 
 void (*cwtools_cleanup)(void) = cwstats_cleanup;

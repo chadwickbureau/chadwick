@@ -40,7 +40,7 @@ typedef struct cw_box_player_struct {
 } CWBoxPlayer;
 
 typedef struct cw_box_pitching_struct {
-  int outs, r, er, h, hr, bb, so, bf;
+  int outs, r, er, h, hr, bb, ibb, so, bf, bk, wp;
 } CWBoxPitching;
 
 typedef struct cw_box_pitcher_struct {
@@ -74,6 +74,16 @@ CWBoxBatting *cw_boxscore_batting_create(void);
  * Add a boxscore batting line to another
  */
 void cw_boxscore_batting_add(CWBoxBatting *dest, CWBoxBatting *src);
+
+/*
+ * Create a new boxscore pitching line
+ */
+CWBoxPitching *cw_boxscore_pitching_create(void);
+
+/*
+ * Add a boxscore pitching line to another
+ */
+void cw_boxscore_pitching_add(CWBoxPitching *dest, CWBoxPitching *src);
 
 #endif  /* CW_BOX_H */
 
