@@ -74,12 +74,9 @@ class StatePanel(wxPanel):
                                    wxDefaultPosition, wxSize(250, 25),
                                    wxTE_PROCESS_ENTER)
         self.playText.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+        # playText starts out empty, which is invalid...
+        self.playText.SetBackgroundColour(wxNamedColour("pink"))
         playTextSizer.Add(self.playText, 1, wxALL | wxALIGN_CENTER, 5)
-
-        self.playTextValid = FormattedStaticText(self, "Invalid")
-        self.playTextValid.SetForegroundColour(wxRED)
-        playTextSizer.Add(self.playTextValid, 0,
-                          wxALL | wxALIGN_CENTER, 5)
 
         stateSizer.Add(playTextSizer, 0, wxALL | wxEXPAND, 5)
 
@@ -155,11 +152,9 @@ class StatePanel(wxPanel):
 
         data = CWParsedEvent()
         if cw_parse_event(x.upper(), data):
-            self.playTextValid.SetLabel("Valid")
-            self.playTextValid.SetForegroundColour(wxColour(0, 150, 0))
+            self.playText.SetBackgroundColour(wxSystemSettings_GetColour(wxSYS_COLOUR_WINDOW))
         else:
-            self.playTextValid.SetLabel("Invalid")
-            self.playTextValid.SetForegroundColour(wxRED)
+            self.playText.SetBackgroundColour(wxNamedColour("pink"))
         
             
     def OnPlayEnter(self, event):
@@ -171,8 +166,7 @@ class StatePanel(wxPanel):
             self.doc.AddPlay(play)
 
             self.playText.Clear()
-            self.playTextValid.SetLabel("Invalid")
-            self.playTextValid.SetForegroundColour(wxRED)
+            self.playText.SetBackgroundColour(wxSystemSettings_GetColour(wxSYS_COLOUR_WINDOW))
             
             wxPostEvent(self.GetParent(),
                         wxCommandEvent(wxEVT_COMMAND_BUTTON_CLICKED,
