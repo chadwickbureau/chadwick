@@ -98,8 +98,11 @@ cw_league_read(CWLeague *rosterList, FILE *file)
   }
 
   while (!feof(file)) {
+    strcpy(buf, "");
     fgets(buf, 256, file);
-    numTokens = cw_file_tokenize_line(buf, tokens);
+    if ((numTokens = cw_file_tokenize_line(buf, tokens)) != 4) {
+      continue;
+    }
 
     cw_league_roster_append(rosterList, 
 			    cw_roster_create(tokens[0], 0, tokens[1][0],
