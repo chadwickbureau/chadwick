@@ -25,32 +25,14 @@
 ##
 
 EXTRA_DIST = \
-	boxscore.py \
-	chadwick.py \
-	dialogabout.py \
-	dialogboxview.py \
-	dialogcomment.py \
-	dialogdecision.py \
-	dialoggame.py \
-	dialoglineup.py \
-	dialognewgame.py \
-	dialogreport.py \
-	frameentry.py \
-	gameeditor.py \
-	gridlineup.py \
-	icons.py \
-	panelboxscore.py \
-	panelgamelist.py \
-	panellinescore.py \
-	panelnarrative.py \
-	panelplayerlist.py \
-	panelrunners.py \
-	panelstate.py \
-	panelteamlist.py \
-	scorebook.py \
 	setup.py \
-	statscan.py \
-	wxutils.py 
+	libchadwick.py \
+	libchadwick.i \
+	libchadwick_python.c \
+	Makefile.swig \
+	Makefile.xc \
+	lib2def.py \
+	libchadwick.def
 
 install-exec-local:
 	python setup.py install

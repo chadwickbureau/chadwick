@@ -24,30 +24,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-all: python
-
 #
 # The -I flag assumes Chadwick is installed in /usr/local;
 # modify as appropriate to your installation.
 #
 libchadwick_python.c:	libchadwick.i
 	swig -python -I/usr/local/include -o libchadwick_python.c libchadwick.i
-
-#
-# Modify the -I flag to point to your Python installation, if
-# different.
-#
-libchadwick_python.o:	libchadwick_python.c
-	gcc -c -I/usr/include/python2.3 libchadwick_python.c
-
-#
-# The -L flag assumes Chadwick is installed in /usr/local;
-# modify as appropriate to your installation.
-#
-python:	libchadwick_python.o
-	gcc -shared libchadwick_python.o -L/usr/local/lib -lchadwick -o _libchadwick.so
-
-clean:
-	rm -f libchadwick_python.c 
-	rm -f libchadwick_python.o 
-	rm -f libchadwick.py _libchadwick.so

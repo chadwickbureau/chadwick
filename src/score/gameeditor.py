@@ -38,7 +38,7 @@ def CreateGame(gameId, vis, home):
     game = cw_game_create(gameId)
     
     cw_game_set_version(game, "1")
-    cw_game_info_append(game, "inputprogvers", "Chadwick version 0.3.0")
+    cw_game_info_append(game, "inputprogvers", "Chadwick version 0.3.1")
     cw_game_info_append(game, "visteam", vis)
     cw_game_info_append(game, "hometeam", home)
     cw_game_info_append(game, "date",

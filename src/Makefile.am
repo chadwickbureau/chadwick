@@ -24,6 +24,6 @@
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ##
 
-SUBDIRS = cwlib cwtools score
+SUBDIRS = cwlib cwtools python score
 
 EXTRA_DIST = borland.mak
