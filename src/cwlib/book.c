@@ -148,10 +148,9 @@ cw_scorebook_read_comments(CWScorebook *scorebook, FILE *file)
 }
 
 int
-cw_scorebook_read(CWScorebook *scorebook, char *path)
+cw_scorebook_read(CWScorebook *scorebook, FILE *file)
 {
   int game_count = 0;
-  FILE *file = fopen(path, "r");
 
   if (file != NULL) {
     cw_scorebook_read_comments(scorebook, file);
@@ -164,7 +163,6 @@ cw_scorebook_read(CWScorebook *scorebook, char *path)
 	game_count++;
       }
     }
-    fclose(file);
     return game_count;
   }
   else {

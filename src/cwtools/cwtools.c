@@ -154,11 +154,13 @@ cwtools_iterate_games(CWScorebook *scorebook, CWLeague *league)
 }
 
 void
-cwtools_process_scorebook(CWLeague *league, char *file)
+cwtools_process_scorebook(CWLeague *league, char *filename)
 {
   CWScorebook *scorebook = cw_scorebook_create();
-  fprintf(stderr, "[Processing file %s.]\n", file);
-  if (cw_scorebook_read(scorebook, file) < 0) {
+  FILE *file = fopen(filename, "r");
+
+  fprintf(stderr, "[Processing file %s.]\n", filename);
+  if (!file || cw_scorebook_read(scorebook, file) < 0) {
     fprintf(stderr, "Warning: could not open file '%s'\n", file);
   }
   else {

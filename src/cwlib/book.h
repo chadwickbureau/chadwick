@@ -62,11 +62,11 @@ int cw_scorebook_append_game(CWScorebook *scorebook, CWGame *game);
 void cw_scorebook_remove_game(CWScorebook *scorebook, char *game_id);
 
 /*
- * Reads the contents of the scorebook file in filename 'path' into
+ * Reads the contents of the scorebook file 'file' into
  * the scorebook 'scorebook'.  Returns the number of games successfully read,
  * or -1 if the file could not be opened.
  */ 
-int cw_scorebook_read(CWScorebook *scorebook, char *path);
+int cw_scorebook_read(CWScorebook *scorebook, FILE *file);
 
 /*
  * Writes the contents of the scorebook to file 'file'.
