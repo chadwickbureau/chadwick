@@ -34,5 +34,8 @@ EXTRA_DIST = \
 	lib2def.py \
 	libchadwick.def
 
+all-local:
+	python setup.py build
+
 install-exec-local:
 	python setup.py install

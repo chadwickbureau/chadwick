@@ -12,14 +12,12 @@ CHADWICK_TOP to the directory where you unpacked the chadwick
 sources, and then type 'make -f borland'.  The binary tools will
 be built in chadwick-x.y.z\src\cwtools.
 
+To get the graphical interface working, check with the author for
+instructions.
+
 We are looking for contributions of makefiles and/or patches for other
 tools.
 
-Macintosh users
-===============
-
-We are looking for contributions of makefiles and/or patches to get
-Chadwick building on Mac.
 
 Unix users
 ==========
@@ -28,34 +26,27 @@ Chadwick uses the standard "./configure; make; make install" method
 for configuration and building.  The generic instructions below come
 standard from autotools.
 
-Graphical user interface for Macintosh and Unix users
-=====================================================
+The build system expects Python to be installed in a standard place.
+Note that if you're using a package management system, you'll need the
+package called python-dev (or similar) to build Chadwick.  You will
+also need to have wxPython version 2.5.3 or higher installed (check
+your package management system for package name, or get it from
+www.wxpython.org)
 
-After you install the libraries using the standard method outlined
-above, you can build the necessary bits for the graphical interface.
+The install step installs the Chadwick C library (libchadwick), the
+command-line tools cwevent, cwgame, and cwsub, a Python wrapper around
+the C library (installed as module libgambit), and the graphical
+scorebook program itself.  A script named 'chadwick' is installed in
+the binary directory that launches the scorebook application.
 
-Prerequisites: The graphical user interface is written in Python,
-using the wxPython library.  So, you'll need Python installed
-(at least version 2.3, should be available on most systems already),
-as well as the wxPython extension, version 2.5.3 or later.
-(available from www.wxpython.org, or from your local .deb or .rpm 
-provider).  
+Macintosh users
+===============
 
-Once you've got these set up, use the following sequence of commands
-to build the Python wrapper around the Chadwick library:
+For MacOS X users, you should be able to just follow the Unix users'
+instructions.
 
-cd src/score
-make -f Makefile.swig
-
-Note that you may need to modify paths in Makefile.swig if you
-installed either the Chadwick libraries or Python/wxPython in
-unusual locations.
-
-Once your build is complete, you should be set to do
-
-python chadwick.py
-
-and launch the graphical interface.
+There is no build system for earlier versions of MacOS; please
+contact the author if you can contribute one.
 
 
 

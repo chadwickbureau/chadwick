@@ -25,6 +25,7 @@
 ##
 
 EXTRA_DIST = \
+	__init__.py \
 	boxscore.py \
 	chadwick.py \
 	dialogabout.py \
@@ -51,6 +52,10 @@ EXTRA_DIST = \
 	setup.py \
 	statscan.py \
 	wxutils.py 
+
+
+all-local:
+	python setup.py build
 
 install-exec-local:
 	python setup.py install
