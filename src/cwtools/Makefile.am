@@ -31,25 +31,25 @@ AM_CPPFLAGS = -I$(top_srcdir)/src
 
 cwevent_SOURCES = cwevent.c cwtools.c
 
-cwevent_LDADD = $(top_builddir)/src/cwlib/libchadwick.a
+cwevent_LDADD = $(top_builddir)/src/cwlib/libchadwick.la
 
 
 cwgame_SOURCES = cwgame.c cwtools.c
 
-cwgame_LDADD = $(top_builddir)/src/cwlib/libchadwick.a
+cwgame_LDADD = $(top_builddir)/src/cwlib/libchadwick.la
 
 
 cwscore_SOURCES = cwscore.c
 
-cwscore_LDADD = $(top_builddir)/src/cwlib/libchadwick.a
+cwscore_LDADD = $(top_builddir)/src/cwlib/libchadwick.la
 
 
 cwstats_SOURCES = cwstats.c cwtools.c
 
-cwstats_LDADD = $(top_builddir)/src/cwlib/libchadwick.a
+cwstats_LDADD = $(top_builddir)/src/cwlib/libchadwick.la
 
 
 cwsub_SOURCES = cwsub.c cwtools.c
 
-cwsub_LDADD = $(top_builddir)/src/cwlib/libchadwick.a
+cwsub_LDADD = $(top_builddir)/src/cwlib/libchadwick.la
 
