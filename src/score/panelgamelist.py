@@ -161,7 +161,8 @@ class GameListGrid(wxGrid):
         self.SetDefaultCellFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL))
         self.SetColLabelAlignment(wxALIGN_CENTER, wxALIGN_CENTER)
         self.SetDefaultCellBackgroundColour(wxColour(242, 242, 242))
-
+        self.DisableDragRowSize()
+        
         self.SetColSize(0, 100)
         self.SetColSize(1, 25)
         self.SetColSize(2, 175)
@@ -185,7 +186,10 @@ class GameListGrid(wxGrid):
             self.DeleteRows(0, self.GetNumberRows() - book.NumGames(self.filter))
         elif self.GetNumberRows() < book.NumGames(self.filter):
             self.AppendRows(book.NumGames(self.filter) - self.GetNumberRows())
-        
+
+        if self.GetNumberRows() > 0:
+            self.AutoSizeRow(0)
+            self.SetDefaultRowSize(self.GetRowSize(0))
         self.AdjustScrollbars()
 
     def OnLeftDoubleClick(self, event):

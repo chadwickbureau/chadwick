@@ -209,7 +209,8 @@ class ChadwickScorebook:
                 self.playerDict[x.player_id] = x
                 x = x.next
         self.players = self.playerDict.keys()
-        self.players.sort()
+        self.players.sort(lambda x, y: cmp(self.playerDict[x].GetSortName(),
+                                           self.playerDict[y].GetSortName()))
 
     def NumGames(self, crit=lambda x: True):
         return len(filter(crit, self.games))
@@ -248,7 +249,18 @@ class ChadwickScorebook:
         roster.InsertPlayer(p)
         self.playerDict[playerID] = p
         self.players.append(playerID)
-        self.players.sort()
+        self.players.sort(lambda x, y: cmp(self.playerDict[x].GetSortName(),
+                                           self.playerDict[y].GetSortName()))
+        self.modified = True
+
+    def ModifyPlayer(self, playerID, firstName, lastName, bats, throws):
+        p = self.playerDict[playerID]
+        p.SetFirstName(firstName)
+        p.SetLastName(lastName)
+        p.bats = bats
+        p.throws = throws
+        self.players.sort(lambda x, y: cmp(self.playerDict[x].GetSortName(),
+                                           self.playerDict[y].GetSortName()))
         self.modified = True
         
     def GetTeam(self, teamId):
@@ -283,6 +295,15 @@ class ChadwickScorebook:
                 t.next = x
         self.modified = True
 
+    def ModifyTeam(self, teamID, city, nickname, leagueID):
+        team = self.league.first_roster
+        while team.team_id != teamID:  team = team.next
+
+        team.SetCity(city)
+        team.SetNickname(nickname)
+        team.SetLeague(leagueID)
+        self.modified = True
+
     def AddGame(self, game):
         hometeam = game.GetTeam(1)
         self.books[hometeam].InsertGame(game)
@@ -291,3 +312,5 @@ class ChadwickScorebook:
         self.modified = True
 
     def IsModified(self):   return self.modified
+    def SetModified(self, value):  self.modified = value
+        

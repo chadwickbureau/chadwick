@@ -105,6 +105,7 @@ class ChadwickFrame(wxFrame):
         wxFrame.__init__(self, parent, -1, "Chadwick",
                          wxDefaultPosition, wxSize(800, 600))
         self.book = scorebook.ChadwickScorebook()
+        self.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL))
 
         self.MakeMenus()
         self.CreateStatusBar()

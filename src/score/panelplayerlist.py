@@ -72,10 +72,12 @@ class NameValidator(wxPyValidator):
         return
 
 
-class NewPlayerDialog(wxDialog):
+class AddPlayerDialog(wxDialog):
     def __init__(self, parent, book):
-        wxDialog.__init__(self, parent, -1, "Create new player")
+        wxDialog.__init__(self, parent, -1, "Add player")
         self.book = book
+
+        self.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL))
 
         sizer = wxFlexGridSizer(6)
 
@@ -173,6 +175,81 @@ class NewPlayerDialog(wxDialog):
         return [ t for t in self.book.IterateTeams() ][self.team.GetSelection()].team_id
     
 
+class EditPlayerDialog(wxDialog):
+    def __init__(self, parent, player):
+        wxDialog.__init__(self, parent, -1, "Edit player")
+
+        self.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL))
+        
+        sizer = wxFlexGridSizer(5)
+
+        sizer.Add(FormattedStaticText(self, "First name"),
+                  0, wxALL | wxALIGN_CENTER, 5)
+        self.firstName = wxTextCtrl(self, -1, player.GetFirstName(),
+                                    wxDefaultPosition, wxSize(150, -1))
+        self.firstName.SetValidator(NameValidator())
+        sizer.Add(self.firstName, 0, wxALL | wxALIGN_CENTER, 5)
+
+        sizer.Add(FormattedStaticText(self, "Last name"),
+                  0, wxALL | wxALIGN_CENTER, 5)
+        self.lastName = wxTextCtrl(self, -1, player.GetLastName(),
+                                   wxDefaultPosition, wxSize(150, -1))
+        self.lastName.SetValidator(NameValidator())
+        sizer.Add(self.lastName, 0, wxALL | wxALIGN_CENTER, 5)
+
+        sizer.Add(FormattedStaticText(self, "Bats"),
+                  0, wxALL | wxALIGN_CENTER, 5)
+        self.bats = wxChoice(self, -1, wxDefaultPosition, wxSize(150, -1),
+                             [ "Unknown", "Right", "Left", "Both" ])
+        self.bats.SetSelection({ "?": 0, "R": 1, "L": 2, "B": 3}[player.bats])
+        sizer.Add(self.bats, 0, wxALL | wxALIGN_CENTER, 5)
+
+        sizer.Add(FormattedStaticText(self, "Throws"),
+                  0, wxALL | wxALIGN_CENTER, 5)
+        self.throws = wxChoice(self, -1, wxDefaultPosition, wxSize(150, -1),
+                               [ "Unknown", "Right", "Left" ])
+        self.throws.SetSelection({ "?": 0, "R": 1, "L": 2}[player.throws])
+        sizer.Add(self.throws, 0, wxALL | wxALIGN_CENTER, 5)
+
+        #sizer.Add(FormattedStaticText(self, "Team"),
+        #          0, wxALL | wxALIGN_CENTER, 5)
+        #teamList = [ team.GetName() for team in book.IterateTeams() ]
+        #self.team = wxChoice(self, -1, wxDefaultPosition, wxSize(150, -1),
+        #                     teamList)
+        #self.team.SetSelection(0)
+        #sizer.Add(self.team, 0, wxALL | wxALIGN_CENTER, 5)
+
+        sizer.Add(FormattedStaticText(self, "Player ID"),
+                  0, wxALL | wxALIGN_CENTER, 5)
+        self.playerID = wxTextCtrl(self, -1, player.player_id,
+                                   wxDefaultPosition,
+                                   wxSize(150, -1))
+        self.playerID.Enable(False)
+        sizer.Add(self.playerID, 0, wxALL | wxALIGN_CENTER, 5)
+
+        buttonSizer = wxBoxSizer(wxHORIZONTAL)
+        buttonSizer.Add(wxButton(self, wxID_CANCEL, "Cancel"),
+                                 0, wxALL | wxALIGN_CENTER, 5)
+        buttonSizer.Add(wxButton(self, wxID_OK, "OK"), 0,
+                        wxALL | wxALIGN_CENTER, 5)
+
+        topSizer = wxBoxSizer(wxVERTICAL)
+
+        topSizer.Add(sizer, 0, wxALL, 5)
+        topSizer.Add(buttonSizer, 0, wxALIGN_RIGHT, 5)
+
+        self.SetSizer(topSizer)
+        self.Layout()
+        topSizer.SetSizeHints(self)
+
+    def GetFirstName(self):  return str(self.firstName.GetValue()).strip()
+    def GetLastName(self):   return str(self.lastName.GetValue()).strip()
+    def GetBats(self):
+        return [ "?", "R", "L", "B" ][self.bats.GetSelection()]
+    def GetThrows(self):
+        return [ "?", "R", "L" ][self.throws.GetSelection()]
+    
+
 class PlayerListTable(wxPyGridTableBase):
     def __init__(self, parent):
         wxPyGridTableBase.__init__(self)
@@ -252,20 +329,41 @@ class PlayerListGrid(wxGrid):
         self.SetDefaultCellFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL))
         self.SetColLabelAlignment(wxALIGN_CENTER, wxALIGN_CENTER)
         self.SetDefaultCellBackgroundColour(wxColour(242, 242, 242))
+        self.DisableDragRowSize()
+        self.EnableEditing(False)
 
         self.SetColSize(0, 250)
         self.SetColSize(1, 75)
         self.SetColSize(2, 75)
         self.SetColSize(3, 100)
 
+        EVT_GRID_CELL_LEFT_DCLICK(self, self.OnLeftDoubleClick)
+
     def OnUpdate(self, book):
         self.table.SetScorebook(book)
+        self.book = book
         if self.GetNumberRows() > book.NumPlayers():
             self.DeleteRows(0, self.GetNumberRows() - book.NumPlayers())
         elif self.GetNumberRows() < book.NumPlayers():
             self.AppendRows(book.NumPlayers() - self.GetNumberRows())
             
+        if self.GetNumberRows() > 0:
+            self.AutoSizeRow(0)
+            self.SetDefaultRowSize(self.GetRowSize(0))
         self.AdjustScrollbars()
+
+    def OnLeftDoubleClick(self, event):
+        for (i,player) in enumerate(self.book.IteratePlayers()):
+            if i == event.GetRow():
+                dialog = EditPlayerDialog(self, player)
+                if dialog.ShowModal() == wxID_OK:
+                    self.book.ModifyPlayer(player.player_id,
+                                           dialog.GetFirstName(),
+                                           dialog.GetLastName(),
+                                           dialog.GetBats(),
+                                           dialog.GetThrows())
+                    self.GetParent().GetGrandParent().OnUpdate()
+                return
 
 class PlayerListPanel(wxPanel):
     def __init__(self, parent):
@@ -284,7 +382,7 @@ class PlayerListPanel(wxPanel):
         EVT_BUTTON(self, newPlayerButton.GetId(), self.OnNewPlayer)
 
     def OnNewPlayer(self, event):
-        dialog = NewPlayerDialog(self, self.book)
+        dialog = AddPlayerDialog(self, self.book)
 
         if dialog.ShowModal() == wxID_OK:
             self.book.AddPlayer(dialog.GetPlayerID(),
