@@ -67,10 +67,10 @@ class Boxscore:
 
         while s != None:
             if self.FindStats(s.player_id) == None:
-                # We don't have entries (for now) for pitchers who don't bat
-                # because of the DH
                 if s.slot > 0:
                     self.stats[s.team][s.slot-1].append(self.NewBattingStats(s))
+                else:
+                    self.stats[s.team][9].append(self.NewBattingStats(s))
             else:
                 self.FindStats(s.player_id)["pos"].append(s.pos)
             
@@ -87,6 +87,8 @@ class Boxscore:
         for t in [0, 1]:
             starters = [ cw_game_starter_find(self.game, t, slot) for slot in xrange(1, 10) ]
             self.stats[t] = [ [ self.NewBattingStats(x) ] for x in starters ]
+            if self.game.GetStarter(t, 0) != None:
+                self.stats[t].append([ self.NewBattingStats(self.game.GetStarter(t, 0))])
 
             pitcher = cw_game_starter_find_by_position(self.game, t, 1)
             self.pitching[t] = [ self.NewPitchingStats(pitcher) ]
