@@ -186,7 +186,7 @@ class StatePanel(wxPanel):
                                            (self.doc.GetRoster(team).city,
                                             self.doc.GetRoster(team).nickname))
 
-        hasDH = (cw_gameiter_get_player(self.doc.GetState(), team, 0) != None)
+        hasDH = (self.doc.GetState().GetPlayer()(team, 0) != None)
 
         dialog.LoadRoster(self.doc.GetRoster(team), team, hasDH)
         dialog.LoadLineup(self.doc, team)
@@ -199,8 +199,8 @@ class StatePanel(wxPanel):
 
     def OnPinchHit(self, event):
         team = self.doc.GetHalfInning()
-        batter = cw_gameiter_get_player(self.doc.gameiter, team,
-                                        cw_gameiter_num_batters(self.doc.gameiter, team) % 9 + 1)
+        batter = self.doc.gameiter.GetPlayer(team,
+                                             self.doc.gameiter.NumBatters(team) % 9 + 1)
         dialog = dialoglineup.PinchDialog(self, "Choose pinch hitter")
         dialog.LoadRoster(self.doc.GetRoster(self.doc.GetHalfInning()),
                           self.doc.GetHalfInning())
@@ -219,7 +219,7 @@ class StatePanel(wxPanel):
 
         if dialog.ShowModal() == wxID_OK:
             dialog.WriteChanges(self.doc,
-                                cw_gameiter_get_runner(self.doc.gameiter, 3),
+                                self.doc.gameiter.GetRunner(3),
                                 self.doc.GetHalfInning(), 12)
             wxPostEvent(self.GetParent(),
                         wxCommandEvent(wxEVT_COMMAND_BUTTON_CLICKED,
@@ -232,7 +232,7 @@ class StatePanel(wxPanel):
 
         if dialog.ShowModal() == wxID_OK:
             dialog.WriteChanges(self.doc,
-                                cw_gameiter_get_runner(self.doc.gameiter, 2),
+                                self.doc.gameiter.GetRunner(2),
                                 self.doc.GetHalfInning(), 12)
             wxPostEvent(self.GetParent(),
                         wxCommandEvent(wxEVT_COMMAND_BUTTON_CLICKED,
@@ -245,7 +245,7 @@ class StatePanel(wxPanel):
 
         if dialog.ShowModal() == wxID_OK:
             dialog.WriteChanges(self.doc,
-                                cw_gameiter_get_runner(self.doc.gameiter, 1),
+                                self.doc.gameiter.GetRunner(1),
                                 self.doc.GetHalfInning(), 12)
             wxPostEvent(self.GetParent(),
                         wxCommandEvent(wxEVT_COMMAND_BUTTON_CLICKED,

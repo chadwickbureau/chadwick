@@ -34,10 +34,10 @@ class BoxscoreViewDialog(wxDialog):
     def __init__(self, parent, doc):
         title = (doc.GetRoster(0).city + " at " + 
                  doc.GetRoster(1).city + " on " +
-                 cw_game_info_lookup(doc.GetGame(), "date"))
-        if cw_game_info_lookup(doc.GetGame(), "number") == "1":
+                 doc.GetGame().GetDate())
+        if doc.GetGame().GetNumber() == 1:
             title += " (first game)"
-        elif cw_game_info_lookup(doc.GetGame(), "number") == "2":
+        elif doc.GetGame().GetNumber() == 2:
             title += " (second game)"
 
         wxDialog.__init__(self, parent, -1, title,

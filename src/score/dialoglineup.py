@@ -162,7 +162,7 @@ class LineupDialog(wxDialog):
         self.origPlayers = []
         self.origPositions = []
 
-        pitcher = cw_gameiter_get_player(gameiter, team, 0)
+        pitcher = gameiter.GetPlayer(team, 0)
         if pitcher != None:
             self.pitcherText.Show(true)
             self.players[-1].Show(true)
@@ -172,7 +172,7 @@ class LineupDialog(wxDialog):
                     self.players[-1].SetStringSelection(player.first_name + " " + player.last_name)
 
         for slot in range(9):
-            playerId = cw_gameiter_get_player(gameiter, team, slot+1)
+            playerId = gameiter.GetPlayer(team, slot+1)
             for player in iterate_roster(self.roster):
                 if player.player_id == playerId:
                     self.players[slot].SetStringSelection(player.first_name + " " + player.last_name)

@@ -103,17 +103,17 @@ class Boxscore:
         
             
     def Tabulate(self, game):
-        gameiter = cw_gameiter_create(game)
+        gameiter = CWGameIterator(game)
 
         while gameiter.event != None:
             if gameiter.event.event_text == "NP":
                 self.AddSubs(gameiter)
-                cw_gameiter_next(gameiter)
+                gameiter.NextEvent()
                 continue
             
-            team = cw_gameiter_get_halfinning(gameiter)
-            batterId = cw_gameiter_get_player(gameiter, team,
-                                              cw_gameiter_num_batters(gameiter, team) % 9 + 1)
+            team = gameiter.GetHalfInning()
+            batterId = gameiter.GetPlayer(team,
+                                          gameiter.NumBatters(team) % 9 + 1)
 
             batter = self.FindStats(batterId)
             pitcher = self.pitching[1-team][-1]
@@ -168,15 +168,13 @@ class Boxscore:
                 pitcher["wp"] += 1
 
             if event_data.pb_flag > 0:
-                fielder = self.FindStats(cw_gameiter_get_fielder(gameiter,
-                                                                 1-team, 2))
+                fielder = self.FindStats(gameiter.GetFielder(1-team, 2))
                 fielder["pb"] += 1
             if event_data.num_errors > 0:
                 for pos in range(1, 10):
                     errors = cw_gameiter_get_fielder_errors(gameiter, pos)
                     if errors > 0:
-                        fielder = self.FindStats(cw_gameiter_get_fielder(gameiter,
-                                                                         1-team, pos))
+                        fielder = self.FindStats(gameiter.GetFielder(1-team, pos))
                         fielder["e"] += errors
                 
             if event_data.dp_flag > 0:
@@ -189,15 +187,15 @@ class Boxscore:
                 self.byInnings[halfInning].append(0)
                 
             for base in [1,2,3]:
-                if cw_gameiter_get_runner(gameiter, base) == "":
+                if gameiter.GetRunner(base) == "":
                     continue
                 
-                runner = self.FindStats(cw_gameiter_get_runner(gameiter, base))
+                runner = self.FindStats(gameiter.GetRunner(base))
 
                 if cw_gameiter_get_advancement(gameiter, base) >= 4:
                     self.byInnings[halfInning][inning-1] += 1
                     runner["r"] += 1
-                    resppitcher = self.FindPitcher(cw_gameiter_get_resp_pitcher(gameiter, base))
+                    resppitcher = self.FindPitcher(gameiter.GetRespPitcher(base))
                     resppitcher["r"] += 1
                     if cw_gameiter_get_advancement(gameiter, base) != 5:
                         resppitcher["er"] += 1
@@ -214,10 +212,8 @@ class Boxscore:
                 if cw_gameiter_get_advancement(gameiter, 0) != 5:
                     pitcher["er"] += 1
 
-            cw_gameiter_next(gameiter)
+            gameiter.NextEvent()
 
-        cw_gameiter_cleanup(gameiter)
-        
     def GetDPs(self, team):   return self.dp[team]
 
 

@@ -83,11 +83,8 @@ class GameEditor:
         self.visRoster = visRoster
         self.homeRoster = homeRoster
 
-        self.gameiter = cw_gameiter_create(self.game)
-        if self.game.first_event != None:
-            cw_gameiter_reset(self.gameiter)
-            while self.gameiter.event != None:
-                cw_gameiter_next(self.gameiter)
+        self.gameiter = CWGameIterator(self.game)
+        if self.game.first_event != None:  self.gameiter.ToEnd()
 
         self.boxscore = Boxscore(self.game)
 
@@ -102,9 +99,7 @@ class GameEditor:
                              self.GetHalfInning(),
                              self.GetCurrentBatter(),
                              "??", "", text)
-        cw_gameiter_reset(self.gameiter)
-        while self.gameiter.event != None:
-            cw_gameiter_next(self.gameiter)
+        self.gameiter.ToEnd()
         self.boxscore.Build()
 
     def DeletePlay(self):
@@ -123,10 +118,7 @@ class GameEditor:
         # otherwise, truncate and update everything
         if x != None:
             cw_game_truncate(self.game, x)
-
-            cw_gameiter_reset(self.gameiter)
-            while self.gameiter.event != None:
-                cw_gameiter_next(self.gameiter)
+            self.gameiter.ToEnd()
             self.boxscore.Build()
 
     def AddSubstitute(self, player, team, slot, pos):
@@ -139,9 +131,7 @@ class GameEditor:
                                   player.player_id,
                                   player.first_name + " " + player.last_name,
                                   team, slot, pos)
-        cw_gameiter_reset(self.gameiter)
-        while self.gameiter.event != None:
-            cw_gameiter_next(self.gameiter)
+        self.gameiter.ToEnd()
         self.boxscore.Build()
 
     def AddComment(self, text):
@@ -160,34 +150,25 @@ class GameEditor:
     def GetCurrentBatter(self):
         halfInning = self.GetHalfInning()
 
-        return cw_gameiter_get_player(self.gameiter,
-                                      halfInning,
-                                      cw_gameiter_num_batters(self.gameiter, halfInning) % 9 + 1)
+        return self.gameiter.GetPlayer(halfInning,
+                                       self.gameiter.NumBatters(halfInning) % 9 + 1)
 
     def GetCurrentRunner(self, base):
-        return cw_gameiter_get_runner(self.gameiter, base)
+        return self.gameiter.GetRunner(base)
 
     def GetCurrentPlayer(self, team, slot):
-        return cw_gameiter_get_player(self.gameiter, team, slot)
+        return self.gameiter.GetPlayer(team, slot)
 
     def GetCurrentPosition(self, team, slot):
-        playerId = cw_gameiter_get_player(self.gameiter, team, slot)
+        playerId = self.gameiter.GetPlayer(team, slot)
         return cw_gameiter_player_position(self.gameiter, team, playerId)
 
-    def GetInning(self):
-        return cw_gameiter_get_inning(self.gameiter)
+    def GetInning(self):        return self.gameiter.GetInning()
+    def GetHalfInning(self):    return self.gameiter.GetHalfInning()
 
-    def GetHalfInning(self):
-        return cw_gameiter_get_halfinning(self.gameiter)
-
-    def GetScore(self, team):
-        return cw_gameiter_get_score(self.gameiter, team)
-
-    def GetHits(self, team):
-        return cw_gameiter_get_hits(self.gameiter, team)
-
-    def GetErrors(self, team):
-        return cw_gameiter_get_errors(self.gameiter, team)
+    def GetScore(self, team):   return self.gameiter.GetTeamScore(team)
+    def GetHits(self, team):    return self.gameiter.GetTeamHits(team)
+    def GetErrors(self, team):  return self.gameiter.GetTeamErrors(team)
         
     def GetDoublePlays(self, team):
         return self.boxscore.GetDPs(team)

@@ -31,73 +31,6 @@
 %{
 #include <chadwick/chadwick.h>
 
-int cw_gameiter_get_inning(CWGameIterator *iterator)
-{
-  if (iterator->outs == 3) {
-    return iterator->inning + iterator->half_inning;
-  }
-  else {
-    return iterator->inning;
-  }
-}
-
-int cw_gameiter_get_halfinning(CWGameIterator *iterator)
-{
-  if (iterator->outs == 3) {
-    return (iterator->half_inning + 1) % 2;
-  }
-  else {
-    return iterator->half_inning;
-  }
-}
-
-char *cw_gameiter_get_batter(CWGameIterator *iterator)
-{
-  int halfInning = cw_gameiter_get_halfinning(iterator);
-  return iterator->lineups[iterator->num_batters[halfInning] % 9 + 1][halfInning].player_id;
-}
-
-char *cw_gameiter_get_player(CWGameIterator *iterator, 
-                             int team, int slot)
-{
-  return iterator->lineups[slot][team].player_id;
-}
-
-char *cw_gameiter_get_fielder(CWGameIterator *iterator, int team, int pos)
-{
-  return iterator->fielders[pos][team];
-}
-
-int cw_gameiter_num_batters(CWGameIterator *iterator, int team)
-{
-  return iterator->num_batters[team];
-}
-
-int cw_gameiter_get_score(CWGameIterator *iterator, int team)
-{
-  return iterator->score[team];
-}
-
-int cw_gameiter_get_hits(CWGameIterator *iterator, int team)
-{
-  return iterator->hits[team];
-}
-
-int cw_gameiter_get_errors(CWGameIterator *iterator, int team)
-{
-  return iterator->errors[team];
-}
-
-char *cw_gameiter_get_runner(CWGameIterator *iterator, int base)
-{
-  return iterator->runners[base];
-}
-
-char *cw_gameiter_get_resp_pitcher(CWGameIterator *iterator, int base)
-{
-  return iterator->pitchers[base];
-}
-
 int cw_gameiter_get_advancement(CWGameIterator *iterator, int base)
 {
   return iterator->event_data->advance[base];
@@ -167,17 +100,66 @@ void cw_game_set_er(CWGame *game, char *pitcher, int er)
 %include <chadwick/parse.h>
 %include <chadwick/roster.h>
 
-int cw_gameiter_get_inning(CWGameIterator *iterator);
-int cw_gameiter_get_halfinning(CWGameIterator *iterator);
-char *cw_gameiter_get_batter(CWGameIterator *iterator);
-char *cw_gameiter_get_player(CWGameIterator *iterator, int team, int slot);
-char *cw_gameiter_get_fielder(CWGameIterator *iterator, int team, int pos);
-int cw_gameiter_num_batters(CWGameIterator *iterator, int team);
-int cw_gameiter_get_score(CWGameIterator *iterator, int team);
-int cw_gameiter_get_hits(CWGameIterator *iterator, int team);
-int cw_gameiter_get_errors(CWGameIterator *iterator, int team);
-char *cw_gameiter_get_runner(CWGameIterator *iterator, int base);
-char *cw_gameiter_get_resp_pitcher(CWGameIterator *iterator, int base);
+%extend CWGame {
+  char *GetGameID(void) { return self->game_id; }
+  char *GetDate(void)   { return cw_game_info_lookup(self, "date"); }
+  int GetNumber(void)   { return (int) (cw_game_info_lookup(self, "number")[0] - '0'); }
+  char *GetTeam(int t) 
+    { if (t == 0)    return cw_game_info_lookup(self, "visteam");
+      else           return cw_game_info_lookup(self, "hometeam");
+    }
+  int NumInnings(void)  
+    { if (self->last_event != NULL)  return self->last_event->inning;
+      else return 0;
+    }
+
+  char *GetInfo(char *label) { return cw_game_info_lookup(self, label); }
+  CWAppearance *GetStarter(int team, int slot)
+     { return cw_game_starter_find(self, team, slot); }
+
+  char *GetWinningPitcher(void)   { return cw_game_info_lookup(self, "wp"); }
+  char *GetLosingPitcher(void)    { return cw_game_info_lookup(self, "lp"); }
+  char *GetSavePitcher(void)      { return cw_game_info_lookup(self, "save"); }
+};
+
+%extend CWGameIterator {
+  CWGameIterator(CWGame *game)  { return cw_gameiter_create(game); }
+  ~CWGameIterator()             { cw_gameiter_cleanup(self);  free(self); }
+
+  void NextEvent(void) { cw_gameiter_next(self); }
+  void ToEnd(void)  
+    { cw_gameiter_reset(self); while (self->event != NULL)  cw_gameiter_next(self); } 
+
+  int GetInning(void) {
+    if (self->outs == 3) return self->inning + self->half_inning;
+    else return self->inning;
+  }
+
+  int GetHalfInning(void) {
+    if (self->outs == 3) return (self->half_inning + 1) % 2;
+    else return self->half_inning;
+  }
+
+  char *GetBatter(void) {
+    int halfInning = self->half_inning;
+    if (self->outs == 3) halfInning = (halfInning + 1) % 2;
+    return self->lineups[self->num_batters[halfInning] % 9 + 1][halfInning].player_id;
+  }
+
+  char *GetPlayer(int team, int slot)  { return self->lineups[slot][team].player_id; }
+  char *GetFielder(int team, int pos)  { return self->fielders[pos][team]; }
+  char *GetNextBatter(int team)
+    { return self->lineups[self->num_batters[team] % 9 + 1][team].player_id; }
+
+  char *GetRunner(int base)            { return self->runners[base]; }
+  char *GetRespPitcher(int base)       { return self->pitchers[base]; }
+
+  int NumBatters(int team)             { return self->num_batters[team]; }
+  int GetTeamScore(int team)           { return self->score[team]; }
+  int GetTeamHits(int team)            { return self->hits[team]; }
+  int GetTeamErrors(int team)          { return self->errors[team]; }
+};
+
 int cw_gameiter_get_advancement(CWGameIterator *iterator, int base);
 int cw_gameiter_get_sb_flag(CWGameIterator *iterator, int base);
 int cw_gameiter_get_cs_flag(CWGameIterator *iterator, int base);

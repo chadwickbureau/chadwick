@@ -46,7 +46,7 @@ class WeatherPanel(wxPanel):
         grid.Add(FormattedStaticText(self, "Temperature"),
                  0, wxALL | wxALIGN_CENTER, 5)
         self.temp = wxTextCtrl(self, -1,
-                               cw_game_info_lookup(doc.GetGame(), "temp"))
+                               doc.GetGame().GetInfo("temp"))
         grid.Add(self.temp, 0, wxALL | wxEXPAND | wxALIGN_CENTER, 5)
         grid.Add(FormattedStaticText(self, "Wind direction"),
                  0, wxALL | wxALIGN_CENTER, 5)
@@ -57,13 +57,13 @@ class WeatherPanel(wxPanel):
                                   "In from left", "In from center", "In from right" ])
         winddirs = [ "unknown", "tolf", "tocf", "torf",
                      "ltor", "rtol", "fromlf", "fromcf", "fromrf" ]
-        self.windDir.SetSelection(winddirs.index(cw_game_info_lookup(doc.GetGame(), "winddir")))
+        self.windDir.SetSelection(winddirs.index(doc.GetGame().GetInfo("winddir")))
         grid.Add(self.windDir, 0, wxALL | wxEXPAND | wxALIGN_CENTER, 5)
 
         grid.Add(FormattedStaticText(self, "Wind speed"),
                  0, wxALL | wxALIGN_CENTER, 5)
         self.windSpeed = wxTextCtrl(self, -1,
-                                    cw_game_info_lookup(doc.GetGame(), "windspeed"))
+                                    doc.GetGame().GetInfo("windspeed"))
         grid.Add(self.windSpeed, 0, wxALL | wxEXPAND | wxALIGN_CENTER, 5)
         
         grid.Add(FormattedStaticText(self, "Sky"),
@@ -72,7 +72,7 @@ class WeatherPanel(wxPanel):
                     "Overcast", "Night", "Dome" ]
         self.sky = wxChoice(self, -1, wxDefaultPosition, wxDefaultSize,
                             skyList)
-        skyCond = cw_game_info_lookup(doc.GetGame(), "sky")
+        skyCond = doc.GetGame().GetInfo("sky")
         self.sky.SetSelection(0)
         for sky in skyList:
             if sky.lower() == skyCond.lower():
@@ -86,7 +86,7 @@ class WeatherPanel(wxPanel):
         self.field = wxChoice(self, -1,
                               wxDefaultPosition, wxDefaultSize,
                               fieldList)
-        fieldCond = cw_game_info_lookup(doc.GetGame(), "fieldcond")
+        fieldCond = doc.GetGame.GetInfo("fieldcond")
         self.field.SetSelection(0)
         for field in fieldList:
             if field.lower() == fieldCond.lower():
@@ -126,19 +126,19 @@ class ScorerPanel(wxPanel):
         grid.Add(FormattedStaticText(self, "Scorer"),
                  0, wxALL | wxALIGN_CENTER, 5)
         self.scorer = wxTextCtrl(self, -1,
-                                 cw_game_info_lookup(doc.GetGame(), "scorer"))
+                                 doc.GetGame().GetInfo("scorer"))
         grid.Add(self.scorer, 0, wxALL | wxEXPAND | wxALIGN_CENTER, 5)
         
         grid.Add(FormattedStaticText(self, "Translator"),
                  0, wxALL | wxALIGN_CENTER, 5)
         self.translator = wxTextCtrl(self, -1,
-                                     cw_game_info_lookup(doc.GetGame(), "translator"))
+                                     doc.GetGame().GetInfo("translator"))
         grid.Add(self.translator, 0, wxALL | wxEXPAND | wxALIGN_CENTER, 5)
 
         grid.Add(FormattedStaticText(self, "Inputter"),
                  0, wxALL | wxALIGN_CENTER, 5)
         self.inputter = wxTextCtrl(self, -1,
-                                   cw_game_info_lookup(doc.GetGame(), "inputter"))
+                                   doc.GetGame().GetInfo("inputter"))
         grid.Add(self.inputter, 0, wxALL | wxEXPAND | wxALIGN_CENTER, 5)
 
         grid.Add(FormattedStaticText(self, "How scored"),
@@ -147,7 +147,7 @@ class ScorerPanel(wxPanel):
         self.howScored = wxChoice(self, -1,
                                   wxDefaultPosition, wxDefaultSize,
                                   scoredList)
-        scored = cw_game_info_lookup(doc.GetGame(), "howscored")
+        scored = doc.GetGame().GetInfo("howscored")
         self.howScored.SetSelection(0)
         for how in scoredList:
             if how.lower() == scored.lower():
@@ -184,25 +184,25 @@ class UmpirePanel(wxPanel):
         grid.Add(FormattedStaticText(self, "Home plate"),
                  0, wxALL | wxALIGN_CENTER, 5)
         self.home = wxTextCtrl(self, -1,
-                               cw_game_info_lookup(doc.GetGame(), "umphome"))
+                               doc.GetGame().GetInfo("umphome"))
         grid.Add(self.home, 0, wxALL | wxEXPAND | wxALIGN_CENTER, 5)
 
         grid.Add(FormattedStaticText(self, "First base"),
                  0, wxALL | wxALIGN_CENTER, 5)
         self.first = wxTextCtrl(self, -1,
-                                cw_game_info_lookup(doc.GetGame(), "ump1b"))
+                                doc.GetGame().GetInfo("ump1b"))
         grid.Add(self.first, 0, wxALL | wxEXPAND | wxALIGN_CENTER, 5)
 
         grid.Add(FormattedStaticText(self, "Second base"),
                  0, wxALL | wxALIGN_CENTER, 5)
         self.second = wxTextCtrl(self, -1,
-                                 cw_game_info_lookup(doc.GetGame(), "ump2b"))
+                                 doc.GetGame().GetInfo("ump2b"))
         grid.Add(self.second, 0, wxALL | wxEXPAND | wxALIGN_CENTER, 5)
 
         grid.Add(FormattedStaticText(self, "Third base"),
                  0, wxALL | wxALIGN_CENTER, 5)
         self.third = wxTextCtrl(self, -1,
-                                cw_game_info_lookup(doc.GetGame(), "ump3b"))
+                                doc.GetGame().GetInfo("ump3b"))
         grid.Add(self.third, 0, wxALL | wxEXPAND | wxALIGN_CENTER, 5)
 
         box.Add(grid, 0, wxALL | wxEXPAND, 5)
@@ -233,7 +233,7 @@ class GeneralPanel(wxPanel):
         grid.Add(FormattedStaticText(self, "Start time"),
                  0, wxALL | wxALIGN_CENTER, 5)
         self.startTime = wxTextCtrl(self, -1,
-                                    cw_game_info_lookup(doc.GetGame(), "starttime"))
+                                    doc.GetGame().GetInfo("starttime"))
         grid.Add(self.startTime, 0, wxALL | wxEXPAND | wxALIGN_CENTER, 5)
 
         grid.Add(FormattedStaticText(self, "Day/night"),
@@ -242,7 +242,7 @@ class GeneralPanel(wxPanel):
         self.dayNight = wxChoice(self, -1,
                                  wxDefaultPosition, wxDefaultSize,
                                  dayNightList)
-        day = cw_game_info_lookup(doc.GetGame(), "daynight")
+        day = doc.GetGame().GetInfo("daynight")
         self.dayNight.SetSelection(0)
         for entry in dayNightList:
             if entry.lower() == day.lower():
@@ -253,13 +253,13 @@ class GeneralPanel(wxPanel):
         grid.Add(FormattedStaticText(self, "Time of game"),
                  0, wxALL | wxALIGN_CENTER, 5)
         self.timeOfGame = wxTextCtrl(self, -1,
-                                     cw_game_info_lookup(doc.GetGame(), "timeofgame"))
+                                     doc.GetGame().GetInfo("timeofgame"))
         grid.Add(self.timeOfGame, 0, wxALL | wxEXPAND | wxALIGN_CENTER, 5)
 
         grid.Add(FormattedStaticText(self, "Attendance"),
                  0, wxALL | wxALIGN_CENTER, 5)
         self.attendance = wxTextCtrl(self, -1,
-                                     cw_game_info_lookup(doc.GetGame(), "attendance"))
+                                     doc.GetGame().GetInfo("attendance"))
         grid.Add(self.attendance, 0, wxALL | wxEXPAND | wxALIGN_CENTER, 5)
 
         box.Add(grid, 0, wxALL | wxEXPAND, 5)

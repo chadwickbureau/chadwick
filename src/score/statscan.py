@@ -69,10 +69,10 @@ class BattingAccumulator:
 
     def OnEvent(self, game, gameiter):
         event_data = gameiter.event_data
-        team = cw_gameiter_get_halfinning(gameiter)
+        team = gameiter.GetHalfInning()
         
-        batterId = cw_gameiter_get_player(gameiter, team,
-                                          cw_gameiter_num_batters(gameiter, team) % 9 + 1)
+        batterId = gameiter.GetPlayer(team,
+                                      gameiter.NumBatters(team) % 9 + 1)
         batter = self.stats[batterId]
 
         if cw_event_is_official_ab(event_data):
@@ -109,10 +109,10 @@ class BattingAccumulator:
             batter["gdp"] += 1
 
         for base in [1,2,3]:
-            if cw_gameiter_get_runner(gameiter, base) == "":
+            if gameiter.GetRunner(base) == "":
                 continue
             
-            runner = self.stats[cw_gameiter_get_runner(gameiter, base)]
+            runner = self.stats[gameiter.GetRunner(base)]
             destBase = cw_gameiter_get_advancement(gameiter, base)
             if destBase >= 4:
                 runner["r"] += 1
@@ -186,7 +186,7 @@ class TeamBattingAccumulator:
 
     def OnEvent(self, game, gameiter):
         event_data = gameiter.event_data
-        team = cw_gameiter_get_halfinning(gameiter)
+        team = gameiter.GetHalfInning()
 
         batter = self.stats[game.GetTeams()[team]]
         if cw_event_is_official_ab(event_data):
@@ -223,7 +223,7 @@ class TeamBattingAccumulator:
             batter["gdp"] += 1
 
         for base in [1,2,3]:
-            if cw_gameiter_get_runner(gameiter, base) == "":
+            if gameiter.GetRunner(base) == "":
                 continue
             
             destBase = cw_gameiter_get_advancement(gameiter, base)
@@ -319,8 +319,8 @@ class PitchingAccumulator:
             rec = rec.next
 
     def OnEvent(self, game, gameiter):
-        team = cw_gameiter_get_halfinning(gameiter)
-        pitcherId = cw_gameiter_get_fielder(gameiter, 1-team, 1)
+        team = gameiter.GetHalfInning()
+        pitcherId = gameiter.GetFielder(1-team, 1)
         pitcher = self.stats[pitcherId]
 
         event_data = gameiter.event_data
@@ -351,10 +351,10 @@ class PitchingAccumulator:
             pitcher["wp"] += 1
 
         for base in [1,2,3]:
-            if cw_gameiter_get_runner(gameiter, base) == "":
+            if gameiter.GetRunner(base) == "":
                 continue
             
-            resppitcher = self.stats[cw_gameiter_get_resp_pitcher(gameiter, base)]
+            resppitcher = self.stats[gameiter.GetRespPitcher(base)]
             destBase = cw_gameiter_get_advancement(gameiter, base)
             if destBase >= 4:
                 resppitcher["r"] += 1
@@ -377,12 +377,12 @@ class PitchingAccumulator:
 
         for t in [0, 1]:
             startP = game.GetStarterAtPos(t, 1).player_id
-            endP = cw_gameiter_get_fielder(gameiter, t, 1)
+            endP = gameiter.GetFielder(t, 1)
             if startP == endP:
                 # TODO: It's possible but rare to start and end game but
                 # not pitch a complete game!
                 self.stats[startP]["cg"] += 1
-                if cw_gameiter_get_score(gameiter, 1-t) == 0:
+                if gameiter.GetTeamScore(1-t) == 0:
                     self.stats[startP]["sho"] += 1
             else:
                 self.stats[endP]["gf"] += 1
@@ -445,7 +445,7 @@ class TeamPitchingAccumulator:
 
     def OnEvent(self, game, gameiter):
         event_data = gameiter.event_data
-        team = cw_gameiter_get_halfinning(gameiter)
+        team = gameiter.GetHalfInning()
 
         pitcher = self.stats[game.GetTeams()[1-team]]
 
@@ -476,7 +476,7 @@ class TeamPitchingAccumulator:
             pitcher["wp"] += 1
 
         for base in [1,2,3]:
-            if cw_gameiter_get_runner(gameiter, base) == "":
+            if gameiter.GetRunner(base) == "":
                 continue
             
             destBase = cw_gameiter_get_advancement(gameiter, base)
@@ -493,12 +493,12 @@ class TeamPitchingAccumulator:
 
     def OnEndGame(self, game, gameiter):
         teams = game.GetTeams()
-        if cw_gameiter_get_score(gameiter, 0) > cw_gameiter_get_score(gameiter, 1):
+        if gameiter.GetTeamScore(0) > gameiter.GetTeamScore(1):
             self.stats[teams[0]]["w"] += 1
             self.stats[teams[1]]["l"] += 1
             if game.GetSavePitcher() != "":
                 self.stats[teams[0]]["sv"] += 1
-        elif cw_gameiter_get_score(gameiter, 0) < cw_gameiter_get_score(gameiter, 1):
+        elif gameiter.GetTeamScore(0) < gameiter.GetTeamScore(1):
             self.stats[teams[1]]["w"] += 1
             self.stats[teams[0]]["l"] += 1
             if game.GetSavePitcher() != "":
@@ -506,12 +506,12 @@ class TeamPitchingAccumulator:
 
         for t in [0, 1]:
             startP = game.GetStarterAtPos(t, 1).player_id
-            endP = cw_gameiter_get_fielder(gameiter, t, 1)
+            endP = gameiter.GetFielder(t, 1)
             if startP == endP:
                 # TODO: It's possible but rare to start and end game but
                 # not pitch a complete game!
                 self.stats[teams[t]]["cg"] += 1
-            if cw_gameiter_get_score(gameiter, 1-t) == 0:
+            if gameiter.GetTeamScore(1-t) == 0:
                 self.stats[teams[t]]["sho"] += 1
 
     def NewPitchingStats(self, team):
@@ -589,9 +589,9 @@ class FieldingAccumulator:
 
     def OnEvent(self, game, gameiter):
         event_data = gameiter.event_data
-        team = cw_gameiter_get_halfinning(gameiter)
+        team = gameiter.GetHalfInning()
 
-        fielderId = cw_gameiter_get_fielder(gameiter, 1-team, self.pos)
+        fielderId = gameiter.GetFielder(1-team, self.pos)
         fielder = self.stats[fielderId]
 
         event_data = gameiter.event_data
@@ -672,7 +672,7 @@ class TeamFieldingAccumulator:
 
     def OnEvent(self, game, gameiter):
         event_data = gameiter.event_data
-        team = cw_gameiter_get_halfinning(gameiter)
+        team = gameiter.GetHalfInning()
 
         fielder = self.stats[game.GetTeams()[1-team]]
         fielder["po"] += cw_event_outs_on_play(event_data)
@@ -740,7 +740,7 @@ class GameLogAccumulator:
 
     def OnEndGame(self, game, gameiter):
         ids = game.GetTeams()
-        scores = [ cw_gameiter_get_score(gameiter, t) for t in [0,1] ]
+        scores = [ gameiter.GetTeamsScore(t) for t in [0,1] ]
 
         for t in [0,1]:
             self.stats[ids[t]].append({ "date": game.GetDate(),
@@ -847,7 +847,7 @@ class RecordAccumulator:
 
     def OnEndGame(self, game, gameiter):
         ids = game.GetTeams()
-        scores = [ cw_gameiter_get_score(gameiter, t) for t in [0,1] ]
+        scores = [ gameiter.GetTeamScore(t) for t in [0,1] ]
 
         self.stats[ids[0]]["g"] += 1
         self.stats[ids[1]]["g"] += 1
@@ -924,34 +924,34 @@ class GrandSlamAccumulator:
 
     def OnEvent(self, game, gameiter):
         if (gameiter.event_data.event_type == CW_EVENT_HOMERUN and
-            cw_gameiter_get_runner(gameiter, 1) != "" and
-            cw_gameiter_get_runner(gameiter, 2) != "" and
-            cw_gameiter_get_runner(gameiter, 3) != ""):
-            inning = cw_gameiter_get_inning(gameiter)
-            halfInning = cw_gameiter_get_halfinning(gameiter)
+            gameiter.GetRunner(1) != "" and
+            gameiter.GetRunner(2) != "" and
+            gameiter.GetRunner(3) != ""):
+            inning = gameiter.GetInning()
+            halfInning = gameiter.GetHalfInning()
             if halfInning == 0:
-                team = cw_game_info_lookup(game, "visteam")
-                opp = cw_game_info_lookup(game, "hometeam")
+                team = game.GetTeams()[0]
+                opp = game.GetTeams()[1]
                 site = opp
             else:
-                team = cw_game_info_lookup(game, "hometeam")
-                opp = cw_game_info_lookup(game, "visteam")
+                team = game.GetTeams()[1]
+                opp = game.GetTeams()[0]
                 site = team
                 
-            self.stats.append({ "date": cw_game_info_lookup(game, "date"),
-                                "number": cw_game_info_lookup(game, "number"),
+            self.stats.append({ "date": game.GetDate(),
+                                "number": game.GetNumber(),
                                 
                                 "inning": inning,
                                 "halfInning": halfInning,
-                                "batter": cw_gameiter_get_batter(gameiter),
-                                "pitcher": cw_gameiter_get_fielder(gameiter, 1-halfInning, 1),
+                                "batter": gameiter.GetBatter(),
+                                "pitcher": gameiter.GetFielder(1-halfInning, 1),
                                 "team": team, "opp": opp, "site": site })
         
     def OnEndGame(self, game, gameiter):  pass
    
     def __str__(self):
-        self.stats.sort(lambda x, y: cmp(x["date"] + x["number"],
-                                         y["date"] + y["number"]))
+        self.stats.sort(lambda x, y: cmp(x["date"] + str(x["number"]),
+                                         y["date"] + str(y["number"])))
 
         s = "\nDate       # Site Batter               Pitcher           Inning\n"
         for rec in self.stats:
@@ -967,7 +967,7 @@ class GrandSlamAccumulator:
         return s
 
 def ProcessGame(game, acclist):
-    gameiter = cw_gameiter_create(game.game)
+    gameiter = CWGameIterator(game.game)
     map(lambda x: x.OnBeginGame(game, gameiter), acclist)
 
     while gameiter.event != None:
@@ -975,14 +975,13 @@ def ProcessGame(game, acclist):
             # Note that there exist some Retrosheet files that have subs
             # that aren't preceded by NP...
             map(lambda x: x.OnSubstitution(game, gameiter), acclist)
-            cw_gameiter_next(gameiter)
+            gameiter.NextEvent()
             continue
 
         map(lambda x: x.OnEvent(game, gameiter), acclist)
-        cw_gameiter_next(gameiter)
+        gameiter.NextEvent()
 
     map(lambda x: x.OnEndGame(game, gameiter), acclist)
-    cw_gameiter_cleanup(gameiter)
 
 def ProcessFile(book, acclist, monitor=None):
     """

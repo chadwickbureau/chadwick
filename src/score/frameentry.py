@@ -107,7 +107,7 @@ class GameEntryFrame(wxFrame):
         for t in [0, 1]:
             teams.append(doc.GetRoster(t).city + " " + doc.GetRoster(t).nickname)
         
-        gameDate = cw_game_info_lookup(doc.game, "date")
+        gameDate = doc.GetGame().GetDate()
         
         if doc.game.game_id[-1] == "0":
             gameNumber = ""

@@ -64,13 +64,11 @@ class BoxscorePanel(wxPanel):
                               self.doc.GetRoster(0).nickname,
                               self.doc.GetRoster(1).city,
                               self.doc.GetRoster(1).nickname))
-        self.text.AppendText("Game of %s" %
-                             cw_game_info_lookup(self.doc.GetGame(),
-                                                 "date"))
-        number = cw_game_info_lookup(self.doc.GetGame(), "number")
-        if number == "1":
+        self.text.AppendText("Game of %s" % self.doc.GetGame().GetDate())
+        number = self.doc.GetGame().GetNumber()
+        if number == 1:
             self.text.AppendText(" (first game)\n")
-        elif number == "2":
+        elif number == 2:
             self.text.AppendText(" (second game)\n")
         else:
             self.text.AppendText("\n")
@@ -158,11 +156,11 @@ class BoxscorePanel(wxPanel):
 
             for rec in box.pitching[t]:
                 decision = ""
-                if rec["id"] == cw_game_info_lookup(self.doc.GetGame(), "wp"):
+                if rec["id"] == self.doc.GetGame().GetWinningPitcher():
                     decision = " (W)"
-                elif rec["id"] == cw_game_info_lookup(self.doc.GetGame(), "lp"):
+                elif rec["id"] == self.doc.GetGame().GetLosingPitcher():
                     decision = " (L)"
-                elif rec["id"] == cw_game_info_lookup(self.doc.GetGame(), "save"):
+                elif rec["id"] == self.doc.GetGame().GetSavePitcher():
                     decision = " (S)"
                 self.text.AppendText("%-25s %2d.%1d %2d %2d %2d %2d %2d %2d\n" %
                                      (rec["name"] + decision,

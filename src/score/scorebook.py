@@ -54,22 +54,17 @@ class ChadwickGame:
         """
         self.game = game
 
-    def GetGameID(self):  return self.game.game_id
-    def GetDate(self):    return cw_game_info_lookup(self.game, "date")
-    def GetNumber(self):  return int(cw_game_info_lookup(self.game, "number"))
+    def GetGameID(self):  return self.game.GetGameID()
+    def GetDate(self):    return self.game.GetDate()
+    def GetNumber(self):  return self.game.GetNumber()
 
     def GetTeams(self):
-        return [ cw_game_info_lookup(self.game, "visteam"),
-                 cw_game_info_lookup(self.game, "hometeam") ]
+        return [ self.game.GetTeam(t) for t in [0,1] ]
 
     def GetScore(self):
-        gameiter = cw_gameiter_create(self.game)
-
-        try:
-            while gameiter.event != None:  cw_gameiter_next(gameiter)
-            return [ cw_gameiter_get_score(gameiter, t) for t in [0,1] ]
-        finally:
-            cw_gameiter_cleanup(gameiter)
+        gameiter = CWGameIterator(self.game)
+        gameiter.ToEnd()
+        return [ gameiter.GetTeamScore(t) for t in [0,1] ]
 
     def GetStarter(self, team, slot):
         return cw_game_starter_find(self.game, team, slot)
@@ -78,15 +73,15 @@ class ChadwickGame:
         return cw_game_starter_find_by_position(self.game, team, pos)
 
     def GetWinningPitcher(self):
-        return cw_game_info_lookup(self.game, "wp")
+        return self.game.GetWinningPitcher()
 
     def GetLosingPitcher(self):
-        return cw_game_info_lookup(self.game, "lp")
+        return self.game.GetLosingPitcher()
 
     def GetSavePitcher(self):
-        return cw_game_info_lookup(self.game, "save")
+        return self.game.GetSavePitcher()
 
-    def GetInnings(self):   return self.game.last_event.inning
+    def GetInnings(self):   return self.game.GetInnings()
 
 
 class ChadwickScorebook:
@@ -255,8 +250,7 @@ class ChadwickScorebook:
                 self.games.append(g)
                 g = g.next
 
-        self.games.sort(lambda x, y: cmp(cw_game_info_lookup(x, "date"),
-                                         cw_game_info_lookup(y, "date")))
+        self.games.sort(lambda x, y: cmp(x.GetDate(), y.GetDate()))
 
         self.players = { }
         for team in self.IterateTeams():
@@ -335,11 +329,10 @@ class ChadwickScorebook:
         self.modified = True
 
     def AddGame(self, game):
-        hometeam = cw_game_info_lookup(game, "hometeam")
+        hometeam = game.GetTeam(1)
         cw_scorebook_append_game(self.books[hometeam], game)
         self.games.append(game)
-        self.games.sort(lambda x, y: cmp(cw_game_info_lookup(x, "date"),
-                                         cw_game_info_lookup(y, "date")))
+        self.games.sort(lambda x, y: cmp(x.GetDate(), y.GetDate()))
         self.modified = True
 
     def IsModified(self):   return self.modified

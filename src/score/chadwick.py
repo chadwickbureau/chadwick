@@ -348,12 +348,12 @@ class ChadwickFrame(wxFrame):
                 # Find the game that was previous to the current one.
                 # If the game being entered was earlier than all others,
                 # just use the first one
-                if prevGames[0].GetDate() > cw_game_info_lookup(game, "date"):
+                if prevGames[0].GetDate() > game.GetDate():
                     pg = prevGames[0]
                 else:
                     pg = None
                     for g in prevGames:
-                        if g.GetDate() >= cw_game_info_lookup(game, "date"):
+                        if g.GetDate() >= game.GetDate():
                             pg = g
                             break
                     if pg == None:  pg = prevGames[-1]

@@ -88,7 +88,7 @@ class LineupGrid(wxScrolledWindow):
 
             if slot < 9:
                 playerId = self.doc.GetCurrentPlayer(self.team, slot+1)
-                if cw_gameiter_num_batters(self.doc.gameiter, self.team) % 9 == slot:
+                if self.doc.gameiter.NumBatters(self.team) % 9 == slot:
                     memdc.SetTextForeground(wxBLACK)
                 else:
                     memdc.SetTextForeground(self.fgColor)

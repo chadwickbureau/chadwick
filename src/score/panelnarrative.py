@@ -69,12 +69,11 @@ class NarrativePanel(wxPanel):
                                       self.doc.GetRoster(0).nickname,
                                       self.doc.GetRoster(1).city,
                                       self.doc.GetRoster(1).nickname)
-        text += "Game of %s" % cw_game_info_lookup(self.doc.GetGame(),
-                                                   "date")
-        number = cw_game_info_lookup(self.doc.GetGame(), "number")
-        if number == "1":
+        text += "Game of %s" % self.doc.GetGame().GetDate()
+        number = self.doc.GetGame().GetNumber()
+        if number == 1:
             text += " (first game)\n"
-        elif number == "2":
+        elif number == 2:
             text += " (second game)\n"
         else:
             text += "\n"
@@ -122,7 +121,7 @@ class NarrativePanel(wxPanel):
         return text
 
     def PrintPlays(self):
-        gameiter = cw_gameiter_create(self.doc.game)
+        gameiter = CWGameIterator(self.doc.game)
         text = ""
 
         lastHalf = 1
@@ -135,12 +134,11 @@ class NarrativePanel(wxPanel):
                 com = com.next
 
         while gameiter.event != None:
-            team = cw_gameiter_get_halfinning(gameiter)
+            team = gameiter.GetHalfInning()
             
             if team != lastHalf:
                 text += "\n"
-                text += GetInningLabel(cw_gameiter_get_inning(gameiter),
-                                       cw_gameiter_get_halfinning(gameiter))
+                text += GetInningLabel(gameiter.GetInning(), gameiter.GetHalfInning())
                 text += "\n"
                 lastHalf = team
             
@@ -160,17 +158,17 @@ class NarrativePanel(wxPanel):
                     text += x + "\n"
                     sub = sub.next
             else:                
-                batterId = cw_gameiter_get_player(gameiter, team,
-                                                  cw_gameiter_num_batters(gameiter, team) % 9 + 1)
+                batterId = gameiter.GetPlayer(team,
+                                              gameiter.NumBatters(team) % 9 + 1)
                 ros = self.doc.GetRoster(team)
                 batter = cw_roster_player_find(ros, batterId)
                 
                 x = "%-20s " % (batter.first_name + " " + batter.last_name)
-                x += "%2d-%2d " % (cw_gameiter_get_score(gameiter, 0),
-                                  cw_gameiter_get_score(gameiter, 1))
+                x += "%2d-%2d " % (gameiter.GetTeamScore(0),
+                                   gameiter.GetTeamScore(1))
                 x += "("
                 for base in [3, 2, 1]:
-                    x += { True: "x", False: "-" }[cw_gameiter_get_runner(gameiter, base) != ""]
+                    x += { True: "x", False: "-" }[gameiter.GetRunner(base) != ""]
                 
                 x += "%d): " % gameiter.outs
                 x += gameiter.event.event_text + "\n"
@@ -183,9 +181,7 @@ class NarrativePanel(wxPanel):
                     text += "Comment: %s\n" % com.text
                     com = com.next
                     
-            cw_gameiter_next(gameiter)
-
-        cw_gameiter_cleanup(gameiter)
+            gameiter.NextEvent()
 
         return text
 
