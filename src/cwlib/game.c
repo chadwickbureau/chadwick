@@ -47,6 +47,8 @@ CWGame *cw_game_create(char *game_id)
   game->last_event = NULL;
   game->first_data = NULL;
   game->last_data = NULL;
+  game->first_comment = NULL;
+  game->last_comment = NULL;
   game->prev = NULL;
   game->next = NULL;
 
@@ -104,6 +106,7 @@ static void cw_game_cleanup_events(CWGame *game, CWEvent *event)
   while (event != NULL) {
     CWEvent *next_event = event->next;
     CWAppearance *sub = event->first_sub;
+    CWComment *comment = event->first_comment;
     free(event->batter);
     free(event->count);
     free(event->pitches);
@@ -114,6 +117,12 @@ static void cw_game_cleanup_events(CWGame *game, CWEvent *event)
       free(sub->name);
       free(sub);
       sub = next_sub;
+    }
+    while (comment != NULL) {
+      CWComment *next_comment = comment->next;
+      free(comment->text);
+      free(comment);
+      comment = next_comment;
     }
     free(event);
     event = next_event;
@@ -317,7 +326,7 @@ void cw_game_data_append(CWGame *game, int num_data, char **data)
   d->num_data = num_data;
   d->data = (char **) malloc(sizeof(char *) * num_data);
   
-  for (i = 1; i < num_data; i++) {
+  for (i = 1; i <= num_data; i++) {
     d->data[i-1] = (char *) malloc(sizeof(char) * (strlen(data[i]) + 1));
     strcpy(d->data[i-1], data[i]);
   }
@@ -326,10 +335,39 @@ void cw_game_data_append(CWGame *game, int num_data, char **data)
     game->last_data->next = d;
   }
   else {
-    game->last_data = d;
+    game->first_data = d;
   }
   d->prev = game->last_data;
   game->last_data = d;
+}
+
+void cw_game_comment_append(CWGame *game, char *text)
+{
+  CWComment *comment = (CWComment *) malloc(sizeof(CWComment));
+  comment->text = (char *) malloc(sizeof(char) * (strlen(text) + 1));
+  strcpy(comment->text, text);
+  comment->next = NULL;
+
+  if (game->first_event == NULL) {
+    comment->prev = game->last_comment;
+    if (game->last_comment) {
+      game->last_comment->next = comment;
+    }
+    else {
+      game->first_comment = comment;
+    }
+    game->last_comment = comment;
+  }
+  else {
+    comment->prev = game->last_event->last_comment;
+    if (game->last_event->last_comment) {
+      game->last_event->last_comment->next = comment;
+    }
+    else {
+      game->last_event->first_comment = comment;
+    }
+    game->last_event->last_comment = comment;
+  }
 }
 
 CWGame *
@@ -363,6 +401,9 @@ cw_game_read(FILE *file)
   while (!feof(file)) {
     fgetpos(file, &filepos);
     fgets(buf, 256, file);
+    if (feof(file)) {
+      break;
+    }
     numTokens = cw_file_tokenize_line(buf, tokens);
     if (!strcmp(tokens[0], "id")) {
       fsetpos(file, &filepos);
@@ -396,8 +437,11 @@ cw_game_read(FILE *file)
 				atoi(tokens[3]), atoi(tokens[4]), 
 				atoi(tokens[5]));
     }
+    else if (!strcmp(tokens[0], "com")) {
+      cw_game_comment_append(game, tokens[1]);
+    }
     else if (!strcmp(tokens[0], "data")) {
-      cw_game_data_append(game, numTokens, tokens);
+      cw_game_data_append(game, numTokens - 1, tokens);
     }
     else if (!strcmp(tokens[0], "badj")) {
       strncpy(batHandBatter, tokens[1], 255);
@@ -458,6 +502,17 @@ cw_game_write_starters(CWGame *game, FILE *file)
 }
 
 static void
+cw_game_write_comments(CWGame *game, FILE *file)
+{
+  CWComment *comment = game->first_comment;
+
+  while (comment != NULL) {
+    fprintf(file, "com,\"%s\"\n", comment->text);
+    comment = comment->next;
+  }
+}
+
+static void
 cw_game_write_events(CWGame *game, FILE *file)
 {
   CWEvent *event = game->first_event;
@@ -478,6 +533,13 @@ cw_game_write_events(CWGame *game, FILE *file)
 		sub->player_id, sub->name, 
 		sub->team, sub->slot, sub->pos);
 	sub = sub->next;
+      }
+    }
+    if (event->first_comment != NULL) {
+      CWComment *comment = event->first_comment;
+      while (comment != NULL) {
+	fprintf(file, "com,\"%s\"\n", comment->text);
+	comment = comment->next;
       }
     }
     event = event->next;
@@ -506,6 +568,7 @@ cw_game_write(CWGame *game, FILE *file)
 {
   cw_game_write_header(game, file);
   cw_game_write_starters(game, file);
+  cw_game_write_comments(game, file);
   cw_game_write_events(game, file);
   cw_game_write_data(game, file);
 }

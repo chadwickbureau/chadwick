@@ -31,6 +31,7 @@
  * Structures and functions for manipulating lists of games ("scorebooks")
  */
 typedef struct cw_scorebook_struct {
+  CWComment *first_comment, *last_comment;
   CWGame *first_game, *last_game;
 } CWScorebook;
 

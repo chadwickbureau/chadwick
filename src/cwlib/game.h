@@ -51,12 +51,23 @@ typedef struct cw_appearance_struct {
   struct cw_appearance_struct *prev, *next;
 } CWAppearance;
 
+/*
+ * CWComment represents a comment in the game file.
+ * Comments are attached to the event preceding them
+ */
+
+typedef struct cw_comment_struct {
+  char *text;
+  struct cw_comment_struct *prev, *next;
+} CWComment;
+
 typedef struct cw_event_struct {
   int inning, half_inning;
   char *batter, *count, *pitches, *event_text;
   /* These are used for badj and padj; if spaces, use roster file */
   char batter_hand, pitcher_hand;
   CWAppearance *first_sub, *last_sub;
+  CWComment *first_comment, *last_comment;
   struct cw_event_struct *prev, *next;
 } CWEvent;
 
@@ -77,6 +88,7 @@ typedef struct cw_game_struct {
   CWAppearance *first_starter, *last_starter;
   CWEvent *first_event, *last_event;
   CWData *first_data, *last_data;
+  CWComment *first_comment, *last_comment; /* for comments before first evt */
   struct cw_game_struct *prev, *next;
 } CWGame;
 
@@ -162,6 +174,11 @@ void cw_game_substitute_append(CWGame *game, char *playerID, char *name,
  * Add a data record to the game
  */
 void cw_game_data_append(CWGame *game, int num_data, char **data);
+
+/*
+ * Add a comment to the game
+ */
+void cw_game_comment_append(CWGame *game, char *comment);
 
 #endif  /* CW_GAME_H */
 
