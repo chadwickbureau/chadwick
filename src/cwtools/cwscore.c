@@ -460,6 +460,59 @@ void cwscore_get_substitute(CWGame *game, CWRoster *roster,
   }
 }
 
+void cwscore_get_pinch_hitter(CWGameIterator *gameiter, CWRoster *roster,
+			      int inning, int half_inning, int team)
+{
+  int slot, index, positions[10];
+  char lineup[10][9];
+  char buffer[256];
+
+  cw_gameiter_reset(gameiter);
+
+  while (gameiter->event != NULL) {
+    cw_gameiter_next(gameiter);
+  }
+
+  for (slot = 1; slot <= 9; slot++) {
+    strcpy(lineup[slot], gameiter->lineups[slot][team].player_id);
+    positions[slot] = gameiter->lineups[slot][team].position;
+  }
+
+  cwscore_print_lineup(roster, lineup, positions);
+
+  slot = (gameiter->num_batters[team] % 9) + 1;
+
+  printf("Enter pinch-hitter:\n");
+  cwscore_get_line(buffer);
+  
+  if (isdigit(buffer[0])) {
+    sscanf(buffer, "%d", &index);
+      
+    if (index >= 0 && index < cw_roster_player_count(roster)) {
+      CWPlayer *player = cwscore_get_player_number(roster, index);
+      sprintf(buffer, "%s %s", player->first_name, player->last_name);
+      cw_game_substitute_append(gameiter->game, player->player_id, buffer,
+				team, slot, 11);
+    }
+    else {
+      printf("Invalid player number '%d'\n", index);
+    } 
+  }
+  else {
+    CWPlayer *player;
+    for (player = roster->first_player; player; player = player->next) {
+      if (!strcmp(player->last_name, buffer)) {
+	sprintf(buffer, "%s %s", player->first_name, player->last_name);
+	cw_game_substitute_append(gameiter->game, player->player_id,
+				  buffer, team, slot, 11);
+	return;
+      }
+    }
+      
+    printf("Couldn't figure out who '%s' is\n", buffer);
+  }
+}
+
 void cwscore_undo(CWGame *game)
 {
   if (game->first_event == NULL) {
@@ -561,6 +614,10 @@ void cwscore_enter_events(CWGame *game, CWRoster *visitors, CWRoster *home)
 			   batter, "??", "", "NP");
       cwscore_get_substitute(game, (half_inning == 0) ? visitors : home,
 			     inning, half_inning, half_inning);
+    }
+    else if (!strcmp(buffer, "PH")) {
+      cwscore_get_pinch_hitter(gameiter, (half_inning == 0) ? visitors : home,
+			       inning, half_inning, half_inning);
     }
     else if (!strcmp(buffer, "DS")) {
       cw_game_event_append(game, inning, half_inning,
