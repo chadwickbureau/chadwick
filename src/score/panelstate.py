@@ -76,7 +76,7 @@ class StatePanel(wxPanel):
         self.playText.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
         playTextSizer.Add(self.playText, 1, wxALL | wxALIGN_CENTER, 5)
 
-        self.playTextValid = FormattedStaticText(self, "")
+        self.playTextValid = FormattedStaticText(self, "Invalid")
         self.playTextValid.SetForegroundColour(wxRED)
         playTextSizer.Add(self.playTextValid, 0,
                           wxALL | wxALIGN_CENTER, 5)
@@ -148,32 +148,35 @@ class StatePanel(wxPanel):
         does nothing.
         """
         x = str(self.playText.GetValue())
-        if x != "":
-            #self.playTextValid.SetLabel("Valid")
-            self.playTextValid.SetForegroundColour(wxColour(0, 150, 0))
-        else:
-            #self.playTextValid.SetLabel("Invalid")
-            self.playTextValid.SetForegroundColour(wxRED)
-            event.Skip()
-            return
-        
         if x.upper() != x:
             y = self.playText.GetInsertionPoint()
             self.playText.SetValue(x.upper())
             self.playText.SetInsertionPoint(y)
+
+        data = CWParsedEvent()
+        if cw_parse_event(x.upper(), data):
+            self.playTextValid.SetLabel("Valid")
+            self.playTextValid.SetForegroundColour(wxColour(0, 150, 0))
         else:
-            event.Skip()
+            self.playTextValid.SetLabel("Invalid")
+            self.playTextValid.SetForegroundColour(wxRED)
+        
             
     def OnPlayEnter(self, event):
         play = str(self.playText.GetValue()).upper()
-        if play == "": 
-            return
-        self.doc.AddPlay(play)
+	data = CWParsedEvent()
+	if not cw_parse_event(play, data):
+            pass
+        else:
+            self.doc.AddPlay(play)
 
-        self.playText.Clear()
-        wxPostEvent(self.GetParent(),
-                    wxCommandEvent(wxEVT_COMMAND_BUTTON_CLICKED,
-                                   CW_BUTTON_UPDATE))
+            self.playText.Clear()
+            self.playTextValid.SetLabel("Invalid")
+            self.playTextValid.SetForegroundColour(wxRED)
+            
+            wxPostEvent(self.GetParent(),
+                        wxCommandEvent(wxEVT_COMMAND_BUTTON_CLICKED,
+                                       CW_BUTTON_UPDATE))
 
     def OnUndo(self, event):
         self.doc.DeletePlay()
