@@ -28,6 +28,38 @@ Chadwick uses the standard "./configure; make; make install" method
 for configuration and building.  The generic instructions below come
 standard from autotools.
 
+Graphical user interface for Macintosh and Unix users
+=====================================================
+
+After you install the libraries using the standard method outlined
+above, you can build the necessary bits for the graphical interface.
+
+Prerequisites: The graphical user interface is written in Python,
+using the wxPython library.  So, you'll need Python installed
+(at least version 2.3, should be available on most systems already),
+as well as the wxPython extension, version 2.5.3 or later.
+(available from www.wxpython.org, or from your local .deb or .rpm 
+provider).  
+
+Once you've got these set up, use the following sequence of commands
+to build the Python wrapper around the Chadwick library:
+
+cd src/score
+make -f Makefile.swig
+
+Note that you may need to modify paths in Makefile.swig if you
+installed either the Chadwick libraries or Python/wxPython in
+unusual locations.
+
+Once your build is complete, you should be set to do
+
+python chadwick.py
+
+and launch the graphical interface.
+
+
+
+What follows are the generic autoconf installation instructions.
 
 Basic Installation
 ==================

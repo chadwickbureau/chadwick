@@ -17,5 +17,6 @@ dnl Checks for library functions.
 
 AC_OUTPUT(src/cwlib/Makefile \
           src/cwtools/Makefile \
+	   src/score/Makefile \
           src/Makefile \
-	  Makefile)
+  	  Makefile)

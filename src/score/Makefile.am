@@ -4,7 +4,7 @@
 ## $Revision$
 ##
 ## DESCRIPTION:
-## Automake input file for Chadwick command-line tools
+## Automake input file for Chadwick
 ##
 ## This file is part of Chadwick, a library for baseball play-by-play and stats
 ## Copyright (C) 2002, Ted Turocy (turocy@econ.tamu.edu)
@@ -24,24 +24,38 @@
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ##
 
-bin_PROGRAMS = cwevent cwgame cwsub 
-
-EXTRA_DIST = borland.cfg borland.mak
-
-AM_CPPFLAGS = -I$(top_srcdir)/src
-
-
-cwevent_SOURCES = cwevent.c cwtools.c
-
-cwevent_LDADD = $(top_builddir)/src/cwlib/libchadwick.la
-
-
-cwgame_SOURCES = cwgame.c cwtools.c
-
-cwgame_LDADD = $(top_builddir)/src/cwlib/libchadwick.la
-
-
-cwsub_SOURCES = cwsub.c cwtools.c
-
-cwsub_LDADD = $(top_builddir)/src/cwlib/libchadwick.la
-
+EXTRA_DIST = \
+	boxscore.py \
+	chadwick.py \
+	dialogabout.py \
+	dialogboxview.py \
+	dialogcomment.py \
+	dialogdecision.py \
+	dialoggame.py \
+	dialoglineup.py \
+	dialognewgame.py \
+	dialogreport.py \
+	frameentry.py \
+	gameeditor.py \
+	gridlineup.py \
+	icons.py \
+	panelboxscore.py \
+	panelgamelist.py \
+	panellinescore.py \
+	panelnarrative.py \
+	panelplayerlist.py \
+	panelrunners.py \
+	panelstate.py \
+	panelteamlist.py \
+	scorebook.py \
+	setup.py \
+	statscan.py \
+	wxutils.py \
+	libchadwick.py \
+	libchadwick.i \
+	libchadwick_python.c \
+	Makefile.swig \
+	Makefile.xc \
+	lib2def.py \
+	libchadwick.def
+	

@@ -9,10 +9,10 @@
       <firstname>Theodore</firstname>
       <surname>Turocy</surname>
     </author>
-    <edition>Version 0.1.0</edition>
-    <pubdate>March, 2003</pubdate>
+    <edition>Version 0.3.0</edition>
+    <pubdate>March 2005</pubdate>
     <copyright>
-      <year>2003</year>
+      <year>2005</year>
       <holder>Theodore Turocy</holder>
     </copyright>
   </bookinfo>
@@ -171,6 +171,269 @@ not of crucial interest to most people.
 </sect1>
 
   </chapter>
+
+<chapter id="gui">
+<title>The Chadwick graphical interface</title>
+
+<para>
+The graphical interface is the program of interest for most users.
+This is intended to be a full-fledged baseball scorebook and
+statkeeping application.
+</para>
+
+<para>
+While it is still in an early stage of development, the graphical
+interface is already sufficient for many statkeeping tasks. 
+Future development will include additional reporting features,
+pitch-by-pitch entry, and some graphical helpers for entering
+unusual or difficult plays.  Users are encouraged to submit
+suggestions and ideas for enhancements to make the tool more
+useful.
+</para>
+
+<note>
+<para>
+Note that while the program is fairly stable, it is still in
+an early stage of development, and there may be as-yet undiscovered
+bugs.  You are strongly encouraged to follow good practices and
+back up your data frequently!
+</para>
+</note>
+
+<sect1 id="gui.files">
+<title>Getting started: Chadwick &quot;scorebook&quot; files</title
+
+<para>
+Chadwick files are referred to as &quot;scorebooks&quot; and
+typically have the extension <filename>.chw</filename>.  A scorebook
+is intended to comprise a group of related games in one season --
+usually a league or conference, or a similar grouping.
+</para>
+
+<para>
+The title bar of the Chadwick window will advise you of the location
+of the current scorebook file you're working on, and also will
+let you know if you have any unsaved changes.  You'll also be
+warned if you try to close the program with any pending unsaved
+changes.
+</para>
+
+<para>
+A new scorebook can be created from scratch using the
+<guimenuitem>New</guimenuitem> item on the <guimenu>File</guimenu>
+menu.  You will be prompted to enter the year in which the games
+are played.
+</para>
+
+<para>
+Chadwick scorebooks are internally fully compatible with the
+ZIP files of league play-by-play distributed by Retrosheet
+(http://www.retrosheet.org).  A good way to get a
+&quot;quick start&quot; in using Chadwick is to grab one of these
+ZIP files from the Retrosheet site and load it into Chadwick.
+Scorebooks are opened using the <guimenuitem>Open</guimenuitem>
+item on the <guimenu>File</guimenu> menu.  This dialog defaults
+to looking for files with the <filename>.chw</filename>
+extension, but there's a dropdown menu at the bottom that will
+switch it to looking for files with the <filename>.zip</filename> 
+extension.
+</para>
+
+<note>
+<para>
+If you want to use Chadwick to view the Retrosheet data, always
+use the full-season ZIP files Retrosheet provides, and not the
+ones for individual teams.  If you grab one of the individual
+team ZIP files, Chadwick will only recognize the team's home
+games.
+</para>
+</note>
+
+<para>
+As noted in the introduction, you are encouraged to save your
+scorebooks often, just in case.  The <guimenuitem>Save</guimenuitem>
+item on the <guimenu>File</guimenu> menu will save the scorebook
+to the same location from which it was loaded.  To save a copy
+to a different location, use the <guimenuitem>Save as</guimenuitem>
+item on the <guimenu>File</guimenu> menu instead.
+</para>
+
+</sect1>
+
+<sect1 id="gui.playersteams">
+<title>Players and teams</title>
+
+<para>
+Chadwick presents a list of all teams present in the current
+scorebook on the Teams tab.  A button labeled &quot;Create
+new team&quot; calls up a dialog box to add a new team.  You'll
+need to assign the team an ID unique within the scorebook
+(customarily, these are three letters).  You may also assign a
+one-letter League ID to the team; this is currently only presented
+in the Teams tab for human consumption, and is not used anywhere
+else.
+</para>
+
+<para>
+Chadwick presents a list of all players listed in the current
+scorebook on the Players tab.  A button labeled &quot;Create
+new player&quot; calls up a dialog box to add a new player to the
+list.  Players automatically are assigned to at least one team
+(so create teams first!)  You may either give the player a
+hand-assigned unique ID number, or have Chadwick generate
+one for you.  (Note that the unique ID number is generated using
+the Retrosheet style, and is only guaranteed to be unique
+within your current scorebook!)
+</para>
+
+</sect1>
+
+<sect1 id="gui.newgame">
+<title>Inputting games</title>
+
+<para>
+The Games tab of the main Chadwick window shows a list of all the
+games in the current scorebook.  Note that double-clicking on
+any game will pop up a dialog showing a boxscore and narrative
+(play-by-play) for that game.
+</para>
+
+<para>
+On the Games tab of the main Chadwick window is a button labeled
+&quot;Enter new game&quot;  This button launches the Chadwick
+game editor to input a new game.
+</para>
+
+<para>
+This process is intended to be guided and, hopefully, largely
+intuitive.  Initial dialogs will ask you for the teams and date
+of the game, and the starting lineups.
+</para>
+
+<para>
+With that all in place, the main game editor window is ready to
+go.  Plays are entered in the Retrosheet event notation.  A good
+documentation of this notation can be found at
+http://www.retrosheet.org/eventfile.htm 
+</para>
+
+<para>
+Here are some notes on entering games:
+<itemizedlist>
+<listitem>
+<para>
+Very little validation is as yet done on the input strings.
+So be a bit careful for now!  With an invalid play, what most
+likely happens is the state of the game doesn't change -- the
+program just ignores them silently.
+</para>
+</listitem>
+<listitem>
+<para>
+Plays can be undone one at a time using the
+&quot;Undo last play&quot; button.  Note that each undo takes the
+game back one play, including any intervening substitutions.
+It's not possible to jump right to a substitution currently.
+</para>
+</listitem>
+<listitem>
+<para>
+Offensive substitutions are entered using the &quot;Pinch hit&quot;
+and &quot;Pinch run&quot; buttons.  Each button is located next to the
+player for whom the substitute is intended.
+</para>
+</listitem>
+<listitem>
+<para>
+Defensive substitutions are entered using the &quot;Defensive
+substitution&quot; button.  This brings up a dialog which permits
+multiple simultaneous changes (e.g., double-switches).
+Note that when a team has an invalid defensive alignment (after
+pinch-hitting or pinch-running in the previous half inning), the
+play entry field is disabled until valid changes are input using
+this dialog.
+</para>
+</listitem>
+<listitem>
+<para>
+The &quot;Edit game information&quot; button brings up a dialog
+for editing the general information about the game which can
+be stored in a Retrosheet game file.  These include parameters
+for weather, umpires, attendance, and so forth.
+</para>
+</listitem>
+<listitem>
+<para>
+The &quot;Insert comment&quot; button inserts a free-form text comment in the play-by-play.
+</para>
+</listitem>
+<listitem>
+<para>
+The &quot;Save game and exit&quot; button ends the entry process.
+If the game is not a tie, then a dialog appears prompting you
+to award decisions (win, loss, save) to the appropriate pitchers.
+After this dialog, the editor screen is closed, and the game
+is stored in the scorebook.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<para>
+Note that the game entry window features &quot;live&quot; boxscore
+and play-by-play (&quot;narrative&quot;) windows.  These can be
+helpful in making sure you've got everything input correctly.
+</para>
+
+</sect1>
+
+<sect1 id="gui.reporting">
+<title>Reporting features</title>
+
+<para>
+This version contains some primitive reporting features.  Reports
+come in a few groups.
+</para>
+
+<para>
+Registers are complete listings of all players' statistics.
+Three registers are available: batting, pitching, and fielding.
+</para>
+
+<para>
+Team-level statistics: these are aggregate club batting, pitching,
+and fielding, as well as won-lost records.
+</para>
+
+<para>
+Game logs: a list of all teams' games played, including scores
+and decisions for pitchers.
+</para>
+
+<para>
+Events: lists of events.  As a current sample, a list of all
+grand slams in the scorebook is available.
+</para>
+
+<para>
+These are intended as some prelimiary features.  Other functionality
+can be imagined: splits, sabermetric data, restricting reports
+to time frames.  The reports are currently plain-text, and can
+be cut-and-pasted into other programs for further processing:
+formatted output is a future possibility for Chadwick.  
+</para>
+
+<note>
+<para>
+Development of future reports will be user-request driven: please
+send in your requests for enhancements in this area!
+</para>
+</note>
+
+</sect1>
+
+</chapter>
+
 
 <chapter id="cwtools">
     <title>Command-line tools</title>
@@ -748,194 +1011,6 @@ viewed with <option>-d</option>.</entry>
 
       </sect1>
 
-  </chapter>
-
-<chapter id="notation">
-    <title>File format and the scoring notation</title>
-    <para>Description of the scoring notation</para>
-
-    <sect1 id="notation.file">
-      <title>The Retrosheet play-by-play file format</title>
-
-      <para></para>
-      </sect1>
-
-    <sect1 id="notation.events">
-      <title>Event notation</title>
-
-      <para></para>
-
-
-      <sect2 id="notation.events.primary">
-      <title>Primary events</title>
-
-      <para>
-      <table>
-      <title>Primary events recognized by Chadwick parser</title>
-      <tgroup cols='2'>
-      <thead>
-      <row><entry>Code</entry><entry>Description</entry></row>
-      </thead>
-      <tbody>
-      <row><entry>BK</entry><entry>Balk</entry></row>
-      <row><entry>C</entry><entry>Catcher's interference</entry></row>
-      <row><entry>CS</entry><entry>Caught stealing</entry></row>
-      <row><entry>D</entry><entry>Double</entry></row>
-      <row><entry>DI</entry><entry>Defensive indifference</entry></row>
-      <row><entry>E</entry><entry>Error</entry></row>
-      <row><entry>FC</entry><entry>Fielder's choice</entry></row>
-      <row><entry>FLE</entry><entry>Foul error</entry></row>
-      <row><entry>H</entry><entry>Home run</entry></row>
-      <row><entry>HBP</entry><entry>Hit by pitch</entry></row>
-      <row><entry>HP</entry><entry>Hit by pitch</entry></row>
-      <row><entry>HR</entry><entry>Home run</entry></row>
-      <row><entry>I</entry><entry>Intentional walk</entry></row>
-      <row><entry>IW</entry<entry>Intentional walk</entry></row>
-      <row><entry>K</entry><entry>Strikeout</entry></row>
-      <row><entry>OA</entry><entry>Other advance</entry></row>
-      <row><entry>OBA</entry><entry>Other advance</entry></row>
-      <row><entry>PB</entry><entry>Passed ball</entry></row>
-      <row><entry>PO</entry><entry>Pickoff</entry></row>
-      <row><entry>POE</entry><entry>Pickoff error (deprecated)</entry></row>
-      <row><entry>T</entry><entry>Triple</entry></row>
-      <row><entry>W</entry><entry>Walk</entry></row>
-      <row><entry>WP</entry><entry>Wild pitch</entry</row>
-      </tbody>
-      </tgroup>
-      </table>
-      </para>
-
-      <sect3 id="notation.primary.bk">
-      <title>Balk</title>
-      
-      <para>
-      </para>
-
-      </sect3>
-
-      <sect3 id="notation.primary.c">
-      <title>Catcher's interference</title>
-
-      <para>
-      Accepted flags are 
-      <literal>/E1</literal>,
-      <literal>/E2</literal>,
-      <literal>/E3</literal>,
-      <literal>/INT</literal>.
-      If none of /E1, /E2, or /E3 is present, an error is charged to
-      the catcher.  /E1 and /E3 handle cases where the batter is awarded
-      first on interference by the pitcher or first baseman, respectively.
-      Even though these are not catcher's interference, this is Retrosheet
-      usage.  The /INT flag is redundant and unnecessary, and is accepted
-      silently by the parser.      
-      </para>
-
-      </sect3>
-
-      <sect3 id="notation.primary.di">
-      <title>Defensive indifference</title>
-      <para>
-      </para>
-      </sect3>
-
-      <sect3 id="notation.primary.hp">
-      <title>Hit by pitch</title>
-      <para>
-      Event implies advancement of batter to first base.
-      </para>
-      </sect3>
-      
-      <sect3 id="notation.primary.oa">
-      <title>Other advance (or Out advancing)</title>
-
-      <para>
-      Accepted flags are
-      <literal>/INT</literal>,
-      <literal>/DP</literal>,
-      <literal>/TP</literal>.
-      This is sometimes called out advancing, since most instances of
-      it occur when a runner attempts to advance on a would-be wild
-      pitch or passed ball, but is thrown out.  However, it can also
-      occur in cases like advancement on a wild return throw from the
-      catcher to the pitcher, which would be scored
-      <literal>OA.1-2(E2)</literal>.
-      </para>
-      </sect3>
-
-      <sect3 id="notation.primary.pb">
-      <title>Passed ball</title>
-      <para>
-      </para>
-      </sect3>
-
-      <sect3 id="notation.primary.wp">
-      <title>Wild pitch</title>
-
-      <para>
-      </para>
-      </sect3>
-
-      </sect2>
-
-      </sect1>
-
-    <sect1 id="notation.pitch">
-      <title>Pitch-by-pitch notation</title>
-
-      <para>
-      The following table contains the pitch codes which may appear in
-      Retrosheet files with pitch-by-pitch information.  (This list is
-      based on a list posted by David Vincent to the Retrosheet mailing
-      list in August, 2002.)  As of this writing, Chadwick does not
-      do any actual processing of pitch strings; it merely stores and
-      reports them verbatim.
-
-      <table>
-	<title>Meanings for pitch codes in pitch-by-pitch notation</title>
-	<tgroup cols='2'>
-	  <thead>
-	    <row><entry>Code</entry><entry>Description</entry></row>
-	    </thead>
-
-	  <tbody>
-	    <row><entry>B</entry><entry>Ball</entry></row>
-	    <row><entry>I</entry><entry>Intentional ball</entry></row>
-            <row><entry>P</entry><entry>Pitchout</entry></row>
-	    <row><entry>H</entry><entry>Hit by pitch</entry></row>
-	    <row><entry>V</entry><entry>Pitcher went to mouth (penalty ball)</entry></row>
-            <row><entry>X</entry><entry>Ball in play</entry></row>
-	    <row><entry>C</entry><entry>Called strike</entry></row>
-	    <row><entry>S</entry><entry>Swinging strike</entry></row>
-	    <row><entry>K</entry><entry>Unknown strike</entry></row>
-            <row><entry>F</entry><entry>Foul ball</entry></row>
-	    <row><entry>M</entry><entry>Missed bunt</entry></row>
-	    <row><entry>L</entry><entry>Foul bunt</entry></row>
-            <row><entry>Q</entry><entry>Swinging strike on pitchout</entry></row>
-            <row><entry>R</entry><entry>Foul ball on pitchout</entry></row>
-	    <row><entry>Y</entry><entry>Ball in play on pitchout</entry></row>
-            <row><entry>T</entry><entry>Foul tip</entry></row>
-            <row><entry>O</entry><entry>Foul tip on bunt</entry></row>
-            <row><entry>N</entry><entry>No pitch (e.g., pitch thrown but time called)</entry></row>
-	    <row><entry>U</entry><entry>Unknown pitch</entry></row>
-	    <row><entry>.</entry><entry>Event marker (used to indicate timing of substitutions, balks, etc.)</entry></row>
-	    <row><entry>1</entry><entry>Pickoff attempt at first by pitcher</entry></row>
-	    <row><entry>2</entry><entry>Pickoff attempt at second by pitcher</entry></row>
-	    <row><entry>3</entry><entry>Pickoff attempt at third by pitcher</entry></row>
-	    <row><entry>+1</entry><entry>Pickoff attempt at first by catcher (modifies previous pitch)</entry></row>
-	    <row><entry>+2</entry><entry>Pickoff attempt at second by catcher (modifies previous pitch)</entry></row>
-	    <row><entry>+3</entry><entry>Pickoff attempt at third by catcher (modifies previous pitch)</entry></row>
-	    <row><entry>></entry><entry>Runner going (modifies subsequent pitch)</entry></row>
-            <row><entry>*</entry><entry>Blocked ball (modifies subsequent pitch; generally used with B)</entry></row>
-
-	    </tbody>
-	  </tgroup>
-	</table>
-
-      Note that when an event occurs in the middle of a plate appearance,
-the entire pitch sequence is repeated in subsequent play records, not
-just the portion occurring after the mid-PA event.
-      </para>
-      </sect1>
   </chapter>
 
 <chapter id="api">
