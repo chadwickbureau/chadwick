@@ -86,7 +86,7 @@ class WeatherPanel(wxPanel):
         self.field = wxChoice(self, -1,
                               wxDefaultPosition, wxDefaultSize,
                               fieldList)
-        fieldCond = doc.GetGame.GetInfo("fieldcond")
+        fieldCond = doc.GetGame().GetInfo("fieldcond")
         self.field.SetSelection(0)
         for field in fieldList:
             if field.lower() == fieldCond.lower():

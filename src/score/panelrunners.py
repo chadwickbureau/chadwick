@@ -137,7 +137,7 @@ class RunnersPanel(wxPanel):
                 self.runnerText[base].SetForegroundColour(wxBLUE)
 
         playerId = self.doc.GetCurrentBatter()
-        player = cw_roster_player_find(self.doc.GetRoster(self.doc.GetHalfInning()), playerId)
+        player = self.doc.GetRoster(self.doc.GetHalfInning()).FindPlayer(playerId)
         self.runnerText[0].SetLabel(player.first_name + " " + player.last_name)
 
         for base in [1,2,3]:
@@ -147,7 +147,7 @@ class RunnersPanel(wxPanel):
                 self.FindWindowById(CW_BUTTON_PINCH[base]).Enable(false)
                 continue
 
-            player = cw_roster_player_find(self.doc.GetRoster(self.doc.GetHalfInning()), playerId)
+            player = self.doc.GetRoster(self.doc.GetHalfInning()).FindPlayer(playerId)
 
             if player != None and not self.doc.IsLeadoff():
                 self.runnerText[base].SetLabel(player.first_name + " " + player.last_name)

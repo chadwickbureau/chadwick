@@ -740,7 +740,7 @@ class GameLogAccumulator:
 
     def OnEndGame(self, game, gameiter):
         ids = game.GetTeams()
-        scores = [ gameiter.GetTeamsScore(t) for t in [0,1] ]
+        scores = [ gameiter.GetTeamScore(t) for t in [0,1] ]
 
         for t in [0,1]:
             self.stats[ids[t]].append({ "date": game.GetDate(),
@@ -759,8 +759,8 @@ class GameLogAccumulator:
         s = ""
 
         for team in keys:
-            self.stats[team].sort(lambda x, y: cmp(x["date"] + x["number"],
-                                                   y["date"] + y["number"]))
+            self.stats[team].sort(lambda x, y: cmp(x["date"] + str(x["number"]),
+                                                   y["date"] + str(y["number"])))
             roster = self.cwf.GetTeam(team)
 
             s += "\nGame log for %s %s\n" % (roster.city, roster.nickname)
@@ -790,9 +790,6 @@ class GameLogAccumulator:
                 else:
                     savename = ""
 
-                if game["number"] == "0":
-                    game["number"] = " ";
-
                 if game["innings"] == 9:
                     inningStr = ""
                 else:
@@ -810,7 +807,7 @@ class GameLogAccumulator:
                         dec = " "
                 
                     s += ("%s %s   at %s  %s %2d-%2d %-4s  %3d-%3d  %-16s %-16s %-16s\n" %
-                          (game["date"], game["number"],
+                          (game["date"], [ " ", "1", "2" ][game["number"]],
                            game["teams"][1], dec, 
                            game["scores"][0], game["scores"][1], inningStr,
                            wins, losses, wpname, lpname, savename))
@@ -826,7 +823,7 @@ class GameLogAccumulator:
                         dec = " "
 
                     s += ("%s %s   vs %s  %s %2d-%2d %-4s  %3d-%3d  %-16s %-16s %-16s\n" %
-                          (game["date"], game["number"],
+                          (game["date"], [ " ", "1", "2" ][game["number"]],
                            game["teams"][0], dec,
                            game["scores"][1], game["scores"][0], inningStr,
                            wins, losses, wpname, lpname, savename))
@@ -967,7 +964,7 @@ class GrandSlamAccumulator:
         return s
 
 def ProcessGame(game, acclist):
-    gameiter = CWGameIterator(game.game)
+    gameiter = CWGameIterator(game)
     map(lambda x: x.OnBeginGame(game, gameiter), acclist)
 
     while gameiter.event != None:

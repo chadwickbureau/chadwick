@@ -150,8 +150,7 @@ class StatePanel(wxPanel):
             self.playText.SetValue(x.upper())
             self.playText.SetInsertionPoint(y)
 
-        data = CWParsedEvent()
-        if cw_parse_event(x.upper(), data):
+        if IsValid(x.upper()):
             self.playText.SetBackgroundColour(wxSystemSettings_GetColour(wxSYS_COLOUR_WINDOW))
         else:
             self.playText.SetBackgroundColour(wxNamedColour("pink"))
@@ -159,14 +158,13 @@ class StatePanel(wxPanel):
             
     def OnPlayEnter(self, event):
         play = str(self.playText.GetValue()).upper()
-	data = CWParsedEvent()
-	if not cw_parse_event(play, data):
+        if not IsValid(play):
             pass
         else:
             self.doc.AddPlay(play)
 
             self.playText.Clear()
-            self.playText.SetBackgroundColour(wxSystemSettings_GetColour(wxSYS_COLOUR_WINDOW))
+            self.playText.SetBackgroundColour(wxNamedColour("pink"))
             
             wxPostEvent(self.GetParent(),
                         wxCommandEvent(wxEVT_COMMAND_BUTTON_CLICKED,
@@ -186,7 +184,7 @@ class StatePanel(wxPanel):
                                            (self.doc.GetRoster(team).city,
                                             self.doc.GetRoster(team).nickname))
 
-        hasDH = (self.doc.GetState().GetPlayer()(team, 0) != None)
+        hasDH = (self.doc.GetState().GetPlayer(team, 0) != None)
 
         dialog.LoadRoster(self.doc.GetRoster(team), team, hasDH)
         dialog.LoadLineup(self.doc, team)

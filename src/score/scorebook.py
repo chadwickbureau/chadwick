@@ -40,66 +40,16 @@ def TempFile():
     os.close(f[0])
     return name    
 
-class ChadwickGame:
-    """
-    This is a convenience class used by ChadwickScorebook
-    to 'wrap' the CWGame type to make it more object-like, and to hide
-    details of dealing with the underlying C library.
-    TODO: Much of this stuff is actually computed -- this is intended to
-    be a temporary, 'const' sort of object, and so a lot could be cached.
-    """
-    def __init__(self, game):
-        """
-        Initialize the wrapper around a CWGame 'game'.
-        """
-        self.game = game
-
-    def GetGameID(self):  return self.game.GetGameID()
-    def GetDate(self):    return self.game.GetDate()
-    def GetNumber(self):  return self.game.GetNumber()
-
-    def GetTeams(self):
-        return [ self.game.GetTeam(t) for t in [0,1] ]
-
-    def GetScore(self):
-        gameiter = CWGameIterator(self.game)
-        gameiter.ToEnd()
-        return [ gameiter.GetTeamScore(t) for t in [0,1] ]
-
-    def GetStarter(self, team, slot):
-        return cw_game_starter_find(self.game, team, slot)
-
-    def GetStarterAtPos(self, team, pos):
-        return cw_game_starter_find_by_position(self.game, team, pos)
-
-    def GetWinningPitcher(self):
-        return self.game.GetWinningPitcher()
-
-    def GetLosingPitcher(self):
-        return self.game.GetLosingPitcher()
-
-    def GetSavePitcher(self):
-        return self.game.GetSavePitcher()
-
-    def GetInnings(self):   return self.game.GetInnings()
-
-
 class ChadwickScorebook:
     def __init__(self, year=2005):
         self.books = { }
         self.modified = False
         self.year = year
-        self.league = cw_league_create()
+        self.league = CWLeague()
         self.games = [ ]
         self.players = { }
         self.filename = "untitled.chw"
         
-    def __del__(self):
-        #for book in self.books:
-        #    cw_scorebook_cleanup(book)
-        #cw_league_cleanup(self.league)
-        pass
-
     def GetFilename(self):   return self.filename
 
     def Read(self, filename):
@@ -144,8 +94,8 @@ class ChadwickScorebook:
         f.close()
         
         f = file(name, "r")
-        self.league = cw_league_create()
-        cw_league_read(self.league, f)
+        self.league = CWLeague()
+        self.league.Read(f)
 
         f.close()
         os.remove(name)
@@ -163,7 +113,7 @@ class ChadwickScorebook:
             f.close()
             
             f = file(name, "r")
-            cw_roster_read(team, f)
+            team.Read(f)
             f.close()
 
             os.remove(name)
@@ -178,21 +128,21 @@ class ChadwickScorebook:
             f.close()
             
             f = file(name, "r")
-            self.books[team.team_id] = cw_scorebook_create()
-            cw_scorebook_read(self.books[team.team_id], f)
+            self.books[team.team_id] = CWScorebook()
+            self.books[team.team_id].Read(f)
             f.close()
             
             os.remove(name)
         else:
             # Just create an empty scorebook if event file is
             # not present.
-            self.books[team.team_id] = cw_scorebook_create()
+            self.books[team.team_id] = CWScorebook()
 
     def Write(self, filename):
         zf = zipfile.ZipFile(filename, "w", zipfile.ZIP_DEFLATED)
         name = TempFile()
         f = file(name, "w")
-        cw_league_write(self.league, f)
+        self.league.Write(f)
         f.close()
         
         f = file(name, "r")
@@ -208,19 +158,23 @@ class ChadwickScorebook:
         self.modified = False
 
     def WriteTeam(self, zf, team):
+        print "writing roster"
         fn = team.team_id + str(self.year) + ".ROS"
         name = TempFile()
         f = file(name, "w")
-        cw_roster_write(team, f)
+        team.Write(f)
+        print "roster written"
         f.close()
         
         f = file(name, "r")
         zf.writestr(fn, f.read())
         f.close()
 
+        print "writing scorebook"
         fn = str(self.year) + team.team_id + ".EV" + team.league
         f = file(name, "w")
-        cw_scorebook_write(self.books[team.team_id], f)
+        self.books[team.team_id].Write(f)
+        print "scorebook written"
         f.close()
         
         f = file(name, "r")
@@ -260,12 +214,11 @@ class ChadwickScorebook:
                 x = x.next
 
     def NumGames(self, crit=lambda x: True):
-        return len(filter(crit, [ ChadwickGame(g) for g in self.games ]))
+        return len(filter(crit, self.games))
 
     def IterateGames(self, crit=lambda x: True):
         for g in self.games:
-            game = ChadwickGame(g)
-            if crit(game):  yield game
+            if crit(g):  yield g
 
     def NumPlayers(self):  return len(self.players)
 
@@ -291,18 +244,17 @@ class ChadwickScorebook:
         roster = self.league.first_roster
         while roster.team_id != team:  roster = roster.next
 
-        cw_roster_player_insert(roster, p)
+        roster.InsertPlayer(p)
         self.players[playerID] = p
         self.modified = True
         
     def GetTeam(self, teamId):
-        return cw_league_roster_find(self.league, teamId)
+        return self.league.FindRoster(teamId)
 
     def GetYear(self):    return self.year
 
     def AddTeam(self, teamID, city, nickname, leagueID):
-        t = cw_roster_create(teamID, self.year, leagueID,
-                             city, nickname)
+        t = CWRoster(teamID, self.year, leagueID, city, nickname)
         
         # We try to keep teams in playerID order.
         # This really ought to be part of the underlying C library
@@ -330,7 +282,7 @@ class ChadwickScorebook:
 
     def AddGame(self, game):
         hometeam = game.GetTeam(1)
-        cw_scorebook_append_game(self.books[hometeam], game)
+        self.books[hometeam].AppendGame(game)
         self.games.append(game)
         self.games.sort(lambda x, y: cmp(x.GetDate(), y.GetDate()))
         self.modified = True

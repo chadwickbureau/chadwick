@@ -83,8 +83,7 @@ class GameListGrid(wxGrid):
         for (i,game) in enumerate(self.book.IterateGames(self.filter)):
             if i == event.GetRow():
                 teams = [ self.book.GetTeam(t) for t in game.GetTeams() ]
-                # FIXME: here we pass from the wrapper to the base game
-                doc = GameEditor(game.game, teams[0], teams[1])
+                doc = GameEditor(game, teams[0], teams[1])
                 dialog = BoxscoreViewDialog(self, doc)
                 dialog.ShowModal()
                 return

@@ -161,7 +161,7 @@ class NarrativePanel(wxPanel):
                 batterId = gameiter.GetPlayer(team,
                                               gameiter.NumBatters(team) % 9 + 1)
                 ros = self.doc.GetRoster(team)
-                batter = cw_roster_player_find(ros, batterId)
+                batter = ros.FindPlayer(batterId)
                 
                 x = "%-20s " % (batter.first_name + " " + batter.last_name)
                 x += "%2d-%2d " % (gameiter.GetTeamScore(0),

@@ -87,6 +87,12 @@ void cw_game_set_er(CWGame *game, char *pitcher, int er)
   free(foo);
 }
 
+int IsValid(char *play)
+{
+  CWParsedEvent data;
+  return cw_parse_event(play, &data); 
+}
+
 %}
 
 %include <chadwick/chadwick.h>
@@ -100,6 +106,45 @@ void cw_game_set_er(CWGame *game, char *pitcher, int er)
 %include <chadwick/parse.h>
 %include <chadwick/roster.h>
 
+%extend CWLeague {
+  CWLeague(void)        { return cw_league_create(); }
+  ~CWLeague()           { cw_league_cleanup(self);  free(self); }  
+
+  void AppendRoster(CWRoster *roster)
+     { cw_league_roster_append(self, roster); }
+  CWRoster *FindRoster(char *teamID)
+     { return cw_league_roster_find(self, teamID); }
+
+  void Read(FILE *file)    { cw_league_read(self, file); }
+  void Write(FILE *file)   { cw_league_write(self, file); }
+};
+
+%extend CWScorebook {
+  CWScorebook(void)     { return cw_scorebook_create(); }
+  ~CWScorebook()        { cw_scorebook_cleanup(self);  free(self); }
+
+  int AppendGame(CWGame *game) { return cw_scorebook_append_game(self, game); }
+  int Read(FILE *file)         { return cw_scorebook_read(self, file); }
+  void Write(FILE *file)       { cw_scorebook_write(self, file); }
+};
+
+%extend CWRoster {
+  CWRoster(char *team_id, int year, char league,
+           char *city, char *nickname)
+    { return cw_roster_create(team_id, year, league, city, nickname); }
+
+  void InsertPlayer(CWPlayer *player)
+    { cw_roster_player_insert(self, player); }
+  void AppendPlayer(CWPlayer *player)  
+    { cw_roster_player_append(self, player); }
+  CWPlayer *FindPlayer(char *id)    
+    { return cw_roster_player_find(self, id); }
+  int NumPlayers(void)    { return cw_roster_player_count(self); }
+
+  void Read(FILE *file)   { cw_roster_read(self, file); }
+  void Write(FILE *file)  { cw_roster_write(self, file); }
+};
+
 %extend CWGame {
   char *GetGameID(void) { return self->game_id; }
   char *GetDate(void)   { return cw_game_info_lookup(self, "date"); }
@@ -108,14 +153,28 @@ void cw_game_set_er(CWGame *game, char *pitcher, int er)
     { if (t == 0)    return cw_game_info_lookup(self, "visteam");
       else           return cw_game_info_lookup(self, "hometeam");
     }
-  int NumInnings(void)  
+
+%pythoncode %{
+  def GetTeams(self):
+    return [ self.GetTeam(t) for t in [0,1] ]
+
+  def GetScore(self):
+    gameiter = CWGameIterator(self)
+    gameiter.ToEnd()
+    return [ gameiter.GetTeamScore(t) for t in [0,1] ]
+%}
+
+  int GetInnings(void)  
     { if (self->last_event != NULL)  return self->last_event->inning;
       else return 0;
     }
 
   char *GetInfo(char *label) { return cw_game_info_lookup(self, label); }
+
   CWAppearance *GetStarter(int team, int slot)
      { return cw_game_starter_find(self, team, slot); }
+  CWAppearance *GetStarterAtPos(int team, int pos)
+     { return cw_game_starter_find_by_position(self, team, pos); }
 
   char *GetWinningPitcher(void)   { return cw_game_info_lookup(self, "wp"); }
   char *GetLosingPitcher(void)    { return cw_game_info_lookup(self, "lp"); }
@@ -167,3 +226,4 @@ int cw_gameiter_get_putouts(CWGameIterator *iterator, int pos);
 int cw_gameiter_get_assists(CWGameIterator *iterator, int pos);
 int cw_gameiter_get_fielder_errors(CWGameIterator *iterator, int pos);
 void cw_game_set_er(CWGame *game, char *pitcher, int er);
+int IsValid(char *play);
