@@ -119,20 +119,26 @@ int IsValid(char *play)
   void Write(FILE *file)   { cw_league_write(self, file); }
 };
 
-%extend CWScorebook {
-  CWScorebook(void)     { return cw_scorebook_create(); }
-  ~CWScorebook()        { cw_scorebook_cleanup(self);  free(self); }
-
-  int AppendGame(CWGame *game) { return cw_scorebook_append_game(self, game); }
-  int InsertGame(CWGame *game) { return cw_scorebook_insert_game(self, game); }
-  int Read(FILE *file)         { return cw_scorebook_read(self, file); }
-  void Write(FILE *file)       { cw_scorebook_write(self, file); }
-};
-
 %extend CWRoster {
-  CWRoster(char *team_id, int year, char league,
+  CWRoster(char *team_id, int year, char *league,
            char *city, char *nickname)
     { return cw_roster_create(team_id, year, league, city, nickname); }
+
+  void SetCity(char *name)  { cw_roster_set_city(self, name); }
+  char *GetCity(void) const  { return self->city; }
+
+  void SetNickname(char *name)  { cw_roster_set_nickname(self, name); }
+  char *GetNickname(void) const  { return self->nickname; }
+
+%pythoncode %{
+  def GetName(self):   return self.GetCity() + " " + self.GetNickname()
+%}
+
+  void SetLeague(char *name)  { cw_roster_set_league(self, name); }
+  char *GetLeague(void) const   { return self->league; }
+
+  void SetYear(int year)   { self->year = year; }
+  int GetYear(void) const   { return self->year; }
 
   void InsertPlayer(CWPlayer *player)
     { cw_roster_player_insert(self, player); }
@@ -144,6 +150,35 @@ int IsValid(char *play)
 
   void Read(FILE *file)   { cw_roster_read(self, file); }
   void Write(FILE *file)  { cw_roster_write(self, file); }
+};
+
+%extend CWPlayer {
+  CWPlayer(char *player_id, char *last_name, char *first_name,
+           char bats, char throws)
+    { return cw_player_create(player_id, last_name, first_name,
+                              bats, throws); }
+
+  void SetFirstName(char *name)  { cw_player_set_first_name(self, name); }
+  char *GetFirstName(void) const { return self->first_name; }
+
+  void SetLastName(char *name)  { cw_player_set_last_name(self, name); }
+  char *GetLastName(void) const  { return self->last_name; }
+
+%pythoncode %{
+  def GetName(self):   return self.GetFirstName() + " " + self.GetLastName()
+  def GetSortName(self):
+    return self.GetLastName() + ", " + self.GetFirstName()
+%}
+};
+
+%extend CWScorebook {
+  CWScorebook(void)     { return cw_scorebook_create(); }
+  ~CWScorebook()        { cw_scorebook_cleanup(self);  free(self); }
+
+  int AppendGame(CWGame *game) { return cw_scorebook_append_game(self, game); }
+  int InsertGame(CWGame *game) { return cw_scorebook_insert_game(self, game); }
+  int Read(FILE *file)         { return cw_scorebook_read(self, file); }
+  void Write(FILE *file)       { cw_scorebook_write(self, file); }
 };
 
 %extend CWGame {
@@ -160,9 +195,11 @@ int IsValid(char *play)
     return [ self.GetTeam(t) for t in [0,1] ]
 
   def GetScore(self):
-    gameiter = CWGameIterator(self)
-    gameiter.ToEnd()
-    return [ gameiter.GetTeamScore(t) for t in [0,1] ]
+    if not hasattr(self, "scorecache"):
+      gameiter = CWGameIterator(self)
+      gameiter.ToEnd()
+      self.scorecache = [ gameiter.GetTeamScore(t) for t in [0,1] ]
+    return self.scorecache
 %}
 
   int GetInnings(void)  

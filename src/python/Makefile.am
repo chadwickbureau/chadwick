@@ -39,3 +39,6 @@ all-local:
 
 install-exec-local:
 	python setup.py install
+
+clean-local:
+	rm -rf build
