@@ -30,6 +30,30 @@
 
 #include "chadwick.h"
 
+CWBoxBatting *
+cw_boxscore_batting_create(void)
+{
+  CWBoxBatting *batting = (CWBoxBatting *) malloc(sizeof(CWBoxBatting));
+  batting->ab = 0;
+  batting->r = 0;
+  batting->h = 0;
+  batting->bi = 0;
+  batting->bb = 0;
+  batting->so = 0;
+  return batting;
+}
+
+void
+cw_boxscore_batting_add(CWBoxBatting *dest, CWBoxBatting *src)
+{
+  dest->ab += src->ab;
+  dest->r += src->r;
+  dest->h += src->h;
+  dest->bi += src->bi;
+  dest->bb += src->bb;
+  dest->so += src->so;
+}
+
 /************************************************************************
  * Private routines for dealing with auxiliary struct init and dealloc
  ************************************************************************/
@@ -40,13 +64,7 @@ cw_boxscore_player_create(char *player_id)
   CWBoxPlayer *player = (CWBoxPlayer *) malloc(sizeof(CWBoxPlayer));
   player->player_id = (char *) malloc(sizeof(char) * (strlen(player_id) + 1));
   strcpy(player->player_id, player_id);
-  player->batting = (CWBoxBatting *) malloc(sizeof(CWBoxBatting));
-  player->batting->ab = 0;
-  player->batting->r = 0;
-  player->batting->h = 0;
-  player->batting->bi = 0;
-  player->batting->bb = 0;
-  player->batting->so = 0;
+  player->batting = cw_boxscore_batting_create();
   player->prev = NULL;
   player->next = NULL;
   return player;
@@ -120,12 +138,12 @@ cw_boxscore_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
       boxscore->slots[sub->slot][sub->team]->next = player;
       player->prev = boxscore->slots[sub->slot][sub->team];
       boxscore->slots[sub->slot][sub->team] = player;
-      if (sub->pos == 1) {
-	CWBoxPitcher *pitcher = cw_boxscore_pitcher_create(sub->player_id);
-	boxscore->pitchers[sub->team]->next = pitcher;
-	pitcher->prev = boxscore->pitchers[sub->team];
-	boxscore->pitchers[sub->team] = pitcher;
-      }
+    }
+    if (sub->pos == 1) {
+      CWBoxPitcher *pitcher = cw_boxscore_pitcher_create(sub->player_id);
+      boxscore->pitchers[sub->team]->next = pitcher;
+      pitcher->prev = boxscore->pitchers[sub->team];
+      boxscore->pitchers[sub->team] = pitcher;
     }
     sub = sub->next;
   }

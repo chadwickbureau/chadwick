@@ -61,9 +61,19 @@ CWBoxscore *cw_boxscore_create(CWGame *game);
 
 /*
  * Cleans up internal memory allocation associated with 'boxscore'.
- * Caller is responsiblefor free()ing the boxscore itself
+ * Caller is responsible for free()ing the boxscore itself
  */
 void cw_boxscore_cleanup(CWBoxscore *boxscore);
+
+/*
+ * Create a new boxscore batting line
+ */
+CWBoxBatting *cw_boxscore_batting_create(void);
+
+/*
+ * Add a boxscore batting line to another
+ */
+void cw_boxscore_batting_add(CWBoxBatting *dest, CWBoxBatting *src);
 
 #endif  /* CW_BOX_H */
 
