@@ -39,7 +39,7 @@ def TempFile():
     name = f[1]
     os.close(f[0])
     return name    
-    
+
 class ChadwickGame:
     """
     This is a convenience class used by ChadwickScorebook
@@ -73,6 +73,20 @@ class ChadwickGame:
 
     def GetStarter(self, team, slot):
         return cw_game_starter_find(self.game, team, slot)
+
+    def GetStarterAtPos(self, team, pos):
+        return cw_game_starter_find_by_position(self.game, team, pos)
+
+    def GetWinningPitcher(self):
+        return cw_game_info_lookup(self.game, "wp")
+
+    def GetLosingPitcher(self):
+        return cw_game_info_lookup(self.game, "lp")
+
+    def GetSavePitcher(self):
+        return cw_game_info_lookup(self.game, "save")
+
+    def GetInnings(self):   return self.game.last_event.inning
 
 
 class ChadwickScorebook:

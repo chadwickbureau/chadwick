@@ -47,12 +47,12 @@ class BattingAccumulator:
     def OnBeginGame(self, game, gameiter):
         for t in [0, 1]:
             for slot in range(9):
-                player = cw_game_starter_find(game, t, slot+1)
+                player = game.GetStarter(t, slot+1)
                 if player.player_id not in self.stats:
                     self.stats[player.player_id] = self.NewBattingStats(player)
             
-                if game.game_id not in self.stats[player.player_id]["games"]:
-                    self.stats[player.player_id]["games"].append(game.game_id)
+                if game.GetGameID() not in self.stats[player.player_id]["games"]:
+                    self.stats[player.player_id]["games"].append(game.GetGameID())
 
     def OnSubstitution(self, game, gameiter):
         rec = gameiter.event.first_sub
@@ -61,8 +61,8 @@ class BattingAccumulator:
             if rec.player_id not in self.stats:
                 self.stats[rec.player_id] = self.NewBattingStats(rec)
 
-            if game.game_id not in self.stats[rec.player_id]["games"]:
-                self.stats[rec.player_id]["games"].append(gameiter.game.game_id)
+            if game.GetGameID() not in self.stats[rec.player_id]["games"]:
+                self.stats[rec.player_id]["games"].append(game.GetGameID())
 
             rec = rec.next
 
@@ -178,11 +178,8 @@ class TeamBattingAccumulator:
             self.stats[team.team_id] = self.NewBattingStats(team)
 
     def OnBeginGame(self, game, gameiter):
-        vis = cw_game_info_lookup(game, "visteam")
-        self.stats[vis]["games"].append(game.game_id)
-
-        home = cw_game_info_lookup(game, "hometeam")
-        self.stats[home]["games"].append(game.game_id)
+        for team in game.GetTeams():
+            self.stats[team]["games"].append(game.GetGameID())
 
     def OnSubstitution(self, game, gameiter):
         pass
@@ -191,11 +188,7 @@ class TeamBattingAccumulator:
         event_data = gameiter.event_data
         team = cw_gameiter_get_halfinning(gameiter)
 
-        if team == 0:
-            batter = self.stats[cw_game_info_lookup(game, "visteam")]
-        else:
-            batter = self.stats[cw_game_info_lookup(game, "hometeam")]
-
+        batter = self.stats[game.GetTeams()[team]]
         if cw_event_is_official_ab(event_data):
             batter["ab"] += 1
 
@@ -246,8 +239,8 @@ class TeamBattingAccumulator:
             batter["r"] += 1
 
     def OnEndGame(self, game, gameiter):
-        self.stats[cw_game_info_lookup(game, "visteam")]["lob"] += cw_gameiter_left_on_base(gameiter, 0)
-        self.stats[cw_game_info_lookup(game, "hometeam")]["lob"] += cw_gameiter_left_on_base(gameiter, 1)
+        for t in [0,1]:
+            self.stats[game.GetTeams()[t]]["lob"] += cw_gameiter_left_on_base(gameiter, t)
 
     def NewBattingStats(self, team):
         """
@@ -303,14 +296,14 @@ class PitchingAccumulator:
     def OnBeginGame(self, game, gameiter):
         for t in [0, 1]:
             for slot in range(9):
-                player = cw_game_starter_find(game, t, slot+1)
+                player = game.GetStarter(t, slot+1)
 
                 if player.pos == 1:
                     if player.player_id not in self.stats:
                         self.stats[player.player_id] = self.NewPitchingStats(player)
                     
-                    if game.game_id not in self.stats[player.player_id]["games"]:
-                        self.stats[player.player_id]["games"].append(game.game_id)
+                    if game.GetGameID() not in self.stats[player.player_id]["games"]:
+                        self.stats[player.player_id]["games"].append(game.GetGameID())
                     self.stats[player.player_id]["gs"] += 1
 
     def OnSubstitution(self, game, gameiter):
@@ -320,8 +313,8 @@ class PitchingAccumulator:
             if rec.pos == 1:
                 if rec.player_id not in self.stats:
                     self.stats[rec.player_id] = self.NewPitchingStats(rec)
-                if game.game_id not in self.stats[rec.player_id]["games"]:
-                    self.stats[rec.player_id]["games"].append(game.game_id)
+                if game.GetGameID() not in self.stats[rec.player_id]["games"]:
+                    self.stats[rec.player_id]["games"].append(game.GetGameID())
 
             rec = rec.next
 
@@ -375,15 +368,15 @@ class PitchingAccumulator:
                 pitcher["er"] += 1
 
     def OnEndGame(self, game, gameiter):
-        if cw_game_info_lookup(game, "wp") != "":
-            self.stats[cw_game_info_lookup(game, "wp")]["w"] += 1
-        if cw_game_info_lookup(game, "lp") != "":
-            self.stats[cw_game_info_lookup(game, "lp")]["l"] += 1
-        if cw_game_info_lookup(game, "save") != "":
-            self.stats[cw_game_info_lookup(game, "save")]["sv"] += 1
+        if game.GetWinningPitcher() != "":
+            self.stats[game.GetWinningPitcher()]["w"] += 1
+        if game.GetLosingPitcher() != "":
+            self.stats[game.GetLosingPitcher()]["l"] += 1
+        if game.GetSavePitcher() != "":
+            self.stats[game.GetSavePitcher()]["sv"] += 1
 
         for t in [0, 1]:
-            startP = cw_game_starter_find_by_position(game, t, 1).player_id
+            startP = game.GetStarterAtPos(t, 1).player_id
             endP = cw_gameiter_get_fielder(gameiter, t, 1)
             if startP == endP:
                 # TODO: It's possible but rare to start and end game but
@@ -444,11 +437,8 @@ class TeamPitchingAccumulator:
             self.stats[team.team_id] = self.NewPitchingStats(team)
 
     def OnBeginGame(self, game, gameiter):
-        vis = cw_game_info_lookup(game, "visteam")
-        self.stats[vis]["games"].append(game.game_id)
-
-        home = cw_game_info_lookup(game, "hometeam")
-        self.stats[home]["games"].append(game.game_id)
+        for team in game.GetTeams():
+            self.stats[team]["games"].append(game.GetGameID())
 
     def OnSubstitution(self, game, gameiter):
         pass
@@ -457,10 +447,7 @@ class TeamPitchingAccumulator:
         event_data = gameiter.event_data
         team = cw_gameiter_get_halfinning(gameiter)
 
-        if team == 1:
-            pitcher = self.stats[cw_game_info_lookup(game, "visteam")]
-        else:
-            pitcher = self.stats[cw_game_info_lookup(game, "hometeam")]
+        pitcher = self.stats[game.GetTeams()[1-team]]
 
         pitcher["outs"] += cw_event_outs_on_play(event_data)
 
@@ -505,21 +492,20 @@ class TeamPitchingAccumulator:
                 pitcher["er"] += 1
 
     def OnEndGame(self, game, gameiter):
-        teams = [ cw_game_info_lookup(game, "visteam"),
-                  cw_game_info_lookup(game, "hometeam") ]
+        teams = game.GetTeams()
         if cw_gameiter_get_score(gameiter, 0) > cw_gameiter_get_score(gameiter, 1):
             self.stats[teams[0]]["w"] += 1
             self.stats[teams[1]]["l"] += 1
-            if cw_game_info_lookup(game, "save") != "":
+            if game.GetSavePitcher() != "":
                 self.stats[teams[0]]["sv"] += 1
         elif cw_gameiter_get_score(gameiter, 0) < cw_gameiter_get_score(gameiter, 1):
             self.stats[teams[1]]["w"] += 1
             self.stats[teams[0]]["l"] += 1
-            if cw_game_info_lookup(game, "save") != "":
+            if game.GetSavePitcher() != "":
                 self.stats[teams[1]]["sv"] += 1
 
         for t in [0, 1]:
-            startP = cw_game_starter_find_by_position(game, t, 1).player_id
+            startP = game.GetStarterAtPos(t, 1).player_id
             endP = cw_gameiter_get_fielder(gameiter, t, 1)
             if startP == endP:
                 # TODO: It's possible but rare to start and end game but
@@ -578,14 +564,14 @@ class FieldingAccumulator:
     def OnBeginGame(self, game, gameiter):
         for t in [0, 1]:
             for slot in range(9):
-                player = cw_game_starter_find(game, t, slot+1)
+                player = game.GetStarter(t, slot+1)
 
                 if player.pos == self.pos:
                     if player.player_id not in self.stats:
                         self.stats[player.player_id] = self.NewFieldingStats(player)
                     
-                    if game.game_id not in self.stats[player.player_id]["games"]:
-                        self.stats[player.player_id]["games"].append(game.game_id)
+                    if game.GetGameID() not in self.stats[player.player_id]["games"]:
+                        self.stats[player.player_id]["games"].append(game.GetGameID())
                     self.stats[player.player_id]["gs"] += 1
 
     def OnSubstitution(self, game, gameiter):
@@ -595,8 +581,8 @@ class FieldingAccumulator:
             if rec.pos == self.pos:
                 if rec.player_id not in self.stats:
                     self.stats[rec.player_id] = self.NewFieldingStats(rec)
-                if game.game_id not in self.stats[rec.player_id]["games"]:
-                    self.stats[rec.player_id]["games"].append(game.game_id)
+                if game.GetGameID() not in self.stats[rec.player_id]["games"]:
+                    self.stats[rec.player_id]["games"].append(game.GetGameID())
 
             rec = rec.next
 
@@ -678,11 +664,8 @@ class TeamFieldingAccumulator:
             self.stats[team.team_id] = self.NewFieldingStats(team)
 
     def OnBeginGame(self, game, gameiter):
-        vis = cw_game_info_lookup(game, "visteam")
-        self.stats[vis]["games"].append(game.game_id)
-
-        home = cw_game_info_lookup(game, "hometeam")
-        self.stats[home]["games"].append(game.game_id)
+        for team in game.GetTeams():
+            self.stats[team]["games"].append(game.GetGameID())
 
     def OnSubstitution(self, game, gameiter):
         pass
@@ -691,11 +674,7 @@ class TeamFieldingAccumulator:
         event_data = gameiter.event_data
         team = cw_gameiter_get_halfinning(gameiter)
 
-        if team == 1:
-            fielder = self.stats[cw_game_info_lookup(game, "visteam")]
-        else:
-            fielder = self.stats[cw_game_info_lookup(game, "hometeam")]
-
+        fielder = self.stats[game.GetTeams()[1-team]]
         fielder["po"] += cw_event_outs_on_play(event_data)
         fielder["a"] += event_data.num_assists
         fielder["e"] += event_data.num_errors
@@ -760,19 +739,18 @@ class GameLogAccumulator:
     def OnEvent(self, game, gameiter):  pass
 
     def OnEndGame(self, game, gameiter):
-        ids = [ cw_game_info_lookup(game, "visteam"),
-                cw_game_info_lookup(game, "hometeam") ]
+        ids = game.GetTeams()
         scores = [ cw_gameiter_get_score(gameiter, t) for t in [0,1] ]
 
         for t in [0,1]:
-            self.stats[ids[t]].append({ "date": cw_game_info_lookup(game, "date"),
-                                        "number": cw_game_info_lookup(game, "number"),
+            self.stats[ids[t]].append({ "date": game.GetDate(),
+                                        "number": game.GetNumber(),
                                         "teams": ids,
                                         "scores": scores,
-                                        "innings": game.last_event.inning,
-                                        "wp": cw_game_info_lookup(game, "wp"),
-                                        "lp": cw_game_info_lookup(game, "lp"),
-                                        "save": cw_game_info_lookup(game, "save") })
+                                        "innings": game.GetInnings(),
+                                        "wp": game.GetWinningPitcher(),
+                                        "lp": game.GetLosingPitcher(),
+                                        "save": game.GetSavePitcher() })
    
     def __str__(self):
         keys = self.stats.keys()
@@ -868,8 +846,7 @@ class RecordAccumulator:
     def OnEvent(self, game, gameiter):  pass
 
     def OnEndGame(self, game, gameiter):
-        ids = [ cw_game_info_lookup(game, "visteam"),
-                cw_game_info_lookup(game, "hometeam") ]
+        ids = game.GetTeams()
         scores = [ cw_gameiter_get_score(gameiter, t) for t in [0,1] ]
 
         self.stats[ids[0]]["g"] += 1
@@ -990,7 +967,7 @@ class GrandSlamAccumulator:
         return s
 
 def ProcessGame(game, acclist):
-    gameiter = cw_gameiter_create(game)
+    gameiter = cw_gameiter_create(game.game)
     map(lambda x: x.OnBeginGame(game, gameiter), acclist)
 
     while gameiter.event != None:
