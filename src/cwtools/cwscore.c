@@ -434,7 +434,7 @@ int cwscore_gameover(CWGameIterator *gameiter)
   return 0;
 }
 
-void cwscore_get_substitute(CWGame *game, CWRoster *roster,
+void cwscore_get_substitute(CWGame *game, CWRoster *roster, char *batter,
 			    int inning, int half_inning, int team)
 {
   char buffer[256], name[256];
@@ -447,6 +447,8 @@ void cwscore_get_substitute(CWGame *game, CWRoster *roster,
     sscanf(buffer, "%s %d %d", name, &position, &slot);
     for (player = roster->first_player; player; player = player->next) {
       if (!strcmp(player->last_name, name)) {
+	cw_game_event_append(game, inning, half_inning,
+			     batter, "??", "", "NP");
 	sprintf(name, "%s %s", player->first_name, player->last_name);
 	cw_game_substitute_append(game, player->player_id, name,
 				  team, slot, position);
@@ -461,7 +463,7 @@ void cwscore_get_substitute(CWGame *game, CWRoster *roster,
 }
 
 void cwscore_get_pinch_hitter(CWGameIterator *gameiter, CWRoster *roster,
-			      int inning, int half_inning, int team)
+			      char *batter, int inning, int team)
 {
   int slot, index, positions[10];
   char lineup[10][9];
@@ -490,6 +492,8 @@ void cwscore_get_pinch_hitter(CWGameIterator *gameiter, CWRoster *roster,
       
     if (index >= 0 && index < cw_roster_player_count(roster)) {
       CWPlayer *player = cwscore_get_player_number(roster, index);
+      cw_game_event_append(gameiter->game, inning, team,
+			   batter, "??", "", "NP");
       sprintf(buffer, "%s %s", player->first_name, player->last_name);
       cw_game_substitute_append(gameiter->game, player->player_id, buffer,
 				team, slot, 11);
@@ -502,6 +506,8 @@ void cwscore_get_pinch_hitter(CWGameIterator *gameiter, CWRoster *roster,
     CWPlayer *player;
     for (player = roster->first_player; player; player = player->next) {
       if (!strcmp(player->last_name, buffer)) {
+	cw_game_event_append(gameiter->game, inning, team,
+			     batter, "??", "", "NP");
 	sprintf(buffer, "%s %s", player->first_name, player->last_name);
 	cw_game_substitute_append(gameiter->game, player->player_id,
 				  buffer, team, slot, 11);
@@ -634,20 +640,16 @@ void cwscore_enter_events(CWGame *game, CWRoster *visitors, CWRoster *home)
     cwscore_get_line(buffer);
     cwscore_uppercase(buffer);
     if (!strcmp(buffer, "OS")) {
-      cw_game_event_append(game, inning, half_inning,
-			   batter, "??", "", "NP");
       cwscore_get_substitute(game, (half_inning == 0) ? visitors : home,
-			     inning, half_inning, half_inning);
+			     batter, inning, half_inning, half_inning);
     }
     else if (!strcmp(buffer, "PH")) {
       cwscore_get_pinch_hitter(gameiter, (half_inning == 0) ? visitors : home,
-			       inning, half_inning, half_inning);
+			       batter, inning, half_inning);
     }
     else if (!strcmp(buffer, "DS")) {
-      cw_game_event_append(game, inning, half_inning,
-			   batter, "??", "", "NP");
       cwscore_get_substitute(game, (half_inning == 0) ? home : visitors,
-			     inning, half_inning, 1 - half_inning);
+			     batter, inning, half_inning, 1 - half_inning);
     }
     else if (!strcmp(buffer, "BACK")) {
       cwscore_undo(game);
@@ -696,7 +698,7 @@ void cwscore_compute_earned_runs(CWGame *game)
       strcpy(data[2], pitcher->player_id);
       data[3] = (char *) malloc(sizeof(char) * 10);
       sprintf(data[3], "%d", pitcher->pitching->er);
-      cw_game_data_append(game, 2, data);
+      cw_game_data_append(game, 3, data);
       free(data[3]);
       free(data[2]);
       free(data[1]);
