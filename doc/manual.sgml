@@ -9,7 +9,7 @@
       <firstname>Theodore</firstname>
       <surname>Turocy</surname>
     </author>
-    <edition>Version 0.3.0</edition>
+    <edition>Version 0.3.1</edition>
     <pubdate>March 2005</pubdate>
     <copyright>
       <year>2005</year>
@@ -596,14 +596,13 @@ Three registers are available: batting, pitching, and fielding.
 </para>
 
 <para>
-Team-level statistics: these are aggregate club batting, pitching,
-and fielding, as well as won-lost records.
-</para>
-
-<para>
-Game logs: a list of all teams' games played, including scores
-and decisions for pitchers.
-</para>
+Team-level statistics.  &quot;Totals&quot; compiles aggregate club
+batting, pitching, and fielding, as well as won-lost records.
+&quot;Batting&quot; and &quot;Pitching&quot;
+compile player statistics organized by team.  &quot;Game logs&quot;
+compile a list of all teams' games played, including scores and
+decisions for pitchers. 
+ </para>
 
 <para>
 Events: lists of events.  As a current sample, a list of all
