@@ -28,6 +28,7 @@ from wxPython.wx import *
 from wxPython.grid import *
 from libchadwick import *
 
+import icons
 from dialoglineup import LineupDialog
 from panelboxscore import BoxscorePanel
 import panelstate
@@ -39,6 +40,9 @@ class GameEntryFrame(wxFrame):
     def __init__(self, parent):
         wxFrame.__init__(self, parent, -1, "Chadwick Game Entry",
                          wxDefaultPosition, wxSize(800, 600))
+
+        icon = wxIconFromXPMData(icons.baseball_xpm)
+        self.SetIcon(icon)
 
         self.notebook = wxNotebook(self, -1)
 

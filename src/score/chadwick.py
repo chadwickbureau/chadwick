@@ -31,6 +31,7 @@ import string
 from libchadwick import *
 import scorebook
 import panelstate
+import icons
 
 from gameeditor import GameEditor, CreateGame
 from frameentry import GameEntryFrame
@@ -101,6 +102,8 @@ class ChadwickFrame(wxFrame):
         self.MakeMenus()
         self.CreateStatusBar()
 
+        icon = wxIconFromXPMData(icons.baseball_xpm)
+        self.SetIcon(icon)
         sizer = wxBoxSizer(wxVERTICAL)
         
         notebook = wxNotebook(self, -1)
