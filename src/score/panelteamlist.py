@@ -151,4 +151,4 @@ class TeamListPanel(wxPanel):
             self.book.AddTeam(dialog.GetTeamID(),
                               dialog.GetCity(), dialog.GetNickname(),
                               dialog.GetLeague())
-            self.OnUpdate(self.book)
+            self.GetGrandParent().OnUpdate()

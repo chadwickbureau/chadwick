@@ -179,7 +179,7 @@ class PlayerListPanel(wxPanel):
                                 dialog.GetBats(),
                                 dialog.GetThrows(),
                                 dialog.GetTeam())
-            self.OnUpdate(self.book)
+            self.GetGrandParent().OnUpdate()
 
     def OnUpdate(self, book):
         self.book = book

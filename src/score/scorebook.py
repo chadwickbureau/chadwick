@@ -42,18 +42,22 @@ def TempFile():
     
 
 class ChadwickScorebook:
-    def __init__(self):
+    def __init__(self, year=2005):
         self.books = { }
         self.modified = False
-        self.year = 2005
+        self.year = year
         self.league = cw_league_create()
         self.games = [ ]
-
+        self.players = { }
+        self.filename = "untitled.chw"
+        
     def __del__(self):
         #for book in self.books:
         #    cw_scorebook_cleanup(book)
         #cw_league_cleanup(self.league)
         pass
+
+    def GetFilename(self):   return self.filename
 
     def Read(self, filename):
         zf = zipfile.ZipFile(filename, "r")
@@ -63,6 +67,7 @@ class ChadwickScorebook:
         self.ReadLeague(zf)
         self.BuildIndices()
         self.modified = False
+        self.filename = filename
 
     def FindLeagueEntry(self, zf):
         """

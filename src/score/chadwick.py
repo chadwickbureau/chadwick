@@ -44,7 +44,46 @@ from dialogreport import ReportDialog
 
 import statscan
 
+from wxutils import FormattedStaticText
 
+class YearDialog(wxDialog):
+    def __init__(self, parent):
+        wxDialog.__init__(self, parent, -1, "New scorebook")
+
+        topSizer = wxBoxSizer(wxVERTICAL)
+        
+        yearSizer = wxBoxSizer(wxHORIZONTAL)
+        yearSizer.Add(FormattedStaticText(self, "Year"),
+                      0, wxALL | wxALIGN_CENTER, 5)
+                      
+        self.year = wxTextCtrl(self, -1, "2005",
+                               wxDefaultPosition, wxSize(125, -1))
+        yearSizer.Add(self.year, 0, wxALL | wxALIGN_CENTER, 5)
+        topSizer.Add(yearSizer, 0, wxALL, 5)
+        
+        buttonSizer = wxBoxSizer(wxHORIZONTAL)
+        buttonSizer.Add(wxButton(self, wxID_CANCEL, "Cancel"),
+                                 0, wxALL | wxALIGN_CENTER, 5)
+        buttonSizer.Add(wxButton(self, wxID_OK, "OK"), 0,
+                        wxALL | wxALIGN_CENTER, 5)
+        topSizer.Add(buttonSizer, 0, wxALIGN_RIGHT, 5)
+
+        self.SetSizer(topSizer)
+        self.Layout()
+        topSizer.SetSizeHints(self)
+
+        EVT_TEXT(self, self.year.GetId(), self.OnChangeYear)
+        
+    def OnChangeYear(self, event):
+        try:
+            if int(str(self.year.GetValue())) > 0:
+                self.FindWindowById(wxID_OK).Enable(true)
+            else:
+                self.FindWindowById(wxID_OK).Enable(false)
+        except ValueError:
+            self.FindWindowById(wxID_OK).Enable(false)
+    
+    def GetYear(self):  return int(str(self.year.GetValue()))
 
 # IDs for our menu command events
 CW_MENU_REPORT_BATTING = 2010
@@ -78,6 +117,7 @@ class ChadwickFrame(wxFrame):
         self.SetSizer(sizer)
         self.Layout()
 
+        EVT_MENU(self, wxID_NEW, self.OnFileNew)
         EVT_MENU(self, wxID_OPEN, self.OnFileOpen)
         EVT_MENU_RANGE(self, wxID_FILE1, wxID_FILE9, self.OnFileMRU)
         EVT_MENU(self, wxID_SAVE, self.OnFileSave)
@@ -89,6 +129,8 @@ class ChadwickFrame(wxFrame):
         EVT_MENU(self, CW_MENU_REPORT_TEAM, self.OnReportTeam)
         EVT_BUTTON(self, panelstate.CW_BUTTON_SAVE, self.OnGameSave)
         EVT_CLOSE(self, self.OnClickClose)
+
+        self.OnUpdate()
 
 
     def MakeMenus(self):
@@ -124,7 +166,33 @@ class ChadwickFrame(wxFrame):
 
         self.SetMenuBar(menuBar)
 
+    def CheckUnsaved(self):
+        """
+        Returns True if it's OK to close a scorebook, either because
+        it's not modified, or the user wants to abandon changes.
+        """
+        if self.book.IsModified() == False:  return True
+
+        dialog = wxMessageDialog(self,
+                                 "There are unsaved changes to "
+                                 "the scorebook.  Continue?",
+                                 "Warning: unsaved changes",
+                                 wxOK | wxCANCEL | wxICON_EXCLAMATION)
+        result = dialog.ShowModal()
+        dialog.Destroy()
+        return result
+
+    def OnFileNew(self, event):
+        if not self.CheckUnsaved():  return
+
+        dialog = YearDialog(self)
+        if dialog.ShowModal() == wxID_OK:
+            self.book = scorebook.ChadwickScorebook(dialog.GetYear())
+            self.OnUpdate()
+
     def OnFileOpen(self, event):
+        if not self.CheckUnsaved():  return
+        
         dialog = wxFileDialog(self, "Scorebook to open...",
                               "", "",
                               "Chadwick scorebooks (*.chw)|*.chw|"
@@ -146,6 +214,8 @@ class ChadwickFrame(wxFrame):
                 dialog.ShowModal()
 
     def OnFileMRU(self, event):
+        if not self.CheckUnsaved():  return
+        
         self.book = scorebook.ChadwickScorebook()
         self.book.Read(str(self.fileHistory.GetHistoryFile(event.GetId() - wxID_FILE1)))
         self.OnUpdate()
@@ -169,28 +239,16 @@ class ChadwickFrame(wxFrame):
                 dialog.ShowModal()
 
     def OnFileExit(self, event):
-        if self.book.IsModified():
-            dialog = wxMessageDialog(self,
-                                     "There are unsaved changes to "
-                                     "the scorebook.  Continue?",
-                                     "Warning: unsaved changes",
-                                     wxOK | wxCANCEL | wxICON_EXCLAMATION)
-            if dialog.ShowModal() == wxID_OK:
-                self.Close()
-        self.Close()
-
-    def OnClickClose(self, event):
-        if event.CanVeto() and self.book.IsModified():
-            dialog = wxMessageDialog(self,
-                                     "There are unsaved changes to "
-                                     "the scorebook.  Continue?",
-                                     "Warning: unsaved changes",
-                                     wxOK | wxCANCEL | wxICON_EXCLAMATION)
-            if dialog.ShowModal() == wxID_CANCEL:
-                event.Veto()
-                
+        if not self.CheckUnsaved():  return
         self.fileHistory.Save(wxConfig("Chadwick"))
-        event.Skip()
+        global app
+        app.ExitMainLoop()
+        
+    def OnClickClose(self, event):
+        if not self.CheckUnsaved():  return
+        self.fileHistory.Save(wxConfig("Chadwick"))
+        global app
+        app.ExitMainLoop()
         
     def OnGameNew(self, event):
         dialog = NewGameDialog(self, self.book)
@@ -280,6 +338,12 @@ class ChadwickFrame(wxFrame):
         dialog.ShowModal()
 
     def OnUpdate(self):
+        title = "Chadwick: [%s] %d" % (self.book.GetFilename(),
+                                       self.book.GetYear())
+        if self.book.IsModified():
+            title += " (unsaved changes)"
+            
+        self.SetTitle(title)
         self.teamList.OnUpdate(self.book)
         self.gameList.OnUpdate(self.book)
         self.playerList.OnUpdate(self.book)
