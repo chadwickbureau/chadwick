@@ -26,7 +26,7 @@
 
 from wxPython.wx import *
 from wxPython.grid import *
-import string, sys
+import string, sys, os
 
 from libchadwick import *
 import scorebook
@@ -278,6 +278,24 @@ class ChadwickFrame(wxFrame):
         self.OnUpdate()
             
     def OnFileSave(self, event):
+        if not self.book.IsModified():  return
+        
+        # Remove a backup file
+        try:
+            os.remove(self.book.GetFilename() + "~")
+        except:
+            print "oops1"
+            pass
+
+        # Rename the original file to a backup
+        try:
+            os.rename(self.book.GetFilename(),
+                      self.book.GetFilename() + "~")
+        except:
+            print "oops2"
+            pass
+
+        # Now try to write this file
         try:
             self.book.Write(self.book.GetFilename())
             self.OnUpdate()
@@ -298,6 +316,7 @@ class ChadwickFrame(wxFrame):
                               wxSAVE | wxOVERWRITE_PROMPT)
         if dialog.ShowModal() == wxID_OK:
             try:
+                # We don't do any backup file writing here
                 self.book.Write(str(dialog.GetPath()))
                 self.fileHistory.AddFileToHistory(dialog.GetPath())
                 self.OnUpdate()
