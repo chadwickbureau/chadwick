@@ -33,6 +33,7 @@ EXTRA_DIST = \
 	dialogcomment.py \
 	dialogdecision.py \
 	dialoggame.py \
+	dialogimport.py \
 	dialoglineup.py \
 	dialognewgame.py \
 	dialogreport.py \

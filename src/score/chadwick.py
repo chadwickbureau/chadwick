@@ -39,6 +39,7 @@ from panelgamelist import *
 from panelplayerlist import PlayerListPanel
 from panelteamlist import TeamListPanel
 
+from dialogimport import ImportDialog
 from dialognewgame import NewGameDialog
 from dialoglineup import LineupDialog
 from dialogreport import ReportDialog
@@ -363,19 +364,22 @@ class ChadwickFrame(wxFrame):
                               "Retrosheet zipfiles (*.zip)|*.zip|"
                               "All files (*.*)|*.*")
         if dialog.ShowModal() == wxID_OK:
-            #try:
+            try:
                 book = scorebook.ChadwickScorebook()
                 book.Read(str(dialog.GetPath()))
-                self.book.ImportGames(book, [g for g in book.Games()])
-                self.OnUpdate()
-            #except:
-            #    dialog = wxMessageDialog(self,
-            #                             "An error occurred in reading "
-            #                             + str(dialog.GetPath()),
-            #                             "Error opening scorebook",
-            #                             wxOK | wxICON_ERROR)
-            #    dialog.ShowModal()
-        
+            except:
+                dialog = wxMessageDialog(self,
+                                         "An error occurred in reading "
+                                         + str(dialog.GetPath()),
+                                         "Error opening scorebook",
+                                         wxOK | wxICON_ERROR)
+                dialog.ShowModal()
+                return
+
+        dialog = ImportDialog(self, book)
+        if dialog.ShowModal() == wxID_OK:
+            self.book.ImportGames(book, dialog.GetSelectedGames())
+            self.OnUpdate()
 
     def OnFileExit(self, event):
         if not self.CheckUnsaved():  return
