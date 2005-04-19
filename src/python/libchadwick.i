@@ -59,8 +59,23 @@ int IsValidPlay(char *play)
   CWRoster *FindRoster(char *teamID)
      { return cw_league_roster_find(self, teamID); }
 
+%pythoncode %{
+  def Teams(self): 
+    x = self.first_roster
+    while x != None:  yield x; x = x.next
+    raise StopIteration
+%}
+
   void Read(FILE *file)    { cw_league_read(self, file); }
   void Write(FILE *file)   { cw_league_write(self, file); }
+
+%pythoncode %{
+  def Import(self, league):
+    for team in league.Teams():
+      if self.FindRoster(team.GetID()) == None:
+        self.AppendRoster(team.GetID(), team.GetYear(), team.GetLeague(),
+                          team.GetCity(), team.GetNickname())
+%}
 };
 
 %extend CWRoster {
@@ -86,10 +101,16 @@ int IsValidPlay(char *play)
   void SetYear(int year)   { self->year = year; }
   int GetYear(void) const   { return self->year; }
 
-  void InsertPlayer(CWPlayer *player)
-    { cw_roster_player_insert(self, player); }
-  void AppendPlayer(CWPlayer *player)  
-    { cw_roster_player_append(self, player); }
+%pythoncode %{
+  def InsertPlayer(self, player):
+     cw_roster_player_insert(self, player)
+     player.thisown = 0
+
+  def AppendPlayer(self, player):
+     cw_roster_player_append(self, player)
+     player.thisown = 0
+%}
+
   CWPlayer *FindPlayer(char *id)    
     { return cw_roster_player_find(self, id); }
   int NumPlayers(void)    { return cw_roster_player_count(self); }
@@ -103,6 +124,16 @@ int IsValidPlay(char *play)
 
   void Read(FILE *file)   { cw_roster_read(self, file); }
   void Write(FILE *file)  { cw_roster_write(self, file); }
+
+%pythoncode %{
+  def Import(self, roster):
+    for player in roster.Players():
+        self.InsertPlayer(CWPlayer(player.GetID(),
+				   player.GetLastName(),
+                                   player.GetFirstName(),
+                                   player.GetBats(),
+                                   player.GetThrows()))
+%}
 };
 
 %extend CWPlayer {

@@ -344,6 +344,24 @@ class ChadwickScorebook:
         self.games.sort(lambda x, y: cmp(x.GetDate(), y.GetDate()))
         self.modified = True
 
+    def ImportGames(self, book, games):
+        for game in games:
+            for t in [0, 1]:
+                if self.GetTeam(game.GetTeam(t)) == None:
+                    team = book.GetTeam(game.GetTeam(t))
+                    self.AddTeam(team.GetID(),
+                                 team.GetCity(), team.GetNickname(),
+                                 team.GetLeague())
+                    self.books[game.GetTeam(t)] = CWScorebook()
+
+                self.GetTeam(game.GetTeam(t)).Import(book.GetTeam(game.GetTeam(t)))
+                
+            book.RemoveGame(game)
+            self.books[game.GetTeam(1)].InsertGame(game)
+        if len(games) > 0:
+            self.BuildIndices()
+            self.modified = True
+        
     def IsModified(self):   return self.modified
     def SetModified(self, value):  self.modified = value
         

@@ -607,6 +607,27 @@ the window is closed.
 
 </sect1>
 
+<sect1 id="gui.import">
+<title>Importing games from other scorebooks</title>
+
+<para>
+In many cases, games may be input into computers at different locations.
+The <guimenuitem>Import</guimenuitem> command on the <guimenu>File</guimenu>
+menu provides a facility to import games into the current scorebook
+from another scorebook.  This menu item presents a file selection dialog
+to indicate the scorebook from which to import games.
+</para>
+
+<para>
+Importing is done based on IDs.  If a team ID appears in both scorebooks,
+it is assumed to be the same team; similarly, if a player
+ID appears in both scorebooks, it is assumed to be the same player.
+Players and teams appearing in the scorebook being imported from but
+not present in the current scorebook are added automatically. 
+</para>
+
+</sect1>
+
 <sect1 id="gui.reporting">
 <title>Reporting features</title>
 

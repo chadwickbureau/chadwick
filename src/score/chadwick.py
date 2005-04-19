@@ -88,6 +88,7 @@ class YearDialog(wxDialog):
     def GetYear(self):  return int(str(self.year.GetValue()))
 
 # IDs for our menu command events
+CW_MENU_FILE_IMPORT = 2008
 CW_MENU_REPORT_REGISTER = 2009
 CW_MENU_REPORT_REGISTER_BATTING = 2010
 CW_MENU_REPORT_REGISTER_PITCHING = 2011
@@ -135,6 +136,7 @@ class ChadwickFrame(wxFrame):
         EVT_MENU_RANGE(self, wxID_FILE1, wxID_FILE9, self.OnFileMRU)
         EVT_MENU(self, wxID_SAVE, self.OnFileSave)
         EVT_MENU(self, wxID_SAVEAS, self.OnFileSaveAs)
+        EVT_MENU(self, CW_MENU_FILE_IMPORT, self.OnFileImport)
         EVT_MENU(self, wxID_EXIT, self.OnFileExit)
         EVT_MENU(self, wxID_ABOUT, self.OnHelpAbout)
         EVT_BUTTON(self, CW_MENU_GAME_NEW, self.OnGameNew)
@@ -164,6 +166,9 @@ class ChadwickFrame(wxFrame):
         fileMenu.Append(wxID_SAVE, "&Save", "Save the current scorebook")
         fileMenu.Append(wxID_SAVEAS, "Save &as",
                         "Save the scorebook to a different file")
+        fileMenu.AppendSeparator()
+        fileMenu.Append(CW_MENU_FILE_IMPORT, "&Import",
+                        "Import games from another scorebook")
         fileMenu.AppendSeparator()
         fileMenu.Append(wxID_EXIT, "&Exit", "Close Chadwick")
 
@@ -350,6 +355,27 @@ class ChadwickFrame(wxFrame):
                                          "Error saving scorebook",
                                          wxOK | wxICON_ERROR)
                 dialog.ShowModal()
+
+    def OnFileImport(self, event):
+        dialog = wxFileDialog(self, "Scorebook to open...",
+                              "", "",
+                              "Chadwick scorebooks (*.chw)|*.chw|"
+                              "Retrosheet zipfiles (*.zip)|*.zip|"
+                              "All files (*.*)|*.*")
+        if dialog.ShowModal() == wxID_OK:
+            #try:
+                book = scorebook.ChadwickScorebook()
+                book.Read(str(dialog.GetPath()))
+                self.book.ImportGames(book, [g for g in book.Games()])
+                self.OnUpdate()
+            #except:
+            #    dialog = wxMessageDialog(self,
+            #                             "An error occurred in reading "
+            #                             + str(dialog.GetPath()),
+            #                             "Error opening scorebook",
+            #                             wxOK | wxICON_ERROR)
+            #    dialog.ShowModal()
+        
 
     def OnFileExit(self, event):
         if not self.CheckUnsaved():  return
