@@ -337,6 +337,13 @@ class ChadwickScorebook:
         self.games.sort(lambda x, y: cmp(x.GetDate(), y.GetDate()))
         self.modified = True
 
+    def RemoveGame(self, game):
+        hometeam = game.GetTeam(1)
+        self.books[hometeam].RemoveGame(game.GetGameID())
+        self.games.remove(game)
+        self.games.sort(lambda x, y: cmp(x.GetDate(), y.GetDate()))
+        self.modified = True
+
     def IsModified(self):   return self.modified
     def SetModified(self, value):  self.modified = value
         

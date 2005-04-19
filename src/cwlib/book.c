@@ -124,7 +124,7 @@ cw_scorebook_insert_game(CWScorebook *scorebook, CWGame *game)
   return 1;
 }
 
-void
+CWGame *
 cw_scorebook_remove_game(CWScorebook *scorebook, char *game_id)
 {
   CWGame *game = scorebook->first_game;
@@ -144,12 +144,12 @@ cw_scorebook_remove_game(CWScorebook *scorebook, char *game_id)
 	scorebook->last_game = game->prev;
       }
 
-      cw_game_cleanup(game);
-      free(game);
-      return;
+      game->prev = game->next = NULL;
+      return game;
     }
     game = game->next;
   }
+  return NULL;
 }
 
 static void

@@ -147,6 +147,8 @@ int IsValidPlay(char *play)
 
   int AppendGame(CWGame *game) { return cw_scorebook_append_game(self, game); }
   int InsertGame(CWGame *game) { return cw_scorebook_insert_game(self, game); }
+  CWGame *RemoveGame(char *gameID)
+    { return cw_scorebook_remove_game(self, gameID); }
   int Read(FILE *file)         { return cw_scorebook_read(self, file); }
   void Write(FILE *file)       { cw_scorebook_write(self, file); }
 };

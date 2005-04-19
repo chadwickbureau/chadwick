@@ -62,10 +62,13 @@ int cw_scorebook_append_game(CWScorebook *scorebook, CWGame *game);
 int cw_scorebook_insert_game(CWScorebook *scorebook, CWGame *game);
 
 /*
- * Removes the game with game ID 'game_id' from scorebook.
- * If 'game_id' is not present, no action is taken.
+ * Removes the game with game ID 'game_id' from scorebook.  Returns the
+ * game object; the caller becomes responsible for the memory allocated
+ * to the game.
+ * If 'game_id' is not present, NULL is returned and there is no effect
+ * on the scorebook.
  */
-void cw_scorebook_remove_game(CWScorebook *scorebook, char *game_id);
+CWGame *cw_scorebook_remove_game(CWScorebook *scorebook, char *game_id);
 
 /*
  * Reads the contents of the scorebook file 'file' into

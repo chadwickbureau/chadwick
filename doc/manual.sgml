@@ -404,6 +404,17 @@ to showing all games by all teams.
 
 </sect2>
 
+<sect2 id="gui.games.delete">
+<title>Deleting games</title>
+
+<para>
+Games can be deleted by selecting the game to be deleted and pressing
+the &quot;Delete&quot; key.  A dialog will appear asking for confirmation
+of the deletion; note that deletion is currently not reversible!
+</para>
+
+</sect2>
+
 </sect1>
 
 <sect1 id="gui.newgame">
