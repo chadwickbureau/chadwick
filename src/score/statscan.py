@@ -95,13 +95,16 @@ class PitchingStatline:
         self.stats = { "games": [ ],
                        "gs":0, "cg":0, "sho":0, "gf":0,
                        "w":0, "l":0, "sv":0,
-                       "outs":0, "r":0, "er":0, "tur":0,
+                       "outs":0, "bf":0, "r":0, "er":0, "tur":0,
                        "h":0, "2b":0, "3b":0, "hr":0,
                        "bb":0, "ibb":0, "so":0,
                        "wp":0, "bk":0, "hb":0 }
 
     def ProcessBatting(self, eventData):
         self.stats["outs"] += eventData.GetOuts()
+
+        if eventData.IsBatterEvent():
+            self.stats["bf"] += 1
 
         if eventData.event_type == CW_EVENT_SINGLE:
             self.stats["h"] += 1
@@ -608,14 +611,14 @@ class PitchingRegister:
             else:
                 era = "%5.2f" % (float(stat["er"]) / float(stat["outs"]) * 27)
             if i % 20 == 0:
-                s += "\nPlayer                 ERA  G GS CG SH GF  W- L SV    IP   R  ER   H HR  BB IW  SO BK WP HB\n"
-            s += ("%-20s %s %2d %2d %2d %2d %2d %2d-%2d %2d %3d.%1d %3d %3d %3d %2d %3d %2d %3d %2d %2d %2d\n" %
+                s += "\nPlayer                 ERA  G GS CG SH GF  W- L SV   BF    IP   R  ER   H HR  BB IW  SO BK WP HB\n"
+            s += ("%-20s %s %2d %2d %2d %2d %2d %2d-%2d %2d %4d %3d.%1d %3d %3d %3d %2d %3d %2d %3d %2d %2d %2d\n" %
                 (player.GetSortName(), era,
                  len(stat["games"]),
                  stat["gs"], stat["cg"], stat["sho"],
                  stat["gf"],
                  stat["w"], stat["l"], stat["sv"],
-                 stat["outs"] / 3, stat["outs"] % 3,
+                 stat["bf"], stat["outs"] / 3, stat["outs"] % 3,
                  stat["r"], stat["er"],
                  stat["h"], stat["hr"],
                  stat["bb"], stat["ibb"], stat["so"],
@@ -712,7 +715,7 @@ class TeamPitchingRegister:
         keys = self.stats.keys()
         keys.sort()
 
-        s = "\n%-20s   ERA  G GS CG SH GF  W- L SV    IP   R  ER   H HR  BB IW  SO BK WP HB\n" % self.book.GetTeam(self.team).GetCity()
+        s = "\n%-20s   ERA  G GS CG SH GF  W- L SV   BF    IP   R  ER   H HR  BB IW  SO BK WP HB\n" % self.book.GetTeam(self.team).GetCity()
         for (i,key) in enumerate(keys):
             stat = self.stats[key]
             player = self.book.GetPlayer(key)
@@ -721,13 +724,13 @@ class TeamPitchingRegister:
                 era = "-----"
             else:
                 era = "%5.2f" % (float(stat["er"]) / float(stat["outs"]) * 27)
-            s += ("%-20s %s %2d %2d %2d %2d %2d %2d-%2d %2d %3d.%1d %3d %3d %3d %2d %3d %2d %3d %2d %2d %2d\n" %
+            s += ("%-20s %s %2d %2d %2d %2d %2d %2d-%2d %2d %4d %3d.%1d %3d %3d %3d %2d %3d %2d %3d %2d %2d %2d\n" %
                 (player.GetSortName(), era,
                  len(stat["games"]),
                  stat["gs"], stat["cg"], stat["sho"],
                  stat["gf"],
                  stat["w"], stat["l"], stat["sv"],
-                 stat["outs"] / 3, stat["outs"] % 3,
+                 stat["bf"], stat["outs"] / 3, stat["outs"] % 3,
                  stat["r"], stat["er"],
                  stat["h"], stat["hr"],
                  stat["bb"], stat["ibb"], stat["so"],
@@ -739,13 +742,13 @@ class TeamPitchingRegister:
             era = "-----"
         else:
             era = "%5.2f" % (float(stat["er"]) / float(stat["outs"]) * 27)
-        s += ("%-20s %s %2d %2d %2d %2d %2d %2d-%2d %2d %3d.%1d %3d %3d %3d %2d %3d %2d %3d %2d %2d %2d\n" %
+        s += ("%-20s %s %2d %2d %2d %2d %2d %2d-%2d %2d %4d %3d.%1d %3d %3d %3d %2d %3d %2d %3d %2d %2d %2d\n" %
               ("Totals", era,
                len(stat["games"]),
                stat["gs"], stat["cg"], stat["sho"],
                stat["gf"],
                stat["w"], stat["l"], stat["sv"],
-               stat["outs"] / 3, stat["outs"] % 3,
+               stat["bf"], stat["outs"] / 3, stat["outs"] % 3,
                stat["r"], stat["er"],
                stat["h"], stat["hr"],
                stat["bb"], stat["ibb"], stat["so"],
@@ -1401,11 +1404,14 @@ if __name__ == "__main__":
     book = scorebook.ChadwickScorebook()
     book.Read(fn)
 
+    x = [ PitchingRegister(book) ]
+    for team in book.Teams():
+        x.append(TeamPitchingRegister(book, team.GetID()))
     #x = [ TeamRecordTotals(book),
     #      TeamBattingTotals(book),
     #      TeamPitchingTotals(book),
     #      TeamFieldingTotals(book) ]
-    x = [ MultiHRLog(book), MultiHitLog(book), MultiStrikeoutLog(book) ]
+    #x = [ MultiHRLog(book), MultiHitLog(book), MultiStrikeoutLog(book) ]
     ProcessFile(book, x)
 
     for acc in x:
