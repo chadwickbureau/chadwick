@@ -1164,10 +1164,10 @@ class TeamRecordTotals:
         keys = self.stats.keys()
         keys.sort()
 
-        s = "\nClub                   G   W-  L    PCT  HOME  AWAY  1RUN  XINN\n";
+        s = "\nClub                             G   W-  L    PCT  HOME  AWAY  1RUN  XINN\n";
         for (i,key) in enumerate(keys):
             stat = self.stats[key]
-            s += ("%-20s %3d %3d-%3d  %s %2d-%2d %2d-%2d %2d-%2d %2d-%2d\n" %
+            s += ("%-30s %3d %3d-%3d  %s %2d-%2d %2d-%2d %2d-%2d %2d-%2d\n" %
                 (stat["city"] + " " + stat["nickname"],
                  stat["g"], stat["w"], stat["l"],
                  FormatAverage(stat["w"], stat["w"]+stat["l"]),
