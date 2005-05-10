@@ -221,6 +221,11 @@ class ChadwickScorebook:
     def GetGameNumber(self, i, crit=lambda x: True):
         return filter(crit, self.games)[i]
 
+    def GetGame(self, gameID):
+        for g in self.games:
+            if g.GetGameID() == gameID:  return g
+        return None
+
     def Games(self, crit=lambda x: True):
         for g in self.games:
             if crit(g):  yield g

@@ -88,6 +88,36 @@ class YearDialog(wxDialog):
     
     def GetYear(self):  return int(str(self.year.GetValue()))
 
+class ChoosePlayerDialog(wxDialog):
+    def __init__(self, parent, title, book):
+        wxDialog.__init__(self, parent, -1, title)
+
+        topSizer = wxBoxSizer(wxVERTICAL)
+
+        self.playerList = wxListBox(self, -1, style=wxLB_SINGLE)
+        self.players = [ ]
+        for (pl,player) in enumerate(book.Players()):
+            self.playerList.Append("%s (%s)" % (player.GetSortName(),
+                                                player.GetID()))
+            self.players.append(player.GetID())
+
+        self.playerList.SetSelection(0)
+        topSizer.Add(self.playerList, 0, wxALL | wxALIGN_CENTER, 5)
+
+        buttonSizer = wxBoxSizer(wxHORIZONTAL)
+        buttonSizer.Add(wxButton(self, wxID_CANCEL, "Cancel"),
+                                 0, wxALL | wxALIGN_CENTER, 5)
+        buttonSizer.Add(wxButton(self, wxID_OK, "OK"), 0,
+                        wxALL | wxALIGN_CENTER, 5)
+        topSizer.Add(buttonSizer, 0, wxALIGN_RIGHT, 5)
+
+        self.SetSizer(topSizer)
+        self.Layout()
+        topSizer.SetSizeHints(self)
+
+    def GetPlayerID(self):
+        return self.players[self.playerList.GetSelection()]
+
 # IDs for our menu command events
 CW_MENU_FILE_IMPORT = 2008
 CW_MENU_REPORT_REGISTER = 2009
@@ -99,6 +129,8 @@ CW_MENU_REPORT_TEAM_TOTALS = 2021
 CW_MENU_REPORT_TEAM_GAMELOG = 2022
 CW_MENU_REPORT_TEAM_BATTING = 2023
 CW_MENU_REPORT_TEAM_PITCHING = 2024
+CW_MENU_REPORT_PLAYER = 2030
+CW_MENU_REPORT_PLAYER_DAILY_BATTING = 2031
 CW_MENU_REPORT_EVENTS = 2016
 CW_MENU_REPORT_EVENTS_SLAMS = 2017
 CW_MENU_REPORT_EVENTS_BIGGAME = 2018
@@ -151,6 +183,8 @@ class ChadwickFrame(wxFrame):
         EVT_MENU(self, CW_MENU_REPORT_TEAM_GAMELOG, self.OnReportTeamGameLog)
         EVT_MENU(self, CW_MENU_REPORT_TEAM_BATTING, self.OnReportTeamBatting)
         EVT_MENU(self, CW_MENU_REPORT_TEAM_PITCHING, self.OnReportTeamPitching)
+        EVT_MENU(self, CW_MENU_REPORT_PLAYER_DAILY_BATTING,
+                 self.OnReportPlayerDailyBatting)
         EVT_MENU(self, CW_MENU_REPORT_EVENTS_SLAMS, self.OnReportEventsSlams)
         EVT_MENU(self, CW_MENU_REPORT_EVENTS_BIGGAME,
                  self.OnReportEventsBigGame)
@@ -202,6 +236,15 @@ class ChadwickFrame(wxFrame):
         reportMenu.AppendMenu(CW_MENU_REPORT_TEAM, "&Team",
                               reportTeamMenu, "Compile team-by-team reports")
 
+
+        reportPlayerMenu = wxMenu()
+        reportPlayerMenu.Append(CW_MENU_REPORT_PLAYER_DAILY_BATTING,
+                                "Daily &batting",
+                                "Compile game-by-game batting for player")
+        reportMenu.AppendMenu(CW_MENU_REPORT_PLAYER, "&Player",
+                              reportPlayerMenu,
+                              "Compile reports by player")
+        
         reportEventsMenu = wxMenu()
         reportEventsMenu.Append(CW_MENU_REPORT_EVENTS_BIGGAME,
                                 "&Big games",
@@ -535,6 +578,15 @@ class ChadwickFrame(wxFrame):
                        "Team-by-team pitching",
                        [ statscan.TeamPitchingRegister(self.book, t.GetID())
                          for t in self.book.Teams() ])
+
+    def OnReportPlayerDailyBatting(self, event):
+        dialog = ChoosePlayerDialog(self, "Choose player", self.book)
+        if dialog.ShowModal() == wxID_OK:
+            self.RunReport("Compiling daily batting for %s" %
+                           self.book.GetPlayer(dialog.GetPlayerID()).GetName(),
+                           "Daily batting",
+                           [ statscan.BattingDailies(self.book,
+                                                     dialog.GetPlayerID()) ])
 
     def OnReportEventsSlams(self, event):
         self.RunReport("Compiling list of grand slams", "Grand slams",

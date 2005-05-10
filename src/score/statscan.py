@@ -338,6 +338,85 @@ class BattingRegister:
 
         return s
 
+class BattingDailies:
+    def __init__(self, book, playerID):
+        self.stats = { }
+        self.book = book
+        self.playerID = playerID
+
+    def OnBeginGame(self, game, gameiter):
+        for t in [0, 1]:
+            for slot in range(9):
+                player = game.GetStarter(t, slot+1)
+                if player.player_id == self.playerID:
+                    self.stats[game] = BattingStatline()
+                    return
+
+    def OnSubstitution(self, game, gameiter):
+        rec = gameiter.event.first_sub
+
+        while rec != None:
+            if (rec.player_id == self.playerID and
+                game not in self.stats.keys()):
+                self.stats[game] = BattingStatline()
+                return
+
+            rec = rec.next
+
+
+    def OnEvent(self, game, gameiter):
+        eventData = gameiter.GetEventData()
+        team = gameiter.GetHalfInning()
+        
+        batterId = gameiter.GetPlayer(team,
+                                      gameiter.NumBatters(team) % 9 + 1)
+        if batterId == self.playerID:
+            batter = self.stats[game]
+            batter.ProcessBatting(eventData)
+
+        for base in [1,2,3]:
+            if gameiter.GetRunner(base) == self.playerID:
+                runner = self.stats[game]
+                runner.ProcessRunning(eventData, base)
+
+    def OnEndGame(self, game, gameiter):
+        pass
+
+    def __str__(self):
+        keys = self.stats.keys()
+        keys.sort(lambda x, y: cmp(x.GetDate() + str(x.GetNumber()),
+                                   y.GetDate() + str(y.GetNumber())))
+
+        s = ("Game-by-game batting for %s\n\n" %
+             self.book.GetPlayer(self.playerID).GetName())
+        accum = BattingStatline()
+        for (i,key) in enumerate(keys):
+            stat = self.stats[key]
+            if i % 20 == 0:
+                s += "\nGame             AVG   SLG   OBP AB  R  H 2B 3B HR BI BB IW SO DP HP SH SF SB CS\n"
+            
+
+            accum += stat
+            
+            s += ("%-10s %-3s %s %s %s %2d %2d %2d %2d %2d %2d %2d %2d %2d %2d %2d %2d %2d %2d %2d %2d\n" %
+                (key.GetDate(),
+                 { 1: "(1)", 2: "(2)", 0: "" }[key.GetNumber()],
+                 FormatAverage(accum["h"], accum["ab"]),
+                 FormatAverage(accum["h"] + accum["2b"] +
+                               2*accum["3b"] + 3*accum["hr"],
+                               accum["ab"]),
+                 FormatAverage(accum["h"] + accum["bb"] + accum["hp"],
+                               accum["ab"] + accum["bb"] + accum["hp"] + accum["sf"]),
+                 stat["ab"], stat["r"], stat["h"],
+                 stat["2b"], stat["3b"], stat["hr"],
+                 stat["bi"],
+                 stat["bb"], stat["ibb"], stat["so"],
+                 stat["gdp"], stat["hp"],
+                 stat["sh"], stat["sf"],
+                 stat["sb"], stat["cs"]))
+
+        return s
+
 class TeamBattingRegister:
     def __init__(self, book, team):
         self.book = book
@@ -1404,14 +1483,15 @@ if __name__ == "__main__":
     book = scorebook.ChadwickScorebook()
     book.Read(fn)
 
-    x = [ PitchingRegister(book) ]
-    for team in book.Teams():
-        x.append(TeamPitchingRegister(book, team.GetID()))
+    #x = [ PitchingRegister(book) ]
+    #for team in book.Teams():
+    #    x.append(TeamPitchingRegister(book, team.GetID()))
     #x = [ TeamRecordTotals(book),
     #      TeamBattingTotals(book),
     #      TeamPitchingTotals(book),
     #      TeamFieldingTotals(book) ]
     #x = [ MultiHRLog(book), MultiHitLog(book), MultiStrikeoutLog(book) ]
+    x = [ BattingDailies(book, "bondb001") ]
     ProcessFile(book, x)
 
     for acc in x:
