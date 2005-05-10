@@ -310,6 +310,7 @@ int IsValidPlay(char *play)
 
 %extend CWParsedEvent {
   int IsOfficialAB(void)  { return cw_event_is_official_ab(self); }
+  int IsBatterEvent(void) { return cw_event_is_batter(self); }
   int GetRBI(void)    { return cw_event_rbi_on_play(self); }
 
   int GetOuts(void) { return cw_event_outs_on_play(self); }
