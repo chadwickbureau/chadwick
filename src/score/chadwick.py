@@ -544,8 +544,15 @@ class ChadwickFrame(wxFrame):
             dialog.ShowModal()
         
     def OnReportRegisterBatting(self, event):
-        self.RunReport("Compiling batting register", "Batting register",
-                       [ statscan.BattingRegister(self.book) ])
+        report = self.book.GetReport("batting-register")
+        if report != None:
+            dialog = ReportDialog(self, "Batting register", str(report))
+            dialog.ShowModal()
+        else:
+            report = statscan.BattingRegister(self.book)
+            self.RunReport("Compiling batting register", "Batting register",
+                           [ report ])
+            self.book.AddReport(report)
 
     def OnReportRegisterPitching(self, event):
         self.RunReport("Compiling pitching register", "Pitching register",

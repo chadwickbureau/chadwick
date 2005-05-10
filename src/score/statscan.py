@@ -89,6 +89,7 @@ class BattingStatline:
     def __getitem__(self, attr):  return self.stats[attr]
     def __setitem__(self, attr, value):  self.stats[attr] = value
 
+    def __repr__(self):  return repr(self.stats)
 
 class PitchingStatline:
     def __init__(self):
@@ -267,6 +268,8 @@ class BattingRegister:
         self.stats = { }
         self.book = book
 
+    def GetName(self):  return "batting-register"
+
     def OnBeginGame(self, game, gameiter):
         for t in [0, 1]:
             for slot in range(9):
@@ -337,6 +340,15 @@ class BattingRegister:
                  stat["sb"], stat["cs"]))
 
         return s
+
+    def __repr__(self):  return repr(self.stats)
+
+    def derepr(self, text):
+        x = eval(text)
+        self.stats = { }
+        for key in x:
+            self.stats[key] = BattingStatline()
+            self.stats[key].stats = x[key]
 
 class BattingDailies:
     def __init__(self, book, playerID):
@@ -1491,9 +1503,11 @@ if __name__ == "__main__":
     #      TeamPitchingTotals(book),
     #      TeamFieldingTotals(book) ]
     #x = [ MultiHRLog(book), MultiHitLog(book), MultiStrikeoutLog(book) ]
-    x = [ BattingDailies(book, "bondb001") ]
+    #x = [ BattingDailies(book, "bondb001") ]
+    x = [ BattingRegister(book) ]
     ProcessFile(book, x)
 
     for acc in x:
-        print acc
+        print repr(acc)
         print "\n"
+        print len(repr(acc))

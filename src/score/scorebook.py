@@ -29,6 +29,7 @@ from libchadwick import *
 import os                # for low-level manipulation of tempfiles
 import zipfile
 import tempfile
+import statscan          # for report updating
 
 def TempFile():
     """
@@ -50,6 +51,7 @@ class ChadwickScorebook:
         self.playerDict = { }
         self.players = [ ]
         self.filename = "untitled.chw"
+        self.reports = [ ]
         
     def GetFilename(self):   return self.filename
 
@@ -104,6 +106,9 @@ class ChadwickScorebook:
         for team in self.Teams():
             self.ReadTeam(zf, team)
 
+        for report in [ "batting-register" ]:
+            self.ReadReport(zf, report)
+
     def ReadTeam(self, zf, team):
         fn = self.FindEntry(zf,
                             [ team.GetID() + str(self.year) + ".ROS" ])
@@ -139,6 +144,13 @@ class ChadwickScorebook:
             # not present.
             self.books[team.GetID()] = CWScorebook()
 
+    def ReadReport(self, zf, label):
+        fn = self.FindEntry(zf, label.upper() + ".RPT")
+        if fn != None:
+            report = statscan.BattingRegister(self)
+            report.derepr(zf.read(fn))
+            self.reports.append(report)
+            
     def Write(self, filename):
         zf = zipfile.ZipFile(filename, "w", zipfile.ZIP_DEFLATED)
         name = TempFile()
@@ -153,6 +165,9 @@ class ChadwickScorebook:
 
         for team in self.Teams():
             self.WriteTeam(zf, team)
+
+        for report in self.reports:
+            self.WriteReport(zf, report)
         
         zf.close()
         self.filename = filename
@@ -177,6 +192,10 @@ class ChadwickScorebook:
         f = file(name, "r")
         zf.writestr(fn, f.read())
         f.close()
+
+    def WriteReport(self, zf, report):
+        fn = report.GetName() + ".rpt"
+        zf.writestr(fn, repr(report))
         
     def NumTeams(self):
         i = 0
@@ -340,6 +359,7 @@ class ChadwickScorebook:
         self.books[hometeam].InsertGame(game)
         self.games.append(game)
         self.games.sort(lambda x, y: cmp(x.GetDate(), y.GetDate()))
+        statscan.ProcessGame(game, self.reports)
         self.modified = True
 
     def RemoveGame(self, game):
@@ -363,6 +383,8 @@ class ChadwickScorebook:
                 
             book.RemoveGame(game)
             self.books[game.GetTeam(1)].InsertGame(game)
+            statscan.ProcessGame(game, self.reports)
+            
         if len(games) > 0:
             self.BuildIndices()
             self.modified = True
@@ -370,3 +392,15 @@ class ChadwickScorebook:
     def IsModified(self):   return self.modified
     def SetModified(self, value):  self.modified = value
         
+    def AddReport(self, report):
+        self.reports.append(report)
+
+    def GetReport(self, label):
+        report = filter(lambda x: x.GetName() == label, self.reports)
+        if len(report) > 0:
+            return report[0]
+        else:
+            return None
+
+    def RemoveReport(self, label):
+        self.reports = filter(lambda x: x.GetName() != label, self.reports)
