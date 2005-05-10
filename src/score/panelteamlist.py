@@ -170,8 +170,8 @@ class EditTeamDialog(wxDialog):
             else:
                 self.allPlayers.SetItemTextColour(pl, wxBLACK)
 
-        EVT_LIST_ITEM_SELECTED(self, self.allPlayers.GetId(),
-                               self.OnPlayerSelected)
+        EVT_LIST_ITEM_ACTIVATED(self, self.allPlayers.GetId(),
+                                self.OnPlayerActivated)
             
         allPlayerBox.Add(self.allPlayers, 0, wxALL, 5)
 
@@ -200,7 +200,7 @@ class EditTeamDialog(wxDialog):
     def GetNickname(self):   return str(self.nickname.GetValue())
     def GetLeague(self):     return str(self.league.GetValue())
 
-    def OnPlayerSelected(self, event):
+    def OnPlayerActivated(self, event):
         playerID = self.allPlayerIDs[event.GetIndex()]
         if self.team.FindPlayer(playerID) == None:
             player = self.book.GetPlayer(playerID)
@@ -212,6 +212,7 @@ class EditTeamDialog(wxDialog):
             self.players.InsertStringItem(self.playerIDs.index(playerID), entry)
             self.players.SetItemTextColour(self.playerIDs.index(playerID),
                                            wxColour(0, 192, 0))
+            self.players.EnsureVisible(self.playerIDs.index(playerID))
             self.allPlayers.SetItemTextColour(event.GetIndex(), wxBLUE)
 
     def UpdateTeam(self):
@@ -223,65 +224,54 @@ class EditTeamDialog(wxDialog):
                                     player.GetBats(), player.GetThrows(),
                                     self.team.GetID())
 
-class TeamListGrid(wxGrid):
+class TeamListCtrl(wxListCtrl):
     def __init__(self, parent):
-        wxGrid.__init__(self, parent, -1)
-        self.CreateGrid(0, 4)
-        self.SetColLabelValue(0, "City")
-        self.SetColLabelValue(1, "Nickname")
-        self.SetColLabelValue(2, "Team ID")
-        self.SetColLabelValue(3, "League")
-        self.SetRowLabelSize(1)
-        self.SetLabelFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-        self.SetDefaultCellFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL))
-        self.SetColLabelAlignment(wxALIGN_CENTER, wxALIGN_CENTER)
-        self.SetDefaultCellBackgroundColour(wxColour(242, 242, 242))
-        self.DisableDragRowSize()
+        wxListCtrl.__init__(self, parent, -1,
+                            style = wxLC_VIRTUAL | wxLC_REPORT | wxLC_SINGLE_SEL)
+
+        self.InsertColumn(0, "City")
+        self.InsertColumn(1, "Nickname")
+        self.InsertColumn(2, "Team ID")
+        self.InsertColumn(3, "League")
         
-        self.SetColSize(0, 150)
-        self.SetColSize(1, 150)
-        self.SetColSize(2, 100)
-        self.SetColSize(3, 100)
+        self.SetColumnWidth(0, 150)
+        self.SetColumnWidth(1, 150)
+        self.SetColumnWidth(2, 100)
+        self.SetColumnWidth(3, 100)
 
-        self.EnableEditing(false)
+        item = wxListItem()
+        item.m_format = wxLIST_FORMAT_CENTRE
+        item.m_mask = wxLIST_MASK_FORMAT
+        for col in [2, 3]:  self.SetColumn(col, item)
 
-        EVT_GRID_CELL_LEFT_DCLICK(self, self.OnLeftDoubleClick)
+        EVT_LIST_ITEM_ACTIVATED(self, self.GetId(), self.OnItemActivate)
 
     def OnUpdate(self, book):
         self.book = book
+        self.SetItemCount(book.NumTeams())
+
+    def OnGetItemText(self, item, col):
+        team = [x for x in self.book.Teams()][item]
+        if col == 0:
+            return team.GetCity()
+        elif col == 1:
+            return team.GetNickname()
+        elif col == 2:
+            return team.GetID()
+        else:
+            return team.GetLeague()
         
-        if self.GetNumberRows() > book.NumTeams():
-            self.DeleteRows(0, self.GetNumberRows() - book.NumTeams())
-        elif self.GetNumberRows() < book.NumTeams():
-            self.InsertRows(0, book.NumTeams() - self.GetNumberRows())
+    def OnItemActivate(self, event):
+        team = [x for x in self.book.Teams()][event.GetIndex()]
 
-        for (i,team) in enumerate(book.Teams()):
-            self.SetCellValue(i, 0, team.GetCity())
-            self.SetCellAlignment(i, 0, wxALIGN_LEFT, wxALIGN_CENTER)
-            self.SetCellValue(i, 1, team.GetNickname())
-            self.SetCellAlignment(i, 1, wxALIGN_LEFT, wxALIGN_CENTER)
-            self.SetCellValue(i, 2, team.GetID())
-            self.SetCellAlignment(i, 2, wxALIGN_CENTER, wxALIGN_CENTER)
-            self.SetCellValue(i, 3, team.league)
-            self.SetCellAlignment(i, 3, wxALIGN_CENTER, wxALIGN_CENTER)
-            
-        if self.GetNumberRows() > 0:
-            self.AutoSizeRow(0)
-            self.SetDefaultRowSize(self.GetRowSize(0))
-        self.AdjustScrollbars()
-
-    def OnLeftDoubleClick(self, event):
-        for (i,team) in enumerate(self.book.Teams()):
-            if i == event.GetRow():
-                dialog = EditTeamDialog(self, self.book, team)
-                if dialog.ShowModal() == wxID_OK:
-                    self.book.ModifyTeam(team.GetID(),
-                                         dialog.GetCity(),
-                                         dialog.GetNickname(),
-                                         dialog.GetLeague())
-                    dialog.UpdateTeam()
-                    self.GetParent().GetGrandParent().OnUpdate()
-                return
+        dialog = EditTeamDialog(self, self.book, team)
+        if dialog.ShowModal() == wxID_OK:
+            self.book.ModifyTeam(team.GetID(),
+                                 dialog.GetCity(),
+                                 dialog.GetNickname(),
+                                 dialog.GetLeague())
+            dialog.UpdateTeam()
+            self.GetParent().GetGrandParent().OnUpdate()
 
 class TeamListPanel(wxPanel):
     def __init__(self, parent):
@@ -289,7 +279,7 @@ class TeamListPanel(wxPanel):
 
         newTeamButton = wxButton(self, -1, "Add team")
         newTeamButton.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-        self.teamList = TeamListGrid(self)
+        self.teamList = TeamListCtrl(self)
 
         sizer = wxBoxSizer(wxVERTICAL)
         sizer.Add(newTeamButton, 0, wxALL | wxALIGN_CENTER, 5)

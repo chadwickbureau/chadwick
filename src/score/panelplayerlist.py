@@ -252,144 +252,74 @@ class EditPlayerDialog(wxDialog):
         return [ "?", "R", "L" ][self.throws.GetSelection()]
     
 
-class PlayerListTable(wxPyGridTableBase):
+class PlayerListCtrl(wxListCtrl):
     def __init__(self, parent):
-        wxPyGridTableBase.__init__(self)
-        self.parent = parent
-        self.attr = [ wxGridCellAttr() for i in range(5) ]
-
-        for x in self.attr:
-            x.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL))
-            x.SetTextColour(wxBLACK)
-            x.SetBackgroundColour(wxColour(242, 242, 242))
-        
-        self.attr[0].SetAlignment(wxALIGN_LEFT, wxALIGN_CENTER)
-        self.attr[1].SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER)
-        self.attr[2].SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER)
-        self.attr[3].SetAlignment(wxALIGN_LEFT, wxALIGN_CENTER)
-        self.attr[4].SetAlignment(wxALIGN_LEFT, wxALIGN_CENTER)
-
-    def SetScorebook(self, book):   self.book = book
-
-    def GetAttr(self, row, col, kind):
-        self.attr[col].IncRef()
-        return self.attr[col]
-
-    def GetNumberRows(self):
-        if hasattr(self, "book"):
-            return self.book.NumPlayers()
-        else:
-            return 0
-
-    def GetNumberCols(self):
-        return 5
-
-    def IsEmptyCell(self, row, col):
-        return False
-
-    def GetValue(self, row, col):
-        if not hasattr(self, "book"):  return ""
-
-        player = self.book.GetPlayerNumber(row)
-        if col == 0:
-            return player.GetSortName()
-        elif col == 1:
-            return { "R": "Right", "L": "Left",
-                     "B": "Both", "?": "Unknown" }[player.bats]
-        elif col == 2:
-            return { "R": "Right", "L": "Left", "?": "Unknown" }[player.throws]
-        elif col == 3:
-            return player.player_id
-        else:
-            return string.join(player.GetTeams(), ", ")
-        
-
-    def SetValue(self, row, col, value):
-        pass
-
-    def GetColLabelValue(self, col):
-        return [ "Player", "Bats", "Throws", "ID", "Teams" ][col]
-
-    def AppendRows(self, howMany):
-        msg = wxGridTableMessage(self,
-                                 wxGRIDTABLE_NOTIFY_ROWS_APPENDED,
-                                 howMany)
-        self.parent.ProcessTableMessage(msg)
-
-    def DeleteRows(self, where, howMany):
-        msg = wxGridTableMessage(self,
-                                 wxGRIDTABLE_NOTIFY_ROWS_DELETED,
-                                 where, howMany)
-        self.parent.ProcessTableMessage(msg)
-                                 
-
-class PlayerListGrid(wxGrid):
-    def __init__(self, parent):
-        wxGrid.__init__(self, parent, -1)
-        self.table = PlayerListTable(self)
+        wxListCtrl.__init__(self, parent, -1,
+                            style = wxLC_VIRTUAL | wxLC_REPORT | wxLC_SINGLE_SEL)
         self.firstMenuID = 4000
 
-        self.SetBackgroundColour(wxColour(242, 242, 242))
-        self.SetTable(self.table, True)
-        self.SetRowLabelSize(1)
-        self.SetLabelFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-        self.SetDefaultCellFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL))
-        self.SetColLabelAlignment(wxALIGN_CENTER, wxALIGN_CENTER)
-        self.SetDefaultCellBackgroundColour(wxColour(242, 242, 242))
-        self.DisableDragRowSize()
-        self.EnableEditing(False)
+        self.InsertColumn(0, "Player")
+        self.InsertColumn(1, "Bats")
+        self.InsertColumn(2, "Throws")
+        self.InsertColumn(3, "ID")
+        self.InsertColumn(4, "Teams")
 
-        self.SetColSize(0, 250)
-        self.SetColSize(1, 75)
-        self.SetColSize(2, 75)
-        self.SetColSize(3, 100)
-        self.SetColSize(4, 150)
+        self.SetColumnWidth(0, 250)
+        self.SetColumnWidth(1, 75)
+        self.SetColumnWidth(2, 75)
+        self.SetColumnWidth(3, 100)
+        self.SetColumnWidth(4, 150)
         
-        EVT_GRID_CELL_LEFT_DCLICK(self, self.OnLeftDoubleClick)
-        EVT_GRID_CELL_RIGHT_CLICK(self, self.OnRightClick)
+        EVT_LIST_ITEM_ACTIVATED(self, self.GetId(), self.OnItemActivated)
+        EVT_LIST_ITEM_RIGHT_CLICK(self, self.GetId(), self.OnRightClick)
         EVT_MENU_RANGE(self, self.firstMenuID, self.firstMenuID + 100,
                        self.OnMenu)
         
     def OnUpdate(self, book):
-        self.table.SetScorebook(book)
         self.book = book
-        if self.GetNumberRows() > book.NumPlayers():
-            self.DeleteRows(0, self.GetNumberRows() - book.NumPlayers())
-        elif self.GetNumberRows() < book.NumPlayers():
-            self.AppendRows(book.NumPlayers() - self.GetNumberRows())
-            
-        if self.GetNumberRows() > 0:
-            self.AutoSizeRow(0)
-            self.SetDefaultRowSize(self.GetRowSize(0))
-        self.AdjustScrollbars()
+        self.SetItemCount(book.NumPlayers())
 
-    def OnLeftDoubleClick(self, event):
-        for (i,player) in enumerate(self.book.Players()):
-            if i == event.GetRow():
-                dialog = EditPlayerDialog(self, player)
-                if dialog.ShowModal() == wxID_OK:
-                    self.book.ModifyPlayer(player.player_id,
-                                           dialog.GetFirstName(),
-                                           dialog.GetLastName(),
-                                           dialog.GetBats(),
-                                           dialog.GetThrows())
-                    self.GetParent().GetGrandParent().OnUpdate()
-                return
+    def OnGetItemText(self, item, col):
+        player = [x for x in self.book.Players()][item]
+        if col == 0:
+            return player.GetSortName()
+        elif col == 1:
+            return { "R": "Right", "L": "Left",
+                     "B": "Both", "?": "Unknown" }[player.GetBats()]
+        elif col == 2:
+            return { "R": "Right", "L": "Left",
+                     "B": "Both", "?": "Unknown" }[player.GetThrows()]
+        elif col == 3:
+            return player.GetID()
+        else:
+            return string.join(player.GetTeams(), ", ")
+        
+
+    def OnItemActivated(self, event):
+        player = [x for x in self.book.Players()][event.GetIndex()]
+        dialog = EditPlayerDialog(self, player)
+        if dialog.ShowModal() == wxID_OK:
+            self.book.ModifyPlayer(player.player_id,
+                                   dialog.GetFirstName(),
+                                   dialog.GetLastName(),
+                                   dialog.GetBats(),
+                                   dialog.GetThrows())
+            self.GetParent().GetGrandParent().OnUpdate()
+            return
 
     def OnRightClick(self, event):
-        for (i,player) in enumerate(self.book.Players()):
-            if i == event.GetRow():
-                self.menuPlayer = player
-                menu = wxMenu("Add %s to roster of" % player.GetName())
+        player = [x for x in self.book.Players()][event.GetIndex()]
+        self.menuPlayer = player
+        menu = wxMenu("Add %s to roster of" % player.GetName())
 
-                menuID = self.firstMenuID
-                for t in self.book.Teams():
-                    if t.GetID() not in player.GetTeams():
-                        menu.Append(menuID, t.GetName(),
-                                    "Add to %s" % t.GetName())
-                        menuID += 1
-
-                self.PopupMenu(menu)
+        menuID = self.firstMenuID
+        for t in self.book.Teams():
+            if t.GetID() not in player.GetTeams():
+                menu.Append(menuID, t.GetName(),
+                            "Add to %s" % t.GetName())
+                menuID += 1
+                
+        self.PopupMenu(menu)
 
     def OnMenu(self, event):
         menuID = self.firstMenuID
@@ -413,7 +343,7 @@ class PlayerListPanel(wxPanel):
 
         newPlayerButton = wxButton(self, -1, "Add player")
         newPlayerButton.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-        self.playerList = PlayerListGrid(self)
+        self.playerList = PlayerListCtrl(self)
 
         sizer = wxBoxSizer(wxVERTICAL)
         sizer.Add(newPlayerButton, 0, wxALL | wxALIGN_CENTER, 5)
