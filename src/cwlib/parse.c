@@ -555,7 +555,7 @@ static void parse_flags(CWParserState *state, CWParsedEvent *event)
     } while (state->sym != '/' && state->sym != '.' && 
 	     state->sym != '#' && state->sym != '!' && state->sym != 0);
 
-    if (!strcmp(flag, "/SH")) {
+    if (!strcmp(flag, "/SH") || !strcmp(flag, "/SAC")) {
       event->sh_flag = 1;
       event->bunt_flag = 1;
     }
