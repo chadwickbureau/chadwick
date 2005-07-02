@@ -261,6 +261,26 @@ int IsValidPlay(char *play)
 
 };
 
+%extend CWAppearance {
+  char *GetPlayerID(void) const { return self->player_id; }
+  char *GetName(void) const  { return self->name; }
+  int GetTeam(void) const  { return self->team; }
+  int GetSlot(void) const  { return self->slot; }
+  int GetPosition(void) const  { return self->pos; }
+
+};
+
+%extend CWEvent {
+%pythoncode %{
+  def Substitutes(self):
+    x = self.first_sub
+    while x != None:
+      yield x
+      x = x.next
+    raise StopIteration
+%}
+};
+
 %extend CWGameIterator {
   CWGameIterator(CWGame *game)  { return cw_gameiter_create(game); }
   ~CWGameIterator()             { cw_gameiter_cleanup(self);  free(self); }
@@ -305,6 +325,7 @@ int IsValidPlay(char *play)
   int GetTeamErrors(int team)          { return self->errors[team]; }
   int GetTeamLOB(int team)  { return cw_gameiter_left_on_base(self, team); }
 
+  CWEvent *GetEvent(void) const  { return self->event; }
   CWParsedEvent *GetEventData(void) const  { return self->event_data; }  
 };
 
