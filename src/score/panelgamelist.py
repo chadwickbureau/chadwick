@@ -115,7 +115,7 @@ class GameListCtrl(wxListCtrl):
             dialog = wxMessageDialog(self,
                                      "Are you sure you want to delete this game?",
                                      "Confirm delete",
-                                     wxID_OK | wxID_CANCEL)
+                                     wxOK | wxCANCEL)
             if dialog.ShowModal() == wxID_OK:
                 self.book.RemoveGame(game)
                 self.GetParent().GetGrandParent().OnUpdate()

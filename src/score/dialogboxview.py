@@ -24,13 +24,14 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-from wxPython.wx import *
+import wx
+
 from libchadwick import *
 
 from panelnarrative import NarrativePanel
 from panelboxscore import BoxscorePanel
 
-class BoxscoreViewDialog(wxDialog):
+class BoxscoreViewDialog(wx.Dialog):
     def __init__(self, parent, doc):
         title = (doc.GetRoster(0).GetCity() + " at " + 
                  doc.GetRoster(1).GetCity() + " on " +
@@ -40,12 +41,11 @@ class BoxscoreViewDialog(wxDialog):
         elif doc.GetGame().GetNumber() == 2:
             title += " (second game)"
 
-        wxDialog.__init__(self, parent, -1, title,
-                          wxDefaultPosition, wxSize(800, 600))
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, title, size=(800, 600))
 
-        sizer = wxBoxSizer(wxVERTICAL)
+        sizer = wx.BoxSizer(wx.VERTICAL)
 
-        notebook = wxNotebook(self, -1)
+        notebook = wx.Notebook(self, wx.ID_ANY)
 
         boxscore = BoxscorePanel(notebook)
         notebook.AddPage(boxscore, "Boxscore")
@@ -57,12 +57,12 @@ class BoxscoreViewDialog(wxDialog):
         boxscore.SetDocument(doc)
         narrative.SetDocument(doc)
         
-        sizer.Add(notebook, 1, wxALL | wxEXPAND, 5)
+        sizer.Add(notebook, 1, wx.ALL | wx.EXPAND, 5)
 
-        buttonSizer = wxBoxSizer(wxHORIZONTAL)
-        buttonSizer.Add(wxButton(self, wxID_OK, "OK"), 0,
-                        wxALL | wxALIGN_CENTER, 5)
-        sizer.Add(buttonSizer, 0, wxALIGN_RIGHT, 5)
+        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+        buttonSizer.Add(wx.Button(self, wx.ID_OK, "OK"), 0,
+                        wx.ALL | wx.ALIGN_CENTER, 5)
+        sizer.Add(buttonSizer, 0, wx.ALIGN_RIGHT, 5)
 
         self.SetSizer(sizer)
         self.Layout()
