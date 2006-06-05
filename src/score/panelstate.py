@@ -145,20 +145,20 @@ class StatePanel(wx.Panel):
         self.Layout()
 
         # Events propagating up from buttons on runners panel
-        EVT_BUTTON(self, panelrunners.CW_BUTTON_PINCH[3], self.OnPinchRun3)
-        EVT_BUTTON(self, panelrunners.CW_BUTTON_PINCH[2], self.OnPinchRun2)
-        EVT_BUTTON(self, panelrunners.CW_BUTTON_PINCH[1], self.OnPinchRun1)
-        EVT_BUTTON(self, panelrunners.CW_BUTTON_PINCH[0], self.OnPinchHit)
+        wx.EVT_BUTTON(self, panelrunners.CW_BUTTON_PINCH[3], self.OnPinchRun3)
+        wx.EVT_BUTTON(self, panelrunners.CW_BUTTON_PINCH[2], self.OnPinchRun2)
+        wx.EVT_BUTTON(self, panelrunners.CW_BUTTON_PINCH[1], self.OnPinchRun1)
+        wx.EVT_BUTTON(self, panelrunners.CW_BUTTON_PINCH[0], self.OnPinchHit)
 
         # Events from controls on this panel
-        EVT_TEXT(self, CW_PITCHES_CTRL, self.OnPitchesText)
-        EVT_TEXT(self, CW_PLAYTEXT_CTRL, self.OnPlayText)
-        EVT_TEXT_ENTER(self, CW_PLAYTEXT_CTRL, self.OnPlayEnter)
-        EVT_BUTTON(self, CW_BUTTON_DEFSUB, self.OnDefensiveSub)
-        EVT_BUTTON(self, CW_BUTTON_SAVE, self.OnSave)
-        EVT_BUTTON(self, CW_BUTTON_COMMENT, self.OnComment)
-        EVT_BUTTON(self, CW_BUTTON_PROPERTIES, self.OnProperties)
-        EVT_BUTTON(self, CW_BUTTON_UNDO, self.OnUndo)
+        wx.EVT_TEXT(self, CW_PITCHES_CTRL, self.OnPitchesText)
+        wx.EVT_TEXT(self, CW_PLAYTEXT_CTRL, self.OnPlayText)
+        wx.EVT_TEXT_ENTER(self, CW_PLAYTEXT_CTRL, self.OnPlayEnter)
+        wx.EVT_BUTTON(self, CW_BUTTON_DEFSUB, self.OnDefensiveSub)
+        wx.EVT_BUTTON(self, CW_BUTTON_SAVE, self.OnSave)
+        wx.EVT_BUTTON(self, CW_BUTTON_COMMENT, self.OnComment)
+        wx.EVT_BUTTON(self, CW_BUTTON_PROPERTIES, self.OnProperties)
+        wx.EVT_BUTTON(self, CW_BUTTON_UNDO, self.OnUndo)
         
     def SetDocument(self, doc):
         self.doc = doc
@@ -209,15 +209,15 @@ class StatePanel(wx.Panel):
             self.playText.SetBackgroundColour(wx.NamedColour("pink"))
             
             wx.PostEvent(self.GetParent(),
-                        wx.CommandEvent(wx.EVT_COMMAND_BUTTON_CLICKED,
-                                       CW_BUTTON_UPDATE))
+                         wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
+                                         CW_BUTTON_UPDATE))
 
     def OnUndo(self, event):
         self.doc.DeletePlay()
         self.playText.Clear()
         wx.PostEvent(self.GetParent(),
-                    wx.CommandEvent(wx.EVT_COMMAND_BUTTON_CLICKED,
-                                   CW_BUTTON_UPDATE))
+                    wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
+                                    CW_BUTTON_UPDATE))
 
     def OnDefensiveSub(self, event):
         team = 1 - self.doc.GetHalfInning()
@@ -233,8 +233,8 @@ class StatePanel(wx.Panel):
         if dialog.ShowModal() == wx.ID_OK:
             dialog.WriteChanges(self.doc, team)
             wx.PostEvent(self.GetParent(),
-                        wx.CommandEvent(wx.EVT_COMMAND_BUTTON_CLICKED,
-                                       CW_BUTTON_UPDATE))
+                        wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
+                                        CW_BUTTON_UPDATE))
 
     def OnPinchHit(self, event):
         team = self.doc.GetHalfInning()
@@ -248,8 +248,8 @@ class StatePanel(wx.Panel):
             dialog.WriteChanges(self.doc, batter,
                                 self.doc.GetHalfInning(), 11)
             wx.PostEvent(self.GetParent(),
-                        wx.CommandEvent(wx.EVT_COMMAND_BUTTON_CLICKED,
-                                       CW_BUTTON_UPDATE))
+                         wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
+                                         CW_BUTTON_UPDATE))
 
     def OnPinchRun3(self, event):
         dialog = dialoglineup.PinchDialog(self, "Choose pinch runner at third")
@@ -261,8 +261,8 @@ class StatePanel(wx.Panel):
                                 self.doc.gameiter.GetRunner(3),
                                 self.doc.GetHalfInning(), 12)
             wx.PostEvent(self.GetParent(),
-                        wx.CommandEvent(wx.EVT_COMMAND_BUTTON_CLICKED,
-                                       CW_BUTTON_UPDATE))
+                         wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
+                                         CW_BUTTON_UPDATE))
 
     def OnPinchRun2(self, event):
         dialog = dialoglineup.PinchDialog(self, "Choose pinch runner at second")
@@ -274,8 +274,8 @@ class StatePanel(wx.Panel):
                                 self.doc.gameiter.GetRunner(2),
                                 self.doc.GetHalfInning(), 12)
             wx.PostEvent(self.GetParent(),
-                        wx.CommandEvent(wx.EVT_COMMAND_BUTTON_CLICKED,
-                                       CW_BUTTON_UPDATE))
+                        wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
+                                        CW_BUTTON_UPDATE))
 
     def OnPinchRun1(self, event):
         dialog = dialoglineup.PinchDialog(self, "Choose pinch runner at first")
@@ -287,8 +287,8 @@ class StatePanel(wx.Panel):
                                 self.doc.gameiter.GetRunner(1),
                                 self.doc.GetHalfInning(), 12)
             wx.PostEvent(self.GetParent(),
-                        wx.CommandEvent(wx.EVT_COMMAND_BUTTON_CLICKED,
-                                       CW_BUTTON_UPDATE))
+                         wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
+                                         CW_BUTTON_UPDATE))
 
     def OnSave(self, event):
         if self.doc.GetScore(0) != self.doc.GetScore(1):
@@ -309,7 +309,7 @@ class StatePanel(wx.Panel):
         if dialog.ShowModal() == wx.ID_OK:
             self.doc.AddComment(dialog.GetComment())
             wx.PostEvent(self.GetParent(),
-                         wx.CommandEvent(wx.EVT_COMMAND_BUTTON_CLICKED,
+                         wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
                                          CW_BUTTON_UPDATE))
 
             
@@ -318,7 +318,7 @@ class StatePanel(wx.Panel):
         if dialog.ShowModal() == wx.ID_OK:
             dialog.UpdateDocument(self.doc)
             wx.PostEvent(self.GetParent(),
-                         wx.CommandEvent(wx.EVT_COMMAND_BUTTON_CLICKED,
+                         wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
                                          CW_BUTTON_UPDATE))
 
     def OnUpdate(self):

@@ -40,7 +40,7 @@ class LineupGrid(wx.ScrolledWindow):
         self.bgColors = [ wx.Colour(225, 225, 225), wx.WHITE ]
         self.outlineColor = wx.Colour(0, 150, 0)
 
-        EVT_PAINT(self, self.OnPaint)
+        wx.EVT_PAINT(self, self.OnPaint)
 
     def SetDocument(self, doc):
         self.doc = doc

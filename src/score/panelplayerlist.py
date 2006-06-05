@@ -48,9 +48,9 @@ class NameValidator(wx.PyValidator):
         
         for x in val:
             if x not in string.letters and x not in [ " ", "'" ]:
-                return false
+                return False
 
-        return true
+        return True
 
     def OnChar(self, event):
         key = event.KeyCode()
