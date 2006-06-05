@@ -24,24 +24,23 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-from wxPython.wx import *
+import wx
 
-class CommentDialog(wxDialog):
+class CommentDialog(wx.Dialog):
     def __init__(self, parent):
-        wxDialog.__init__(self, parent, -1, "Insert Comment...")
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, "Insert Comment...")
 
-        self.text = wxTextCtrl(self, -1, "", wxDefaultPosition,
-                               wxSize(400, -1))
+        self.text = wx.TextCtrl(self, wx.ID_ANY, "", size=(400, -1))
 
-        sizer = wxBoxSizer(wxVERTICAL)
-        sizer.Add(self.text, 0, wxALL | wxALIGN_CENTER, 5)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self.text, 0, wx.ALL | wx.ALIGN_CENTER, 5)
         
-        buttonSizer = wxBoxSizer(wxHORIZONTAL)
-        buttonSizer.Add(wxButton(self, wxID_CANCEL, "Cancel"),
-                        0, wxALL | wxALIGN_CENTER, 5)
-        buttonSizer.Add(wxButton(self, wxID_OK, "OK"), 0,
-                        wxALL | wxALIGN_CENTER, 5)
-        sizer.Add(buttonSizer, 1, wxALIGN_RIGHT, 5)
+        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+        buttonSizer.Add(wx.Button(self, wx.ID_CANCEL, "Cancel"),
+                        0, wx.ALL | wx.ALIGN_CENTER, 5)
+        buttonSizer.Add(wx.Button(self, wx.ID_OK, "OK"), 0,
+                        wx.ALL | wx.ALIGN_CENTER, 5)
+        sizer.Add(buttonSizer, 1, wx.ALIGN_RIGHT, 5)
 
         self.SetSizer(sizer)
         self.Layout()

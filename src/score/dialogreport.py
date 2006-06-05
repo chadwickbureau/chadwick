@@ -24,25 +24,24 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-from wxPython.wx import *
+import wx
 
-class ReportDialog(wxDialog):
+class ReportDialog(wx.Dialog):
     def __init__(self, parent, title, contents):
-        wxDialog.__init__(self, parent, -1, title,
-                          wxDefaultPosition, wxSize(800, 600))
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, title, size=(800, 600))
 
-        self.text = wxTextCtrl(self, -1, contents,
-                               wxDefaultPosition, wxDefaultSize,
-                               wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL)
-        self.text.SetFont(wxFont(10, wxMODERN, wxNORMAL, wxNORMAL))
+        self.text = wx.TextCtrl(self, wx.ID_ANY, contents,
+                                wx.DefaultPosition, wx.DefaultSize,
+                                wx.TE_MULTILINE | wx.TE_READONLY | wx.HSCROLL)
+        self.text.SetFont(wx.Font(10, wx.MODERN, wx.NORMAL, wx.NORMAL))
 
-        sizer = wxBoxSizer(wxVERTICAL)
-        sizer.Add(self.text, 1, wxALL | wxEXPAND, 5)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self.text, 1, wx.ALL | wx.EXPAND, 5)
         
-        buttonSizer = wxBoxSizer(wxHORIZONTAL)
-        buttonSizer.Add(wxButton(self, wxID_OK, "OK"), 0,
-                        wxALL | wxALIGN_CENTER, 5)
-        sizer.Add(buttonSizer, 0, wxALIGN_RIGHT, 5)
+        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+        buttonSizer.Add(wx.Button(self, wx.ID_OK, "OK"),
+                        0, wx.ALL | wx.ALIGN_CENTER, 5)
+        sizer.Add(buttonSizer, 0, wx.ALIGN_RIGHT, 5)
 
         self.SetSizer(sizer)
         self.Layout()

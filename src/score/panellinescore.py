@@ -24,8 +24,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-from wxPython.wx import *
-
+import wx
 from wxutils import FormattedStaticText
 
 def GetInningLabel(inning, halfInning, outs):
@@ -56,47 +55,47 @@ def GetInningLabel(inning, halfInning, outs):
 
     return x
 
-class LinescorePanel(wxPanel):
+class LinescorePanel(wx.Panel):
     def __init__(self, parent):
-        wxPanel.__init__(self, parent, -1)
+        wx.Panel.__init__(self, parent, -1)
         
-        box = wxStaticBox(self, wxID_STATIC, "Linescore")
-        box.SetBackgroundColour(wxColour(0, 150, 0))
-        box.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-        sizer = wxStaticBoxSizer(box, wxVERTICAL)
+        box = wx.StaticBox(self, wx.ID_STATIC, "Linescore")
+        box.SetBackgroundColour(wx.Colour(0, 150, 0))
+        box.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 
-        linescoreSizer = wxFlexGridSizer(3)
+        linescoreSizer = wx.FlexGridSizer(3)
         linescoreSizer.AddGrowableCol(0)
 
-        self.teamName = [ FormattedStaticText(self, "", wxSize(200, -1),
-                                              wxALIGN_LEFT)
+        self.teamName = [ FormattedStaticText(self, "", (200, -1),
+                                              wx.ALIGN_LEFT)
                           for t in [0, 1] ]
-        self.teamName[0].SetForegroundColour(wxRED)
-        self.teamName[1].SetForegroundColour(wxBLUE)
-        self.runsText = [ FormattedStaticText(self, "0", wxSize(30, -1))
+        self.teamName[0].SetForegroundColour(wx.RED)
+        self.teamName[1].SetForegroundColour(wx.BLUE)
+        self.runsText = [ FormattedStaticText(self, "0", (30, -1))
                           for t in [0, 1] ]
-        self.hitsText = [ FormattedStaticText(self, "0", wxSize(30, -1))
+        self.hitsText = [ FormattedStaticText(self, "0", (30, -1))
                           for t in [0, 1] ]
-        self.errorsText = [ FormattedStaticText(self, "0", wxSize(30, -1))
+        self.errorsText = [ FormattedStaticText(self, "0", (30, -1))
                             for t in [0, 1] ]
-        self.dpText = [ FormattedStaticText(self, "0", wxSize(30, -1))
+        self.dpText = [ FormattedStaticText(self, "0", (30, -1))
                         for t in [0, 1] ]
-        self.lobText = [ FormattedStaticText(self, "0", wxSize(30, -1))
+        self.lobText = [ FormattedStaticText(self, "0", (30, -1))
                          for t in [0, 1] ]
                             
         for heading in [ "", "R", "H", "E", "DP", "LOB" ]:
             linescoreSizer.Add(FormattedStaticText(self, heading), 
-                               0, wxALL | wxALIGN_CENTER, 5)
+                               0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         for t in [0, 1]:
-            linescoreSizer.Add(self.teamName[t], 1, wxALL | wxALIGN_LEFT, 5)
-            linescoreSizer.Add(self.runsText[t], 0, wxALL | wxALIGN_CENTER, 5)
-            linescoreSizer.Add(self.hitsText[t], 0, wxALL | wxALIGN_CENTER, 5)
-            linescoreSizer.Add(self.errorsText[t], 0, wxALL | wxALIGN_CENTER, 5)
-            linescoreSizer.Add(self.dpText[t], 0, wxALL | wxALIGN_CENTER, 5)
-            linescoreSizer.Add(self.lobText[t], 0, wxALL | wxALIGN_CENTER, 5)
+            linescoreSizer.Add(self.teamName[t], 1, wx.ALL | wx.ALIGN_LEFT, 5)
+            linescoreSizer.Add(self.runsText[t], 0, wx.ALL | wx.ALIGN_CENTER, 5)
+            linescoreSizer.Add(self.hitsText[t], 0, wx.ALL | wx.ALIGN_CENTER, 5)
+            linescoreSizer.Add(self.errorsText[t], 0, wx.ALL | wx.ALIGN_CENTER, 5)
+            linescoreSizer.Add(self.dpText[t], 0, wx.ALL | wx.ALIGN_CENTER, 5)
+            linescoreSizer.Add(self.lobText[t], 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
-        sizer.Add(linescoreSizer, 0, wxALL | wxALIGN_CENTER, 5)
+        sizer.Add(linescoreSizer, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         self.SetSizer(sizer)
         self.Layout()

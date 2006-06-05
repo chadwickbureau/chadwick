@@ -24,7 +24,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-from wxPython.wx import *
+import wx
 from libchadwick import *
 
 from wxutils import FormattedStaticText
@@ -54,60 +54,60 @@ def GetInningLabel(inning, halfInning, outs):
     x += ["0 outs", "1 out", "2 outs"][outs]
     return x
 
-class RunnersPanel(wxPanel):
+class RunnersPanel(wx.Panel):
     def __init__(self, parent):
-        wxPanel.__init__(self, parent, -1)
+        wx.Panel.__init__(self, parent, wx.ID_ANY)
 
-        box = wxStaticBox(self, wxID_STATIC, "Current state")
-        box.SetBackgroundColour(wxColour(0, 150, 0))
-        box.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-        sizer = wxStaticBoxSizer(box, wxVERTICAL)
+        box = wx.StaticBox(self, wx.ID_STATIC, "Current state")
+        box.SetBackgroundColour(wx.Colour(0, 150, 0))
+        box.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
         
         self.inningText = FormattedStaticText(self, "")
-        sizer.Add(self.inningText, 0, wxALL | wxEXPAND, 5)
+        sizer.Add(self.inningText, 0, wx.ALL | wx.EXPAND, 5)
 
-        baseOutSizer = wxFlexGridSizer(5)
+        baseOutSizer = wx.FlexGridSizer(5)
 
-        self.runnerText = [ wxStaticText(self, wxID_STATIC, "",
-                                         wxDefaultPosition,
-                                         wxSize(200, -1),
-                                         wxALIGN_CENTER | wxST_NO_AUTORESIZE)
+        self.runnerText = [ wx.StaticText(self, wx.ID_STATIC, "",
+                                          wx.DefaultPosition,
+                                          (200, -1),
+                                          wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE)
                             for i in [0,1,2,3] ]
         for w in self.runnerText:
-            w.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+            w.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
 
         baseOutSizer.Add(FormattedStaticText(self, "Runner on 3rd"),
-                         0, wxALL | wxALIGN_CENTER, 5)
-        baseOutSizer.Add(self.runnerText[3], 1, wxALL | wxALIGN_CENTER, 5)
-        baseOutSizer.Add(wxButton(self, CW_BUTTON_PINCH[3], "Pinch run"),
-                         0, wxALL | wxALIGN_CENTER, 5)
-        self.FindWindowById(CW_BUTTON_PINCH[3]).Enable(false)
-        self.FindWindowById(CW_BUTTON_PINCH[3]).SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+                         0, wx.ALL | wx.ALIGN_CENTER, 5)
+        baseOutSizer.Add(self.runnerText[3], 1, wx.ALL | wx.ALIGN_CENTER, 5)
+        baseOutSizer.Add(wx.Button(self, CW_BUTTON_PINCH[3], "Pinch run"),
+                         0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.FindWindowById(CW_BUTTON_PINCH[3]).Enable(False)
+        self.FindWindowById(CW_BUTTON_PINCH[3]).SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
 
         baseOutSizer.Add(FormattedStaticText(self, "Runner on 2nd"),
-                         0, wxALL | wxALIGN_CENTER, 5)
-        baseOutSizer.Add(self.runnerText[2], 1, wxALL | wxALIGN_CENTER, 5)
-        baseOutSizer.Add(wxButton(self, CW_BUTTON_PINCH[2], "Pinch run"),
-                         0, wxALL | wxALIGN_CENTER, 5)
-        self.FindWindowById(CW_BUTTON_PINCH[2]).Enable(false)
-        self.FindWindowById(CW_BUTTON_PINCH[2]).SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+                         0, wx.ALL | wx.ALIGN_CENTER, 5)
+        baseOutSizer.Add(self.runnerText[2], 1, wx.ALL | wx.ALIGN_CENTER, 5)
+        baseOutSizer.Add(wx.Button(self, CW_BUTTON_PINCH[2], "Pinch run"),
+                         0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.FindWindowById(CW_BUTTON_PINCH[2]).Enable(False)
+        self.FindWindowById(CW_BUTTON_PINCH[2]).SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
 
         baseOutSizer.Add(FormattedStaticText(self, "Runner on 1st"),
-                         0, wxALL | wxALIGN_CENTER, 5)
-        baseOutSizer.Add(self.runnerText[1], 1, wxALL | wxALIGN_CENTER, 5)
-        baseOutSizer.Add(wxButton(self, CW_BUTTON_PINCH[1], "Pinch run"),
-                         0, wxALL | wxALIGN_CENTER, 5)
-        self.FindWindowById(CW_BUTTON_PINCH[1]).Enable(false)
-        self.FindWindowById(CW_BUTTON_PINCH[1]).SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+                         0, wx.ALL | wx.ALIGN_CENTER, 5)
+        baseOutSizer.Add(self.runnerText[1], 1, wx.ALL | wx.ALIGN_CENTER, 5)
+        baseOutSizer.Add(wx.Button(self, CW_BUTTON_PINCH[1], "Pinch run"),
+                         0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.FindWindowById(CW_BUTTON_PINCH[1]).Enable(False)
+        self.FindWindowById(CW_BUTTON_PINCH[1]).SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
 
         baseOutSizer.Add(FormattedStaticText(self, "Batter"),
-                         0, wxALL | wxALIGN_CENTER, 5)
-        baseOutSizer.Add(self.runnerText[0], 1, wxALL | wxALIGN_CENTER, 5)
-        baseOutSizer.Add(wxButton(self, CW_BUTTON_PINCH[0], "Pinch hit"),
-                         0, wxALL | wxALIGN_CENTER, 5)
-        self.FindWindowById(CW_BUTTON_PINCH[0]).SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+                         0, wx.ALL | wx.ALIGN_CENTER, 5)
+        baseOutSizer.Add(self.runnerText[0], 1, wx.ALL | wx.ALIGN_CENTER, 5)
+        baseOutSizer.Add(wx.Button(self, CW_BUTTON_PINCH[0], "Pinch hit"),
+                         0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.FindWindowById(CW_BUTTON_PINCH[0]).SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
 
-        sizer.Add(baseOutSizer, 1, wxALL | wxALIGN_CENTER, 5)
+        sizer.Add(baseOutSizer, 1, wx.ALL | wx.ALIGN_CENTER, 5)
  
         self.SetSizer(sizer)
         self.Layout()
@@ -122,8 +122,8 @@ class RunnersPanel(wxPanel):
             for ctrl in self.runnerText:
                 ctrl.SetLabel("")
             for base in [1,2,3]:
-                self.FindWindowById(CW_BUTTON_PINCH[base]).Enable(false)
-            self.FindWindowById(CW_BUTTON_PINCH[0]).Enable(false)
+                self.FindWindowById(CW_BUTTON_PINCH[base]).Enable(False)
+            self.FindWindowById(CW_BUTTON_PINCH[0]).Enable(False)
             return
         else:
             self.inningText.SetLabel(GetInningLabel(self.doc.GetInning(),
@@ -132,28 +132,28 @@ class RunnersPanel(wxPanel):
 
         for base in [0,1,2,3]:
             if self.doc.GetHalfInning() == 0:
-                self.runnerText[base].SetForegroundColour(wxRED)
+                self.runnerText[base].SetForegroundColour(wx.RED)
             else:
-                self.runnerText[base].SetForegroundColour(wxBLUE)
+                self.runnerText[base].SetForegroundColour(wx.BLUE)
 
         playerId = self.doc.GetCurrentBatter()
         player = self.doc.GetRoster(self.doc.GetHalfInning()).FindPlayer(playerId)
         self.runnerText[0].SetLabel(player.GetName())
 
-        self.FindWindowById(CW_BUTTON_PINCH[0]).Enable(true)
+        self.FindWindowById(CW_BUTTON_PINCH[0]).Enable(True)
         for base in [1,2,3]:
             playerId = self.doc.GetCurrentRunner(base)
             if playerId == "":
                 self.runnerText[base].SetLabel("")
-                self.FindWindowById(CW_BUTTON_PINCH[base]).Enable(false)
+                self.FindWindowById(CW_BUTTON_PINCH[base]).Enable(False)
                 continue
 
             player = self.doc.GetRoster(self.doc.GetHalfInning()).FindPlayer(playerId)
 
             if player != None and not self.doc.IsLeadoff():
                 self.runnerText[base].SetLabel(player.GetName())
-                self.FindWindowById(CW_BUTTON_PINCH[base]).Enable(true)
+                self.FindWindowById(CW_BUTTON_PINCH[base]).Enable(True)
             else:
                 self.runnerText[base].SetLabel("")
-                self.FindWindowById(CW_BUTTON_PINCH[base]).Enable(false)
+                self.FindWindowById(CW_BUTTON_PINCH[base]).Enable(False)
 

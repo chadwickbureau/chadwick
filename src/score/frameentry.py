@@ -24,8 +24,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-from wxPython.wx import *
-from wxPython.grid import *
+import wx, wx.grid
 from libchadwick import *
 
 import icons
@@ -36,15 +35,15 @@ from panelnarrative import NarrativePanel
 
 import sys
 
-class GameEntryFrame(wxFrame):
+class GameEntryFrame(wx.Frame):
     def __init__(self, parent, doc):
-        wxFrame.__init__(self, parent, -1, "Chadwick Game Entry",
-                         wxDefaultPosition, wxSize(800, 600))
+        wx.Frame.__init__(self, parent, wx.ID_OK, "Chadwick Game Entry",
+                          size=(800, 600))
 
-        icon = wxIconFromXPMData(icons.baseball_xpm)
+        icon = wx.IconFromXPMData(icons.baseball_xpm)
         self.SetIcon(icon)
 
-        self.notebook = wxNotebook(self, -1)
+        self.notebook = wx.Notebook(self, wx.ID_ANY)
 
         self.statePanel = panelstate.StatePanel(self.notebook, doc)
         self.notebook.AddPage(self.statePanel, "Current State")
@@ -55,32 +54,32 @@ class GameEntryFrame(wxFrame):
         self.narrativePanel = NarrativePanel(self.notebook)
         self.notebook.AddPage(self.narrativePanel, "Narrative")
 
-        sizer = wxBoxSizer(wxVERTICAL)
-        sizer.Add(self.notebook, 1, wxEXPAND, 0)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self.notebook, 1, wx.EXPAND, 0)
 
         self.SetSizer(sizer)
         self.Layout()
         
-        self.disabler = wxWindowDisabler(self)
+        self.disabler = wx.WindowDisabler(self)
 
         # System event handlers
-        EVT_CLOSE(self, self.OnClickClose)
+        wx.EVT_CLOSE(self, self.OnClickClose)
 
         # Handle an "update" event: make sure all child windows update
-        EVT_BUTTON(self, panelstate.CW_BUTTON_UPDATE, self.OnUpdate)
+        wx.EVT_BUTTON(self, panelstate.CW_BUTTON_UPDATE, self.OnUpdate)
 
         # When switching to the narrative, we rebuild it
         # (but only then, since doing it the current way is slowish)
-        EVT_NOTEBOOK_PAGE_CHANGED(self, self.notebook.GetId(), self.OnNotebook)
+        wx.EVT_NOTEBOOK_PAGE_CHANGED(self, self.notebook.GetId(), self.OnNotebook)
 
     def OnClickClose(self, event):
         if event.CanVeto():
-            dialog = wxMessageDialog(self,
-                                     "The game has not been saved. "
-                                     "Confirm close? (Changes will be lost!)",
-                                     "Changes not saved",
-                                     wxOK | wxCANCEL | wxICON_EXCLAMATION)
-            if dialog.ShowModal() == wxID_CANCEL:
+            dialog = wx.MessageDialog(self,
+                                      "The game has not been saved. "
+                                      "Confirm close? (Changes will be lost!)",
+                                      "Changes not saved",
+                                      wx.OK | wx.CANCEL | wx.ICON_EXCLAMATION)
+            if dialog.ShowModal() == wx.ID_CANCEL:
                 event.Veto()
             else:
                 event.Skip()

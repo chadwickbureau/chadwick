@@ -24,7 +24,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-from wxPython.wx import *
+import wx
 from libchadwick import *
 
 def GetInningLabel(inning, halfInning):
@@ -44,17 +44,16 @@ def GetInningLabel(inning, halfInning):
     return x
 
 
-class NarrativePanel(wxPanel):
+class NarrativePanel(wx.Panel):
     def __init__(self, parent):
-        wxPanel.__init__(self, parent, -1)
+        wx.Panel.__init__(self, parent, wx.ID_ANY)
 
-        self.textCtrl = wxTextCtrl(self, -1, "",
-                                   wxDefaultPosition, wxDefaultSize,
-                                   wxTE_MULTILINE | wxTE_READONLY)
-        self.textCtrl.SetFont(wxFont(10, wxMODERN, wxNORMAL, wxNORMAL))
+        self.textCtrl = wx.TextCtrl(self, wx.ID_ANY, "",
+                                    style = wx.TE_MULTILINE | wx.TE_READONLY)
+        self.textCtrl.SetFont(wx.Font(10, wx.MODERN, wx.NORMAL, wx.NORMAL))
 
-        sizer = wxBoxSizer(wxVERTICAL)
-        sizer.Add(self.textCtrl, 1, wxEXPAND, 0)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self.textCtrl, 1, wx.EXPAND, 0)
 
         self.SetSizer(sizer)
         self.Layout()
@@ -134,7 +133,8 @@ class NarrativePanel(wxPanel):
             
             if team != lastHalf:
                 text += "\n"
-                text += GetInningLabel(gameiter.GetInning(), gameiter.GetHalfInning())
+                text += GetInningLabel(gameiter.GetInning(),
+                                       gameiter.GetHalfInning())
                 text += "\n"
                 lastHalf = team
             

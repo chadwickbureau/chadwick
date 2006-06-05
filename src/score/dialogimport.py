@@ -24,19 +24,17 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-from wxPython.wx import *
-from wxPython.grid import *
+import wx
 from libchadwick import *
 
 #
 # This is virtually identical to the GameListCtrl in panelgamelist.
 # TODO: Refactor into common base class
 #
-class GameListCtrl(wxListCtrl):
+class GameListCtrl(wx.ListCtrl):
     def __init__(self, parent):
-        wxListCtrl.__init__(self, parent, -1,
-                            wxDefaultPosition, wxSize(550, 400),
-                            style = wxLC_VIRTUAL | wxLC_REPORT)
+        wx.ListCtrl.__init__(self, parent, wx.ID_ANY, size = (550, 400),
+                             style = wx.LC_VIRTUAL | wx.LC_REPORT)
         self.filter = lambda x: True
 
         self.InsertColumn(0, "Date")
@@ -55,9 +53,9 @@ class GameListCtrl(wxListCtrl):
         self.SetColumnWidth(5, 150)
         self.SetColumnWidth(6, 150)
 
-        item = wxListItem()
-        item.m_format = wxLIST_FORMAT_CENTRE
-        item.m_mask = wxLIST_MASK_FORMAT
+        item = wx.ListItem()
+        item.m_format = wx.LIST_FORMAT_CENTRE
+        item.m_mask = wx.LIST_MASK_FORMAT
         for col in range(7):  self.SetColumn(col, item)
 
     def OnUpdate(self, book, f):
@@ -105,27 +103,27 @@ class GameListCtrl(wxListCtrl):
     def GetSelectedGames(self):
         games = [ ]
         for index in range(len(self.games)):
-            if self.GetItemState(index, wxLIST_STATE_SELECTED) == wxLIST_STATE_SELECTED:
+            if self.GetItemState(index, wx.LIST_STATE_SELECTED) == wx.LIST_STATE_SELECTED:
                 games.append(self.games[index])
         return games
 
-class ImportDialog(wxDialog):
+class ImportDialog(wx.Dialog):
     def __init__(self, parent, book):
-        wxDialog.__init__(self, parent, -1, "Select games to import")
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, "Select games to import")
 
-        sizer = wxBoxSizer(wxVERTICAL)
+        sizer = wx.BoxSizer(wx.VERTICAL)
 
         self.gameList = GameListCtrl(self)
         self.gameList.OnUpdate(book, lambda x: True)
 
-        sizer.Add(self.gameList, 0, wxALL | wxEXPAND, 5)
+        sizer.Add(self.gameList, 0, wx.ALL | wx.EXPAND, 5)
 
-        buttonSizer = wxBoxSizer(wxHORIZONTAL)
-        buttonSizer.Add(wxButton(self, wxID_CANCEL, "Cancel"),
-                                 0, wxALL | wxALIGN_CENTER, 5)
-        buttonSizer.Add(wxButton(self, wxID_OK, "OK"), 0,
-                        wxALL | wxALIGN_CENTER, 5)
-        sizer.Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5)
+        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+        buttonSizer.Add(wx.Button(self, wx.ID_CANCEL, "Cancel"),
+                                 0, wx.ALL | wx.ALIGN_CENTER, 5)
+        buttonSizer.Add(wx.Button(self, wx.ID_OK, "OK"), 0,
+                        wx.ALL | wx.ALIGN_CENTER, 5)
+        sizer.Add(buttonSizer, 0, wx.ALL | wx.ALIGN_RIGHT, 5)
 
         self.SetSizer(sizer)
         self.Layout()

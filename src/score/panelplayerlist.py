@@ -24,20 +24,19 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-from wxPython.wx import *
-from wxPython.grid import *
 import string
+import wx
 
 from wxutils import FormattedStaticText
 
-class NameValidator(wxPyValidator):
+class NameValidator(wx.PyValidator):
     """
     This validates a text control as a valid name.  We permit
     letters, whitespace, and apostrophes.
     """
     def __init__(self, pyVar=None):
-        wxPyValidator.__init__(self)
-        EVT_CHAR(self, self.OnChar)
+        wx.PyValidator.__init__(self)
+        wx.EVT_CHAR(self, self.OnChar)
 
     def TransferToWindow(self):     return True
     def TransferFromWindow(self):   return True 
@@ -65,105 +64,102 @@ class NameValidator(wxPyValidator):
             return
 
         if not wx.Validator_IsSilent():
-            wxBell()
+            wx.Bell()
 
-        # Returning without calling even.Skip eats the event before it
+        # Returning without calling event.Skip eats the event before it
         # gets to the text control
         return
 
 
-class AddPlayerDialog(wxDialog):
+class AddPlayerDialog(wx.Dialog):
     def __init__(self, parent, book):
-        wxDialog.__init__(self, parent, -1, "Add player")
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, "Add player")
         self.book = book
 
-        self.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL))
+        self.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.NORMAL))
 
-        sizer = wxFlexGridSizer(6)
+        sizer = wx.FlexGridSizer(6)
 
         sizer.Add(FormattedStaticText(self, "First name"),
-                  0, wxALL | wxALIGN_CENTER, 5)
-        self.firstName = wxTextCtrl(self, -1, "",
-                                    wxDefaultPosition, wxSize(150, -1))
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.firstName = wx.TextCtrl(self, wx.ID_ANY, "", size=(150, -1))
         self.firstName.SetValidator(NameValidator())
-        sizer.Add(self.firstName, 0, wxALL | wxALIGN_CENTER, 5)
+        sizer.Add(self.firstName, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "Last name"),
-                  0, wxALL | wxALIGN_CENTER, 5)
-        self.lastName = wxTextCtrl(self, -1, "",
-                                   wxDefaultPosition, wxSize(150, -1))
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.lastName = wx.TextCtrl(self, -1, "", size=(150, -1))
         self.lastName.SetValidator(NameValidator())
-        sizer.Add(self.lastName, 0, wxALL | wxALIGN_CENTER, 5)
+        sizer.Add(self.lastName, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "Bats"),
-                  0, wxALL | wxALIGN_CENTER, 5)
-        self.bats = wxChoice(self, -1, wxDefaultPosition, wxSize(150, -1),
-                             [ "Unknown", "Right", "Left", "Both" ])
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.bats = wx.Choice(self, wx.ID_ANY, wx.DefaultPosition, (150, -1),
+                              [ "Unknown", "Right", "Left", "Both" ])
         self.bats.SetSelection(1)
-        sizer.Add(self.bats, 0, wxALL | wxALIGN_CENTER, 5)
+        sizer.Add(self.bats, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "Throws"),
-                  0, wxALL | wxALIGN_CENTER, 5)
-        self.throws = wxChoice(self, -1, wxDefaultPosition, wxSize(150, -1),
-                               [ "Unknown", "Right", "Left" ])
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.throws = wx.Choice(self, wx.ID_ANY, wx.DefaultPosition, (150, -1),
+                                [ "Unknown", "Right", "Left" ])
         self.throws.SetSelection(1)
-        sizer.Add(self.throws, 0, wxALL | wxALIGN_CENTER, 5)
+        sizer.Add(self.throws, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "Team"),
-                  0, wxALL | wxALIGN_CENTER, 5)
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
         teamList = [ team.GetName() for team in book.Teams() ]
-        self.team = wxChoice(self, -1, wxDefaultPosition, wxSize(150, -1),
-                             teamList)
+        self.team = wx.Choice(self, wx.ID_ANY, wx.DefaultPosition, (150, -1),
+                              teamList)
         self.team.SetSelection(0)
-        sizer.Add(self.team, 0, wxALL | wxALIGN_CENTER, 5)
+        sizer.Add(self.team, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "Player ID"),
-                  0, wxALL | wxALIGN_CENTER, 5)
-        self.playerID = wxTextCtrl(self, -1, "", wxDefaultPosition,
-                                   wxSize(150, -1))
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.playerID = wx.TextCtrl(self, -1, "", size=(150, -1))
         # The player ID starts out blank, which is invalid
-        self.playerID.SetBackgroundColour(wxNamedColour("pink"))
-        sizer.Add(self.playerID, 0, wxALL | wxALIGN_CENTER, 5)
+        self.playerID.SetBackgroundColour(wx.NamedColour("pink"))
+        sizer.Add(self.playerID, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
-        generateButton = wxButton(self, -1, "Generate unique ID")
-        generateButton.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+        generateButton = wx.Button(self, wx.ID_ANY, "Generate unique ID")
+        generateButton.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
         
-        buttonSizer = wxBoxSizer(wxHORIZONTAL)
-        buttonSizer.Add(wxButton(self, wxID_CANCEL, "Cancel"),
-                                 0, wxALL | wxALIGN_CENTER, 5)
-        buttonSizer.Add(wxButton(self, wxID_OK, "OK"), 0,
-                        wxALL | wxALIGN_CENTER, 5)
-        self.FindWindowById(wxID_OK).Enable(false)
-        self.FindWindowById(wxID_OK).SetDefault()
+        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+        buttonSizer.Add(wx.Button(self, wx.ID_CANCEL, "Cancel"),
+                        0, wx.ALL | wx.ALIGN_CENTER, 5)
+        buttonSizer.Add(wx.Button(self, wx.ID_OK, "OK"),
+                        0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.FindWindowById(wx.ID_OK).Enable(False)
+        self.FindWindowById(wx.ID_OK).SetDefault()
 
-        topSizer = wxBoxSizer(wxVERTICAL)
+        topSizer = wx.BoxSizer(wx.VERTICAL)
 
-        topSizer.Add(sizer, 0, wxALL, 5)
-        topSizer.Add(generateButton, 0, wxALL | wxALIGN_CENTER, 5)
-        topSizer.Add(buttonSizer, 0, wxALIGN_RIGHT, 5)
+        topSizer.Add(sizer, 0, wx.ALL, 5)
+        topSizer.Add(generateButton, 0, wx.ALL | wx.ALIGN_CENTER, 5)
+        topSizer.Add(buttonSizer, 0, wx.ALIGN_RIGHT, 5)
 
         self.SetSizer(topSizer)
         self.Layout()
         topSizer.SetSizeHints(self)
 
-        EVT_TEXT(self, self.playerID.GetId(), self.OnIDChange)
-        EVT_BUTTON(self, generateButton.GetId(), self.OnGenerateID)
+        wx.EVT_TEXT(self, self.playerID.GetId(), self.OnIDChange)
+        wx.EVT_BUTTON(self, generateButton.GetId(), self.OnGenerateID)
 
     def OnGenerateID(self, event):
         self.playerID.SetValue(self.book.UniquePlayerID(self.GetFirstName(),
                                                         self.GetLastName()))
-        self.playerID.SetBackgroundColour(wxSystemSettings_GetColour(wxSYS_COLOUR_WINDOW))
-        self.FindWindowById(wxID_OK).Enable(true)
+        self.playerID.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+        self.FindWindowById(wx.ID_OK).Enable(True)
 
     def OnIDChange(self, event):
         playerID = self.GetPlayerID()
         if (playerID == "" or
             playerID in [ p.player_id for p in self.book.Players() ]):
-            self.FindWindowById(wxID_OK).Enable(false)
-            self.playerID.SetBackgroundColour(wxNamedColour("pink"))
+            self.FindWindowById(wx.ID_OK).Enable(False)
+            self.playerID.SetBackgroundColour(wx.NamedColour("pink"))
         else:
-            self.FindWindowById(wxID_OK).Enable(true)
-            self.playerID.SetBackgroundColour(wxSystemSettings_GetColour(wxSYS_COLOUR_WINDOW))
+            self.FindWindowById(wx.ID_OK).Enable(True)
+            self.playerID.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
         
     def GetPlayerID(self):   return str(self.playerID.GetValue()).strip()
     def GetFirstName(self):  return str(self.firstName.GetValue()).strip()
@@ -176,69 +172,70 @@ class AddPlayerDialog(wxDialog):
         return [ t for t in self.book.Teams() ][self.team.GetSelection()].GetID()
     
 
-class EditPlayerDialog(wxDialog):
+class EditPlayerDialog(wx.Dialog):
     def __init__(self, parent, player):
-        wxDialog.__init__(self, parent, -1, "Edit player")
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, "Edit player")
 
-        self.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL))
+        self.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.NORMAL))
         
-        sizer = wxFlexGridSizer(5)
+        sizer = wx.FlexGridSizer(5)
 
         sizer.Add(FormattedStaticText(self, "First name"),
-                  0, wxALL | wxALIGN_CENTER, 5)
-        self.firstName = wxTextCtrl(self, -1, player.GetFirstName(),
-                                    wxDefaultPosition, wxSize(150, -1))
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.firstName = wx.TextCtrl(self, wx.ID_ANY, player.GetFirstName(),
+                                     size=(150, -1))
         self.firstName.SetValidator(NameValidator())
-        sizer.Add(self.firstName, 0, wxALL | wxALIGN_CENTER, 5)
+        sizer.Add(self.firstName, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "Last name"),
-                  0, wxALL | wxALIGN_CENTER, 5)
-        self.lastName = wxTextCtrl(self, -1, player.GetLastName(),
-                                   wxDefaultPosition, wxSize(150, -1))
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.lastName = wx.TextCtrl(self, wx.ID_ANY, player.GetLastName(),
+                                    size=(150, -1))
         self.lastName.SetValidator(NameValidator())
-        sizer.Add(self.lastName, 0, wxALL | wxALIGN_CENTER, 5)
+        sizer.Add(self.lastName, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "Bats"),
-                  0, wxALL | wxALIGN_CENTER, 5)
-        self.bats = wxChoice(self, -1, wxDefaultPosition, wxSize(150, -1),
-                             [ "Unknown", "Right", "Left", "Both" ])
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.bats = wx.Choice(self, wx.ID_ANY,
+                              wx.DefaultPosition, (150, -1),
+                              [ "Unknown", "Right", "Left", "Both" ])
         self.bats.SetSelection({ "?": 0, "R": 1, "L": 2, "B": 3}[player.bats])
-        sizer.Add(self.bats, 0, wxALL | wxALIGN_CENTER, 5)
+        sizer.Add(self.bats, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "Throws"),
-                  0, wxALL | wxALIGN_CENTER, 5)
-        self.throws = wxChoice(self, -1, wxDefaultPosition, wxSize(150, -1),
-                               [ "Unknown", "Right", "Left" ])
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.throws = wx.Choice(self, wx.ID_ANY,
+                                wx.DefaultPosition, (150, -1),
+                                [ "Unknown", "Right", "Left" ])
         self.throws.SetSelection({ "?": 0, "R": 1, "L": 2}[player.throws])
-        sizer.Add(self.throws, 0, wxALL | wxALIGN_CENTER, 5)
+        sizer.Add(self.throws, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         #sizer.Add(FormattedStaticText(self, "Team"),
-        #          0, wxALL | wxALIGN_CENTER, 5)
+        #          0, wx.ALL | wx.ALIGN_CENTER, 5)
         #teamList = [ team.GetName() for team in book.Teams() ]
-        #self.team = wxChoice(self, -1, wxDefaultPosition, wxSize(150, -1),
+        #self.team = wx.Choice(self, -1, wx.DefaultPosition, wx.Size(150, -1),
         #                     teamList)
         #self.team.SetSelection(0)
-        #sizer.Add(self.team, 0, wxALL | wxALIGN_CENTER, 5)
+        #sizer.Add(self.team, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "Player ID"),
-                  0, wxALL | wxALIGN_CENTER, 5)
-        self.playerID = wxTextCtrl(self, -1, player.player_id,
-                                   wxDefaultPosition,
-                                   wxSize(150, -1))
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.playerID = wx.TextCtrl(self, wx.ID_ANY, player.player_id,
+                                    size=(150, -1))
         self.playerID.Enable(False)
-        sizer.Add(self.playerID, 0, wxALL | wxALIGN_CENTER, 5)
+        sizer.Add(self.playerID, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
-        buttonSizer = wxBoxSizer(wxHORIZONTAL)
-        buttonSizer.Add(wxButton(self, wxID_CANCEL, "Cancel"),
-                                 0, wxALL | wxALIGN_CENTER, 5)
-        buttonSizer.Add(wxButton(self, wxID_OK, "OK"), 0,
-                        wxALL | wxALIGN_CENTER, 5)
-        self.FindWindowById(wxID_OK).SetDefault()
+        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+        buttonSizer.Add(wx.Button(self, wx.ID_CANCEL, "Cancel"),
+                        0, wx.ALL | wx.ALIGN_CENTER, 5)
+        buttonSizer.Add(wx.Button(self, wx.ID_OK, "OK"),
+                        0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.FindWindowById(wx.ID_OK).SetDefault()
 
-        topSizer = wxBoxSizer(wxVERTICAL)
+        topSizer = wx.BoxSizer(wx.VERTICAL)
 
-        topSizer.Add(sizer, 0, wxALL, 5)
-        topSizer.Add(buttonSizer, 0, wxALIGN_RIGHT, 5)
+        topSizer.Add(sizer, 0, wx.ALL, 5)
+        topSizer.Add(buttonSizer, 0, wx.ALIGN_RIGHT, 5)
 
         self.SetSizer(topSizer)
         self.Layout()
@@ -252,10 +249,10 @@ class EditPlayerDialog(wxDialog):
         return [ "?", "R", "L" ][self.throws.GetSelection()]
     
 
-class PlayerListCtrl(wxListCtrl):
+class PlayerListCtrl(wx.ListCtrl):
     def __init__(self, parent):
-        wxListCtrl.__init__(self, parent, -1,
-                            style = wxLC_VIRTUAL | wxLC_REPORT | wxLC_SINGLE_SEL)
+        wx.ListCtrl.__init__(self, parent, wx.ID_ANY,
+                             style = wx.LC_VIRTUAL | wx.LC_REPORT | wx.LC_SINGLE_SEL)
         self.firstMenuID = 4000
 
         self.InsertColumn(0, "Player")
@@ -270,10 +267,10 @@ class PlayerListCtrl(wxListCtrl):
         self.SetColumnWidth(3, 100)
         self.SetColumnWidth(4, 150)
         
-        EVT_LIST_ITEM_ACTIVATED(self, self.GetId(), self.OnItemActivated)
-        EVT_LIST_ITEM_RIGHT_CLICK(self, self.GetId(), self.OnRightClick)
-        EVT_MENU_RANGE(self, self.firstMenuID, self.firstMenuID + 100,
-                       self.OnMenu)
+        wx.EVT_LIST_ITEM_ACTIVATED(self, self.GetId(), self.OnItemActivated)
+        wx.EVT_LIST_ITEM_RIGHT_CLICK(self, self.GetId(), self.OnRightClick)
+        wx.EVT_MENU_RANGE(self, self.firstMenuID, self.firstMenuID + 100,
+                          self.OnMenu)
         
     def OnUpdate(self, book):
         self.book = book
@@ -298,7 +295,7 @@ class PlayerListCtrl(wxListCtrl):
     def OnItemActivated(self, event):
         player = [x for x in self.book.Players()][event.GetIndex()]
         dialog = EditPlayerDialog(self, player)
-        if dialog.ShowModal() == wxID_OK:
+        if dialog.ShowModal() == wx.ID_OK:
             self.book.ModifyPlayer(player.player_id,
                                    dialog.GetFirstName(),
                                    dialog.GetLastName(),
@@ -310,7 +307,7 @@ class PlayerListCtrl(wxListCtrl):
     def OnRightClick(self, event):
         player = [x for x in self.book.Players()][event.GetIndex()]
         self.menuPlayer = player
-        menu = wxMenu("Add %s to roster of" % player.GetName())
+        menu = wx.Menu("Add %s to roster of" % player.GetName())
 
         menuID = self.firstMenuID
         for t in self.book.Teams():
@@ -337,26 +334,26 @@ class PlayerListCtrl(wxListCtrl):
                     return
                 menuID += 1
 
-class PlayerListPanel(wxPanel):
+class PlayerListPanel(wx.Panel):
     def __init__(self, parent):
-        wxPanel.__init__(self, parent, -1)
+        wx.Panel.__init__(self, parent, wx.ID_ANY)
 
-        newPlayerButton = wxButton(self, -1, "Add player")
-        newPlayerButton.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+        newPlayerButton = wx.Button(self, wx.ID_ANY, "Add player")
+        newPlayerButton.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
         self.playerList = PlayerListCtrl(self)
 
-        sizer = wxBoxSizer(wxVERTICAL)
-        sizer.Add(newPlayerButton, 0, wxALL | wxALIGN_CENTER, 5)
-        sizer.Add(self.playerList, 1, wxEXPAND, 0)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(newPlayerButton, 0, wx.ALL | wx.ALIGN_CENTER, 5)
+        sizer.Add(self.playerList, 1, wx.EXPAND, 0)
         self.SetSizer(sizer)
         self.Layout()
 
-        EVT_BUTTON(self, newPlayerButton.GetId(), self.OnNewPlayer)
+        wx.EVT_BUTTON(self, newPlayerButton.GetId(), self.OnNewPlayer)
 
     def OnNewPlayer(self, event):
         dialog = AddPlayerDialog(self, self.book)
 
-        if dialog.ShowModal() == wxID_OK:
+        if dialog.ShowModal() == wx.ID_OK:
             self.book.AddPlayer(dialog.GetPlayerID(),
                                 dialog.GetFirstName(),
                                 dialog.GetLastName(),

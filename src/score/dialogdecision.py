@@ -24,12 +24,12 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-from wxPython.wx import *
+import wx
 from wxutils import FormattedStaticText
 
-class DecisionDialog(wxDialog):
+class DecisionDialog(wx.Dialog):
     def __init__(self, parent, doc):
-        wxDialog.__init__(self, parent, -1, "Award Decisions...")
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, "Award Decisions...")
         self.doc = doc
         
         if doc.GetScore(0) > doc.GetScore(1):
@@ -37,52 +37,52 @@ class DecisionDialog(wxDialog):
         else:
             winner = 1
 
-        fgColors = [ wxRED, wxBLUE ]
+        fgColors = [ wx.RED, wx.BLUE ]
         
         self.wps = [ x for x in doc.boxscore.pitching[winner] ]
         self.lps = [ x for x in doc.boxscore.pitching[1-winner] ]
         
-        sizer = wxBoxSizer(wxVERTICAL)
+        sizer = wx.BoxSizer(wx.VERTICAL)
         
-        gridSizer = wxFlexGridSizer(3)
+        gridSizer = wx.FlexGridSizer(3)
 
         gridSizer.Add(FormattedStaticText(self, "Winning pitcher"),
-                      0, wxALL | wxALIGN_CENTER, 5)
-        self.wp = wxChoice(self, -1, wxDefaultPosition, wxSize(300, -1))
+                      0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.wp = wx.Choice(self, wx.ID_ANY, size=(300, -1))
         for x in self.wps:  self.wp.Append(x["name"])
         self.wp.SetForegroundColour(fgColors[winner])
-        self.wp.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-        gridSizer.Add(self.wp, 0, wxALL | wxALIGN_CENTER, 5)
+        self.wp.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        gridSizer.Add(self.wp, 0, wx.ALL | wx.ALIGN_CENTER, 5)
         
         gridSizer.Add(FormattedStaticText(self, "Save"),
-                      0, wxALL | wxALIGN_CENTER, 5)
-        self.save = wxChoice(self, -1, wxDefaultPosition, wxSize(300, -1))
+                      0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.save = wx.Choice(self, wx.ID_ANY, size=(300, -1))
         if len(self.wps) == 1:
-            self.save.Enable(false)
+            self.save.Enable(False)
         else:
             self.save.Append("(none)")
             for x in self.wps: self.save.Append(x["name"])
             self.save.SetSelection(0)
         self.save.SetForegroundColour(fgColors[winner])
-        self.save.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-        gridSizer.Add(self.save, 0, wxALL | wxALIGN_CENTER, 5)
+        self.save.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        gridSizer.Add(self.save, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         gridSizer.Add(FormattedStaticText(self, "Losing pitcher"),
-                      0, wxALL | wxALIGN_CENTER, 5)
-        self.lp = wxChoice(self, -1, wxDefaultPosition, wxSize(300, -1))
+                      0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.lp = wx.Choice(self, wx.ID_ANY, size=(300, -1))
         for x in self.lps: self.lp.Append(x["name"])
         self.lp.SetForegroundColour(fgColors[1-winner])
-        self.lp.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-        gridSizer.Add(self.lp, 0, wxALL | wxALIGN_CENTER, 5)
+        self.lp.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        gridSizer.Add(self.lp, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
-        sizer.Add(gridSizer, 0, wxALL, 5)
+        sizer.Add(gridSizer, 0, wx.ALL, 5)
         
-        buttonSizer = wxBoxSizer(wxHORIZONTAL)
-        buttonSizer.Add(wxButton(self, wxID_CANCEL, "Cancel"),
-                        0, wxALL | wxALIGN_CENTER, 5)
-        buttonSizer.Add(wxButton(self, wxID_OK, "OK"), 0,
-                        wxALL | wxALIGN_CENTER, 5)
-        sizer.Add(buttonSizer, 1, wxALIGN_RIGHT, 5)
+        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+        buttonSizer.Add(wx.Button(self, wx.ID_CANCEL, "Cancel"),
+                        0, wx.ALL | wx.ALIGN_CENTER, 5)
+        buttonSizer.Add(wx.Button(self, wx.ID_OK, "OK"), 0,
+                        wx.ALL | wx.ALIGN_CENTER, 5)
+        sizer.Add(buttonSizer, 1, wx.ALIGN_RIGHT, 5)
 
         self.SetSizer(sizer)
         self.Layout()
@@ -92,7 +92,7 @@ class DecisionDialog(wxDialog):
         return self.wps[self.wp.GetSelection()]["id"]
         
     def GetSavePitcher(self):
-        if self.save.IsEnabled() == false or self.save.GetSelection() == 0:
+        if not self.save.IsEnabled() or self.save.GetSelection() == 0:
             return ""
         else:
             return self.wps[self.save.GetSelection()-1]["id"]

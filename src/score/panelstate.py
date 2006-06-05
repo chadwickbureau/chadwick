@@ -24,7 +24,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-from wxPython.wx import *
+import wx
 from libchadwick import *
 
 # Import of dialogs used
@@ -69,77 +69,77 @@ def GetCount(pitches):
             s += 1
     return "%d%d" % (b,s)
 
-class StatePanel(wxPanel):
+class StatePanel(wx.Panel):
     def __init__(self, parent, doc):
-        wxPanel.__init__(self, parent, -1)
+        wx.Panel.__init__(self, parent, wx.ID_ANY)
 
         self.lineups = [ gridlineup.LineupGrid(self, t) for t in [0, 1] ]
-        lineupSizer = wxBoxSizer(wxVERTICAL)
-        lineupSizer.Add(self.lineups[0], 0, wxALL, 5)
-        lineupSizer.Add(self.lineups[1], 0, wxALL, 5)
+        lineupSizer = wx.BoxSizer(wx.VERTICAL)
+        lineupSizer.Add(self.lineups[0], 0, wx.ALL, 5)
+        lineupSizer.Add(self.lineups[1], 0, wx.ALL, 5)
 
-        stateSizer = wxBoxSizer(wxVERTICAL)
+        stateSizer = wx.BoxSizer(wx.VERTICAL)
         self.linescore = panellinescore.LinescorePanel(self)
-        stateSizer.Add(self.linescore, 0, wxALL | wxEXPAND, 5)
+        stateSizer.Add(self.linescore, 0, wx.ALL | wx.EXPAND, 5)
 
         self.runners = panelrunners.RunnersPanel(self)
-        stateSizer.Add(self.runners, 0, wxALL | wxEXPAND, 5)
+        stateSizer.Add(self.runners, 0, wx.ALL | wx.EXPAND, 5)
 
         if doc.GetGame().GetInfo("pitches") == "pitches":
-            pitchesSizer = wxBoxSizer(wxHORIZONTAL)
+            pitchesSizer = wx.BoxSizer(wx.HORIZONTAL)
             pitchesSizer.Add(FormattedStaticText(self, "Pitches"),
-                             0, wxALL | wxALIGN_CENTER, 5)
+                             0, wx.ALL | wx.ALIGN_CENTER, 5)
 
-            self.pitches = wxTextCtrl(self, CW_PITCHES_CTRL, "",
-                                      wxDefaultPosition, wxSize(150, -1))
-            self.pitches.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-            pitchesSizer.Add(self.pitches, 0, wxALL | wxALIGN_CENTER, 5)
-            stateSizer.Add(pitchesSizer, 0, wxALL | wxEXPAND, 5)
+            self.pitches = wx.TextCtrl(self, CW_PITCHES_CTRL, "",
+                                       size=(150, -1))
+            self.pitches.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+            pitchesSizer.Add(self.pitches, 0, wx.ALL | wx.ALIGN_CENTER, 5)
+            stateSizer.Add(pitchesSizer, 0, wx.ALL | wx.EXPAND, 5)
 
-        playTextSizer = wxBoxSizer(wxHORIZONTAL)
+        playTextSizer = wx.BoxSizer(wx.HORIZONTAL)
         playTextSizer.Add(FormattedStaticText(self, "Play text"),
-                          0, wxALL | wxALIGN_CENTER, 5)
-        self.playText = wxTextCtrl(self, CW_PLAYTEXT_CTRL, "",
-                                   wxDefaultPosition, wxSize(250, 25),
-                                   wxTE_PROCESS_ENTER)
-        self.playText.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+                          0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.playText = wx.TextCtrl(self, CW_PLAYTEXT_CTRL, "",
+                                   wx.DefaultPosition, wx.Size(250, 25),
+                                   wx.TE_PROCESS_ENTER)
+        self.playText.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
         # playText starts out empty, which is invalid...
-        self.playText.SetBackgroundColour(wxNamedColour("pink"))
-        playTextSizer.Add(self.playText, 1, wxALL | wxALIGN_CENTER, 5)
+        self.playText.SetBackgroundColour(wx.NamedColour("pink"))
+        playTextSizer.Add(self.playText, 1, wx.ALL | wx.ALIGN_CENTER, 5)
 
-        stateSizer.Add(playTextSizer, 0, wxALL | wxEXPAND, 5)
+        stateSizer.Add(playTextSizer, 0, wx.ALL | wx.EXPAND, 5)
 
-        buttonSizer = wxBoxSizer(wxHORIZONTAL)
+        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
         
-        buttonSizer.Add(wxButton(self, CW_BUTTON_DEFSUB,
+        buttonSizer.Add(wx.Button(self, CW_BUTTON_DEFSUB,
                                  "Defensive substitution"),
-                        0, wxALL, 5)
-        self.FindWindowById(CW_BUTTON_DEFSUB).SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-        buttonSizer.Add(wxButton(self, CW_BUTTON_COMMENT,
+                        0, wx.ALL, 5)
+        self.FindWindowById(CW_BUTTON_DEFSUB).SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        buttonSizer.Add(wx.Button(self, CW_BUTTON_COMMENT,
                                  "Insert comment"),
-                        0, wxALL, 5)
-        self.FindWindowById(CW_BUTTON_COMMENT).SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-        buttonSizer.Add(wxButton(self, CW_BUTTON_UNDO,
+                        0, wx.ALL, 5)
+        self.FindWindowById(CW_BUTTON_COMMENT).SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        buttonSizer.Add(wx.Button(self, CW_BUTTON_UNDO,
                                  "Undo last play"),
-                         0, wxALL, 5)
-        self.FindWindowById(CW_BUTTON_UNDO).SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-        stateSizer.Add(buttonSizer, 1, wxALL | wxALIGN_CENTER, 5)
+                         0, wx.ALL, 5)
+        self.FindWindowById(CW_BUTTON_UNDO).SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        stateSizer.Add(buttonSizer, 1, wx.ALL | wx.ALIGN_CENTER, 5)
 
-        button2Sizer = wxBoxSizer(wxHORIZONTAL)
+        button2Sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        button2Sizer.Add(wxButton(self, CW_BUTTON_PROPERTIES,
+        button2Sizer.Add(wx.Button(self, CW_BUTTON_PROPERTIES,
                                   "Edit game information"), 
-                         0, wxALL, 5)
-        self.FindWindowById(CW_BUTTON_PROPERTIES).SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-        button2Sizer.Add(wxButton(self, CW_BUTTON_SAVE,
+                         0, wx.ALL, 5)
+        self.FindWindowById(CW_BUTTON_PROPERTIES).SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        button2Sizer.Add(wx.Button(self, CW_BUTTON_SAVE,
                                   "Save game and exit"),
-                         0, wxALL, 5)
-        self.FindWindowById(CW_BUTTON_SAVE).SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-        stateSizer.Add(button2Sizer, 1, wxALL | wxALIGN_CENTER, 5)
+                         0, wx.ALL, 5)
+        self.FindWindowById(CW_BUTTON_SAVE).SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        stateSizer.Add(button2Sizer, 1, wx.ALL | wx.ALIGN_CENTER, 5)
 
-        sizer = wxBoxSizer(wxHORIZONTAL)
-        sizer.Add(lineupSizer, 0, wxALL | wxALIGN_CENTER, 5)
-        sizer.Add(stateSizer, 1, wxALL | wxALIGN_CENTER, 5) 
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        sizer.Add(lineupSizer, 0, wx.ALL | wx.ALIGN_CENTER, 5)
+        sizer.Add(stateSizer, 1, wx.ALL | wx.ALIGN_CENTER, 5) 
 
         self.SetSizer(sizer)
         self.Layout()
@@ -188,15 +188,15 @@ class StatePanel(wxPanel):
             self.playText.SetInsertionPoint(y)
 
         if IsValidPlay(x.upper()):
-            self.playText.SetBackgroundColour(wxSystemSettings_GetColour(wxSYS_COLOUR_WINDOW))
+            self.playText.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
         else:
-            self.playText.SetBackgroundColour(wxNamedColour("pink"))
+            self.playText.SetBackgroundColour(wx.NamedColour("pink"))
         
             
     def OnPlayEnter(self, event):
         play = str(self.playText.GetValue()).upper()
         if play == "" or not IsValidPlay(play):
-            wxBell()
+            wx.Bell()
         else:
             if hasattr(self, "pitches"):
                 pitches = str(self.pitches.GetValue())
@@ -206,17 +206,17 @@ class StatePanel(wxPanel):
                 self.doc.AddPlay("??", "", play)
 
             self.playText.Clear()
-            self.playText.SetBackgroundColour(wxNamedColour("pink"))
+            self.playText.SetBackgroundColour(wx.NamedColour("pink"))
             
-            wxPostEvent(self.GetParent(),
-                        wxCommandEvent(wxEVT_COMMAND_BUTTON_CLICKED,
+            wx.PostEvent(self.GetParent(),
+                        wx.CommandEvent(wx.EVT_COMMAND_BUTTON_CLICKED,
                                        CW_BUTTON_UPDATE))
 
     def OnUndo(self, event):
         self.doc.DeletePlay()
         self.playText.Clear()
-        wxPostEvent(self.GetParent(),
-                    wxCommandEvent(wxEVT_COMMAND_BUTTON_CLICKED,
+        wx.PostEvent(self.GetParent(),
+                    wx.CommandEvent(wx.EVT_COMMAND_BUTTON_CLICKED,
                                    CW_BUTTON_UPDATE))
 
     def OnDefensiveSub(self, event):
@@ -230,10 +230,10 @@ class StatePanel(wxPanel):
         dialog.LoadRoster(self.doc.GetRoster(team), team, hasDH)
         dialog.LoadLineup(self.doc, team)
 
-        if dialog.ShowModal() == wxID_OK:
+        if dialog.ShowModal() == wx.ID_OK:
             dialog.WriteChanges(self.doc, team)
-            wxPostEvent(self.GetParent(),
-                        wxCommandEvent(wxEVT_COMMAND_BUTTON_CLICKED,
+            wx.PostEvent(self.GetParent(),
+                        wx.CommandEvent(wx.EVT_COMMAND_BUTTON_CLICKED,
                                        CW_BUTTON_UPDATE))
 
     def OnPinchHit(self, event):
@@ -244,11 +244,11 @@ class StatePanel(wxPanel):
         dialog.LoadRoster(self.doc.GetRoster(self.doc.GetHalfInning()),
                           self.doc.GetHalfInning())
 
-        if dialog.ShowModal() == wxID_OK:
+        if dialog.ShowModal() == wx.ID_OK:
             dialog.WriteChanges(self.doc, batter,
                                 self.doc.GetHalfInning(), 11)
-            wxPostEvent(self.GetParent(),
-                        wxCommandEvent(wxEVT_COMMAND_BUTTON_CLICKED,
+            wx.PostEvent(self.GetParent(),
+                        wx.CommandEvent(wx.EVT_COMMAND_BUTTON_CLICKED,
                                        CW_BUTTON_UPDATE))
 
     def OnPinchRun3(self, event):
@@ -256,12 +256,12 @@ class StatePanel(wxPanel):
         dialog.LoadRoster(self.doc.GetRoster(self.doc.GetHalfInning()),
                           self.doc.GetHalfInning())
 
-        if dialog.ShowModal() == wxID_OK:
+        if dialog.ShowModal() == wx.ID_OK:
             dialog.WriteChanges(self.doc,
                                 self.doc.gameiter.GetRunner(3),
                                 self.doc.GetHalfInning(), 12)
-            wxPostEvent(self.GetParent(),
-                        wxCommandEvent(wxEVT_COMMAND_BUTTON_CLICKED,
+            wx.PostEvent(self.GetParent(),
+                        wx.CommandEvent(wx.EVT_COMMAND_BUTTON_CLICKED,
                                        CW_BUTTON_UPDATE))
 
     def OnPinchRun2(self, event):
@@ -269,12 +269,12 @@ class StatePanel(wxPanel):
         dialog.LoadRoster(self.doc.GetRoster(self.doc.GetHalfInning()),
                           self.doc.GetHalfInning())
 
-        if dialog.ShowModal() == wxID_OK:
+        if dialog.ShowModal() == wx.ID_OK:
             dialog.WriteChanges(self.doc,
                                 self.doc.gameiter.GetRunner(2),
                                 self.doc.GetHalfInning(), 12)
-            wxPostEvent(self.GetParent(),
-                        wxCommandEvent(wxEVT_COMMAND_BUTTON_CLICKED,
+            wx.PostEvent(self.GetParent(),
+                        wx.CommandEvent(wx.EVT_COMMAND_BUTTON_CLICKED,
                                        CW_BUTTON_UPDATE))
 
     def OnPinchRun1(self, event):
@@ -282,18 +282,18 @@ class StatePanel(wxPanel):
         dialog.LoadRoster(self.doc.GetRoster(self.doc.GetHalfInning()),
                           self.doc.GetHalfInning())
 
-        if dialog.ShowModal() == wxID_OK:
+        if dialog.ShowModal() == wx.ID_OK:
             dialog.WriteChanges(self.doc,
                                 self.doc.gameiter.GetRunner(1),
                                 self.doc.GetHalfInning(), 12)
-            wxPostEvent(self.GetParent(),
-                        wxCommandEvent(wxEVT_COMMAND_BUTTON_CLICKED,
+            wx.PostEvent(self.GetParent(),
+                        wx.CommandEvent(wx.EVT_COMMAND_BUTTON_CLICKED,
                                        CW_BUTTON_UPDATE))
 
     def OnSave(self, event):
         if self.doc.GetScore(0) != self.doc.GetScore(1):
             dialog = dialogdecision.DecisionDialog(self, self.doc)
-            if dialog.ShowModal() != wxID_OK:  return
+            if dialog.ShowModal() != wx.ID_OK:  return
             
             self.doc.game.SetInfo("wp", dialog.GetWinningPitcher())
             self.doc.game.SetInfo("save", dialog.GetSavePitcher())
@@ -306,20 +306,20 @@ class StatePanel(wxPanel):
 
     def OnComment(self, event):
         dialog = dialogcomment.CommentDialog(self)
-        if dialog.ShowModal() == wxID_OK:
+        if dialog.ShowModal() == wx.ID_OK:
             self.doc.AddComment(dialog.GetComment())
-            wxPostEvent(self.GetParent(),
-                        wxCommandEvent(wxEVT_COMMAND_BUTTON_CLICKED,
-                                       CW_BUTTON_UPDATE))
+            wx.PostEvent(self.GetParent(),
+                         wx.CommandEvent(wx.EVT_COMMAND_BUTTON_CLICKED,
+                                         CW_BUTTON_UPDATE))
 
             
     def OnProperties(self, event):
         dialog = dialoggame.GamePropertyDialog(self, self.doc)
-        if dialog.ShowModal() == wxID_OK:
+        if dialog.ShowModal() == wx.ID_OK:
             dialog.UpdateDocument(self.doc)
-            wxPostEvent(self.GetParent(),
-                        wxCommandEvent(wxEVT_COMMAND_BUTTON_CLICKED,
-                                       CW_BUTTON_UPDATE))
+            wx.PostEvent(self.GetParent(),
+                         wx.CommandEvent(wx.EVT_COMMAND_BUTTON_CLICKED,
+                                         CW_BUTTON_UPDATE))
 
     def OnUpdate(self):
         self.linescore.OnUpdate()
@@ -334,9 +334,9 @@ class StatePanel(wxPanel):
         for slot in range(9):
             if self.doc.GetCurrentPosition(1-self.doc.GetHalfInning(),
                                            slot+1) > 10:
-                self.playText.Enable(false)
+                self.playText.Enable(False)
                 if hasattr(self, "pitches"):
-                    self.pitches.Enable(false)
+                    self.pitches.Enable(False)
                     
         if hasattr(self, "pitches") and self.pitches.IsEnabled():
             self.pitches.SetFocus()

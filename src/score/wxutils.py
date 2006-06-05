@@ -24,17 +24,17 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-from wxPython.wx import *
+import wx
 
-def FormattedStaticText(parent, label, size=wxDefaultSize,
-                        style=wxALIGN_CENTER | wxST_NO_AUTORESIZE):
+def FormattedStaticText(parent, label, size=wx.DefaultSize,
+                        style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE):
     """
     Creates a wxStaticText object with a standard format:
     bold Swiss text and centered by default.
     """
-    ctrl = wxStaticText(parent, wxID_STATIC, label,
-                        wxDefaultPosition, size, style)
-    ctrl.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+    ctrl = wx.StaticText(parent, wx.ID_STATIC, label,
+                         wx.DefaultPosition, size, style)
+    ctrl.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
     return ctrl
 
 

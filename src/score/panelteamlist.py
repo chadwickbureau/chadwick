@@ -24,77 +24,71 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-from wxPython.wx import *
-from wxPython.grid import *
-
+import wx 
 from libchadwick import *
 
 from wxutils import FormattedStaticText
 
-class AddTeamDialog(wxDialog):
+class AddTeamDialog(wx.Dialog):
     def __init__(self, parent, book):
-        wxDialog.__init__(self, parent, -1, "Add team")
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, "Add team")
         self.book = book
 
-        self.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL))
+        self.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.NORMAL))
 
-        sizer = wxFlexGridSizer(4)
+        sizer = wx.FlexGridSizer(4)
 
         sizer.Add(FormattedStaticText(self, "City"),
-                  0, wxALL | wxALIGN_CENTER, 5)
-        self.city = wxTextCtrl(self, -1, "",
-                               wxDefaultPosition, wxSize(150, -1))
-        sizer.Add(self.city, 0, wxALL | wxALIGN_CENTER, 5)
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.city = wx.TextCtrl(self, wx.ID_ANY, "", size=(150, -1))
+        sizer.Add(self.city, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "Nickname"),
-                  0, wxALL | wxALIGN_CENTER, 5)
-        self.nickname = wxTextCtrl(self, -1, "",
-                                   wxDefaultPosition, wxSize(150, -1))
-        sizer.Add(self.nickname, 0, wxALL | wxALIGN_CENTER, 5)
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.nickname = wx.TextCtrl(self, wx.ID_ANY, "", size=(150, -1))
+        sizer.Add(self.nickname, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "Team ID"),
-                  0, wxALL | wxALIGN_CENTER, 5)
-        self.teamID = wxTextCtrl(self, -1, "",
-                                 wxDefaultPosition, wxSize(150, -1))
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.teamID = wx.TextCtrl(self, wx.ID_ANY, "", size=(150, -1))
         # A blank team ID is invalid, so flag this as invalid
-        self.teamID.SetBackgroundColour(wxNamedColour("pink"))
-        sizer.Add(self.teamID, 0, wxALL | wxALIGN_CENTER, 5)
+        self.teamID.SetBackgroundColour(wx.NamedColour("pink"))
+        sizer.Add(self.teamID, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "League"),
-                  0, wxALL | wxALIGN_CENTER, 5)
-        self.league = wxTextCtrl(self, -1, "",
-                                 wxDefaultPosition, wxSize(150, -1))
-        sizer.Add(self.league, 0, wxALL | wxALIGN_CENTER, 5)
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.league = wx.TextCtrl(self, wx.ID_ANY, "", size=(150, -1))
+        sizer.Add(self.league, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
-        buttonSizer = wxBoxSizer(wxHORIZONTAL)
-        buttonSizer.Add(wxButton(self, wxID_CANCEL, "Cancel"),
-                                 0, wxALL | wxALIGN_CENTER, 5)
-        buttonSizer.Add(wxButton(self, wxID_OK, "OK"), 0,
-                        wxALL | wxALIGN_CENTER, 5)
-        self.FindWindowById(wxID_OK).Enable(false)
+        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+        buttonSizer.Add(wx.Button(self, wx.ID_CANCEL, "Cancel"),
+                        0, wx.ALL | wx.ALIGN_CENTER, 5)
+        buttonSizer.Add(wx.Button(self, wx.ID_OK, "OK"),
+                        0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.FindWindowById(wx.ID_OK).Enable(False)
 
-        topSizer = wxBoxSizer(wxVERTICAL)
+        topSizer = wx.BoxSizer(wx.VERTICAL)
 
-        topSizer.Add(sizer, 0, wxALL, 5)
-        topSizer.Add(buttonSizer, 0, wxALIGN_RIGHT, 5)
+        topSizer.Add(sizer, 0, wx.ALL, 5)
+        topSizer.Add(buttonSizer, 0, wx.ALIGN_RIGHT, 5)
 
         self.SetSizer(topSizer)
         self.Layout()
         topSizer.SetSizeHints(self)
 
-        EVT_TEXT(self, self.teamID.GetId(), self.OnTeamIDChange)
+        wx.EVT_TEXT(self, self.teamID.GetId(), self.OnTeamIDChange)
 
     def OnTeamIDChange(self, event):
         if str(self.teamID.GetValue()) == "":
-            self.FindWindowById(wxID_OK).Enable(false)
-            self.teamID.SetBackgroundColour(wxNamedColour("pink"))
+            self.FindWindowById(wx.ID_OK).Enable(False)
+            self.teamID.SetBackgroundColour(wx.NamedColour("pink"))
         elif (str(self.teamID.GetValue()) in
               [ x.GetID() for x in self.book.Teams() ]):
-            self.FindWindowById(wxID_OK).Enable(false)
-            self.teamID.SetBackgroundColour(wxNamedColour("pink"))
+            self.FindWindowById(wx.ID_OK).Enable(False)
+            self.teamID.SetBackgroundColour(wx.NamedColour("pink"))
         else:
-            self.FindWindowById(wxID_OK).Enable(true)
-            self.teamID.SetBackgroundColour(wxSystemSettings_GetColour(wxSYS_COLOUR_WINDOW))
+            self.FindWindowById(wx.ID_OK).Enable(True)
+            self.teamID.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
               
     def GetCity(self):       return str(self.city.GetValue())
     def GetNickname(self):   return str(self.nickname.GetValue())
@@ -102,63 +96,61 @@ class AddTeamDialog(wxDialog):
     def GetLeague(self):     return str(self.league.GetValue())
 
 
-class EditTeamDialog(wxDialog):
+class EditTeamDialog(wx.Dialog):
     def __init__(self, parent, book, team):
-        wxDialog.__init__(self, parent, -1, "Edit team")
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, "Edit team")
 
         self.book = book
         self.team = team
         
-        self.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL))
+        self.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.NORMAL))
 
-        sizer = wxFlexGridSizer(2)
+        sizer = wx.FlexGridSizer(2)
 
         sizer.Add(FormattedStaticText(self, "City"),
-                  0, wxALL | wxALIGN_CENTER, 5)
-        self.city = wxTextCtrl(self, -1, team.GetCity(),
-                               wxDefaultPosition, wxSize(150, -1))
-        sizer.Add(self.city, 0, wxALL | wxALIGN_CENTER, 5)
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.city = wx.TextCtrl(self, wx.ID_ANY,
+                                team.GetCity(), size=(150, -1))
+        sizer.Add(self.city, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "Nickname"),
-                  0, wxALL | wxALIGN_CENTER, 5)
-        self.nickname = wxTextCtrl(self, -1, team.GetNickname(),
-                                   wxDefaultPosition, wxSize(150, -1))
-        sizer.Add(self.nickname, 0, wxALL | wxALIGN_CENTER, 5)
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.nickname = wx.TextCtrl(self, wx.ID_ANY, team.GetNickname(),
+                                    size=(150, -1))
+        sizer.Add(self.nickname, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "Team ID"),
-                  0, wxALL | wxALIGN_CENTER, 5)
-        self.teamID = wxTextCtrl(self, -1, team.GetID(),
-                                 wxDefaultPosition, wxSize(150, -1))
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.teamID = wx.TextCtrl(self, wx.ID_ANY, team.GetID(), size=(150,-1))
         self.teamID.Enable(False)
-        sizer.Add(self.teamID, 0, wxALL | wxALIGN_CENTER, 5)
+        sizer.Add(self.teamID, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "League"),
-                  0, wxALL | wxALIGN_CENTER, 5)
-        self.league = wxTextCtrl(self, -1, team.GetLeague(),
-                                 wxDefaultPosition, wxSize(150, -1))
-        sizer.Add(self.league, 0, wxALL | wxALIGN_CENTER, 5)
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.league = wx.TextCtrl(self, wx.ID_ANY, team.GetLeague(),
+                                  size = (150, -1))
+        sizer.Add(self.league, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
 
-        playerBox = wxStaticBoxSizer(wxStaticBox(self, wxID_STATIC,
-                                                 "Players on team"),
-                                     wxHORIZONTAL)
-        self.players = wxListView(self, -1, wxDefaultPosition,
-                                  wxSize(250, 150))
+        playerBox = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_STATIC,
+                                                   "Players on team"),
+                                      wx.HORIZONTAL)
+        self.players = wx.ListView(self, wx.ID_ANY, size=(250, 150))
         self.players.InsertColumn(0, "Name (ID)", width=230)
         self.playerIDs = [ x.GetID() for x in team.Players() ]
         for (pl,player) in enumerate(team.Players()):
             self.players.InsertStringItem(pl,
                                           "%s (%s)" % (player.GetSortName(),
                                                        player.GetID()))
-            self.players.SetItemTextColour(pl, wxBLUE)
+            self.players.SetItemTextColour(pl, wx.BLUE)
             
-        playerBox.Add(self.players, 0, wxALL, 5)
+        playerBox.Add(self.players, 0, wx.ALL, 5)
         
-        allPlayerBox = wxStaticBoxSizer(wxStaticBox(self, wxID_STATIC,
-                                                    "All players"),
-                                        wxHORIZONTAL)
-        self.allPlayers = wxListView(self, -1, wxDefaultPosition,
-                                     wxSize(250, 150), style=wxLC_REPORT)
+        allPlayerBox = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_STATIC,
+                                                      "All players"),
+                                         wx.HORIZONTAL)
+        self.allPlayers = wx.ListView(self, wx.ID_ANY, size=(250, 150),
+                                      style=wx.LC_REPORT)
         self.allPlayers.InsertColumn(0, "Name (ID)", width=230)
         self.allPlayerIDs = [ x.GetID() for x in book.Players() ]
         for (pl,player) in enumerate(book.Players()):
@@ -166,31 +158,31 @@ class EditTeamDialog(wxDialog):
                                              "%s (%s)" % (player.GetSortName(),
                                                           player.GetID()))
             if team.FindPlayer(player.GetID()) != None:
-                self.allPlayers.SetItemTextColour(pl, wxBLUE)
+                self.allPlayers.SetItemTextColour(pl, wx.BLUE)
             else:
-                self.allPlayers.SetItemTextColour(pl, wxBLACK)
+                self.allPlayers.SetItemTextColour(pl, wx.BLACK)
 
-        EVT_LIST_ITEM_ACTIVATED(self, self.allPlayers.GetId(),
-                                self.OnPlayerActivated)
+        wx.EVT_LIST_ITEM_ACTIVATED(self, self.allPlayers.GetId(),
+                                   self.OnPlayerActivated)
             
-        allPlayerBox.Add(self.allPlayers, 0, wxALL, 5)
+        allPlayerBox.Add(self.allPlayers, 0, wx.ALL, 5)
 
 
-        playerSizer = wxBoxSizer(wxHORIZONTAL)
-        playerSizer.Add(playerBox, 0, wxALL, 5)
-        playerSizer.Add(allPlayerBox, 0, wxALL, 5)
+        playerSizer = wx.BoxSizer(wx.HORIZONTAL)
+        playerSizer.Add(playerBox, 0, wx.ALL, 5)
+        playerSizer.Add(allPlayerBox, 0, wx.ALL, 5)
 
-        buttonSizer = wxBoxSizer(wxHORIZONTAL)
-        buttonSizer.Add(wxButton(self, wxID_CANCEL, "Cancel"),
-                                 0, wxALL | wxALIGN_CENTER, 5)
-        buttonSizer.Add(wxButton(self, wxID_OK, "OK"), 0,
-                        wxALL | wxALIGN_CENTER, 5)
+        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+        buttonSizer.Add(wx.Button(self, wx.ID_CANCEL, "Cancel"),
+                        0, wx.ALL | wx.ALIGN_CENTER, 5)
+        buttonSizer.Add(wx.Button(self, wx.ID_OK, "OK"),
+                        0, wx.ALL | wx.ALIGN_CENTER, 5)
 
-        topSizer = wxBoxSizer(wxVERTICAL)
+        topSizer = wx.BoxSizer(wx.VERTICAL)
 
-        topSizer.Add(sizer, 0, wxALL, 5)
-        topSizer.Add(playerSizer, 0, wxALL, 5)
-        topSizer.Add(buttonSizer, 0, wxALIGN_RIGHT, 5)
+        topSizer.Add(sizer, 0, wx.ALL, 5)
+        topSizer.Add(playerSizer, 0, wx.ALL, 5)
+        topSizer.Add(buttonSizer, 0, wx.ALIGN_RIGHT, 5)
 
         self.SetSizer(topSizer)
         self.Layout()
@@ -211,9 +203,9 @@ class EditTeamDialog(wxDialog):
                                     self.book.GetPlayer(y).GetSortName().upper()))
             self.players.InsertStringItem(self.playerIDs.index(playerID), entry)
             self.players.SetItemTextColour(self.playerIDs.index(playerID),
-                                           wxColour(0, 192, 0))
+                                           wx.Colour(0, 192, 0))
             self.players.EnsureVisible(self.playerIDs.index(playerID))
-            self.allPlayers.SetItemTextColour(event.GetIndex(), wxBLUE)
+            self.allPlayers.SetItemTextColour(event.GetIndex(), wx.BLUE)
 
     def UpdateTeam(self):
         for p in self.playerIDs:
@@ -224,10 +216,10 @@ class EditTeamDialog(wxDialog):
                                     player.GetBats(), player.GetThrows(),
                                     self.team.GetID())
 
-class TeamListCtrl(wxListCtrl):
+class TeamListCtrl(wx.ListCtrl):
     def __init__(self, parent):
-        wxListCtrl.__init__(self, parent, -1,
-                            style = wxLC_VIRTUAL | wxLC_REPORT | wxLC_SINGLE_SEL)
+        wx.ListCtrl.__init__(self, parent, -1,
+                            style = wx.LC_VIRTUAL | wx.LC_REPORT | wx.LC_SINGLE_SEL)
 
         self.InsertColumn(0, "City")
         self.InsertColumn(1, "Nickname")
@@ -239,12 +231,12 @@ class TeamListCtrl(wxListCtrl):
         self.SetColumnWidth(2, 100)
         self.SetColumnWidth(3, 100)
 
-        item = wxListItem()
-        item.m_format = wxLIST_FORMAT_CENTRE
-        item.m_mask = wxLIST_MASK_FORMAT
+        item = wx.ListItem()
+        item.m_format = wx.LIST_FORMAT_CENTRE
+        item.m_mask = wx.LIST_MASK_FORMAT
         for col in [2, 3]:  self.SetColumn(col, item)
 
-        EVT_LIST_ITEM_ACTIVATED(self, self.GetId(), self.OnItemActivate)
+        wx.EVT_LIST_ITEM_ACTIVATED(self, self.GetId(), self.OnItemActivate)
 
     def OnUpdate(self, book):
         self.book = book
@@ -265,7 +257,7 @@ class TeamListCtrl(wxListCtrl):
         team = [x for x in self.book.Teams()][event.GetIndex()]
 
         dialog = EditTeamDialog(self, self.book, team)
-        if dialog.ShowModal() == wxID_OK:
+        if dialog.ShowModal() == wx.ID_OK:
             self.book.ModifyTeam(team.GetID(),
                                  dialog.GetCity(),
                                  dialog.GetNickname(),
@@ -273,21 +265,21 @@ class TeamListCtrl(wxListCtrl):
             dialog.UpdateTeam()
             self.GetParent().GetGrandParent().OnUpdate()
 
-class TeamListPanel(wxPanel):
+class TeamListPanel(wx.Panel):
     def __init__(self, parent):
-        wxPanel.__init__(self, parent, -1)
+        wx.Panel.__init__(self, parent, wx.ID_ANY)
 
-        newTeamButton = wxButton(self, -1, "Add team")
-        newTeamButton.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+        newTeamButton = wx.Button(self, wx.ID_ANY, "Add team")
+        newTeamButton.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
         self.teamList = TeamListCtrl(self)
 
-        sizer = wxBoxSizer(wxVERTICAL)
-        sizer.Add(newTeamButton, 0, wxALL | wxALIGN_CENTER, 5)
-        sizer.Add(self.teamList, 1, wxEXPAND, 0)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(newTeamButton, 0, wx.ALL | wx.ALIGN_CENTER, 5)
+        sizer.Add(self.teamList, 1, wx.EXPAND, 0)
         self.SetSizer(sizer)
         self.Layout()
 
-        EVT_BUTTON(self, newTeamButton.GetId(), self.OnAddTeam)
+        wx.EVT_BUTTON(self, newTeamButton.GetId(), self.OnAddTeam)
 
     def OnUpdate(self, book):
         self.book = book
@@ -296,7 +288,7 @@ class TeamListPanel(wxPanel):
     def OnAddTeam(self, event):
         dialog = AddTeamDialog(self, self.book)
 
-        if dialog.ShowModal() == wxID_OK:
+        if dialog.ShowModal() == wx.ID_OK:
             self.book.AddTeam(dialog.GetTeamID(),
                               dialog.GetCity(), dialog.GetNickname(),
                               dialog.GetLeague())

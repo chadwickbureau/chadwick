@@ -1,4 +1,30 @@
-from wxPython.wx import *
+#
+# $Source$
+# $Date$
+# $Revision$
+#
+# DESCRIPTION:
+# Panel to display boxscore
+#
+# This file is part of Chadwick, a library for baseball play-by-play and stats
+# Copyright (C) 2005, Ted Turocy (turocy@econ.tamu.edu)
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+
+import wx
 from libchadwick import *
 import string
 
@@ -12,17 +38,16 @@ def PositionList(rec):
     pos = [ "", "p", "c", "1b", "2b", "3b", "ss", "lf", "cf", "rf", "dh", "ph", "pr" ]
     return string.join([ pos[i] for i in rec["pos"] ], "-")
     
-class BoxscorePanel(wxPanel):
+class BoxscorePanel(wx.Panel):
     def __init__(self, parent):
-        wxPanel.__init__(self, parent, -1)
+        wx.Panel.__init__(self, parent, wx.ID_ANY)
 
-        self.text = wxTextCtrl(self, -1, "",
-                               wxDefaultPosition, wxDefaultSize,
-                               wxTE_MULTILINE | wxTE_READONLY)
-        self.text.SetFont(wxFont(10, wxMODERN, wxNORMAL, wxNORMAL))
+        self.text = wx.TextCtrl(self, wx.ID_ANY, "",
+                                style = wx.TE_MULTILINE | wx.TE_READONLY)
+        self.text.SetFont(wx.Font(10, wx.MODERN, wx.NORMAL, wx.NORMAL))
          
-        sizer = wxBoxSizer(wxVERTICAL)
-        sizer.Add(self.text, 1, wxEXPAND, 0)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self.text, 1, wx.EXPAND, 0)
 
         self.SetSizer(sizer)
         self.Layout()

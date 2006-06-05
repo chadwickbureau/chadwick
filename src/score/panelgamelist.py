@@ -24,18 +24,17 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-from wxPython.wx import *
-from wxPython.grid import *
+import wx
 from libchadwick import *
 
 from wxutils import FormattedStaticText
 from dialogboxview import BoxscoreViewDialog
 from gameeditor import GameEditor
 
-class GameListCtrl(wxListCtrl):
+class GameListCtrl(wx.ListCtrl):
     def __init__(self, parent):
-        wxListCtrl.__init__(self, parent, -1,
-                            style = wxLC_VIRTUAL | wxLC_REPORT | wxLC_SINGLE_SEL)
+        wx.ListCtrl.__init__(self, parent, wx.ID_ANY,
+                             style = wx.LC_VIRTUAL | wx.LC_REPORT | wx.LC_SINGLE_SEL)
         self.filter = lambda x: True
 
         self.InsertColumn(0, "Date")
@@ -54,13 +53,13 @@ class GameListCtrl(wxListCtrl):
         self.SetColumnWidth(5, 150)
         self.SetColumnWidth(6, 150)
 
-        item = wxListItem()
-        item.m_format = wxLIST_FORMAT_CENTRE
-        item.m_mask = wxLIST_MASK_FORMAT
+        item = wx.ListItem()
+        item.m_format = wx.LIST_FORMAT_CENTRE
+        item.m_mask = wx.LIST_MASK_FORMAT
         for col in range(7):  self.SetColumn(col, item)
 
-        EVT_LIST_ITEM_ACTIVATED(self, self.GetId(), self.OnItemActivate)
-        EVT_LIST_KEY_DOWN(self, self.GetId(), self.OnKeyDown)
+        wx.EVT_LIST_ITEM_ACTIVATED(self, self.GetId(), self.OnItemActivate)
+        wx.EVT_LIST_KEY_DOWN(self, self.GetId(), self.OnKeyDown)
         
     def OnUpdate(self, book, f):
         """
@@ -110,13 +109,13 @@ class GameListCtrl(wxListCtrl):
         dialog.ShowModal()
 
     def OnKeyDown(self, event):
-        if event.GetKeyCode() == WXK_DELETE:
+        if event.GetKeyCode() == WX.K_DELETE:
             game = self.games[event.GetIndex()]
-            dialog = wxMessageDialog(self,
-                                     "Are you sure you want to delete this game?",
-                                     "Confirm delete",
-                                     wxOK | wxCANCEL)
-            if dialog.ShowModal() == wxID_OK:
+            dialog = wx.MessageDialog(self,
+                                      "Are you sure you want to delete this game?",
+                                      "Confirm delete",
+                                      wx.OK | wx.CANCEL)
+            if dialog.ShowModal() == wx.ID_OK:
                 self.book.RemoveGame(game)
                 self.GetParent().GetGrandParent().OnUpdate()
         else:
@@ -126,43 +125,43 @@ class GameListCtrl(wxListCtrl):
 
 CW_MENU_GAME_NEW = 2000
 
-class GameListPanel(wxPanel):
+class GameListPanel(wx.Panel):
     def __init__(self, parent):
-        wxPanel.__init__(self, parent, -1)
+        wx.Panel.__init__(self, parent, -1)
 
-        filterSizer = wxBoxSizer(wxHORIZONTAL)
+        filterSizer = wx.BoxSizer(wx.HORIZONTAL)
         filterSizer.Add(FormattedStaticText(self, "Show games involving"),
-                        0, wxALL | wxALIGN_CENTER, 5)
-        self.teamList = wxChoice(self, -1, wxDefaultPosition, wxSize(250, -1))
-        self.teamList.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+                        0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.teamList = wx.Choice(self, wx.ID_ANY, size = (250, -1))
+        self.teamList.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
         self.teamList.Clear()
         self.teamList.Append("all teams")
         self.teamList.SetSelection(0)
-        filterSizer.Add(self.teamList, 0, wxALL | wxALIGN_CENTER, 5)
+        filterSizer.Add(self.teamList, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
-        newGameButton = wxButton(self, CW_MENU_GAME_NEW, "Enter new game")
-        newGameButton.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+        newGameButton = wx.Button(self, CW_MENU_GAME_NEW, "Enter new game")
+        newGameButton.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
 
         self.gameList = GameListCtrl(self)
 
-        sizer = wxBoxSizer(wxVERTICAL)
+        sizer = wx.BoxSizer(wx.VERTICAL)
 
-        toolSizer = wxBoxSizer(wxHORIZONTAL)
-        toolSizer.Add(filterSizer, 0, wxALL | wxALIGN_CENTER, 5)
-        toolSizer.Add(wxSize(30, 1))
-        toolSizer.Add(newGameButton, 0, wxALL | wxALIGN_CENTER, 5)
-        sizer.Add(toolSizer, 0, wxALL | wxALIGN_CENTER, 5)
-        sizer.Add(self.gameList, 1, wxEXPAND, 0)
+        toolSizer = wx.BoxSizer(wx.HORIZONTAL)
+        toolSizer.Add(filterSizer, 0, wx.ALL | wx.ALIGN_CENTER, 5)
+        toolSizer.Add(wx.Size(30, 1))
+        toolSizer.Add(newGameButton, 0, wx.ALL | wx.ALIGN_CENTER, 5)
+        sizer.Add(toolSizer, 0, wx.ALL | wx.ALIGN_CENTER, 5)
+        sizer.Add(self.gameList, 1, wx.EXPAND, 0)
         self.SetSizer(sizer)
         self.Layout()
 
-        EVT_CHOICE(self, self.teamList.GetId(), self.OnTeamFilter)
+        wx.EVT_CHOICE(self, self.teamList.GetId(), self.OnTeamFilter)
 
     def OnUpdate(self, book):
         self.book = book
         teamChoice = self.teamList.GetStringSelection()
         self.teamList.Clear()
-        self.teamList.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+        self.teamList.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
         self.teamList.Append("all teams")
         for team in book.Teams():
             self.teamList.Append(team.GetName())

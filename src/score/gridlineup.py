@@ -24,23 +24,21 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-from wxPython.wx import *
-from wxPython.grid import *
+import wx, wx.grid
 from libchadwick import *
 
-class LineupGrid(wxScrolledWindow):
+class LineupGrid(wx.ScrolledWindow):
     def __init__(self, parent, team):
-        wxScrolledWindow.__init__(self, parent, -1,
-                                  wxDefaultPosition,
-                                  wxSize(270, 265))
-        self.SetBackgroundColour(wxWHITE)
+        wx.ScrolledWindow.__init__(self, parent, wx.ID_ANY, size=(270, 265))
+
+        self.SetBackgroundColour(wx.WHITE)
         self.team = team
         if self.team == 0:
-            self.fgColor = wxRED
+            self.fgColor = wx.RED
         else:
-            self.fgColor = wxBLUE
-        self.bgColors = [ wxColour(225, 225, 225), wxWHITE ]
-        self.outlineColor = wxColour(0, 150, 0)
+            self.fgColor = wx.BLUE
+        self.bgColors = [ wx.Colour(225, 225, 225), wx.WHITE ]
+        self.outlineColor = wx.Colour(0, 150, 0)
 
         EVT_PAINT(self, self.OnPaint)
 
@@ -49,7 +47,7 @@ class LineupGrid(wxScrolledWindow):
         self.OnUpdate()
         
     def OnPaint(self, event):
-        dc = wxPaintDC(self)
+        dc = wx.PaintDC(self)
         self.DoPrepareDC(dc)
         self.Draw(dc)
 
@@ -64,21 +62,21 @@ class LineupGrid(wxScrolledWindow):
     def Draw(self, dc):
         if not hasattr(self, "doc"):  return
 
-        memdc = wxMemoryDC()
-        bitmap = wxEmptyBitmap(270, 265)
+        memdc = wx.MemoryDC()
+        bitmap = wx.EmptyBitmap(270, 265)
         memdc.SelectObject(bitmap)
         memdc.Clear()
         positions = [ "", "p", "c", "1b", "2b", "3b", "ss",
                       "lf", "cf", "rf", "dh", "ph", "pr" ]
         
         roster = self.doc.GetRoster(self.team)
-        memdc.SetFont(wxFont(11, wxSWISS, wxNORMAL, wxBOLD))
-        memdc.SetPen(wxPen(self.outlineColor, 1, wxSOLID))
+        memdc.SetFont(wx.Font(11, wx.SWISS, wx.NORMAL, wx.BOLD))
+        memdc.SetPen(wx.Pen(self.outlineColor, 1, wx.SOLID))
 
         height = 24
 
         memdc.SetTextForeground(self.fgColor)
-        memdc.SetBrush(wxBrush(wxColour(190, 190, 190), wxSOLID))
+        memdc.SetBrush(wx.Brush(wx.Colour(190, 190, 190), wx.SOLID))
         memdc.DrawRectangle(0, 0, 270, height)
         self.DrawCenteredText(memdc, roster.GetName(), 135, height/2)
         for slot in range(10):
@@ -87,7 +85,7 @@ class LineupGrid(wxScrolledWindow):
             if slot < 9:
                 playerId = self.doc.GetCurrentPlayer(self.team, slot+1)
                 if self.doc.gameiter.NumBatters(self.team) % 9 == slot:
-                    memdc.SetTextForeground(wxBLACK)
+                    memdc.SetTextForeground(wx.BLACK)
                 else:
                     memdc.SetTextForeground(self.fgColor)
             else:
@@ -97,11 +95,11 @@ class LineupGrid(wxScrolledWindow):
             if slot == 9:
                 # Only draw the last one if the DH is in use
                 if playerId != None:
-                    memdc.SetBrush(wxBrush(wxColour(210, 210, 210), wxSOLID))
+                    memdc.SetBrush(wx.Brush(wx.Colour(210, 210, 210), wx.SOLID))
                 else:
                     continue
             else:
-                memdc.SetBrush(wxBrush(self.bgColors[slot%2], wxSOLID))
+                memdc.SetBrush(wx.Brush(self.bgColors[slot%2], wx.SOLID))
 
             memdc.DrawRectangle(0, (slot+1) * height, 31, height+1)
             memdc.DrawRectangle(30, (slot+1) * height, 201, height+1)
@@ -129,6 +127,6 @@ class LineupGrid(wxScrolledWindow):
 
 
     def OnUpdate(self):
-        self.Draw(wxClientDC(self))
+        self.Draw(wx.ClientDC(self))
 
 

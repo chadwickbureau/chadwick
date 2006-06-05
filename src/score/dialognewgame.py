@@ -24,9 +24,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-from wxPython.wx import *
-from wxPython.grid import *
-from wxPython.calendar import *
+import wx, wx.grid, wx.calendar
 from libchadwick import *
 
 def iterate_teams(league):
@@ -36,65 +34,65 @@ def iterate_teams(league):
         x = x.next
     raise StopIteration
 
-class NewGameDialog(wxDialog):
+class NewGameDialog(wx.Dialog):
     def __init__(self, parent, f):
-        wxDialog.__init__(self, parent, -1, "Select teams")
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, "Select teams")
 
-        sizer = wxBoxSizer(wxVERTICAL)
+        sizer = wx.BoxSizer(wx.VERTICAL)
 
-        gridSizer = wxFlexGridSizer(2)
+        gridSizer = wx.FlexGridSizer(2)
         gridSizer.AddGrowableCol(1)
 
-        self.teams = [ wxChoice(self, -1,
-                                wxDefaultPosition, wxDefaultSize,
-                                [ ] )
+        self.teams = [ wx.Choice(self, wx.ID_ANY,
+                                 wx.DefaultPosition, wx.DefaultSize,
+                                 [ ] )
                        for t in [0, 1] ]
         for ctrl in self.teams:
-            ctrl.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+            ctrl.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
             
         # Control to select visiting team
-        gridSizer.Add(wxStaticText(self, wxID_STATIC, "Visiting team"),
-                      0, wxALL | wxALIGN_CENTER, 5)
-        gridSizer.Add(self.teams[0], 0, wxALL | wxEXPAND, 5)
+        gridSizer.Add(wx.StaticText(self, wx.ID_STATIC, "Visiting team"),
+                      0, wx.ALL | wx.ALIGN_CENTER, 5)
+        gridSizer.Add(self.teams[0], 0, wx.ALL | wx.EXPAND, 5)
 
         # Control to select home team
-        gridSizer.Add(wxStaticText(self, wxID_STATIC, "Home team"),
-                      0, wxALL | wxALIGN_CENTER, 5)
-        gridSizer.Add(self.teams[1], 0, wxALL | wxEXPAND, 5)
-        sizer.Add(gridSizer, 0, wxALL | wxEXPAND, 5)
+        gridSizer.Add(wx.StaticText(self, wx.ID_STATIC, "Home team"),
+                      0, wx.ALL | wx.ALIGN_CENTER, 5)
+        gridSizer.Add(self.teams[1], 0, wx.ALL | wx.EXPAND, 5)
+        sizer.Add(gridSizer, 0, wx.ALL | wx.EXPAND, 5)
 
-        box = wxStaticBox(self, wxID_STATIC, "Game date")
-        boxSizer = wxStaticBoxSizer(box, wxVERTICAL)
+        box = wx.StaticBox(self, wx.ID_STATIC, "Game date")
+        boxSizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 
-        now = wxDateTime.Now()
+        now = wx.DateTime.Now()
         now.SetYear(f.GetYear())
 
-        self.gameDate = wxCalendarCtrl(self, -1, now,
-                                       wxDefaultPosition,
-                                       wxSize(300, -1))
-        boxSizer.Add(self.gameDate, 1, wxALL | wxALIGN_CENTER, 5)
+        self.gameDate = wx.calendar.CalendarCtrl(self, wx.ID_ANY,
+                                                 now, size=(300, -1))
+        boxSizer.Add(self.gameDate, 1, wx.ALL | wx.ALIGN_CENTER, 5)
 
-        sizer.Add(boxSizer, 1, wxALL | wxEXPAND | wxALIGN_CENTER, 5)
+        sizer.Add(boxSizer, 1, wx.ALL | wx.EXPAND | wx.ALIGN_CENTER, 5)
         
-        self.gameNumber = wxRadioBox(self, -1, "Game number",
-                                     wxDefaultPosition, wxDefaultSize,
-                                     [ "Only game", "First game", "Second game" ])
-        sizer.Add(self.gameNumber, 0, wxALL | wxEXPAND | wxALIGN_CENTER, 5)
+        self.gameNumber = wx.RadioBox(self, -1, "Game number",
+                                      wx.DefaultPosition, wx.DefaultSize,
+                                      [ "Only game", "First game",
+                                        "Second game" ])
+        sizer.Add(self.gameNumber, 0, wx.ALL | wx.EXPAND | wx.ALIGN_CENTER, 5)
 
-        #self.pitches = wxRadioBox(self, -1, "Enter pitches?",
-        #                          wxDefaultPosition, wxDefaultSize,
+        #self.pitches = wx.RadioBox(self, -1, "Enter pitches?",
+        #                          wx.DefaultPosition, wx.DefaultSize,
         #                          [ "No pitches", "Count only", "All pitches" ])
         #self.pitches.SetSelection(0)
-        #sizer.Add(self.pitches, 0, wxALL | wxEXPAND | wxALIGN_CENTER, 5)
+        #sizer.Add(self.pitches, 0, wx.ALL | wx.EXPAND | wx.ALIGN_CENTER, 5)
         
         self.UpdateTeamLists(f)
                                      
-        buttonSizer = wxBoxSizer(wxHORIZONTAL)
-        buttonSizer.Add(wxButton(self, wxID_CANCEL, "Cancel"),
-                        0, wxALL | wxALIGN_CENTER, 5)
-        buttonSizer.Add(wxButton(self, wxID_OK, "OK"), 0,
-                        wxALL | wxALIGN_CENTER, 5)
-        sizer.Add(buttonSizer, 0, wxALIGN_RIGHT, 5)
+        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+        buttonSizer.Add(wx.Button(self, wx.ID_CANCEL, "Cancel"),
+                        0, wx.ALL | wx.ALIGN_CENTER, 5)
+        buttonSizer.Add(wx.Button(self, wx.ID_OK, "OK"),
+                        0, wx.ALL | wx.ALIGN_CENTER, 5)
+        sizer.Add(buttonSizer, 0, wx.ALIGN_RIGHT, 5)
         
         self.SetSizer(sizer)
         self.Layout()
@@ -114,8 +112,8 @@ class NewGameDialog(wxDialog):
         self.teams[0].SetSelection(0)
         self.teams[1].SetSelection(0)
 
-        self.teams[0].SetForegroundColour(wxRED)
-        self.teams[1].SetForegroundColour(wxBLUE)
+        self.teams[0].SetForegroundColour(wx.RED)
+        self.teams[1].SetForegroundColour(wx.BLUE)
 
         gamedate = self.gameDate.GetDate()
         gamedate.SetYear(f.GetYear())

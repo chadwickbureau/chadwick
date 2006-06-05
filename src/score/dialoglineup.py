@@ -24,59 +24,58 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-from wxPython.wx import *
+import wx
 from libchadwick import *
 
-class LineupDialog(wxDialog):
+class LineupDialog(wx.Dialog):
     def __init__(self, parent, title):
-        wxDialog.__init__(self, parent, -1, title)
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, title)
 
-        sizer = wxBoxSizer(wxVERTICAL)
+        sizer = wx.BoxSizer(wx.VERTICAL)
 
-        gridSizer = wxFlexGridSizer(10)
+        gridSizer = wx.FlexGridSizer(10)
 
-        self.players = [ wxChoice(self, -1, wxDefaultPosition,
-                                  wxSize(300, -1)) for i in range(10) ]
-        self.positions = [ wxChoice(self, -1,
-                                    wxDefaultPosition, wxSize(50, -1)) 
-                                    for i in range(10) ]
+        self.players = [ wx.Choice(self, wx.ID_ANY, size=(300, -1))
+                         for i in range(10) ]
+        self.positions = [ wx.Choice(self, wx.ID_ANY, size=(50, -1))
+                           for i in range(10) ]
         
 
         for i in range(10):
             if i < 9:
-                gridSizer.Add(wxStaticText(self, wxID_STATIC, "%d" % (i+1)),
-                              0, wxALL | wxALIGN_CENTER, 5)
+                gridSizer.Add(wx.StaticText(self, wx.ID_STATIC, "%d" % (i+1)),
+                              0, wx.ALL | wx.ALIGN_CENTER, 5)
             else:
-                self.pitcherText = wxStaticText(self, wxID_STATIC, "P")
+                self.pitcherText = wx.StaticText(self, wx.ID_STATIC, "P")
                 gridSizer.Add(self.pitcherText,
-                              0, wxALL | wxALIGN_CENTER, 5)
+                              0, wx.ALL | wx.ALIGN_CENTER, 5)
                 
-            self.players[i].SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-            gridSizer.Add(self.players[i], 0, wxALL | wxALIGN_CENTER, 5)
-            EVT_CHOICE(self, self.players[i].GetId(), self.OnSetEntry)
-            self.positions[i].SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
-            gridSizer.Add(self.positions[i], 0, wxALL | wxALIGN_CENTER, 5)
-            EVT_CHOICE(self, self.positions[i].GetId(), self.OnSetEntry)
+            self.players[i].SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+            gridSizer.Add(self.players[i], 0, wx.ALL | wx.ALIGN_CENTER, 5)
+            wx.EVT_CHOICE(self, self.players[i].GetId(), self.OnSetEntry)
+            self.positions[i].SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+            gridSizer.Add(self.positions[i], 0, wx.ALL | wx.ALIGN_CENTER, 5)
+            wx.EVT_CHOICE(self, self.positions[i].GetId(), self.OnSetEntry)
 
-        self.pitcherText.Show(false)
-        self.players[-1].Show(false)
-        self.positions[-1].Show(false)
+        self.pitcherText.Show(False)
+        self.players[-1].Show(False)
+        self.positions[-1].Show(False)
 
-        sizer.Add(gridSizer, 0, wxALL, 0)
+        sizer.Add(gridSizer, 0, wx.ALL, 0)
 
-        buttonSizer = wxBoxSizer(wxHORIZONTAL)
-        buttonSizer.Add(wxButton(self, wxID_CANCEL, "Cancel"),
-                                 0, wxALL | wxALIGN_CENTER, 5)
-        buttonSizer.Add(wxButton(self, wxID_OK, "OK"), 0,
-                        wxALL | wxALIGN_CENTER, 5)
-        self.FindWindowById(wxID_OK).Enable(false)
-        sizer.Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5)
+        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+        buttonSizer.Add(wx.Button(self, wx.ID_CANCEL, "Cancel"),
+                        0, wx.ALL | wx.ALIGN_CENTER, 5)
+        buttonSizer.Add(wx.Button(self, wx.ID_OK, "OK"),
+                        0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.FindWindowById(wx.ID_OK).Enable(False)
+        sizer.Add(buttonSizer, 0, wx.ALL | wx.ALIGN_RIGHT, 5)
         
         self.SetSizer(sizer)
         self.Layout()
         sizer.SetSizeHints(self)
 
-        EVT_BUTTON(self, wxID_OK, self.OnOK)
+        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOK)
 
     def OnOK(self, event):
         # Do some validation
@@ -99,22 +98,22 @@ class LineupDialog(wxDialog):
         self.pitcherText.Show(self.HasDH())
         self.players[-1].Show(self.HasDH())
 
-        lineupOK = true
+        lineupOK = True
 
         for slot in range(9):
             if (self.players[slot].GetSelection() == 0 or
                 self.positions[slot].GetSelection() == 0):
-                lineupOK = false
+                lineupOK = False
                 break
 
             if self.HasDH() and self.positions[slot] == 1:
-                lineupOK = false
+                lineupOK = False
                 break
 
         if self.HasDH():
             numSlots = 10
             if self.players[-1].GetSelection() == 0:
-                lineupOK = false
+                lineupOK = False
         else:
             numSlots = 9
             
@@ -124,18 +123,16 @@ class LineupDialog(wxDialog):
                     self.players[slot2].GetSelection() or
                     self.positions[slot].GetSelection() ==
                     self.positions[slot2].GetSelection()):
-                    lineupOK = false
+                    lineupOK = False
         
-        self.FindWindowById(wxID_OK).Enable(lineupOK)
+        self.FindWindowById(wx.ID_OK).Enable(lineupOK)
 
     def LoadRoster(self, roster, team, useDH):
         self.roster = roster
-        if useDH:
-            posList = [ "p", "c", "1b", "2b", "3b", "ss", "lf", "cf", "rf", "dh" ]
-        else:
-            posList = [ "p", "c", "1b", "2b", "3b", "ss", "lf", "cf", "rf" ]
+        posList = [ "p", "c", "1b", "2b", "3b", "ss", "lf", "cf", "rf" ]
+        if useDH:  posList += [ "dh" ]
 
-        fgColors = [ wxRED, wxBLUE ]
+        fgColors = [ wx.RED, wx.BLUE ]
 
         for ctrl in self.players:
             ctrl.Clear()
@@ -159,8 +156,8 @@ class LineupDialog(wxDialog):
 
         pitcher = gameiter.GetPlayer(team, 0)
         if pitcher != None:
-            self.pitcherText.Show(true)
-            self.players[-1].Show(true)
+            self.pitcherText.Show(True)
+            self.players[-1].Show(True)
 
             for player in self.roster.Players():
                 if player.player_id == pitcher:
@@ -196,8 +193,8 @@ class LineupDialog(wxDialog):
     def HasDH(self):
         for slot in range(9):
             if self.positions[slot].GetSelection() == 10:
-                return true
-        return false
+                return True
+        return False
 
     def WriteChanges(self, doc, team):
         for slot in range(9):
@@ -214,35 +211,35 @@ class LineupDialog(wxDialog):
                 player = self.GetPlayerInSlot(10)
                 doc.AddSubstitute(player, team, 0, 1)
 
-class PinchDialog(wxDialog):
+class PinchDialog(wx.Dialog):
     def __init__(self, parent, title):
-        wxDialog.__init__(self, parent, -1, title)
+        wx.Dialog.__init__(self, parent, -1, title)
 
-        sizer = wxBoxSizer(wxVERTICAL)
+        sizer = wx.BoxSizer(wx.VERTICAL)
 
-        self.player = wxChoice(self, -1, wxDefaultPosition,
-                               wxSize(300, -1))
-        self.player.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD))
+        self.player = wx.Choice(self, -1, wx.DefaultPosition,
+                               wx.Size(300, -1))
+        self.player.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
 
-        sizer.Add(self.player, 0, wxALL | wxALIGN_CENTER, 5)
+        sizer.Add(self.player, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
-        buttonSizer = wxBoxSizer(wxHORIZONTAL)
-        buttonSizer.Add(wxButton(self, wxID_CANCEL, "Cancel"),
-                                 0, wxALL | wxALIGN_CENTER, 5)
-        buttonSizer.Add(wxButton(self, wxID_OK, "OK"), 0,
-                        wxALL | wxALIGN_CENTER, 5)
-        self.FindWindowById(wxID_OK).Enable(false)
-        sizer.Add(buttonSizer, 0, wxALIGN_RIGHT, 5)
+        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+        buttonSizer.Add(wx.Button(self, wx.ID_CANCEL, "Cancel"),
+                                 0, wx.ALL | wx.ALIGN_CENTER, 5)
+        buttonSizer.Add(wx.Button(self, wx.ID_OK, "OK"), 0,
+                        wx.ALL | wx.ALIGN_CENTER, 5)
+        self.FindWindowById(wx.ID_OK).Enable(False)
+        sizer.Add(buttonSizer, 0, wx.ALIGN_RIGHT, 5)
         
         self.SetSizer(sizer)
         self.Layout()
         sizer.SetSizeHints(self)
         
-        EVT_CHOICE(self, self.player.GetId(), self.OnSetPlayer)
+        wx.EVT_CHOICE(self, self.player.GetId(), self.OnSetPlayer)
 
     def OnSetPlayer(self, event):
         if self.player.GetSelection() >= 0:
-            self.FindWindowById(wxID_OK).Enable(true)
+            self.FindWindowById(wx.ID_OK).Enable(True)
             
     def LoadRoster(self, roster, team):
         self.roster = roster
@@ -252,9 +249,9 @@ class PinchDialog(wxDialog):
             self.player.Append(player.GetName())
 
         if team == 0:
-            self.player.SetForegroundColour(wxRED)
+            self.player.SetForegroundColour(wx.RED)
         else:
-            self.player.SetForegroundColour(wxBLUE)
+            self.player.SetForegroundColour(wx.BLUE)
         
     def WriteChanges(self, doc, oldPlayer, team, pos):
         player = self.GetPlayer()
