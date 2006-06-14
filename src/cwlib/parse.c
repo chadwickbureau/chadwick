@@ -164,13 +164,14 @@ cw_parse_nextsym(CWParserState *state)
     state->sym = 0;
   }
   else {
-    /* This was made a loop since there exists a string in 75SLN.EVN
-     * of the form 3-H#(UR).  Having the hash in the middle is obnoxious,
-     * but it implies it can appear anywhere in the text.  So we'll just
-     * ignore it for now. */
+    /* There are instances of the uncertain play character '#'
+     * or the great play character '!' appearing inside play strings.
+     * Since these are largely for human consumption (and the program
+     * doesn't do anything with the data), we ignore them here.
+     */
     do {
       state->sym = state->inputString[state->inputPos++];
-    } while (state->sym == '#');
+    } while (state->sym == '#' || state->sym == '!');
   }
   return state->sym;
 }
