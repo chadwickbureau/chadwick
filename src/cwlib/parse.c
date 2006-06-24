@@ -401,7 +401,9 @@ static void parse_flag(CWParserState *state)
     cw_parse_nextsym(state);
     if (state->sym != '/' && state->sym != '.' && 
 	state->sym != '(' && state->sym != ')' &&
-	state->sym != '#' && state->sym != '!' && state->sym != 0) {
+	state->sym != '#' && state->sym != '!' && 
+	state->sym != '+' && state->sym != '-' &&
+	state->sym != 0) {
       (*c++) = state->sym;
     }
     else {
@@ -550,11 +552,13 @@ static void parse_flags(CWParserState *state, CWParsedEvent *event)
     do {
       cw_parse_nextsym(state);
       if (state->sym != '/' && state->sym != '.' && 
-	  state->sym != '#' && state->sym != '!' && state->sym != 0) {
+	  state->sym != '#' && state->sym != '!' && 
+	  state->sym != '+' && state->sym != '-' && state->sym != 0) {
 	strncat(flag, &(state->sym), 1); 
       }
     } while (state->sym != '/' && state->sym != '.' && 
-	     state->sym != '#' && state->sym != '!' && state->sym != 0);
+	     state->sym != '#' && state->sym != '!' && 
+	     state->sym != '+' && state->sym != '-' && state->sym != 0);
 
     if (!strcmp(flag, "/SH") || !strcmp(flag, "/SAC")) {
       event->sh_flag = 1;
