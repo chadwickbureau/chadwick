@@ -1633,7 +1633,7 @@ static int parse_advancement(CWParserState *state, CWParsedEvent *event)
 /*
  * Cleanup and so forth
  */
-void SanityCheck(CWParsedEvent *event)
+void sanity_check(CWParsedEvent *event)
 {
   int base;
 
@@ -1674,6 +1674,11 @@ void SanityCheck(CWParsedEvent *event)
     event->rbi_flag[1] = 0;
     event->rbi_flag[2] = 0;
   }
+
+  if (event->event_type == CW_EVENT_FOULERROR) {
+    event->foul_flag = 1;
+  }
+
 
   for (base = 0; base <= 3; base++) {
     if (event->rbi_flag[base] == -1) {
@@ -1801,7 +1806,7 @@ int cw_parse_event(char *text, CWParsedEvent *event)
   }
 
 
-  SanityCheck(event);
+  sanity_check(event);
   cw_parse_cleanup(&state);
   return 1;
 }
