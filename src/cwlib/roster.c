@@ -255,10 +255,13 @@ cw_roster_read(CWRoster *roster, FILE *file)
   while (!feof(file)) {
     strcpy(buf, "");
     fgets(buf, 256, file);
-    if ((numTokens = cw_file_tokenize_line(buf, tokens)) != 5) {
+    if ((numTokens = cw_file_tokenize_line(buf, tokens)) < 5) {
       continue;
     }
 
+    /* TODO: Some Retrosheet roster files have additional fields
+     * at the end.  Preserve these (and write them out in cw_roster_write() ).
+     */
     cw_roster_player_append(roster, 
 			    cw_player_create(tokens[0], tokens[1], tokens[2],
 					     tokens[3][0], tokens[4][0]));
