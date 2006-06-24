@@ -384,15 +384,15 @@ cw_gameiter_next(CWGameIterator *gameiter)
 
     cw_gameiter_process_advance(gameiter);
 
+    if (gameiter->removed_for_ph) {
+      free(gameiter->removed_for_ph);
+      gameiter->removed_for_ph = NULL;
+    }
+
     if (cw_event_is_batter(gameiter->event_data)) {
       gameiter->num_batters[gameiter->half_inning]++;
       gameiter->ph_flag = 0;
       gameiter->is_leadoff = 0;
-
-      if (gameiter->removed_for_ph) {
-	free(gameiter->removed_for_ph);
-	gameiter->removed_for_ph = NULL;
-      }
 
       if (gameiter->walk_pitcher) {
 	free(gameiter->walk_pitcher);
