@@ -1449,6 +1449,13 @@ static int parse_strikeout(CWParserState *state, CWParsedEvent *event,
     else if (!strcmp(state->token, "TP")) {
       event->tp_flag = 1;
     }
+    else if (!strcmp(state->token, "B")) {
+      event->bunt_flag = 1;
+      /* This is to match bevent's output.  Apparently, bevent believes
+       * that K/B is reserved for foul bunt strikeouts, and not strikeouts
+       * on missed bunt attempts. */
+      event->batted_ball_type = 'G';
+    }
     else {
       /* Do nothing.  In theory, there shouldn't be any other flags other
        * than the list above.  In practice, there are in the Retrosheet
@@ -1653,7 +1660,6 @@ void SanityCheck(CWParsedEvent *event)
   }
 
   if (event->event_type == CW_EVENT_STRIKEOUT)  {
-    event->batted_ball_type = ' ';
     if (!strcmp(event->play[0], "2") && 
 	event->advance[0] > 0) {
       strcpy(event->play[0], "");
