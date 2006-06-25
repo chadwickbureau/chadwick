@@ -893,6 +893,11 @@ static int parse_safe_on_error(CWParserState *state,
   event->batted_ball_type = (state->sym <= '6') ? 'G' : 'F';
   cw_parse_nextsym(state);
 
+  /* Special case: writing En? for really bad play */
+  if (state->sym == '?') {
+    cw_parse_nextsym(state);
+  }
+
   if (flags && state->sym == '/') {
     parse_flags(state, event);
   }
