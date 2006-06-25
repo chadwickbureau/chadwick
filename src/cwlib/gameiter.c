@@ -346,7 +346,8 @@ cw_gameiter_process_advance(CWGameIterator *gameiter)
 
   if (gameiter->event_data->advance[3] >= 4 ||
       cw_event_runner_put_out(gameiter->event_data, 3)) {
-    if (gameiter->event_data->fc_flag[3]) {
+    if (gameiter->event_data->fc_flag[3] &&
+	cw_event_runner_put_out(gameiter->event_data, 3)) {
       cw_gameiter_push_pitchers(gameiter, 3);
     }
     strcpy(gameiter->runners[3], "");
@@ -359,7 +360,8 @@ cw_gameiter_process_advance(CWGameIterator *gameiter)
   }
   if (gameiter->event_data->advance[2] >= 3 ||
       cw_event_runner_put_out(gameiter->event_data, 2)) {
-    if (gameiter->event_data->fc_flag[2]) {
+    if (gameiter->event_data->fc_flag[2] &&
+	cw_event_runner_put_out(gameiter->event_data, 2)) {
       cw_gameiter_push_pitchers(gameiter, 2);
     }
     strcpy(gameiter->runners[2], "");
@@ -376,7 +378,8 @@ cw_gameiter_process_advance(CWGameIterator *gameiter)
   }
   if (gameiter->event_data->advance[1] >= 2 || 
       cw_event_runner_put_out(gameiter->event_data, 1)) {
-    if (gameiter->event_data->fc_flag[1]) {
+    if (gameiter->event_data->fc_flag[1] &&
+	cw_event_runner_put_out(gameiter->event_data, 1)) {
       strcpy(gameiter->pitchers[0], gameiter->pitchers[1]);
     }
     strcpy(gameiter->runners[1], "");
