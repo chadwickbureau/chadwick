@@ -1369,6 +1369,14 @@ static int parse_base_hit(CWParserState *state, CWParsedEvent *event,
 static int parse_ground_rule_double(CWParserState *state, CWParsedEvent *event,
 				    int flags)
 {
+  if (state->sym >= '1' && state->sym <= '9') {
+    /* Some newer event files have fielders after the DGR, which seems
+     * like it ought not be possible -- but oh well!
+     * bevent does not give a 'fielded by' credit for this case.
+     */
+    cw_parse_nextsym(state);
+  }
+
   if (flags && state->sym == '/') {
     parse_flags(state, event);
   }
