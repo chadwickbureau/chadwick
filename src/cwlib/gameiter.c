@@ -308,16 +308,46 @@ cw_gameiter_process_subs(CWGameIterator *gameiter, CWEvent *event)
   }
 }
 
+/*
+ * The only tricky part of advancement is correctly implementing pitcher
+ * responsibility on force outs and fielder's choices.  See rule
+ * 10.18(g) and the notes and examples following.  Basically,
+ * what one has to do is, if a runner belonging to pitcher X is
+ * out on a fielder's choice, "push" the responsibilities for all
+ * runners back one runner.
+ */
+static void
+cw_gameiter_push_pitchers(CWGameIterator *gameiter, int base)
+{
+  int b;
+
+  for (b = base - 1; b > 0; b--) {
+    if (strcmp(gameiter->runners[b], "")) {
+      cw_gameiter_push_pitchers(gameiter, b);
+      strcpy(gameiter->pitchers[b], gameiter->pitchers[base]);
+      return;
+    }
+  }
+  strcpy(gameiter->pitchers[0], gameiter->pitchers[base]);
+}
+
 static void
 cw_gameiter_process_advance(CWGameIterator *gameiter)
 {
-  strncpy(gameiter->pitchers[0],
-	  gameiter->fielders[1][1-gameiter->half_inning], 49);
-  
+  if ((gameiter->event_data->event_type == CW_EVENT_WALK ||
+       gameiter->event_data->event_type == CW_EVENT_INTENTIONALWALK) &&
+      gameiter->walk_pitcher) {
+    strcpy(gameiter->pitchers[0], gameiter->walk_pitcher);
+  }
+  else {
+    strncpy(gameiter->pitchers[0],
+	    gameiter->fielders[1][1-gameiter->half_inning], 49);
+  }
+
   if (gameiter->event_data->advance[3] >= 4 ||
       cw_event_runner_put_out(gameiter->event_data, 3)) {
     if (gameiter->event_data->fc_flag[3]) {
-      strcpy(gameiter->pitchers[0], gameiter->pitchers[3]);
+      cw_gameiter_push_pitchers(gameiter, 3);
     }
     strcpy(gameiter->runners[3], "");
     strcpy(gameiter->pitchers[3], "");
@@ -330,7 +360,7 @@ cw_gameiter_process_advance(CWGameIterator *gameiter)
   if (gameiter->event_data->advance[2] >= 3 ||
       cw_event_runner_put_out(gameiter->event_data, 2)) {
     if (gameiter->event_data->fc_flag[2]) {
-      strcpy(gameiter->pitchers[0], gameiter->pitchers[2]);
+      cw_gameiter_push_pitchers(gameiter, 2);
     }
     strcpy(gameiter->runners[2], "");
     strcpy(gameiter->pitchers[2], "");
