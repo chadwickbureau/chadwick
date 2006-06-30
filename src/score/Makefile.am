@@ -55,11 +55,11 @@ EXTRA_DIST = \
 	wxutils.py 
 
 
-all-local:
-	python setup.py build
+#all-local:
+#	python setup.py build
 
-install-exec-local:
-	python setup.py install
+#install-exec-local:
+#	python setup.py install
 
-clean-local:
-	rm -rf build
+#clean-local:
+#	rm -rf build
