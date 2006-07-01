@@ -336,7 +336,9 @@ static int parse_fielding_credit(CWParserState *state, CWParsedEvent *event,
       if (isdigit(lastChar)) {
 	assists[num_assists++] = lastChar - '0';
       }
-      *(play++) = state->sym;
+      if (state->sym != '?') {
+	*(play++) = state->sym;
+      }
       lastChar = state->sym;
     }
     else if (state->sym == 'E') {
