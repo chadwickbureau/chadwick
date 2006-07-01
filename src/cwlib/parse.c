@@ -537,7 +537,8 @@ static char locations[][20] = {
   "78XD", "8XD", "89XD",
   /* the following locations are nonstandard or archaic, but 
    * appear in existing Retrosheet data */
-  "3L", "46", "5L", "7LDW", "7DW", "78XDW", "8XDW", "89XDW", "9DW", "9LDW",
+  "2LF", "3L", "46", "5L", 
+  "7LDW", "7DW", "78XDW", "8XDW", "89XDW", "9DW", "9LDW",
   "2R", "7M",  /* where is 7M !?! */
   ""
 };
