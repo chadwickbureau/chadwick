@@ -432,6 +432,16 @@ static int parse_advance_modifier(CWParserState *state, CWParsedEvent *event,
 	   */
 	  event->advance[baseFrom] = baseTo;
 	}
+	if (baseFrom == 0 && event->event_type == CW_EVENT_STRIKEOUT) {
+	  /* Special case: for K.BX1(2E3) and the like, need to remove
+	   * the implied putout for the catcher (which is always
+	   * listed first in the putout list 
+	   */
+	  event->putouts[0] = event->putouts[1];
+	  event->putouts[1] = event->putouts[2];
+	  event->putouts[2] = 0;
+	  event->num_putouts--;
+	}
 	for (i = baseFrom; i >= 0; i--) {
 	  event->rbi_flag[i] = -1;
 	}
@@ -1693,6 +1703,7 @@ void sanity_check(CWParsedEvent *event)
       strcpy(event->play[0], "");
       event->putouts[0] = event->putouts[1];
       event->putouts[1] = event->putouts[2];
+      event->putouts[2] = 0;
       event->num_putouts--;
     }
   }
