@@ -425,7 +425,13 @@ static int parse_advance_modifier(CWParserState *state, CWParsedEvent *event,
     if (parse_fielding_credit(state, event, ' ')) {
       if (!safe) {
 	safe = 1;
-	event->advance[baseFrom] = baseTo;
+	if (event->advance[baseFrom] < 5) {
+	  /* This guards against things like 3XH(UR)(5E2).  The (UR)
+	   * already implies the runner must be safe, so the advancement
+	   * will already be set.
+	   */
+	  event->advance[baseFrom] = baseTo;
+	}
 	for (i = baseFrom; i >= 0; i--) {
 	  event->rbi_flag[i] = -1;
 	}
@@ -490,12 +496,10 @@ static int parse_advance_modifier(CWParserState *state, CWParsedEvent *event,
        * rare cases of ambiguity */
       event->rbi_flag[baseFrom] = 2;
     }
-    else if (!strcmp(state->token, "UR") &&
-	     event->advance[baseFrom] == 4) {
+    else if (!strcmp(state->token, "UR")) {
       event->advance[baseFrom] = 5;
     }
-    else if (!strcmp(state->token, "TUR") &&
-	     event->advance[baseFrom] == 4) {
+    else if (!strcmp(state->token, "TUR")) {
       event->advance[baseFrom] = 6;
     }
     else if (!strcmp(state->token, "WP")) {
