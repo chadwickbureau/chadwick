@@ -1051,14 +1051,16 @@ static int parse_generic_out(CWParserState *state, CWParsedEvent *event,
       if (base < 0)  return 0;
       event->advance[base] = (safe) ? base + 1 : 0;
       event->fc_flag[base] = 1;
-      if (strlen(state->token) > 1 || base > 0) {
-	/* Assumption: more than one fielder implies ground ball,
-	   unless overriden later by a flag; also, getting the first
-	   out on a non-batter implies a bounce */
-	event->batted_ball_type = 'G';
-      }
-      else if (strlen(state->token) == 1 && base == 0) {
-	event->batted_ball_type = 'F';
+      if (event->batted_ball_type == ' ') {
+	if (strlen(state->token) > 1 || base > 0) {
+	  /* Assumption: more than one fielder implies ground ball,
+	     unless overriden later by a flag; also, getting the first
+	     out on a non-batter implies a bounce */
+	  event->batted_ball_type = 'G';
+	}
+	else if (strlen(state->token) == 1 && base == 0) {
+	  event->batted_ball_type = 'F';
+	}
       }
 	 
       strncpy(event->play[base], state->token, 19);
