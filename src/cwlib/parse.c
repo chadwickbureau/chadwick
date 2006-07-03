@@ -1066,6 +1066,11 @@ static int parse_generic_out(CWParserState *state, CWParsedEvent *event,
     }
   }
 
+  if (state->sym == '+' || state->sym == '-') {
+    /* Ignore hard/soft-hit ball modifiers */
+    cw_parse_nextsym(state);
+  }
+
   if (flags && state->sym == '/') {
     parse_flags(state, event);
   }
