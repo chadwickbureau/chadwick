@@ -455,6 +455,9 @@ static int parse_advance_modifier(CWParserState *state, CWParsedEvent *event,
       else if (!strcmp(state->token, "G")) {
 	/* FC5.2X3(5/G) appears in 81TEX.EVA; accept silently */
       }
+      else if (!strcmp(state->token, "AP")) {
+	/* 1X3(15/AP) appears in 2005SFN.EVN; appeal play? */
+      }	
       else {
 	return cw_parse_error(state);
       }
