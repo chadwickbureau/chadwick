@@ -1496,6 +1496,9 @@ static int parse_strikeout(CWParserState *state, CWParsedEvent *event,
        * on missed bunt attempts. */
       event->batted_ball_type = 'G';
     }
+    else if (!strcmp(state->token, "FL")) {
+      event->foul_flag = 1;
+    }
     else {
       /* Do nothing.  In theory, there shouldn't be any other flags other
        * than the list above.  In practice, there are in the Retrosheet
