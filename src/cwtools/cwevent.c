@@ -709,15 +709,23 @@ DECLARE_FIELDFUNC(cwevent_responsible_pitcher3)
 /* Field 78 */
 DECLARE_FIELDFUNC(cwevent_new_game_flag)
 {
+  CWEvent *event = gameiter->event->prev;
+  while (event && !strcmp(event->event_text, "NP")) {
+    event = event->prev;
+  }
   return sprintf(buffer, (ascii) ? "\"%c\"" : "%c",
-		 (gameiter->event->prev == NULL) ? 'T' : 'F');
+		 (event == NULL) ? 'T' : 'F');
 }
 
 /* Field 79 */
 DECLARE_FIELDFUNC(cwevent_end_game_flag)
 {
+  CWEvent *event = gameiter->event->next;
+  while (event && !strcmp(event->event_text, "NP")) {
+    event = event->next;
+  }
   return sprintf(buffer, (ascii) ? "\"%c\"" : "%c",
-		 (gameiter->event->next == NULL) ? 'T' : 'F');
+		 (event == NULL) ? 'T' : 'F');
 }
 
 /* Field 80 */
