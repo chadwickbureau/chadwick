@@ -79,11 +79,11 @@ class NewGameDialog(wx.Dialog):
                                         "Second game" ])
         sizer.Add(self.gameNumber, 0, wx.ALL | wx.EXPAND | wx.ALIGN_CENTER, 5)
 
-        #self.pitches = wx.RadioBox(self, -1, "Enter pitches?",
-        #                          wx.DefaultPosition, wx.DefaultSize,
-        #                          [ "No pitches", "Count only", "All pitches" ])
-        #self.pitches.SetSelection(0)
-        #sizer.Add(self.pitches, 0, wx.ALL | wx.EXPAND | wx.ALIGN_CENTER, 5)
+        self.pitches = wx.RadioBox(self, -1, "Enter pitches?",
+                                  wx.DefaultPosition, wx.DefaultSize,
+                                  [ "No pitches", "Count only", "All pitches" ])
+        self.pitches.SetSelection(0)
+        sizer.Add(self.pitches, 0, wx.ALL | wx.EXPAND | wx.ALIGN_CENTER, 5)
         
         self.UpdateTeamLists(f)
                                      
@@ -136,6 +136,5 @@ class NewGameDialog(wx.Dialog):
         return self.gameNumber.GetSelection()
 
     def GetPitches(self):
-        #return [ "none", "count", "pitches" ][self.pitches.GetSelection()]
-        return "none"
+        return [ "none", "count", "pitches" ][self.pitches.GetSelection()]
     
