@@ -1496,6 +1496,19 @@ static int parse_strikeout(CWParserState *state, CWParsedEvent *event,
        * on missed bunt attempts. */
       event->batted_ball_type = 'G';
     }
+    else if (!strcmp(state->token, "BF")) {
+      /* While the /BF flag usually would mean a foul bunt fly, this
+       * often appears with strikeouts.  Conjecture that this might
+       * be a coding problem: inputters might think this means 'bunt foul'.
+       * However, bevent clearly treats this literally, so we will as
+       * well, for now. */
+      event->bunt_flag = 1;
+      event->batted_ball_type = 'F';
+    }
+    else if (!strcmp(state->token, "BG")) {
+      event->bunt_flag = 1;
+      event->batted_ball_type = 'G';
+    }
     else if (!strcmp(state->token, "FL")) {
       event->foul_flag = 1;
     }
