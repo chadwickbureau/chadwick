@@ -8,7 +8,8 @@ setup(name="_libchadwick",
       author_email="turocy@econmail.tamu.edu",
       url="http://chadwick.sourceforge.net",
       ext_modules=[Extension('_libchadwick',
-                             ['libchadwick_python.c'],
-                             include_dirs=['../cwlib'],
-                             libraries=['chadwick'] )])
+                             ['libchadwick_python.c',
+                              'book.c', 'box.c', 'file.c', 'game.c',
+                              'gameiter.c', 'league.c', 'parse.c', 'roster.c'],
+                             include_dirs=['../cwlib'] )])
 
