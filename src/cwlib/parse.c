@@ -514,9 +514,11 @@ static int parse_advance_modifier(CWParserState *state, CWParsedEvent *event,
     }
     else if (!strcmp(state->token, "WP")) {
       event->wp_flag = 1;
+      event->rbi_flag[baseFrom] = 0;
     }
     else if (!strcmp(state->token, "PB")) {
       event->pb_flag = 1;
+      event->rbi_flag[baseFrom] = 0;
     }
     else if (!strcmp(state->token, "TH")) {
       if (state->sym >= '1' && state->sym <= '3') {
