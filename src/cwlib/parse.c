@@ -805,12 +805,9 @@ static int parse_stolen_base(CWParserState *state, CWParsedEvent *event,
   while (flags && state->sym == '/') {
     parse_flag(state);
 
-    if (!strcmp(state->token, "INT")) {
-      /* accept /INT flag silently */
-    }
-    else {
-      return cw_parse_error(state);
-    }
+    /* Accept flags silently.  Most common is /INT, though some
+     * files may also have the relay notations /R and /U.
+     */
   }
 
   return 1;
@@ -1680,12 +1677,19 @@ static int parse_walk(CWParserState *state, CWParsedEvent *event, int flags)
  * at exit:  state->sym points to first character after 'WP' token
  *
  * Notes:
- * - Nothing to do here; WP doesn't take flags
+ * - Nothing to do here; WP doesn't take flags (though we accept them
+ *   silently if present).
  */
 static int parse_wild_pitch(CWParserState *state, CWParsedEvent *event,
 			    int flags)
 {
   event->wp_flag = 1;
+
+  while (flags && state->sym == '/') {
+    parse_flag(state);
+    /* Accept flags silently. */
+  }
+
   return 1;
 } 
 
