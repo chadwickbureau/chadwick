@@ -447,6 +447,14 @@ static int parse_advance_modifier(CWParserState *state, CWParsedEvent *event,
 	}
       }
     }
+    else if (baseFrom == 0 && event->event_type == CW_EVENT_STRIKEOUT) {
+      /* Special case: batter put out listed explicitly in advancement */
+      event->putouts[0] = event->putouts[1];
+      event->putouts[1] = event->putouts[2];
+      event->putouts[2] = 0;
+      event->num_putouts--;
+    }
+
     if (state->token[0] != 'E') {
       strncpy(event->play[baseFrom], state->token, 20);
     }
