@@ -1151,6 +1151,11 @@ static int parse_interference(CWParserState *state, CWParsedEvent *event,
     else if (!strcmp(state->token, "INT")) {
       /* silently accept redundant /INT flag */
     }
+    else if (!strcmp(state->token, "G")) {
+      /* Remember that this type of interference can also occur on
+       * a batted ball! */
+      event->batted_ball_type = 'G';
+    }
     else {
       /* silently accept other flags and do nothing */
       /* there exists a C/E1/INT/G4 in Retrosheet 1991 datafiles */
@@ -1515,11 +1520,15 @@ static int parse_strikeout(CWParserState *state, CWParsedEvent *event,
     else if (!strcmp(state->token, "FL")) {
       event->foul_flag = 1;
     }
+    else if (!strcmp(state->token, "L")) {
+      /* This is weird, but it's what BEVENT does. */
+      event->batted_ball_type = 'L';
+    }
     else {
       /* Do nothing.  In theory, there shouldn't be any other flags other
        * than the list above.  In practice, there are in the Retrosheet
        * files; some are just inconsistencies in scoring, others are just
-       * plain weird (K/L?).  Rather than enumerate them, best practice
+       * plain weird.  Rather than enumerate them, best practice
        * at the moment simply seems to be to accept them silently.
        */
     }
