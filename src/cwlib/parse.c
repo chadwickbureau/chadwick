@@ -560,7 +560,7 @@ static char locations[][20] = {
    * appear in existing Retrosheet data */
   "13S", "15S", "2LF", "2RF", "2L", "2R", "3L", "46", "5L", 
   "7LDW", "7DW", "78XDW", "8XDW", "89XDW", "9DW", "9LDW",
-  "7LM", "7M", "78M", "8LM", "8M", "8RM", "89M", "9M", "9LM",
+  "7LMF", "7LM", "7M", "78M", "8LM", "8M", "8RM", "89M", "9M", "9LM", "9LMF",
   "8LS", "8RS", "8LD", "8RD", "8LXD", "8RXD", "8LXDW", "8RXDW", 
   ""
 };
@@ -1156,9 +1156,54 @@ static int parse_interference(CWParserState *state, CWParsedEvent *event,
        * a batted ball! */
       event->batted_ball_type = 'G';
     }
+    /* Starting here, we check for batted ball location flags.
+     * This is essentially copied from parse_flags() and probably should be
+     * refactored. */
+    else if (strlen(state->token) >= 3) {
+      char traj = (state->token[0] == 'B') ? state->token[1] : state->token[0];
+      char *loc = (state->token[0] == 'B') ? state->token + 2 : state->token + 1;
+      if (traj == 'G' || traj == 'F' || traj == 'P' ||
+	  traj == 'L') {
+	int i = 0;
+	for (i = 0; strcmp(locations[i], ""); i++) {
+	  if (!strcmp(locations[i], loc)) {
+	    event->batted_ball_type = traj;
+	    strcpy(event->hit_location, locations[i]);
+	    if (locations[i][strlen(locations[i]) - 1] == 'F') {
+	      event->foul_flag = 1;
+	    }
+	    if (state->token[0] == 'B') {
+	      event->bunt_flag = 1;
+	    }
+	    break;
+	  }
+	}
+      }
+      else {
+	char *loc = (state->token[0] == 'B') ? state->token + 1 : state->token;
+	int i = 0;
+	for (i = 0; strcmp(locations[i], ""); i++) {
+	  if (!strcmp(locations[i], loc)) {
+	    strcpy(event->hit_location, locations[i]);
+	    if (locations[i][strlen(locations[i]) - 1] == 'F') {
+	      event->foul_flag = 1;
+	    }
+	    if (state->token[0] == 'B') {
+	      event->bunt_flag = 1;
+	    }
+	    break;
+	  }
+	}
+      }
+    }
     else {
-      /* silently accept other flags and do nothing */
-      /* there exists a C/E1/INT/G4 in Retrosheet 1991 datafiles */
+      int i = 0;
+      for (i = 0; strcmp(locations[i], ""); i++) {
+	if (!strcmp(locations[i], state->token)) {
+	  strcpy(event->hit_location, locations[i]);
+	  break;
+	}
+      }
     }
   }
 
