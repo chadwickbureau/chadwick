@@ -885,7 +885,7 @@ static int parse_caught_stealing(CWParserState *state, CWParsedEvent *event,
       /* silently accept interference flag */
     }
     else {
-      return cw_parse_error(state);
+      /* silently accept other flags */
     }
   }
 
@@ -1275,12 +1275,19 @@ static int parse_other_advance(CWParserState *state, CWParsedEvent *event,
  * at exit:  state->sym points to first character after 'PB' token
  *
  * Notes:
- * - Nothing to do here; PB doesn't take flags
+ * - Nothing to do here; PB doesn't take flags (although we accept
+ *   them silently if present).
  */
 static int parse_passed_ball(CWParserState *state, CWParsedEvent *event,
 			     int flags)
 {
   event->pb_flag = 1;
+
+  while (flags && state->sym == '/') {
+    parse_flag(state);
+    /* Accept flags silently. */
+  }
+
   return 1;
 }
 
