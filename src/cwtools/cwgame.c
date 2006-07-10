@@ -420,8 +420,8 @@ DECLARE_FIELDFUNC(cwgame_wind_speed)
 DECLARE_FIELDFUNC(cwgame_field_condition)
 {
   CWLookup table[] = {
-    { 0, "unknown" }, { 1, "soaked" }, { 2, "wet" }, { 4, "dry" },
-    { -1, "" }
+    { 0, "unknown" }, { 1, "soaked" }, { 2, "wet" }, 
+    { 3, "damp" }, { 4, "dry" }, { -1, "" }
   };
 
   return sprintf(buffer, "%d",
