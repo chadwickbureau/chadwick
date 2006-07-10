@@ -273,7 +273,7 @@ static void parse_hit_fielder(CWParserState *state, CWParsedEvent *event)
     event->fielded_by = state->sym - '0';
   }
 
-  while (isfielder(state->sym)) {
+  while (isfielder(state->sym) || state->sym == '0') {
     cw_parse_nextsym(state);
   }
 }
@@ -1447,7 +1447,7 @@ static int parse_sac_hit_error(CWParserState *state, CWParsedEvent *event,
 static int parse_base_hit(CWParserState *state, CWParsedEvent *event,
 			  int flags)
 {
-  if (isfielder(state->sym)) {
+  if (isfielder(state->sym) || state->sym == '0') {
     parse_hit_fielder(state, event);
   }
 
