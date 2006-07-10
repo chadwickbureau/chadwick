@@ -244,10 +244,19 @@ DECLARE_FIELDFUNC(cwevent_pitcher)
 /* Field 15 */
 DECLARE_FIELDFUNC(cwevent_pitcher_hand)
 {
-  return sprintf(buffer, (ascii) ? "\"%c\"" : "%c",
-		 cw_roster_throwing_hand((gameiter->event->half_inning == 0) ?
-					 home : visitors,
-					 gameiter->fielders[1][1-gameiter->half_inning]));
+  char pitcherHand;
+
+  if (gameiter->event->pitcher_hand == ' ') {
+    pitcherHand = 
+      cw_roster_throwing_hand((gameiter->event->half_inning == 0) ?
+			      home : visitors,
+			      gameiter->fielders[1][1-gameiter->half_inning]);
+  }
+  else {
+    pitcherHand = gameiter->event->pitcher_hand;
+  }
+
+  return sprintf(buffer, (ascii) ? "\"%c\"" : "%c", pitcherHand);
 }
 
 /* Field 16 */
@@ -260,10 +269,19 @@ DECLARE_FIELDFUNC(cwevent_res_pitcher)
 /* Field 17 */
 DECLARE_FIELDFUNC(cwevent_res_pitcher_hand)
 {
-  return sprintf(buffer, (ascii) ? "\"%c\"" : "%c",
-		 cw_roster_throwing_hand((gameiter->event->half_inning == 0) ? 
-					 home : visitors,
-					 cw_gameiter_charged_pitcher(gameiter)));
+  char resPitcherHand;
+
+  if (gameiter->event->pitcher_hand == ' ') {
+    resPitcherHand = 
+      cw_roster_throwing_hand((gameiter->event->half_inning == 0) ?
+			      home : visitors,
+			      cw_gameiter_charged_pitcher(gameiter));
+  }
+  else {
+    resPitcherHand = gameiter->event->pitcher_hand;
+  }
+
+  return sprintf(buffer, (ascii) ? "\"%c\"" : "%c", resPitcherHand);
 }
 
 /* Field 18 */

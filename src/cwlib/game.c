@@ -404,7 +404,7 @@ cw_game_read(FILE *file)
   char **tokens;
   int numTokens, i;
   fpos_t filepos;
-  char batHand = ' ', batHandBatter[256];
+  char batHand = ' ', batHandBatter[256], pitHand = ' ';
   CWGame *game;
 
   tokens = (char **) malloc(sizeof(char *) * CW_MAX_TOKENS);
@@ -458,6 +458,11 @@ cw_game_read(FILE *file)
 	batHand = ' ';
 	strcpy(batHandBatter, "");
       }
+
+      if (pitHand != ' ') {
+	game->last_event->pitcher_hand = pitHand;
+	pitHand = ' ';
+      }
     }
     else if (!strcmp(tokens[0], "sub")) {
       cw_game_substitute_append(game, tokens[1], tokens[2],
@@ -473,6 +478,9 @@ cw_game_read(FILE *file)
     else if (!strcmp(tokens[0], "badj")) {
       strncpy(batHandBatter, tokens[1], 255);
       batHand = tokens[2][0];
+    }
+    else if (!strcmp(tokens[0], "padj")) {
+      pitHand = tokens[2][0];
     }
   }
 
