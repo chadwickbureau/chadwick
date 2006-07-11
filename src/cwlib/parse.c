@@ -309,7 +309,8 @@ static int parse_fielding_credit(CWParserState *state, CWParsedEvent *event,
     if (!isfielder(state->sym)) {
       return cw_parse_error(state);
     }
-    if (isdigit(state->sym)) {
+    if (isdigit(state->sym) && event->event_type != CW_EVENT_INTERFERENCE) {
+      /* Special case: C.B-1(E2) shouldn't generate a second error. */
       event->errors[event->num_errors] = state->sym - '0';
       event->error_types[event->num_errors++] = 'F';
     }
