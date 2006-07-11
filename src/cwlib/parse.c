@@ -1563,6 +1563,13 @@ static int parse_strikeout(CWParserState *state, CWParsedEvent *event,
       event->bunt_flag = 1;
       event->batted_ball_type = 'G';
     }
+    else if (!strcmp(state->token, "BP")) {
+      event->bunt_flag = 1;
+      event->batted_ball_type = 'P';
+    }
+    else if (!strcmp(state->token, "F")) {
+      event->batted_ball_type = 'F';
+    }
     else if (!strcmp(state->token, "FL")) {
       event->foul_flag = 1;
     }
