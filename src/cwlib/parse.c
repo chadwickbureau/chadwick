@@ -1164,7 +1164,7 @@ static int parse_interference(CWParserState *state, CWParsedEvent *event,
     /* Starting here, we check for batted ball location flags.
      * This is essentially copied from parse_flags() and probably should be
      * refactored. */
-    else if (strlen(state->token) >= 3) {
+    else if (strlen(state->token) >= 2) {
       char traj = (state->token[0] == 'B') ? state->token[1] : state->token[0];
       char *loc = (state->token[0] == 'B') ? state->token + 2 : state->token + 1;
       if (traj == 'G' || traj == 'F' || traj == 'P' ||
