@@ -1342,19 +1342,8 @@ static int parse_pickoff_caught_stealing(CWParserState *state,
 					 CWParsedEvent *event, 
 					 int flags)
 {
-  int runner;
-
-  if (!parse_caught_stealing(state, event, flags)) {
-    return 0;
-  }
-
-  for (runner = 1; runner <= 3; runner++) {
-    if (event->cs_flag[runner]) {
-      event->po_flag[runner] = 1;
-    }
-  }
-
-  return 1;
+  event->po_flag[state->sym - '1'] = 1;
+  return parse_caught_stealing(state, event, flags);
 }
 
 static int parse_pickoff(CWParserState *state, CWParsedEvent *event,
