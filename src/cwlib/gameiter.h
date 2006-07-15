@@ -103,6 +103,16 @@ char *cw_gameiter_charged_batter(CWGameIterator *gameiter);
 char *cw_gameiter_charged_pitcher(CWGameIterator *gameiter);
 
 /*
+ * In cwevent, the "responsible pitcher" is usually the pitcher responsible
+ * at the beginning of the play.  However, on a play like 32(3)/FO.2-H(E2),
+ * the runner scoring should be charged to the pitcher who was initially
+ * responsible for the runner on third, and so that pitcher is listed
+ * as the responsible pitcher so that stats can be calculated directly
+ * from the cwevent output without having to reparse the play.
+ */
+char *cw_gameiter_responsible_pitcher(CWGameIterator *gameiter, int base);
+
+/*
  * Returns the number of runners left on base by 'team'.
  * Current baserunners are included in this count (to match official
  * definition)

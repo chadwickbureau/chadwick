@@ -707,21 +707,21 @@ DECLARE_FIELDFUNC(cwevent_po3_flag)
 DECLARE_FIELDFUNC(cwevent_responsible_pitcher1)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 gameiter->pitchers[1]);
+		 cw_gameiter_responsible_pitcher(gameiter, 1));
 }
 
 /* Field 76 */
 DECLARE_FIELDFUNC(cwevent_responsible_pitcher2)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 gameiter->pitchers[2]);
+		 cw_gameiter_responsible_pitcher(gameiter, 2));
 }
 
 /* Field 77 */
 DECLARE_FIELDFUNC(cwevent_responsible_pitcher3)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 gameiter->pitchers[3]);
+		 cw_gameiter_responsible_pitcher(gameiter, 3));
 }
 
 /* Field 78 */

@@ -331,6 +331,35 @@ cw_gameiter_push_pitchers(CWGameIterator *gameiter, int base)
   strcpy(gameiter->pitchers[0], gameiter->pitchers[base]);
 }
 
+char *
+cw_gameiter_responsible_pitcher(CWGameIterator *gameiter, int base)
+{
+  if (base == 3) {
+    return gameiter->pitchers[3];
+  }
+  else if (base == 2) {
+    if (cw_event_runner_put_out(gameiter->event_data, 3) &&
+	gameiter->event_data->fc_flag[3] &&
+	gameiter->event_data->advance[2] >= 4) {
+      return gameiter->pitchers[3];
+    }
+    else {
+      return gameiter->pitchers[2];
+    }
+  }
+  else {
+    if (cw_event_runner_put_out(gameiter->event_data, 3) &&
+	gameiter->event_data->fc_flag[3] &&
+	gameiter->event_data->advance[2] >= 4) {
+      return gameiter->pitchers[2];
+    }
+    else {
+      return gameiter->pitchers[1];
+    }
+  }
+
+}
+
 static void
 cw_gameiter_process_advance(CWGameIterator *gameiter)
 {

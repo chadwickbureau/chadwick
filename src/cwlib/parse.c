@@ -455,7 +455,13 @@ static int parse_advance_modifier(CWParserState *state, CWParsedEvent *event,
       event->putouts[2] = 0;
       event->num_putouts--;
     }
-
+    else if (/*(event->event_type == CW_EVENT_GENERICOUT &&
+	       baseFrom == baseTo) ||*/
+	     (event->event_type == CW_EVENT_SINGLE &&
+	      strstr(state->inputString, "/BR"))) {
+      event->fc_flag[baseFrom] = 1;
+    }
+    
     if (state->token[0] != 'E') {
       strncpy(event->play[baseFrom], state->token, 20);
     }
@@ -1098,6 +1104,19 @@ static int parse_generic_out(CWParserState *state, CWParsedEvent *event,
 
   if (flags && state->sym == '/') {
     parse_flags(state, event);
+  }
+
+  /* For 10.18(g) tracking: even if the multiple-force notation is
+   * used in the primary event part, if no /GDP or /FO appears, then
+   * runner responsibility should not be handed off.
+   */
+  if (!strstr(state->inputString, "/GDP") && 
+      !strstr(state->inputString, "/FO")) {
+    int i;
+
+    for (i = 1; i <= 3; i++) {
+      event->fc_flag[i] = 0;
+    }
   }
 
   return 1;
