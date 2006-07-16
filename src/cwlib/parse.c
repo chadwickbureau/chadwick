@@ -1052,6 +1052,7 @@ static int parse_generic_out(CWParserState *state, CWParsedEvent *event,
      so as to generate correct credit on plays like 54(1)3/GDP */
   char lastFielder = ' ';
   int safe;
+  int forcePlay = -1;
 
   if (state->sym != '?') {
     event->fielded_by = (state->sym - '0');
@@ -1064,6 +1065,15 @@ static int parse_generic_out(CWParserState *state, CWParsedEvent *event,
     if (state->sym == '(') {
       int base = parse_out_base(state);
       if (base < 0)  return 0;
+      if (forcePlay == -1) {
+	if (base > 0) {
+	  forcePlay = 1;
+	}
+	else {
+	  forcePlay = 0;
+	}
+      }
+
       event->advance[base] = (safe) ? base + 1 : 0;
       event->fc_flag[base] = 1;
       if (event->batted_ball_type == ' ') {
@@ -1106,12 +1116,13 @@ static int parse_generic_out(CWParserState *state, CWParsedEvent *event,
     parse_flags(state, event);
   }
 
-  /* For 10.18(g) tracking: even if the multiple-force notation is
-   * used in the primary event part, if no /GDP or /FO appears, then
-   * runner responsibility should not be handed off.
+  /* For 10.18(g) tracking.
+   * When the force notation is used, but the first play puts out the
+   * batter, we assume that the ball was caught in the air, and therefore
+   * runner responsibility should not be handed off. 
+   * The exception to this is reverse-force GDPs, so we check for that.
    */
-  if (!strstr(state->inputString, "/GDP") && 
-      !strstr(state->inputString, "/FO")) {
+  if (forcePlay == 0 && !strstr(state->inputString, "/GDP")) {
     int i;
 
     for (i = 1; i <= 3; i++) {
