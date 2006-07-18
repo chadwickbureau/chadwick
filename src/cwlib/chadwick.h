@@ -1,12 +1,7 @@
 /*
  * $Source$
-<<<<<<< chadwick.h
  * $Date$
  * $Revision$
-=======
- * $Date$
- * $Revision$
->>>>>>> 1.1.2.1
  *
  * DESCRIPTION:
  * Top-level include file for Chadwick
@@ -39,7 +34,6 @@
 #include "league.h"
 #include "parse.h"
 #include "gameiter.h"
-#include "box.h"
 
 #endif   /* CW_CHADWICK_H */
 
