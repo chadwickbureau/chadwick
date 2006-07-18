@@ -552,6 +552,12 @@ cw_gameiter_player_position(CWGameIterator *gameiter,
 	 * a DH right away, issuing position code 10 instead of 11 */
 	return 10;
       }
+      else if (gameiter->lineups[i][team].position > 10 &&
+	       !gameiter->ph_flag) {
+	/* Pinch-hitters and pinch-runners are assigned a position
+	 * of 0 ("no position") if they come up again in the same inning */
+	return 0;
+      }
       else {
 	return gameiter->lineups[i][team].position;
       }
