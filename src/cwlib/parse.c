@@ -233,7 +233,7 @@ cw_parse_event_initialize(CWParsedEvent *event)
   for (i = 0; i < 10; i++) {
     event->assists[i] = 0;
     event->errors[i] = 0;
-    event->error_types[i] = 'F';
+    event->error_types[i] = 'N';
   }
   event->batted_ball_type = ' ';
   strcpy(event->hit_location, "");
@@ -352,7 +352,7 @@ static int parse_fielding_credit(CWParserState *state, CWParsedEvent *event,
 	return cw_parse_error(state);
       }
       event->errors[event->num_errors] = state->sym - '0';
-      event->error_types[event->num_errors++] = 'F';
+      event->error_types[event->num_errors++] = 'D';
       *(play++) = state->sym; 
       *(play) = '\0';
       cw_parse_nextsym(state);

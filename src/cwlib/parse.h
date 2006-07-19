@@ -98,6 +98,8 @@ typedef struct cw_parsed_event_struct {
   int fielded_by;
   int num_putouts, num_assists, num_errors;
   int putouts[3], assists[10], errors[10];
+  /* Error types are 'N' for none, 'T' for throwing, 
+   * 'F' for fumbled, and 'D' for dropped throw. */
   char error_types[10];
   char batted_ball_type;
   char hit_location[20];
