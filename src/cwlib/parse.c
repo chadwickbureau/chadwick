@@ -1847,6 +1847,9 @@ void sanity_check(CWParsedEvent *event)
 
   if (event->event_type == CW_EVENT_FOULERROR) {
     event->foul_flag = 1;
+    if (event->batted_ball_type == ' ' && event->errors[0] >= 7) {
+      event->batted_ball_type = 'F';
+    }
   }
 
 
