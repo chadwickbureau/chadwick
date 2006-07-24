@@ -581,17 +581,7 @@ DECLARE_FIELDFUNC(cwevent_error3_type)
 /* Field 58 */
 DECLARE_FIELDFUNC(cwevent_batter_advance)
 {
-  /* bevent does not record batter advancing on inning-ending
-   * forceouts */
-  if (gameiter->event_data->event_type == CW_EVENT_GENERICOUT &&
-      gameiter->outs +
-      cw_event_outs_on_play(gameiter->event_data) >= 3 &&
-      gameiter->event_data->num_errors == 0) {
-    return sprintf(buffer, "0");
-  }
-  else {
-    return sprintf(buffer, "%d", gameiter->event_data->advance[0]);
-  }
+  return sprintf(buffer, "%d", gameiter->event_data->advance[0]);
 }
 
 /* Field 59 */
