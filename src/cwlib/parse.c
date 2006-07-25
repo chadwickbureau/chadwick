@@ -896,6 +896,15 @@ static int parse_caught_stealing(CWParserState *state, CWParsedEvent *event,
     }
   }
 
+  if (event->num_errors > 0) {
+    if (runner != 3 && (event->errors[0] == 1 || event->errors[0] == 2)) {
+      event->error_types[0] = 'T';
+    }
+    else {
+      event->error_types[0] = 'D';
+    }
+  }
+
   return 1;
 }
 
