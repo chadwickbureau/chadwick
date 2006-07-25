@@ -897,7 +897,8 @@ static int parse_caught_stealing(CWParserState *state, CWParsedEvent *event,
   }
 
   if (event->num_errors > 0) {
-    if (runner != 3 && (event->errors[0] == 1 || event->errors[0] == 2)) {
+    if (runner != 3 && (event->errors[0] == 1 || event->errors[0] == 2) &&
+	event->error_types[0] == 'F') {
       event->error_types[0] = 'T';
     }
     else {
@@ -1429,8 +1430,9 @@ static int parse_pickoff(CWParserState *state, CWParsedEvent *event,
     /* By convention, the assumption is that errors on pitcher or
      * catcher are throwing errors; others are assumed to be muffs,
      * if not explicitly marked otherwise. */
-    else if (event->errors[event->num_errors - 1] == 1 ||
-	     event->errors[event->num_errors - 1] == 2) {
+    else if ((event->errors[event->num_errors - 1] == 1 ||
+	      event->errors[event->num_errors - 1] == 2) &&
+	     event->error_types[event->num_errors - 1] == 'F') {
       event->error_types[event->num_errors - 1] = 'T';
     }
     else {
