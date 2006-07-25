@@ -282,6 +282,7 @@ cw_gameiter_process_subs(CWGameIterator *gameiter, CWEvent *event)
 	gameiter->lineups[0][sub->team].player_id = NULL;
 	free(gameiter->lineups[0][sub->team].name);
 	gameiter->lineups[0][sub->team].name = NULL;
+	gameiter->dh_slot[sub->team] = 0;
       }
     }
     else if (sub->pos == 11) {
