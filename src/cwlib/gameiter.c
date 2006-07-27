@@ -135,6 +135,7 @@ cw_gameiter_reset(CWGameIterator *gameiter)
   gameiter->inning = 1;
   gameiter->half_inning = 0;
   gameiter->outs = 0;
+  gameiter->inning_batters = 0;
   gameiter->score[0] = gameiter->score[1] = 0;
   gameiter->hits[0] = gameiter->hits[1] = 0;
   gameiter->errors[0] = gameiter->errors[1] = 0;
@@ -210,6 +211,7 @@ cw_gameiter_change_sides(CWGameIterator *gameiter)
   gameiter->outs = 0;
   gameiter->is_leadoff = 1;
   gameiter->ph_flag = 0;
+  gameiter->inning_batters = 0;
 
   for (i = 0; i <= 3; i++) {
     strcpy(gameiter->runners[i], "");
@@ -455,6 +457,7 @@ cw_gameiter_next(CWGameIterator *gameiter)
 
     if (cw_event_is_batter(gameiter->event_data)) {
       gameiter->num_batters[gameiter->half_inning]++;
+      gameiter->inning_batters++;
       gameiter->ph_flag = 0;
       gameiter->is_leadoff = 0;
 
