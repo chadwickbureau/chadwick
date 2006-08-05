@@ -1343,35 +1343,6 @@ static int parse_passed_ball(CWParserState *state, CWParsedEvent *event,
 }
 
 /*
- * parse_pickoff_error: process an old-style pickoff error event
- *
- * at entry: state->sym should be character after 'POE' token
- * at exit:  state->sym points to '.' or end of string, as appropriate
- *
- * Notes:
- * - This is a deprecated code; preferred now is 'POn(En)'
- */
-static int parse_pickoff_error(CWParserState *state, CWParsedEvent *event,
-			       int flags)
-{
-  if (state->sym >= '1' && state->sym <= '9') {
-    event->errors[event->num_errors] = (state->sym- '0');
-    event->error_types[event->num_errors++] = 'F';
-  }
-  else {
-    return cw_parse_error(state);
-  }
-
-  cw_parse_nextsym(state);
-
-  if (flags && state->sym == '/') {
-    parse_flags(state, event);
-  }
-
-  return 1;
-}
-
-/*
  * parse_pickoff_stolen_base: process a pickoff-stolen base event
  *
  * at entry: state->sym should be character after 'POSB' token
@@ -1466,25 +1437,6 @@ static int parse_pickoff(CWParserState *state, CWParsedEvent *event,
   }
 
   return 1;
-}
-
-/*
- * parse_sac_hit_error: process a sac hit error event (archaic)
- *
- * at entry: state->sym should be character after 'SHE' token
- * at exit:  state->sym points to '.' or end of string, as appropriate
- *
- * Notes:
- * - This is an archaic primary event; this function sets the bunt and
- *   sac hit flags, then hands off to parse_error(), since the syntax is
- *   identical after this point.
- */
-static int parse_sac_hit_error(CWParserState *state, CWParsedEvent *event,
-			       int flags)
-{
-  event->bunt_flag = 1;
-  event->sh_flag = 1;
-  return parse_safe_on_error(state, event, flags);
 }
 
 /*
@@ -1700,8 +1652,7 @@ static int parse_walk(CWParserState *state, CWParsedEvent *event, int flags)
     else if (!strcmp(state->token, "DI")) {
       if (!parse_indifference(state, event, 0)) return 0;
     }
-    else if (!strcmp(state->token, "OA") ||
-	     !strcmp(state->token, "OBA")) {
+    else if (!strcmp(state->token, "OA")) {
       /* we don't need to do anything special for W+OA */
     }
     else if (!strcmp(state->token, "E")) {
@@ -1935,10 +1886,8 @@ int cw_parse_event(char *text, CWParsedEvent *event)
     { CW_EVENT_INDIFFERENCE, "DI", parse_indifference },
     { CW_EVENT_ERROR, "E", parse_safe_on_error },
     { CW_EVENT_FIELDERSCHOICE, "FC", parse_fielders_choice },
-    { CW_EVENT_FIELDERSCHOICE, "FCSH", parse_sac_fielders_choice },  /* archaic */
     { CW_EVENT_FOULERROR, "FLE", parse_foul_error },
     { CW_EVENT_HOMERUN, "H", parse_base_hit },
-    { CW_EVENT_HITBYPITCH, "HBP", parse_hit_by_pitch },
     { CW_EVENT_HITBYPITCH, "HP", parse_hit_by_pitch },
     { CW_EVENT_HOMERUN, "HR", parse_base_hit },
     { CW_EVENT_INTENTIONALWALK, "I", parse_walk },
@@ -1946,15 +1895,12 @@ int cw_parse_event(char *text, CWParsedEvent *event)
     { CW_EVENT_STRIKEOUT, "K", parse_strikeout },
     { CW_EVENT_STRIKEOUT, "KE", parse_strikeout_error },  /* archaic */
     { CW_EVENT_OTHERADVANCE, "OA", parse_other_advance },
-    { CW_EVENT_OTHERADVANCE, "OBA", parse_other_advance },
     { CW_EVENT_PASSEDBALL, "PB", parse_passed_ball },
     { CW_EVENT_PICKOFF, "PO", parse_pickoff },
     { CW_EVENT_PICKOFF, "POCS", parse_pickoff_caught_stealing },
-    { CW_EVENT_PICKOFFERROR, "POE", parse_pickoff_error },
     { CW_EVENT_STOLENBASE, "POSB", parse_pickoff_stolen_base },
     { CW_EVENT_SINGLE, "S", parse_base_hit },
     { CW_EVENT_STOLENBASE, "SB", parse_stolen_base },
-    { CW_EVENT_ERROR, "SHE", parse_sac_hit_error },   /* archaic */
     { CW_EVENT_TRIPLE, "T", parse_base_hit },
     { CW_EVENT_WALK, "W", parse_walk },
     { CW_EVENT_WILDPITCH, "WP", parse_wild_pitch },
