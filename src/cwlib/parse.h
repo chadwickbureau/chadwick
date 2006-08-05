@@ -96,8 +96,10 @@ typedef struct cw_parsed_event_struct {
   int wp_flag, pb_flag, foul_flag, bunt_flag;
   int sb_flag[4], cs_flag[4], po_flag[4];
   int fielded_by;
-  int num_putouts, num_assists, num_errors;
-  int putouts[3], assists[10], errors[10];
+  /* touches lists players in the order fielding credits are assigned;
+   * intended for listing players involved in DP or TP */
+  int num_putouts, num_assists, num_errors, num_touches;
+  int putouts[3], assists[10], errors[10], touches[20];
   /* Error types are 'N' for none, 'T' for throwing, 
    * 'F' for fumbled, and 'D' for dropped throw. */
   char error_types[10];

@@ -227,6 +227,7 @@ cw_parse_event_initialize(CWParsedEvent *event)
   event->num_putouts = 0;
   event->num_assists = 0;
   event->num_errors = 0;
+  event->num_touches = 0;
   for (i = 0; i < 3; i++) {
     event->putouts[i] = 0;
   }
@@ -234,6 +235,9 @@ cw_parse_event_initialize(CWParsedEvent *event)
     event->assists[i] = 0;
     event->errors[i] = 0;
     event->error_types[i] = 'N';
+  }
+  for (i = 0; i < 20; i++) {
+    event->touches[i] = 0;
   }
   event->batted_ball_type = ' ';
   strcpy(event->hit_location, "");
@@ -336,6 +340,10 @@ static int cw_parse_fielding_credit(CWParserState *state, CWParsedEvent *event,
 	state->sym == '?') {
       if (isdigit(lastChar)) {
 	assists[num_assists++] = lastChar - '0';
+	if (event->num_touches == 0 ||
+	    (event->touches[event->num_touches - 1] != lastChar - '0')) {
+	  event->touches[event->num_touches++] = lastChar - '0';
+	}
       }
       if (state->sym != '?') {
 	*(play++) = state->sym;
@@ -372,6 +380,10 @@ static int cw_parse_fielding_credit(CWParserState *state, CWParsedEvent *event,
     else {
       if (isdigit(lastChar)) {
 	event->putouts[event->num_putouts++] = lastChar - '0';
+	if (event->num_touches == 0 ||
+	    (event->touches[event->num_touches - 1] != lastChar - '0')) {
+	  event->touches[event->num_touches++] = lastChar - '0';
+	}
       }
       *(play) = '\0';
 
@@ -443,6 +455,11 @@ static int cw_parse_advance_modifier(CWParserState *state,
 	  event->putouts[1] = event->putouts[2];
 	  event->putouts[2] = 0;
 	  event->num_putouts--;
+
+	  for (i = 0; i < event->num_touches - 1; i++) {
+	    event->touches[i] = event->touches[i+1];
+	  }
+	  event->touches[--event->num_touches] = 0;
 	}
 	for (i = baseFrom; i >= 0; i--) {
 	  event->rbi_flag[i] = -1;
@@ -455,6 +472,11 @@ static int cw_parse_advance_modifier(CWParserState *state,
       event->putouts[1] = event->putouts[2];
       event->putouts[2] = 0;
       event->num_putouts--;
+
+      for (i = 0; i < event->num_touches - 1; i++) {
+	event->touches[i] = event->touches[i+1];
+      }
+      event->touches[--event->num_touches] = 0;
     }
     else if (/*(event->event_type == CW_EVENT_GENERICOUT &&
 	       baseFrom == baseTo) ||*/
@@ -1465,6 +1487,7 @@ static int cw_parse_strikeout(CWParserState *state, CWParsedEvent *event,
     /* just a bare strikeout */
     strcpy(event->play[0], "2");
     event->putouts[event->num_putouts++] = 2;
+    event->touches[event->num_touches++] = 2;
   }
 
   if (state->sym == '+') {
