@@ -109,7 +109,8 @@ DECLARE_FIELDFUNC(cwevent_outs)
 DECLARE_FIELDFUNC(cwevent_balls)
 {
   if (strlen(gameiter->event->count) >= 2 && 
-      gameiter->event->count[0] != '?') {
+      gameiter->event->count[0] != '?' &&
+      gameiter->event->count[1] != '?') {
     return sprintf(buffer, "%c", gameiter->event->count[0]);
   }
   else {
@@ -121,6 +122,7 @@ DECLARE_FIELDFUNC(cwevent_balls)
 DECLARE_FIELDFUNC(cwevent_strikes)
 {
   if (strlen(gameiter->event->count) >= 2 &&
+      gameiter->event->count[0] != '?' &&
       gameiter->event->count[1] != '?') {
     return sprintf(buffer, "%c", gameiter->event->count[1]);
   }
