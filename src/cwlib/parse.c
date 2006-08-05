@@ -256,7 +256,7 @@ cw_parse_primary_event(CWParserState *state)
 }
 
 /*
- * parse_hit_fielder: read and process fielded by for base hit
+ * cw_parse_hit_fielder: read and process fielded by for base hit
  *
  * at entry: state->sym should be digit beginning fielder list
  * at exit:  state->sym points to first character after fielder list
@@ -267,7 +267,7 @@ cw_parse_primary_event(CWParserState *state)
  *   if question mark leads fielder list
  */
 
-static void parse_hit_fielder(CWParserState *state, CWParsedEvent *event)
+static void cw_parse_hit_fielder(CWParserState *state, CWParsedEvent *event)
 {
   if (isdigit(state->sym)) {
     event->fielded_by = state->sym - '0';
@@ -294,8 +294,8 @@ static void parse_hit_fielder(CWParserState *state, CWParsedEvent *event)
  * - Question marks for missing fielders are saved in the token field;
  *   this is a difference from bevent's behavior
  */
-static int parse_fielding_credit(CWParserState *state, CWParsedEvent *event,
-				 char prev)
+static int cw_parse_fielding_credit(CWParserState *state, CWParsedEvent *event,
+				    char prev)
 {
   char *play = state->token;
   char lastChar = state->sym;
@@ -390,13 +390,13 @@ static int parse_fielding_credit(CWParserState *state, CWParsedEvent *event,
 }
 
 /*
- * parse_flag: read in a flag
+ * cw_parse_flag: read in a flag
  *
  * at entry: state->sym should be '/'
  * at exit:  state->sym points to first character after flag
  *           text of flag (without the slash) stored in state->token
  */
-static void parse_flag(CWParserState *state)
+static void cw_parse_flag(CWParserState *state)
 {
   char *c = state->token;
 
@@ -417,13 +417,14 @@ static void parse_flag(CWParserState *state)
   *c = '\0';
 }
 
-static int parse_advance_modifier(CWParserState *state, CWParsedEvent *event,
-				  int safe, int baseFrom, int baseTo)
+static int cw_parse_advance_modifier(CWParserState *state, 
+				     CWParsedEvent *event,
+				     int safe, int baseFrom, int baseTo)
 {
   int i;
 
   if (isfielder(state->sym) || state->sym == 'E') {
-    if (parse_fielding_credit(state, event, ' ')) {
+    if (cw_parse_fielding_credit(state, event, ' ')) {
       if (!safe) {
 	safe = 1;
 	if (event->advance[baseFrom] < 5) {
@@ -472,7 +473,7 @@ static int parse_advance_modifier(CWParserState *state, CWParsedEvent *event,
     }
 
     if (state->sym == '/') {
-      parse_flag(state);
+      cw_parse_flag(state);
       if (!strcmp(state->token, "TH") ||
 	  !strcmp(state->token, "TH1") ||
 	  !strcmp(state->token, "TH2") ||
@@ -496,8 +497,8 @@ static int parse_advance_modifier(CWParserState *state, CWParsedEvent *event,
 
     if (state->sym == '(') {
       cw_parse_nextsym(state);
-      if (!parse_advance_modifier(state, event, safe,
-				  baseFrom, baseTo)) {
+      if (!cw_parse_advance_modifier(state, event, safe,
+				     baseFrom, baseTo)) {
 	return 0;
       }
     }
@@ -580,7 +581,7 @@ static char locations[][20] = {
   ""
 };
 
-static void parse_flags(CWParserState *state, CWParsedEvent *event)
+static void cw_parse_flags(CWParserState *state, CWParsedEvent *event)
 {
   char flag[256];
 
@@ -748,7 +749,7 @@ static void parse_flags(CWParserState *state, CWParsedEvent *event)
 }
 
 /*
- * parse_balk: process a balk event
+ * cw_parse_balk: process a balk event
  *
  * at entry: state->sym should be character after 'BK' token
  * at exit:  state->sym points to first character after 'BK' token
@@ -756,13 +757,13 @@ static void parse_flags(CWParserState *state, CWParsedEvent *event)
  * Notes:
  * - Nothing to do here really; balks shouldn't take flags, etc.
  */
-static int parse_balk(CWParserState *state, CWParsedEvent *event, int flags)
+static int cw_parse_balk(CWParserState *state, CWParsedEvent *event, int flags)
 {
   return 1;
 }
 
-static int parse_stolen_base(CWParserState *state, CWParsedEvent *event, 
-			     int flags)
+static int cw_parse_stolen_base(CWParserState *state, CWParsedEvent *event, 
+				int flags)
 {
   if (state->sym == '2') {
     event->sb_flag[1] = 1;
@@ -810,7 +811,7 @@ static int parse_stolen_base(CWParserState *state, CWParsedEvent *event,
     cw_parse_primary_event(state);
 
     if (!strcmp(state->token, "SB")) {
-      parse_stolen_base(state, event, 0);
+      cw_parse_stolen_base(state, event, 0);
     }
     else {
       return cw_parse_error(state);
@@ -818,7 +819,7 @@ static int parse_stolen_base(CWParserState *state, CWParsedEvent *event,
   }
 
   while (flags && state->sym == '/') {
-    parse_flag(state);
+    cw_parse_flag(state);
 
     /* Accept flags silently.  Most common is /INT, though some
      * files may also have the relay notations /R and /U.
@@ -828,8 +829,8 @@ static int parse_stolen_base(CWParserState *state, CWParsedEvent *event,
   return 1;
 }
 
-static int parse_caught_stealing(CWParserState *state, CWParsedEvent *event,
-				 int flags)
+static int cw_parse_caught_stealing(CWParserState *state, CWParsedEvent *event,
+				    int flags)
 {
   int runner;
 
@@ -844,7 +845,7 @@ static int parse_caught_stealing(CWParserState *state, CWParsedEvent *event,
   while (cw_parse_nextsym(state) == '(') {
     cw_parse_nextsym(state);
     if (isfielder(state->sym) || state->sym == 'E') {
-      if (parse_fielding_credit(state, event, ' ')) {
+      if (cw_parse_fielding_credit(state, event, ' ')) {
 	event->advance[runner] = runner + 1;
       }
       strcpy(event->play[runner], state->token);
@@ -875,7 +876,7 @@ static int parse_caught_stealing(CWParserState *state, CWParsedEvent *event,
     cw_parse_primary_event(state);
 
     if (!strcmp(state->token, "CS")) {
-      parse_caught_stealing(state, event, 0);
+      cw_parse_caught_stealing(state, event, 0);
     }
     else {
       return cw_parse_error(state);
@@ -883,21 +884,10 @@ static int parse_caught_stealing(CWParserState *state, CWParsedEvent *event,
   }
 
   while (flags && state->sym == '/') {
-    parse_flag(state);
+    cw_parse_flag(state);
 
     if (!strcmp(state->token, "DP")) {
       event->dp_flag = 1;
-    }
-    else if (!strcmp(state->token, "TH") ||
-	     !strcmp(state->token, "TH1") ||
-	     !strcmp(state->token, "TH2") ||
-	     !strcmp(state->token, "TH3") ||
-	     !strcmp(state->token, "THH")) {
-      /* silently accept a throw flag; there is an instance of
-       * a POCSn(nnEn)/TH1 in 1968 */
-    }
-    else if (!strcmp(state->token, "INT")) {
-      /* silently accept interference flag */
     }
     else {
       /* silently accept other flags */
@@ -918,7 +908,7 @@ static int parse_caught_stealing(CWParserState *state, CWParsedEvent *event,
 }
 
 /*
- * parse_safe_on_error: process an error event
+ * cw_parse_safe_on_error: process an error event
  *
  * at entry: state->sym should be character after 'E' token
  * at exit:  state->sym points to '.' or end of string, as appropriate
@@ -931,8 +921,8 @@ static int parse_caught_stealing(CWParserState *state, CWParsedEvent *event,
  *   of 'G' for all errors)
  * - Implied advancement of batter is to first base
  */
-static int parse_safe_on_error(CWParserState *state,
-			       CWParsedEvent *event, int flags)
+static int cw_parse_safe_on_error(CWParserState *state,
+				  CWParsedEvent *event, int flags)
 {
   event->advance[0] = 1;
   
@@ -952,13 +942,13 @@ static int parse_safe_on_error(CWParserState *state,
   }
 
   if (flags && state->sym == '/') {
-    parse_flags(state, event);
+    cw_parse_flags(state, event);
   }
   return 1;
 }
 
 /*
- * parse_fielders_choice: process a fielder's choice event
+ * cw_parse_fielders_choice: process a fielder's choice event
  *
  * at entry: state->sym should be character after 'FC' token
  * at exit:  state->sym points to '.' or end of string, as appropriate
@@ -967,8 +957,8 @@ static int parse_safe_on_error(CWParserState *state,
  * - Fielder's choice plays are assumed to be grounders unless specified
  * - Implied advance for batters is first base 
  */
-static int parse_fielders_choice(CWParserState *state, CWParsedEvent *event,
-				 int flags)
+static int cw_parse_fielders_choice(CWParserState *state, CWParsedEvent *event,
+				    int flags)
 {
   event->advance[0] = 1;
   event->batted_ball_type = 'G';
@@ -982,32 +972,14 @@ static int parse_fielders_choice(CWParserState *state, CWParsedEvent *event,
   }
 
   if (flags && state->sym == '/') {
-    parse_flags(state, event);
+    cw_parse_flags(state, event);
   }
 
   return 1;
 }
 
 /*
- * parse_sac_fielders_choice: process a sac fielder's choice event (archaic)
- *
- * at entry: state->sym should be character after 'FCSH' token
- * at exit:  state->sym points to '.' or end of string, as appropriate
- *
- * Notes:
- * - Archaic; this function sets the bunt and sac flags, then hands off
- *   to parse_fielders_choice() to do the actual work
- */
-static int parse_sac_fielders_choice(CWParserState *state, CWParsedEvent *event,
-				     int flags)
-{
-  event->bunt_flag = 1;
-  event->sh_flag = 1;
-  return parse_fielders_choice(state, event, flags);
-}
-
-/*
- * parse_foul_error: process a foul ball error event
+ * cw_parse_foul_error: process a foul ball error event
  *
  * at entry: state->sym should be character after 'FLE' token
  * at exit:  state->sym points to end of string
@@ -1016,8 +988,8 @@ static int parse_sac_fielders_choice(CWParserState *state, CWParsedEvent *event,
  * - Foul flag is not set, since bevent does not set it (?)
  * - Ball fielded is generated, since bevent generates it
  */
-static int parse_foul_error(CWParserState *state, CWParsedEvent *event,
-			    int flags)
+static int cw_parse_foul_error(CWParserState *state, CWParsedEvent *event,
+			       int flags)
 {
   if (state->sym >= '1' && state->sym <= '9') {
     event->errors[event->num_errors] = (state->sym - '0');
@@ -1031,7 +1003,7 @@ static int parse_foul_error(CWParserState *state, CWParsedEvent *event,
 
   if (flags && state->sym == '/') {
     /* Most likely a trajectory code */
-    parse_flags(state, event);
+    cw_parse_flags(state, event);
   }
 
   return 1;
@@ -1042,7 +1014,7 @@ static int parse_foul_error(CWParserState *state, CWParsedEvent *event,
  * Returns the base parsed (zero for batter), or a negative
  * number if an error occurs
  */
-static int parse_out_base(CWParserState *state)
+static int cw_parse_out_base(CWParserState *state)
 {
   int base;
 
@@ -1063,8 +1035,8 @@ static int parse_out_base(CWParserState *state)
   return base;
 }
 
-static int parse_generic_out(CWParserState *state, CWParsedEvent *event,
-			     int flags)
+static int cw_parse_generic_out(CWParserState *state, CWParsedEvent *event,
+				int flags)
 {
   /* lastFielder keeps track of the fielder who made the previous putout,
      so as to generate correct credit on plays like 54(1)3/GDP */
@@ -1078,10 +1050,10 @@ static int parse_generic_out(CWParserState *state, CWParsedEvent *event,
   event->advance[0] = 1;
  
   while (isfielder(state->sym)) {
-    safe = parse_fielding_credit(state, event, lastFielder);
+    safe = cw_parse_fielding_credit(state, event, lastFielder);
 
     if (state->sym == '(') {
-      int base = parse_out_base(state);
+      int base = cw_parse_out_base(state);
       if (base < 0)  return 0;
       if (forcePlay == -1) {
 	if (base > 0) {
@@ -1131,7 +1103,7 @@ static int parse_generic_out(CWParserState *state, CWParsedEvent *event,
   }
 
   if (flags && state->sym == '/') {
-    parse_flags(state, event);
+    cw_parse_flags(state, event);
   }
 
   /* For 10.18(g) tracking.
@@ -1152,7 +1124,7 @@ static int parse_generic_out(CWParserState *state, CWParsedEvent *event,
 }
 
 /*
- * parse_hit_by_pitch: process a hit-by-pitch event
+ * cw_parse_hit_by_pitch: process a hit-by-pitch event
  *
  * at entry: state->sym should be character after 'HP'/'HBP' token
  * at exit:  state->sym points to first character after 'HP'/'HBP' token
@@ -1160,15 +1132,15 @@ static int parse_generic_out(CWParserState *state, CWParsedEvent *event,
  * Notes:
  * - Sets advancement of batter to 1, which is implied by primary event
  */
-static int parse_hit_by_pitch(CWParserState *state, CWParsedEvent *event,
-			      int flags)
+static int cw_parse_hit_by_pitch(CWParserState *state, CWParsedEvent *event,
+				 int flags)
 {
   event->advance[0] = 1;
   return 1;
 }
 
 /*
- * parse_interference: process a catcher's interference event
+ * cw_parse_interference: process a catcher's interference event
  *
  * at entry: state->sym should be first character after 'C' token
  * at exit:  p-state->sym points to '.' or end of string, as appropriate
@@ -1181,13 +1153,13 @@ static int parse_hit_by_pitch(CWParserState *state, CWParsedEvent *event,
  *   legal exceptions currently in the DiamondWare engine, so we will
  *   follow along with that convention here.
  */
-static int parse_interference(CWParserState *state, CWParsedEvent *event,
-			      int flags)
+static int cw_parse_interference(CWParserState *state, CWParsedEvent *event,
+				 int flags)
 {
   event->advance[0] = 1;
 
   while (state->sym == '/') {
-    parse_flag(state);
+    cw_parse_flag(state);
 
     if (state->token[0] == 'E' && event->num_errors > 0) {
       return cw_parse_error(state);
@@ -1211,7 +1183,7 @@ static int parse_interference(CWParserState *state, CWParsedEvent *event,
       event->batted_ball_type = 'G';
     }
     /* Starting here, we check for batted ball location flags.
-     * This is essentially copied from parse_flags() and probably should be
+     * This is essentially copied from cw_parse_flags() and probably should be
      * refactored. */
     else if (strlen(state->token) >= 2) {
       char traj = (state->token[0] == 'B') ? state->token[1] : state->token[0];
@@ -1270,7 +1242,7 @@ static int parse_interference(CWParserState *state, CWParsedEvent *event,
 }
 
 /*
- * parse_indifference: process a defensive indifference event
+ * cw_parse_indifference: process a defensive indifference event
  *
  * at entry: state->sym should be character after 'DI' token
  * at exit:  state->sym points to first character after 'DI' token
@@ -1278,14 +1250,14 @@ static int parse_interference(CWParserState *state, CWParsedEvent *event,
  * Notes:
  * - Nothing to do here; DI doesn't take flags
  */
-static int parse_indifference(CWParserState *state, CWParsedEvent *event,
-			      int flags)
+static int cw_parse_indifference(CWParserState *state, CWParsedEvent *event,
+				 int flags)
 {
   return 1;
 }
 
 /*
- * parse_other_advance: process an other advance/out advancing event
+ * cw_parse_other_advance: process an other advance/out advancing event
  *
  * at entry: state->sym should be character after 'OA'/'OBA' token
  * at exit:  state->sym points to '.' or end of string, as appropriate
@@ -1294,11 +1266,11 @@ static int parse_indifference(CWParserState *state, CWParsedEvent *event,
  * - _flags are unusual with this event; /INT, /DP, and /TP are accepted,
  *   though only /INT has occurred so far in Retrosheet data
  */
-static int parse_other_advance(CWParserState *state, CWParsedEvent *event,
-			       int flags)
+static int cw_parse_other_advance(CWParserState *state, CWParsedEvent *event,
+				  int flags)
 {
   while (flags && state->sym == '/') {
-    parse_flag(state);
+    cw_parse_flag(state);
 
     if (!strcmp(state->token, "INT")) {
       /* silently accept interference flag */
@@ -1318,7 +1290,7 @@ static int parse_other_advance(CWParserState *state, CWParsedEvent *event,
 }
 
 /*
- * parse_passed_ball: process a passed ball event
+ * cw_parse_passed_ball: process a passed ball event
  *
  * at entry: state->sym should be character after 'PB' token
  * at exit:  state->sym points to first character after 'PB' token
@@ -1326,13 +1298,13 @@ static int parse_other_advance(CWParserState *state, CWParsedEvent *event,
  * Notes:
  * - The only meaningful flag for WP is /DP 
  */
-static int parse_passed_ball(CWParserState *state, CWParsedEvent *event,
-			     int flags)
+static int cw_parse_passed_ball(CWParserState *state, CWParsedEvent *event,
+				int flags)
 {
   event->pb_flag = 1;
 
   while (flags && state->sym == '/') {
-    parse_flag(state);
+    cw_parse_flag(state);
 
     if (!strcmp(state->token, "DP")) {
       event->dp_flag = 1;
@@ -1343,33 +1315,34 @@ static int parse_passed_ball(CWParserState *state, CWParsedEvent *event,
 }
 
 /*
- * parse_pickoff_stolen_base: process a pickoff-stolen base event
+ * cw_parse_pickoff_stolen_base: process a pickoff-stolen base event
  *
  * at entry: state->sym should be character after 'POSB' token
  * at exit:  state->sym points to '.' or end of string, as appropriate
  */
-static int parse_pickoff_stolen_base(CWParserState *state, CWParsedEvent *event,
-				     int flags)
+static int cw_parse_pickoff_stolen_base(CWParserState *state, 
+					CWParsedEvent *event,
+					int flags)
 {
-  return parse_stolen_base(state, event, flags);
+  return cw_parse_stolen_base(state, event, flags);
 }
 
 /*
- * parse_pickoff_caught_stealing: process a pickoff-caught stealing event
+ * cw_parse_pickoff_caught_stealing: process a pickoff-caught stealing event
  * 
  * at entry: state->sym should be character after 'POCS' token
  * at exit:  state->sym points to '.' or end of string, as appropriate
  */
-static int parse_pickoff_caught_stealing(CWParserState *state,
-					 CWParsedEvent *event, 
-					 int flags)
+static int cw_parse_pickoff_caught_stealing(CWParserState *state,
+					    CWParsedEvent *event, 
+					    int flags)
 {
   event->po_flag[state->sym - '1'] = 1;
-  return parse_caught_stealing(state, event, flags);
+  return cw_parse_caught_stealing(state, event, flags);
 }
 
-static int parse_pickoff(CWParserState *state, CWParsedEvent *event,
-			 int flags)
+static int cw_parse_pickoff(CWParserState *state, CWParsedEvent *event,
+			    int flags)
 {
   int runner;
 
@@ -1386,17 +1359,17 @@ static int parse_pickoff(CWParserState *state, CWParsedEvent *event,
   }
   cw_parse_nextsym(state);
   if (isfielder(state->sym)) {
-    parse_fielding_credit(state, event, ' ');
+    cw_parse_fielding_credit(state, event, ' ');
     strncpy(event->play[runner], state->token, 20);
   }
   else if (state->sym == 'E') {
     /* going to leave this commented to match hevent output for now */
     /*    event->event_type = CW_EVENT_PICKOFFERROR;  */
-    parse_fielding_credit(state, event, ' ' );
+    cw_parse_fielding_credit(state, event, ' ' );
     strncpy(event->play[runner], state->token, 20);
 
     if (state->sym == '/') {
-      parse_flag(state);
+      cw_parse_flag(state);
       if (!strcmp(state->token, "TH") ||
 	  !strcmp(state->token, "TH1") ||
 	  !strcmp(state->token, "TH2") ||
@@ -1433,36 +1406,37 @@ static int parse_pickoff(CWParserState *state, CWParsedEvent *event,
 
   if (flags && state->sym == '/') {
     /* Most likely flag is /DP */
-    parse_flags(state, event);
+    cw_parse_flags(state, event);
   }
 
   return 1;
 }
 
 /*
- * parse_base_hit: process a base hit event ('S', 'D', 'T', 'H', 'HR')
+ * cw_parse_base_hit: process a base hit event ('S', 'D', 'T', 'H', 'HR')
  *
  * at entry: state->sym should be character after hit token
  * at exit:  state->sym points to '.' or end of string, as appropriate
  *
  * Notes:
  */
-static int parse_base_hit(CWParserState *state, CWParsedEvent *event,
-			  int flags)
+static int cw_parse_base_hit(CWParserState *state, CWParsedEvent *event,
+			     int flags)
 {
   if (isfielder(state->sym) || state->sym == '0') {
-    parse_hit_fielder(state, event);
+    cw_parse_hit_fielder(state, event);
   }
 
   if (flags && state->sym == '/') {
-    parse_flags(state, event);
+    cw_parse_flags(state, event);
   }
 
   return 1;
 }
 
-static int parse_ground_rule_double(CWParserState *state, CWParsedEvent *event,
-				    int flags)
+static int cw_parse_ground_rule_double(CWParserState *state, 
+				       CWParsedEvent *event,
+				       int flags)
 {
   if (state->sym >= '1' && state->sym <= '9') {
     /* Some newer event files have fielders after the DGR, which seems
@@ -1473,18 +1447,18 @@ static int parse_ground_rule_double(CWParserState *state, CWParsedEvent *event,
   }
 
   if (flags && state->sym == '/') {
-    parse_flags(state, event);
+    cw_parse_flags(state, event);
   }
   
   return 1;
 }
 
-static int parse_strikeout(CWParserState *state, CWParsedEvent *event,
-			   int flags)
+static int cw_parse_strikeout(CWParserState *state, CWParsedEvent *event,
+			      int flags)
 {
   if (state->sym >= '1' && state->sym <= '9') {
-    event->advance[0] = ((parse_fielding_credit(state, event, ' ')) ?
-			     1 : 0);
+    event->advance[0] = ((cw_parse_fielding_credit(state, event, ' ')) ?
+			 1 : 0);
     strcpy(event->play[0], state->token);
   } 
   else {
@@ -1504,22 +1478,22 @@ static int parse_strikeout(CWParserState *state, CWParsedEvent *event,
       event->pb_flag = 1;
     }
     else if (!strcmp(state->token, "PO")) {
-      parse_pickoff(state, event, 0);
+      cw_parse_pickoff(state, event, 0);
     }
     else if (!strcmp(state->token, "POCS")) {
-      parse_pickoff_caught_stealing(state, event, 0);
+      cw_parse_pickoff_caught_stealing(state, event, 0);
     }
     else if (!strcmp(state->token, "POSB")) {
-      parse_pickoff_stolen_base(state, event, 0);
+      cw_parse_pickoff_stolen_base(state, event, 0);
     }
     else if (!strcmp(state->token, "SB")) {
-      parse_stolen_base(state, event, 0);
+      cw_parse_stolen_base(state, event, 0);
     }
     else if (!strcmp(state->token, "CS")) {
-      parse_caught_stealing(state, event, 0);
+      cw_parse_caught_stealing(state, event, 0);
     }
     else if (!strcmp(state->token, "DI")) {
-      parse_indifference(state, event, 0);
+      cw_parse_indifference(state, event, 0);
     }
     else if (!strcmp(state->token, "OA") ||
 	     !strcmp(state->token, "OBA")) {
@@ -1533,16 +1507,13 @@ static int parse_strikeout(CWParserState *state, CWParsedEvent *event,
       event->error_types[event->num_errors++] = 'F';
       cw_parse_nextsym(state);
     }
-    else if (!strcmp(state->token, "")) {
-      /* 'K+/23' appears in 1988 files; just accept this silently */
-    }
     else {
       return cw_parse_error(state);
     }
   }
 
   while (flags && state->sym == '/') {
-    parse_flag(state);
+    cw_parse_flag(state);
 
     if ((!strcmp(state->token, "TH") ||
 	 !strcmp(state->token, "TH1") ||
@@ -1604,8 +1575,8 @@ static int parse_strikeout(CWParserState *state, CWParsedEvent *event,
   return 1;
 }
 
-static int parse_strikeout_error(CWParserState *state, CWParsedEvent *event,
-				 int flags)
+static int cw_parse_strikeout_error(CWParserState *state, CWParsedEvent *event,
+				    int flags)
 {
   if (state->sym < '1' || state->sym > '9') {
     return cw_parse_error(state);
@@ -1620,7 +1591,7 @@ static int parse_strikeout_error(CWParserState *state, CWParsedEvent *event,
   return 1;
 }
 
-static int parse_walk(CWParserState *state, CWParsedEvent *event, int flags)
+static int cw_parse_walk(CWParserState *state, CWParsedEvent *event, int flags)
 {
   event->advance[0] = 1;
 
@@ -1635,22 +1606,22 @@ static int parse_walk(CWParserState *state, CWParsedEvent *event, int flags)
       event->pb_flag = 1;
     }
     else if (!strcmp(state->token, "PO")) {
-      if (!parse_pickoff(state, event, 0))  return 0;
+      if (!cw_parse_pickoff(state, event, 0))  return 0;
     }
     else if (!strcmp(state->token, "POSB")) {
-      if (!parse_pickoff_stolen_base(state, event, 0)) return 0;
+      if (!cw_parse_pickoff_stolen_base(state, event, 0)) return 0;
     }
     else if (!strcmp(state->token, "POCS")) {
-      if (!parse_pickoff_caught_stealing(state, event, 0)) return 0;
+      if (!cw_parse_pickoff_caught_stealing(state, event, 0)) return 0;
     }
     else if (!strcmp(state->token, "SB")) {
-      if (!parse_stolen_base(state, event, 0)) return 0;
+      if (!cw_parse_stolen_base(state, event, 0)) return 0;
     }
     else if (!strcmp(state->token, "CS")) {
-      if (!parse_caught_stealing(state, event, 0)) return 0;
+      if (!cw_parse_caught_stealing(state, event, 0)) return 0;
     }
     else if (!strcmp(state->token, "DI")) {
-      if (!parse_indifference(state, event, 0)) return 0;
+      if (!cw_parse_indifference(state, event, 0)) return 0;
     }
     else if (!strcmp(state->token, "OA")) {
       /* we don't need to do anything special for W+OA */
@@ -1666,7 +1637,7 @@ static int parse_walk(CWParserState *state, CWParsedEvent *event, int flags)
   }
 
   while (flags && state->sym == '/') {
-    parse_flag(state);
+    cw_parse_flag(state);
 
     if ((!strcmp(state->token, "TH") ||
 	 !strcmp(state->token, "TH1") ||
@@ -1687,7 +1658,7 @@ static int parse_walk(CWParserState *state, CWParsedEvent *event, int flags)
 }
 
 /*
- * parse_wild_pitch: process a wild pitch event
+ * cw_parse_wild_pitch: process a wild pitch event
  *
  * at entry: state->sym should be character after 'WP' token
  * at exit:  state->sym points to first character after 'WP' token
@@ -1696,13 +1667,13 @@ static int parse_walk(CWParserState *state, CWParsedEvent *event, int flags)
  * - The only meaningful flag for WP is /DP (yes, there has been a
  *   wild pitch that resulted in a double play!)
  */
-static int parse_wild_pitch(CWParserState *state, CWParsedEvent *event,
-			    int flags)
+static int cw_parse_wild_pitch(CWParserState *state, CWParsedEvent *event,
+			       int flags)
 {
   event->wp_flag = 1;
 
   while (flags && state->sym == '/') {
-    parse_flag(state);
+    cw_parse_flag(state);
 
     if (!strcmp(state->token, "DP")) {
       event->dp_flag = 1;
@@ -1712,7 +1683,7 @@ static int parse_wild_pitch(CWParserState *state, CWParsedEvent *event,
   return 1;
 } 
 
-static int parse_runner_advance(CWParserState *state, CWParsedEvent *event)
+static int cw_parse_runner_advance(CWParserState *state, CWParsedEvent *event)
 {
   int baseFrom = 0, baseTo = 0, safe = 0;
 
@@ -1757,18 +1728,18 @@ static int parse_runner_advance(CWParserState *state, CWParsedEvent *event)
   cw_parse_nextsym(state);
   while (state->sym == '(') {
     cw_parse_nextsym(state);
-    if (!parse_advance_modifier(state, event, safe, baseFrom, baseTo)) {
+    if (!cw_parse_advance_modifier(state, event, safe, baseFrom, baseTo)) {
       return 0;
     }
   }
   return 1;
 }
 
-static int parse_advancement(CWParserState *state, CWParsedEvent *event)
+static int cw_parse_advancement(CWParserState *state, CWParsedEvent *event)
 {
   do {
     cw_parse_nextsym(state);
-    if (!parse_runner_advance(state, event))  return 0;
+    if (!cw_parse_runner_advance(state, event))  return 0;
   } while (state->sym == ';');
 
   return (state->sym == '\0');
@@ -1777,7 +1748,7 @@ static int parse_advancement(CWParserState *state, CWParsedEvent *event)
 /*
  * Cleanup and so forth
  */
-void sanity_check(CWParsedEvent *event)
+void cw_parse_sanity_check(CWParsedEvent *event)
 {
   int base;
 
@@ -1878,33 +1849,33 @@ typedef struct {
 int cw_parse_event(char *text, CWParsedEvent *event)
 {
   static cw_parse_table_entry primary_table[] = {
-    { CW_EVENT_BALK, "BK", parse_balk },
-    { CW_EVENT_INTERFERENCE, "C", parse_interference },
-    { CW_EVENT_CAUGHTSTEALING, "CS", parse_caught_stealing },
-    { CW_EVENT_DOUBLE, "D", parse_base_hit },
-    { CW_EVENT_DOUBLE, "DGR", parse_ground_rule_double },
-    { CW_EVENT_INDIFFERENCE, "DI", parse_indifference },
-    { CW_EVENT_ERROR, "E", parse_safe_on_error },
-    { CW_EVENT_FIELDERSCHOICE, "FC", parse_fielders_choice },
-    { CW_EVENT_FOULERROR, "FLE", parse_foul_error },
-    { CW_EVENT_HOMERUN, "H", parse_base_hit },
-    { CW_EVENT_HITBYPITCH, "HP", parse_hit_by_pitch },
-    { CW_EVENT_HOMERUN, "HR", parse_base_hit },
-    { CW_EVENT_INTENTIONALWALK, "I", parse_walk },
-    { CW_EVENT_INTENTIONALWALK, "IW", parse_walk },
-    { CW_EVENT_STRIKEOUT, "K", parse_strikeout },
-    { CW_EVENT_STRIKEOUT, "KE", parse_strikeout_error },  /* archaic */
-    { CW_EVENT_OTHERADVANCE, "OA", parse_other_advance },
-    { CW_EVENT_PASSEDBALL, "PB", parse_passed_ball },
-    { CW_EVENT_PICKOFF, "PO", parse_pickoff },
-    { CW_EVENT_PICKOFF, "POCS", parse_pickoff_caught_stealing },
-    { CW_EVENT_STOLENBASE, "POSB", parse_pickoff_stolen_base },
-    { CW_EVENT_SINGLE, "S", parse_base_hit },
-    { CW_EVENT_STOLENBASE, "SB", parse_stolen_base },
-    { CW_EVENT_TRIPLE, "T", parse_base_hit },
-    { CW_EVENT_WALK, "W", parse_walk },
-    { CW_EVENT_WILDPITCH, "WP", parse_wild_pitch },
-    { CW_EVENT_GENERICOUT, "", parse_generic_out },
+    { CW_EVENT_BALK, "BK", cw_parse_balk },
+    { CW_EVENT_INTERFERENCE, "C", cw_parse_interference },
+    { CW_EVENT_CAUGHTSTEALING, "CS", cw_parse_caught_stealing },
+    { CW_EVENT_DOUBLE, "D", cw_parse_base_hit },
+    { CW_EVENT_DOUBLE, "DGR", cw_parse_ground_rule_double },
+    { CW_EVENT_INDIFFERENCE, "DI", cw_parse_indifference },
+    { CW_EVENT_ERROR, "E", cw_parse_safe_on_error },
+    { CW_EVENT_FIELDERSCHOICE, "FC", cw_parse_fielders_choice },
+    { CW_EVENT_FOULERROR, "FLE", cw_parse_foul_error },
+    { CW_EVENT_HOMERUN, "H", cw_parse_base_hit },
+    { CW_EVENT_HITBYPITCH, "HP", cw_parse_hit_by_pitch },
+    { CW_EVENT_HOMERUN, "HR", cw_parse_base_hit },
+    { CW_EVENT_INTENTIONALWALK, "I", cw_parse_walk },
+    { CW_EVENT_INTENTIONALWALK, "IW", cw_parse_walk },
+    { CW_EVENT_STRIKEOUT, "K", cw_parse_strikeout },
+    { CW_EVENT_STRIKEOUT, "KE", cw_parse_strikeout_error },  /* archaic */
+    { CW_EVENT_OTHERADVANCE, "OA", cw_parse_other_advance },
+    { CW_EVENT_PASSEDBALL, "PB", cw_parse_passed_ball },
+    { CW_EVENT_PICKOFF, "PO", cw_parse_pickoff },
+    { CW_EVENT_PICKOFF, "POCS", cw_parse_pickoff_caught_stealing },
+    { CW_EVENT_STOLENBASE, "POSB", cw_parse_pickoff_stolen_base },
+    { CW_EVENT_SINGLE, "S", cw_parse_base_hit },
+    { CW_EVENT_STOLENBASE, "SB", cw_parse_stolen_base },
+    { CW_EVENT_TRIPLE, "T", cw_parse_base_hit },
+    { CW_EVENT_WALK, "W", cw_parse_walk },
+    { CW_EVENT_WILDPITCH, "WP", cw_parse_wild_pitch },
+    { CW_EVENT_GENERICOUT, "", cw_parse_generic_out },
   };
     
   int i;
@@ -1916,7 +1887,7 @@ int cw_parse_event(char *text, CWParsedEvent *event)
 
   if (state.token[0] == '\0') {
     event->event_type = CW_EVENT_GENERICOUT;
-    if (!parse_generic_out(&state, event, 1)) {
+    if (!cw_parse_generic_out(&state, event, 1)) {
       cw_parse_cleanup(&state);
       return 0;
     }
@@ -1937,7 +1908,7 @@ int cw_parse_event(char *text, CWParsedEvent *event)
   }
 
   if (state.sym == '.') {
-    if (!parse_advancement(&state, event)) {
+    if (!cw_parse_advancement(&state, event)) {
       cw_parse_cleanup(&state);
       return 0;
     }
@@ -1954,7 +1925,7 @@ int cw_parse_event(char *text, CWParsedEvent *event)
   }
 
 
-  sanity_check(event);
+  cw_parse_sanity_check(event);
   cw_parse_cleanup(&state);
   return 1;
 }
