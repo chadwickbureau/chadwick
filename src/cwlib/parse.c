@@ -604,7 +604,15 @@ static void parse_flags(CWParserState *state, CWParsedEvent *event)
     }
     else if (!strcmp(flag, "/SF")) {
       event->sf_flag = 1;
-      if (event->batted_ball_type == ' ') {
+      /* Unless marked otherwise, a /SF is considered a fly ball.
+       * Special case: there are a handful of plays like E4/SF, where
+       * a sac fly is awarded when an infielder drops a fly.  In these
+       * cases, we override the default assumption about the batted
+       * ball type.
+       */
+      if (event->batted_ball_type == ' ' ||
+	  (event->event_type == CW_EVENT_ERROR && 
+	   event->batted_ball_type == 'G')) {
 	event->batted_ball_type = 'F';
       }
     }
