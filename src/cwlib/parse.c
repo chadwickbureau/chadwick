@@ -1324,8 +1324,7 @@ static int parse_other_advance(CWParserState *state, CWParsedEvent *event,
  * at exit:  state->sym points to first character after 'PB' token
  *
  * Notes:
- * - Nothing to do here; PB doesn't take flags (although we accept
- *   them silently if present).
+ * - The only meaningful flag for WP is /DP 
  */
 static int parse_passed_ball(CWParserState *state, CWParsedEvent *event,
 			     int flags)
@@ -1334,7 +1333,10 @@ static int parse_passed_ball(CWParserState *state, CWParsedEvent *event,
 
   while (flags && state->sym == '/') {
     parse_flag(state);
-    /* Accept flags silently. */
+
+    if (!strcmp(state->token, "DP")) {
+      event->dp_flag = 1;
+    }
   }
 
   return 1;
@@ -1740,8 +1742,8 @@ static int parse_walk(CWParserState *state, CWParsedEvent *event, int flags)
  * at exit:  state->sym points to first character after 'WP' token
  *
  * Notes:
- * - Nothing to do here; WP doesn't take flags (though we accept them
- *   silently if present).
+ * - The only meaningful flag for WP is /DP (yes, there has been a
+ *   wild pitch that resulted in a double play!)
  */
 static int parse_wild_pitch(CWParserState *state, CWParsedEvent *event,
 			    int flags)
@@ -1750,7 +1752,10 @@ static int parse_wild_pitch(CWParserState *state, CWParsedEvent *event,
 
   while (flags && state->sym == '/') {
     parse_flag(state);
-    /* Accept flags silently. */
+
+    if (!strcmp(state->token, "DP")) {
+      event->dp_flag = 1;
+    }
   }
 
   return 1;
