@@ -162,7 +162,8 @@ DECLARE_FIELDFUNC(cwgame_day_of_week)
   char *date = cw_game_info_lookup(gameiter->game, "date");
 
   if (date == NULL) {
-    return sprintf(buffer, "");
+    strcpy(buffer, "");
+    return 0;
   }
   sscanf(date, "%d/%d/%d", &year, &month, &day);
   if (year > 0 && year <= 99) {

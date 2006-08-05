@@ -161,7 +161,7 @@ cwtools_process_scorebook(CWLeague *league, char *filename)
 
   fprintf(stderr, "[Processing file %s.]\n", filename);
   if (!file || cw_scorebook_read(scorebook, file) < 0) {
-    fprintf(stderr, "Warning: could not open file '%s'\n", file);
+    fprintf(stderr, "Warning: could not open file '%s'\n", filename);
   }
   else {
     cwtools_iterate_games(scorebook, league);
@@ -313,9 +313,7 @@ cwevent_parse_command_line(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
   int i;
-  CWScorebook *scorebook;
   CWLeague *league = cw_league_create();
-  FILE *file;
 
   (*cwtools_print_welcome_message)(argv[0]);
   i = cwevent_parse_command_line(argc, argv);
