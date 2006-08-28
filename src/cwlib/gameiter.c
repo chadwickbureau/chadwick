@@ -516,6 +516,11 @@ cw_gameiter_next(CWGameIterator *gameiter)
        * in event text*/
       gameiter->event_data->rbi_flag[3] = 0;
     }
+    else if (gameiter->event_data->event_type == CW_EVENT_WALK &&
+	     (!strcmp(gameiter->runners[2], "") ||
+	      !strcmp(gameiter->runners[1], ""))) {
+      gameiter->event_data->rbi_flag[3] = 0;
+    }
 
     for (i = 0; i <= 3; i++) {
       if (gameiter->event_data->rbi_flag[i] == 2) {
