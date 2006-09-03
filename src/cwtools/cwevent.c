@@ -476,10 +476,7 @@ DECLARE_FIELDFUNC(cwevent_tp_flag)
 /* Field 43 */
 DECLARE_FIELDFUNC(cwevent_rbi_on_play)
 {
-  return sprintf(buffer, "%d", (gameiter->event_data->rbi_flag[0] +
-				gameiter->event_data->rbi_flag[1] + 
-				gameiter->event_data->rbi_flag[2] +
-				gameiter->event_data->rbi_flag[3]));
+  return sprintf(buffer, "%d", cw_event_rbi_on_play(gameiter->event_data));
 }
 
 /* Field 44 */
