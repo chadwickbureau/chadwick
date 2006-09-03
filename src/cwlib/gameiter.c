@@ -516,7 +516,8 @@ cw_gameiter_next(CWGameIterator *gameiter)
        * in event text*/
       gameiter->event_data->rbi_flag[3] = 0;
     }
-    else if (gameiter->event_data->event_type == CW_EVENT_WALK &&
+    else if ((gameiter->event_data->event_type == CW_EVENT_WALK ||
+	      gameiter->event_data->event_type == CW_EVENT_INTENTIONALWALK) &&
 	     (!strcmp(gameiter->runners[2], "") ||
 	      !strcmp(gameiter->runners[1], ""))) {
       gameiter->event_data->rbi_flag[3] = 0;
