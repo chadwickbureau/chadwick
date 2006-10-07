@@ -917,13 +917,13 @@ static int cw_parse_caught_stealing(CWParserState *state, CWParsedEvent *event,
   }
 
   if (event->num_errors > 0) {
-    if (runner != 3 && (event->errors[0] == 1 || event->errors[0] == 2) &&
-	event->error_types[0] == 'F') {
-      event->error_types[0] = 'T';
-    }
-    else {
-      event->error_types[0] = 'D';
-    }
+    int i;
+
+    for (i = 0; i < event->num_errors; i++) {
+      if (event->error_types[0] == 'F') {
+	event->error_types[0] = 'D';
+      }
+    } 
   }
 
   return 1;
@@ -1822,6 +1822,15 @@ void cw_parse_sanity_check(CWParsedEvent *event)
       }
       else {
 	event->batted_ball_type = 'P';
+      }
+    }
+  }
+  else if (!cw_event_is_batter(event)) {
+    int i;
+
+    for (i = 0; i < event->num_errors; i++) {
+      if (event->error_types[i] == 'F') {
+	event->error_types[i] = 'D';
       }
     }
   }
