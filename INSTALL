@@ -5,50 +5,48 @@ If you've downloaded the binary distribution (chadwick-x.y.z-bin.zip),
 simply unzip the programs into the directory where you would like to 
 put them.  The command-line tools require no special installation setup.
 
-If you're building from source using the Borland C++ 5.5 compiler,
-go to the chadwick-x.y.z\src directory (created when you unpacked the
-source distribution).  Modify borland.mak in that directory to set
-CHADWICK_TOP to the directory where you unpacked the chadwick
-sources, and then type 'make -f borland'.  The binary tools will
-be built in chadwick-x.y.z\src\cwtools.
+If you want to build from source, Makefiles are provided which will work
+with either the MinGW (http://www.mingw.org) or CygWin (http://www.cygwin.com)
+environments.
+
+If you prefer to use a different compiler, setting up a suitable makefile
+or project file should be straightforward.  First build a DLL out of the
+files in src/cwlib, then link them with the programs in src/cwtools.
+Note that for each program in cwtools, you should link both the corresponding
+.c file as well as cwtools.c.  For example, to build cwgame.c, you need
+both cwgame.o and cwtools.o.
 
 To get the graphical interface working, check with the author for
 instructions.
 
-We are looking for contributions of makefiles and/or patches for other
-tools.
-
-
-Unix users
-==========
+Unix/Macintosh users
+====================
 
 Chadwick uses the standard "./configure; make; make install" method
 for configuration and building.  The generic instructions below come
 standard from autotools.
 
-The build system expects Python to be installed in a standard place.
-Note that if you're using a package management system, you'll need the
-package called python-dev (or similar) to build Chadwick.  You will
-also need to have wxPython version 2.5.3 or higher installed (check
-your package management system for package name, or get it from
-www.wxpython.org)
+The makefiles build and install the underlying C library and the
+command-line tools.
 
-The install step installs the Chadwick C library (libchadwick), the
-command-line tools cwevent, cwgame, and cwsub, a Python wrapper around
-the C library (installed as module libgambit), and the graphical
-scorebook program itself.  A script named 'chadwick' is installed in
-the binary directory that launches the scorebook application.
+To build the Python API and the graphical interface, do the following,
+starting in the root source directory:
 
-Macintosh users
-===============
+cd src/python
+python setup.py build
+python setup.py install
+cd ../score
+python setup.py build
+python setup.py install
 
-For MacOS X users, you should be able to just follow the Unix users'
-instructions.  There is *one* change you need to make: in the file
-src/chadwick in the unpacked tarball, change the 'python' in the first
-line to 'pythonw', before doing the build.
+If you are installing to a system directory, you'll need to run
+the install steps as the superuser (via su or sudo).
 
-There is no build system for earlier versions of MacOS; please
-contact the author if you can contribute one.
+The graphical interface requires wxPython 2.5.3 or higher to be
+installed.
+
+A convenience script 'chadwick' is installed (by default to /usr/local/bin)
+which launches the graphical interface.
 
 
 

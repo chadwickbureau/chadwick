@@ -9,7 +9,7 @@ setup(name="_libchadwick",
       url="http://chadwick.sourceforge.net",
       ext_modules=[Extension('_libchadwick',
                              ['libchadwick_python.c',
-                              'book.c', 'box.c', 'file.c', 'game.c',
+                              'book.c', 'file.c', 'game.c',
                               'gameiter.c', 'league.c', 'parse.c', 'roster.c'],
                              include_dirs=['../cwlib'] )])
 

@@ -42,3 +42,6 @@ EXTRA_DIST = \
 
 #clean-local:
 #	rm -rf build
+
+python:	libchadwick.i
+	swig -python -o libchadwick_python.c libchadwick.i

@@ -42,7 +42,6 @@ int IsValidPlay(char *play)
 %include <chadwick.h>
 
 %include <book.h>
-%include <box.h>
 %include <file.h>
 %include <game.h>
 %include <gameiter.h>
