@@ -33,6 +33,7 @@ To build the Python API and the graphical interface, do the following,
 starting in the root source directory:
 
 cd src/python
+cp ../cwlib/*.c ../cwlib/*.h .
 python setup.py build
 python setup.py install
 cd ../score
