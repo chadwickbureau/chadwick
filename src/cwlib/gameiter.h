@@ -33,6 +33,7 @@ typedef struct cw_game_iter_struct {
   CWGame *game;
   CWEvent *event;
   CWParsedEvent *event_data;
+  int parse_ok;            /* Nonzero if last event did not parse */
   int event_count, inning, half_inning, outs, inning_batters;
   int score[2], hits[2], errors[2], times_out[2];
   int num_batters[2], dh_slot[2];

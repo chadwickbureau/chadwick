@@ -154,7 +154,8 @@ cw_gameiter_reset(CWGameIterator *gameiter)
   cw_gameiter_lineup_setup(gameiter);
 
   if (gameiter->event && strcmp(gameiter->event->event_text, "NP")) {
-    cw_parse_event(gameiter->event->event_text, gameiter->event_data);
+    gameiter->parse_ok = cw_parse_event(gameiter->event->event_text, 
+					gameiter->event_data);
   }
 }
 
@@ -500,7 +501,8 @@ cw_gameiter_next(CWGameIterator *gameiter)
   gameiter->event = gameiter->event->next;
   if (gameiter->event && strcmp(gameiter->event->event_text, "NP")) {
     int i;
-    cw_parse_event(gameiter->event->event_text, gameiter->event_data);
+    gameiter->parse_ok = cw_parse_event(gameiter->event->event_text,
+					gameiter->event_data);
     for (i = 1; i <= 3; i++) {
       if (gameiter->event_data->advance[i] == 0 &&
 	  strcmp(gameiter->runners[i], "") &&
