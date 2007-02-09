@@ -156,8 +156,10 @@ void cw_game_cleanup(CWGame *game)
 {
   cw_game_cleanup_tags(game);
   cw_game_cleanup_starters(game);
-  cw_game_cleanup_events(game, game->first_event);
-  game->first_event = NULL;
+  if (game->first_event != NULL) {
+    cw_game_cleanup_events(game, game->first_event);
+    game->first_event = NULL;
+  }
   cw_game_cleanup_data(game);
   
   free(game->version);
