@@ -31,7 +31,7 @@
  * These constants are used for creating token arrays
  */
 #define CW_MAX_TOKENS        20
-#define CW_MAX_TOKEN_LENGTH 100
+#define CW_MAX_TOKEN_LENGTH 300
 
 /*
  * Tokenize 'line' into tokens, which are separated by commas.
