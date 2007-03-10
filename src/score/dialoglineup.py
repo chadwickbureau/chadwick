@@ -56,11 +56,6 @@ class LineupDialog(wx.Dialog):
             self.positions[i].SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
             gridSizer.Add(self.positions[i], 0, wx.ALL | wx.ALIGN_CENTER, 5)
             wx.EVT_CHOICE(self, self.positions[i].GetId(), self.OnSetEntry)
-
-        self.pitcherText.Show(False)
-        self.players[-1].Show(False)
-        self.positions[-1].Show(False)
-
         sizer.Add(gridSizer, 0, wx.ALL, 0)
 
         buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -74,6 +69,9 @@ class LineupDialog(wx.Dialog):
         self.SetSizer(sizer)
         self.Layout()
         sizer.SetSizeHints(self)
+
+        self.players[-1].Enable(False)
+        self.positions[-1].Show(False)
 
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOK)
 
@@ -95,8 +93,9 @@ class LineupDialog(wx.Dialog):
         Check the status of the lineup after an entry (either a player or his
         position) is set.  Activate the OK button iff the lineup is valid.
         """
-        self.pitcherText.Show(self.HasDH())
-        self.players[-1].Show(self.HasDH())
+        self.pitcherText.Enable(self.HasDH())
+        self.players[-1].Enable(self.HasDH())
+        self.Layout()
 
         lineupOK = True
 
@@ -156,8 +155,7 @@ class LineupDialog(wx.Dialog):
 
         pitcher = gameiter.GetPlayer(team, 0)
         if pitcher != None:
-            self.pitcherText.Show(True)
-            self.players[-1].Show(True)
+            self.players[-1].Enable(True)
 
             for player in self.roster.Players():
                 if player.player_id == pitcher:
