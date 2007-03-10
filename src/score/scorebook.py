@@ -42,7 +42,7 @@ def TempFile():
     return name    
 
 class ChadwickScorebook:
-    def __init__(self, year=2005):
+    def __init__(self, year=2007):
         self.books = { }
         self.modified = False
         self.year = year
