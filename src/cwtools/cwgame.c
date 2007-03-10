@@ -38,7 +38,7 @@
 extern int ascii;
 
 /* Fields to display (-f) */
-int fields[82] = {
+int fields[84] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -47,10 +47,10 @@ int fields[82] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1
+  1, 1, 1, 1
 };
 
-int max_field = 81;
+int max_field = 83;
 
 char program_name[20] = "cwgame";
 
@@ -555,6 +555,28 @@ DECLARE_FIELDFUNC(cwgame_gwrbi)
 		 tmp : "");
 }
 
+int
+cwgame_final_pitcher(char *buffer, CWGame *game, int team)
+{
+  char *first = cw_game_starter_find_by_position(game, team, 1)->player_id;
+  char *last = "";
+
+  CWEvent *event = game->first_event;
+  while (event != NULL) {
+    if (event->first_sub != NULL) {
+      CWAppearance *sub = event->first_sub;
+      while (sub != NULL) {
+        if (sub->team == team && sub->pos == 1) {
+          last = sub->player_id;
+        }
+        sub = sub->next;
+      }
+    }
+    event = event->next;
+  }
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s", last); 
+}
+
 /* Fields for starting lineups */
 int
 cwgame_starting_player(char *buffer, CWGame *game, int team, int slot)
@@ -672,6 +694,20 @@ void cwgame_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
     }
   }
 
+  t = 0;
+  for (i = 82; i < 84; i++) {
+    if (fields[i]) {
+      if (ascii && comma) {
+        *(buf++) = ',';
+      }
+      else {
+        comma = 1;
+      }
+      buf += cwgame_final_pitcher(buf, game, t);
+    }
+    t++;
+  }
+
   printf(output_line);
   printf("\n");
 
@@ -695,7 +731,7 @@ void cwgame_print_help(void)
   fprintf(stderr, "  -a        generate Ascii-delimited format files (default)\n");
   fprintf(stderr, "  -ft       generate Fortran format files\n");
   fprintf(stderr, "  -f flist  give list of fields to output\n");
-  fprintf(stderr, "              Default is 0-81\n");
+  fprintf(stderr, "              Default is 0-83\n");
   fprintf(stderr, "  -d        print list of field numbers and descriptions\n");
 
   exit(0);
@@ -793,6 +829,8 @@ cwgame_print_field_list(void)
   fprintf(stderr, "79      home position 8\n");
   fprintf(stderr, "80      home batter 9\n");
   fprintf(stderr, "81      home position 9\n");
+  fprintf(stderr, "82      visiting finisher (NULL if complete game)\n");
+  fprintf(stderr, "83      home finisher (NULL if complete game)\n");
 
   exit(0);
 }
