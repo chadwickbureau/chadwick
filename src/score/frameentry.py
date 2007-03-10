@@ -28,7 +28,6 @@ import wx, wx.grid
 from libchadwick import *
 
 import icons
-from dialoglineup import LineupDialog
 from panelboxscore import BoxscorePanel
 import panelstate
 from panelnarrative import NarrativePanel
