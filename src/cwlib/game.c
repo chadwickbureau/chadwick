@@ -515,7 +515,7 @@ cw_game_read(FILE *file)
       for (i = 0; i < 256; i++) {
 	data[i] = cw_strtok(NULL);
 	if (!data[i]) {
-	  cw_game_data_append(game, i - 1, data);
+	  cw_game_data_append(game, i, data);
 	  break;
 	}
       }
