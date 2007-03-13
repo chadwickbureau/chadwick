@@ -155,21 +155,17 @@ cw_scorebook_remove_game(CWScorebook *scorebook, char *game_id)
 static void
 cw_scorebook_read_comments(CWScorebook *scorebook, FILE *file)
 {
-  int i, num_tokens;
-  char **tokens = (char **) malloc(sizeof(char *) * CW_MAX_TOKENS);
-  for (i = 0; i < CW_MAX_TOKENS; i++) {
-    tokens[i] = (char *) malloc(sizeof(char) * CW_MAX_TOKEN_LENGTH);
-  }
-
   while (1) {
-    char buf[256];
+    char buf[256], *tok, *com;
     fgets(buf, 256, file);
-    num_tokens = cw_file_tokenize_line(buf, tokens);
 
-    if (!strcmp(tokens[0], "com")) {
+    tok = cw_strtok(buf);
+    com = cw_strtok(NULL);
+      
+    if (tok && !strcmp(tok, "com") && com) {
       CWComment *comment = (CWComment *) malloc(sizeof(CWComment));
-      comment->text = (char *) malloc(sizeof(char) * (strlen(tokens[1]) + 1));
-      strcpy(comment->text, tokens[1]);
+      comment->text = (char *) malloc(sizeof(char) * (strlen(com) + 1));
+      strcpy(comment->text, com);
       comment->prev = scorebook->last_comment;
       comment->next = NULL;
       if (scorebook->first_comment == NULL) {
@@ -181,10 +177,6 @@ cw_scorebook_read_comments(CWScorebook *scorebook, FILE *file)
       scorebook->last_comment = comment;
     }
     else {
-      for (i = 0; i < CW_MAX_TOKENS; i++) {
-	free(tokens[i]);
-      }
-      free(tokens);
       return;
     }
   }

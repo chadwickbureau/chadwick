@@ -28,17 +28,10 @@
 #define CW_FILE_H
 
 /*
- * These constants are used for creating token arrays
+ * A replacement for C strtok(), using commas as the token separator,
+ * and respecting quoted fields
  */
-#define CW_MAX_TOKENS        20
-#define CW_MAX_TOKEN_LENGTH 300
-
-/*
- * Tokenize 'line' into tokens, which are separated by commas.
- * If an even number of quotation marks appear in the line, quotes
- * are used to 'escape' commas.
- */
-int cw_file_tokenize_line(char *line, char **tokens);
+char *cw_strtok(char *strToken);
 
 /*
  * Searches for the game 'game_id' in 'file'; sets the file pointer to

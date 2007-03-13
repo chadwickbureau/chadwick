@@ -355,9 +355,9 @@ void cw_game_data_append(CWGame *game, int num_data, char **data)
   d->data = (char **) malloc(sizeof(char *) * num_data);
   d->next = NULL;
   
-  for (i = 1; i <= num_data; i++) {
-    d->data[i-1] = (char *) malloc(sizeof(char) * (strlen(data[i]) + 1));
-    strcpy(d->data[i-1], data[i]);
+  for (i = 0; i < num_data; i++) {
+    d->data[i] = (char *) malloc(sizeof(char) * (strlen(data[i]) + 1));
+    strcpy(d->data[i], data[i]);
   }
 
   if (game->first_data) {
@@ -402,28 +402,23 @@ void cw_game_comment_append(CWGame *game, char *text)
 CWGame *
 cw_game_read(FILE *file)
 {
-  char buf[256];
-  char **tokens;
-  int numTokens, i;
+  char buf[256], *tok;
   fpos_t filepos;
   char batHand = ' ', batHandBatter[256], pitHand = ' ';
   CWGame *game;
 
-  tokens = (char **) malloc(sizeof(char *) * CW_MAX_TOKENS);
-  for (i = 0; i < CW_MAX_TOKENS; i++) {
-    tokens[i] = (char *) malloc(sizeof(char) * CW_MAX_TOKEN_LENGTH);
-  }
-
   fgets(buf, 256, file);
-  numTokens = cw_file_tokenize_line(buf, tokens);
-  if (!strcmp(tokens[0], "id")) {
-    game = cw_game_create(tokens[1]);
+  tok = cw_strtok(buf);
+  if (tok && !strcmp(tok, "id")) {
+    char *game_id = cw_strtok(NULL);
+    if (game_id) {
+      game = cw_game_create(game_id);
+    }
+    else {
+      return NULL;
+    }
   }
   else {
-    for (i = 0; i < CW_MAX_TOKENS; i++) {
-      free(tokens[i]);
-    }
-    free(tokens);
     return NULL;
   }
 
@@ -433,26 +428,53 @@ cw_game_read(FILE *file)
     if (feof(file)) {
       break;
     }
-    numTokens = cw_file_tokenize_line(buf, tokens);
-    if (!strcmp(tokens[0], "id")) {
+
+    tok = cw_strtok(buf);
+    if (!tok || !strcmp(tok, "id")) {
       fsetpos(file, &filepos);
       break;
     }
-    else if (!strcmp(tokens[0], "version")) {
-      cw_game_set_version(game, tokens[1]);
+    else if (!strcmp(tok, "version")) {
+      char *version;
+      version = cw_strtok(NULL);
+      if (version) {
+	cw_game_set_version(game, version);
+      }
     }
-    else if (!strcmp(tokens[0], "info")) {
-      cw_game_info_append(game, tokens[1], tokens[2]);
+    else if (!strcmp(tok, "info")) {
+      char *field, *value;
+      field = cw_strtok(NULL);
+      value = cw_strtok(NULL);
+      if (field && value) {
+	cw_game_info_append(game, field, value);
+      }
     }
-    else if (!strcmp(tokens[0], "start")) {
-      cw_game_starter_append(game, tokens[1], tokens[2],
-			     atoi(tokens[3]), atoi(tokens[4]), 
-			     atoi(tokens[5]));
+    else if (!strcmp(tok, "start")) {
+      char *player_id, *name, *team, *slot, *pos;
+      player_id = cw_strtok(NULL);
+      name = cw_strtok(NULL);
+      team = cw_strtok(NULL);
+      slot = cw_strtok(NULL);
+      pos = cw_strtok(NULL);
+      if (player_id && name && team && slot && pos) {
+	cw_game_starter_append(game, player_id, name,
+			       atoi(team), atoi(slot), 
+			       atoi(pos));
+      }
     } 
-    else if (!strcmp(tokens[0], "play")) {
-      cw_game_event_append(game, atoi(tokens[1]), atoi(tokens[2]),
-			   tokens[3], tokens[4], tokens[5], tokens[6]);
-      if (batHand != ' ' && !strcmp(batHandBatter, tokens[3])) {
+    else if (!strcmp(tok, "play")) {
+      char *inning, *half_inning, *batter, *count, *pitches, *play;
+      inning = cw_strtok(NULL);
+      half_inning = cw_strtok(NULL);
+      batter = cw_strtok(NULL);
+      count = cw_strtok(NULL);
+      pitches = cw_strtok(NULL);
+      play = cw_strtok(NULL);
+      if (inning && half_inning && batter && count && pitches && play) {
+	cw_game_event_append(game, atoi(inning), atoi(half_inning),
+			     batter, count, pitches, play);
+      }
+      if (batHand != ' ' && !strcmp(batHandBatter, batter)) {
 	game->last_event->batter_hand = batHand;
       }
       else {
@@ -466,30 +488,56 @@ cw_game_read(FILE *file)
 	pitHand = ' ';
       }
     }
-    else if (!strcmp(tokens[0], "sub")) {
-      cw_game_substitute_append(game, tokens[1], tokens[2],
-				atoi(tokens[3]), atoi(tokens[4]), 
-				atoi(tokens[5]));
+    else if (!strcmp(tok, "sub")) {
+      char *player_id, *name, *team, *slot, *pos;
+      player_id = cw_strtok(NULL);
+      name = cw_strtok(NULL);
+      team = cw_strtok(NULL);
+      slot = cw_strtok(NULL);
+      pos = cw_strtok(NULL);
+      if (player_id && name && team && slot && pos) {
+	cw_game_substitute_append(game, player_id, name,
+				  atoi(team), atoi(slot), 
+				  atoi(pos));
+      }
     }
-    else if (!strcmp(tokens[0], "com")) {
-      cw_game_comment_append(game, tokens[1]);
+    else if (!strcmp(tok, "com")) {
+      char *comment;
+      comment = cw_strtok(NULL);
+      if (comment) {
+	cw_game_comment_append(game, comment);
+      }
     }
-    else if (!strcmp(tokens[0], "data")) {
-      cw_game_data_append(game, numTokens - 1, tokens);
-    }
-    else if (!strcmp(tokens[0], "badj")) {
-      strncpy(batHandBatter, tokens[1], 255);
-      batHand = tokens[2][0];
-    }
-    else if (!strcmp(tokens[0], "padj")) {
-      pitHand = tokens[2][0];
-    }
-  }
+    else if (!strcmp(tok, "data")) {
+      char *data[256];
+      int i;
 
-  for (i = 0; i < CW_MAX_TOKENS; i++) {
-    free(tokens[i]);
+      for (i = 0; i < 256; i++) {
+	data[i] = cw_strtok(NULL);
+	if (!data[i]) {
+	  cw_game_data_append(game, i - 1, data);
+	  break;
+	}
+      }
+    }
+    else if (!strcmp(tok, "badj")) {
+      char *batter, *bats;
+      batter = cw_strtok(NULL);
+      bats = cw_strtok(NULL);
+      if (batter && bats) {
+	strncpy(batHandBatter, batter, 255);
+	batHand = bats[0];
+      }
+    }
+    else if (!strcmp(tok, "padj")) {
+      char *pitcher, *throws;
+      pitcher = cw_strtok(NULL);
+      throws = cw_strtok(NULL);
+      if (pitcher && throws) {
+	pitHand = throws[0];
+      }
+    }
   }
-  free(tokens);
 
   return game;
 }

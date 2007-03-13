@@ -32,53 +32,98 @@
 #include "file.h"
 
 /*
- * Tokenizes a line by commas; caller is responsible for deleting memory
- * The function first checks to see if quotes are balanced; if they are,
- * assumes that quotes escape possible commas in text strings.  If they
- * aren't, quotes are just ignored.  (This attemps to work around a
- * missing quote before Paul Sorrento's name in MIN199006240.)
+ * This adaptation of strtok() respects the quoted string fields in
+ * Retrosheet files.  The function assumes that quotes appear at the
+ * very beginning and end of a field, i.e., comma-quote-data-quote-comma.
+ *
+ * This function operates similarly to strtok() in that it maintains
+ * static data.
+ *
+ * The implementation is based on ConsoleStrTok() by Chris Cookson,
+ * <cjcookson@hotmail.com>, posted at
+ * http://www.flipcode.com/cgi-bin/fcarticles.cgi?show=64037
  */
-int cw_file_tokenize_line(char *line, char **tokens)
+char *cw_strtok(char *strToken)
 {
-  unsigned int i;
-  int quote = 0, numTokens = 0;
+  /* Where to start searching next */
+  static char *pNext;
+  /* Start of next token */
+  char *pStart;
 
-  strcpy(tokens[numTokens], "");
-  for (i = 0; i < strlen(line); i++) {
-    if (line[i] == '"') {
-      quote++;
+  /* If NULL is passed in, continue searching */
+  if (strToken == NULL) {
+    if (pNext != NULL) {
+      strToken = pNext;
+    } 
+    else {
+      /* Reached end of original string */
+      return NULL;
     }
   }
 
-  if (quote % 2 == 0) {
-    /* An even number of quotes appear; use them */
-    quote = 0;
-    for (i = 0; i < strlen(line); i++) {
-      if (line[i] == '"') {
-	quote = 1 - quote;
-      }
-      else if (line[i] == ',' && !quote) {
-	strcpy(tokens[++numTokens], "");
-      }
-      else if (isprint(line[i])) {
-	strncat(tokens[numTokens], &(line[i]), 1);
-      }
+  /* Zero length string, so no more tokens to be found */
+  if (*strToken == 0) {
+    pNext = NULL;
+    return NULL;
+  }
+
+  /* Skip leading whitespace before next token */
+  /* while (	(*strToken == ' ') || (*strToken == '\t')
+   *		|| (*strToken == '\n') ) {
+   *
+   *  ++strToken;
+   *  }
+   */
+
+  /* It's a quoted literal - skip the first quote char */
+  if (*strToken == '\"') {
+    ++strToken;
+
+    pStart = strToken;
+
+    /* Find ending quote or end of string */
+    while ((*strToken != '\"') && (*strToken != 0) && 
+	   (*strToken != '\n') && (*strToken != '\r')) {
+      ++strToken;
     }
 
-  }
+    if (*strToken == 0) {
+      /* Reached end of original string */
+      pNext = NULL;
+    } 
+    else {
+      /* More to find, note where to continue searching */
+      *strToken = 0;
+      pNext = strToken + 1;
+      /* A comma immediately following a quote should be skipped past */
+      if (*pNext == ',') {
+	pNext++;
+      }
+    }
+    /* Return ptr to start of token */
+    return pStart;
+  } 
   else {
-    /* An odd number of quotes: assume some error, and ignore them */
-    for (i = 0; i < strlen(line); i++) {
-      if (line[i] == ',') {
-	strcpy(tokens[++numTokens], "");
-      }
-      else if (line[i] != '"' && isprint(line[i])) {
-	strncat(tokens[numTokens], &(line[i]), 1);
-      }
-    }
-  }
+    /* Unquoted token */
+    pStart = strToken;
 
-  return (numTokens + 1);
+    /* Find next comma or end of string */
+    while ((*strToken != 0) && (*strToken != ',') && 
+	   (*strToken != '\n') && (*strToken != '\r')) {
+      ++strToken;
+    }
+
+    /* Reached end of original string? */
+    if (*strToken == 0) {
+      pNext = NULL;
+    } 
+    else {
+      *strToken = 0;
+      pNext = strToken + 1;
+    }
+    /* Return ptr to start of token */
+    return pStart;
+  }
 }
 
 /*
@@ -87,35 +132,23 @@ int cw_file_tokenize_line(char *line, char **tokens)
  */
 int cw_file_find_game(char *game_id, FILE *file)
 {
-  char buf[256];
-  char **tokens;
-  int numTokens, i, found = 0;
+  char buf[256], *tok, *game;
   fpos_t filepos;
 
   rewind(file);
 
-  tokens = (char **) malloc(sizeof(char *) * CW_MAX_TOKENS);
-  for (i = 0; i < CW_MAX_TOKENS; i++) {
-    tokens[i] = (char *) malloc(sizeof(char) * CW_MAX_TOKEN_LENGTH);
-  }
-
   while (!feof(file)) {
     fgetpos(file, &filepos);
     fgets(buf, 256, file);
-    numTokens = cw_file_tokenize_line(buf, tokens);
-    if (!strcmp(tokens[0], "id") && !strcmp(tokens[1], game_id)) {
+    tok = cw_strtok(buf);
+    game = cw_strtok(NULL);
+    if (tok && !strcmp(tok, "id") && game && !strcmp(game, game_id)) {
       fsetpos(file, &filepos);
-      found = 1;
-      break;
+      return 1;
     }
   }
 
-  for (i = 0; i < CW_MAX_TOKENS; i++) {
-    free(tokens[i]);
-  }
-  free(tokens);
-
-  return found;
+  return 0;
 }
 
 /*
@@ -123,35 +156,22 @@ int cw_file_find_game(char *game_id, FILE *file)
  */
 int cw_file_find_first_game(FILE *file)
 {
-  char buf[256];
-  char **tokens;
-  int numTokens, i, found = 0;
+  char buf[256], *tok;
   fpos_t filepos;
 
   rewind(file);
 
-  tokens = (char **) malloc(sizeof(char *) * CW_MAX_TOKENS);
-  for (i = 0; i < CW_MAX_TOKENS; i++) {
-    tokens[i] = (char *) malloc(sizeof(char) * CW_MAX_TOKEN_LENGTH);
-  }
-
   while (!feof(file)) {
     fgetpos(file, &filepos);
     fgets(buf, 256, file);
-    numTokens = cw_file_tokenize_line(buf, tokens);
-    if (!strcmp(tokens[0], "id")) {
+    tok = cw_strtok(buf);
+    if (tok && !strcmp(tok, "id")) {
       fsetpos(file, &filepos);
-      found = 1;
-      break;
+      return 1;
     }
   }
 
-  for (i = 0; i < CW_MAX_TOKENS; i++) {
-    free(tokens[i]);
-  }
-  free(tokens);
-
-  return found;
+  return 0;
 }
 
 

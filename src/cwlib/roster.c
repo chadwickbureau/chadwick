@@ -241,21 +241,20 @@ cw_roster_player_count(CWRoster *roster)
 void
 cw_roster_read(CWRoster *roster, FILE *file)
 {
-  char buf[256];
-  char **tokens;
-  int numTokens, i;
+  char buf[256], *player_id, *last_name, *first_name, *bats, *throws;
 
   rewind(file);
-
-  tokens = (char **) malloc(sizeof(char *) * CW_MAX_TOKENS);
-  for (i = 0; i < CW_MAX_TOKENS; i++) {
-    tokens[i] = (char *) malloc(sizeof(char) * CW_MAX_TOKEN_LENGTH);
-  }
 
   while (!feof(file)) {
     strcpy(buf, "");
     fgets(buf, 256, file);
-    if ((numTokens = cw_file_tokenize_line(buf, tokens)) < 5) {
+    player_id = cw_strtok(buf);
+    last_name = cw_strtok(NULL);
+    first_name = cw_strtok(NULL);
+    bats = cw_strtok(NULL);
+    throws = cw_strtok(NULL);
+
+    if (!player_id || !last_name || !first_name || !bats || !throws) {
       continue;
     }
 
@@ -263,14 +262,10 @@ cw_roster_read(CWRoster *roster, FILE *file)
      * at the end.  Preserve these (and write them out in cw_roster_write() ).
      */
     cw_roster_player_append(roster, 
-			    cw_player_create(tokens[0], tokens[1], tokens[2],
-					     tokens[3][0], tokens[4][0]));
+			    cw_player_create(player_id, 
+					     last_name, first_name,
+					     bats[0], throws[0]));
   }
-
-  for (i = 0; i < CW_MAX_TOKENS; i++) {
-    free(tokens[i]);
-  }
-  free(tokens);
 }
 
 void

@@ -86,33 +86,25 @@ cw_league_roster_find(CWLeague *league, char *team)
 void
 cw_league_read(CWLeague *rosterList, FILE *file)
 {
-  char buf[256];
-  char **tokens;
-  int numTokens, i;
+  char buf[256], *team_id, *league, *city, *nickname;
 
   rewind(file);
-
-  tokens = (char **) malloc(sizeof(char *) * CW_MAX_TOKENS);
-  for (i = 0; i < CW_MAX_TOKENS; i++) {
-    tokens[i] = (char *) malloc(sizeof(char) * CW_MAX_TOKEN_LENGTH);
-  }
 
   while (!feof(file)) {
     strcpy(buf, "");
     fgets(buf, 256, file);
-    if ((numTokens = cw_file_tokenize_line(buf, tokens)) != 4) {
+    team_id = cw_strtok(buf);
+    league = cw_strtok(NULL);
+    city = cw_strtok(NULL);
+    nickname = cw_strtok(NULL);
+    if (!team_id || !league || !city || !nickname) {
       continue;
     }
 
     cw_league_roster_append(rosterList, 
-			    cw_roster_create(tokens[0], 0, tokens[1],
-					     tokens[2], tokens[3]));
+			    cw_roster_create(team_id, 0, league,
+					     city, nickname));
   }
-
-  for (i = 0; i < CW_MAX_TOKENS; i++) {
-    free(tokens[i]);
-  }
-  free(tokens);
 }
 
 void
