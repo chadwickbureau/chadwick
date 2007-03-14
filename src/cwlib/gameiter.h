@@ -7,7 +7,7 @@
  * Declaration of structures and routines to store game state
  * 
  * This file is part of Chadwick, a library for baseball play-by-play and stats
- * Copyright (C) 2002, Ted Turocy (turocy@econ.tamu.edu)
+ * Copyright (C) 2002-2007, Ted Turocy (drarbiter@gmail.com)
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,8 +24,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef CW_STATE_H
-#define CW_STATE_H
+#ifndef CW_GAMEITER_H
+#define CW_GAMEITER_H
 
 #include "game.h"
 
@@ -121,7 +121,7 @@ char *cw_gameiter_responsible_pitcher(CWGameIterator *gameiter, int base);
 int cw_gameiter_left_on_base(CWGameIterator *gameiter, int team);
 
 
-#endif   /* CW_STATE_H */
+#endif   /* CW_GAMEITER_H */
 
 
 

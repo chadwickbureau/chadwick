@@ -7,7 +7,7 @@
 # Top-level application classes for Chadwick graphical interface
 # 
 # This file is part of Chadwick, a library for baseball play-by-play and stats
-# Copyright (C) 2005, Ted Turocy (turocy@econ.tamu.edu)
+# Copyright (C) 2005-2007-2007, Ted Turocy (drarbiter@gmail.com)
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -532,7 +532,7 @@ class ChadwickFrame(wx.Frame):
                                       "generating the report.\n"
                                       "Please send a bug report to "
                                       "the maintaner at "
-                                      "turocy@econmail.tamu.edu\n"
+                                      "drarbiter@gmail.com\n"
                                       "It is helpful to include this scorebook "
                                       "as an "
                                       "attachment when you send the report.\n"

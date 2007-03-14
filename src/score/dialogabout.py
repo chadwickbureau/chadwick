@@ -7,7 +7,7 @@
 # "About" dialog for Chadwick
 # 
 # This file is part of Chadwick, a library for baseball play-by-play and stats
-# Copyright (C) 2005, Ted Turocy (turocy@econ.tamu.edu)
+# Copyright (C) 2005-2007-2007, Ted Turocy (drarbiter@gmail.com)
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -49,11 +49,11 @@ class AboutDialog(wx.Dialog):
         topSizer.Add(FormattedStaticText(self, "http://chadwick.sourceforge.net"),
                      0, wx.ALL | wx.ALIGN_CENTER, 5)
 
-        topSizer.Add(FormattedStaticText(self, "Copyright (C) 2005-2006"),
+        topSizer.Add(FormattedStaticText(self, "Copyright (C) 2005-2007-2006"),
                      0, wx.TOP | wx.ALIGN_CENTER, 5)
         topSizer.Add(FormattedStaticText(self, "Theodore Turocy"),
                      0, wx.ALIGN_CENTER, 5)
-        topSizer.Add(FormattedStaticText(self, "turocy@econmail.tamu.edu"),
+        topSizer.Add(FormattedStaticText(self, "drarbiter@gmail.com"),
                      0, wx.BOTTOM | wx.ALIGN_CENTER, 5)
 
         topSizer.Add(FormattedStaticText(self, "This is free software,"),

@@ -7,7 +7,7 @@
 # Dialog to enter a comment in the game file
 # 
 # This file is part of Chadwick, a library for baseball play-by-play and stats
-# Copyright (C) 2005, Ted Turocy (turocy@econ.tamu.edu)
+# Copyright (C) 2005-2007, Ted Turocy (drarbiter@gmail.com)
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public

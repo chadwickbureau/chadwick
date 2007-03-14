@@ -7,7 +7,7 @@
  * Chadwick expanded event descriptor program
  * 
  * This file is part of Chadwick, tools for baseball play-by-play and stats
- * Copyright (C) 2002, Ted Turocy (turocy@econ.tamu.edu)
+ * Copyright (C) 2002-2007, Ted Turocy (drarbiter@gmail.com)
  *
  * This program is free software; you can redistribute it and/or modify 
  * it under the terms of the GNU General Public License as published by 
