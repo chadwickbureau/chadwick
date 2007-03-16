@@ -558,7 +558,6 @@ DECLARE_FIELDFUNC(cwgame_gwrbi)
 int
 cwgame_final_pitcher(char *buffer, CWGame *game, int team)
 {
-  char *first = cw_game_starter_find_by_position(game, team, 1)->player_id;
   char *last = "";
 
   CWEvent *event = game->first_event;
