@@ -503,8 +503,9 @@ static int cw_parse_advance_modifier(CWParserState *state,
 	  !strcmp(state->token, "THH")) {
 	event->error_types[event->num_errors - 1] = 'T';
       }
-      else if (!strcmp(state->token, "INT")) {
-	/* silently accept interference flag */
+      else if (!strcmp(state->token, "INT") ||
+	       !strcmp(state->token, "BINT")) {
+	/* silently accept interference flag; /BINT appears in 2006 */
       }
       else if (!strcmp(state->token, "G")) {
 	/* FC5.2X3(5/G) appears in 81TEX.EVA; accept silently */
@@ -866,11 +867,32 @@ static int cw_parse_caught_stealing(CWParserState *state, CWParsedEvent *event,
     
   while (cw_parse_nextsym(state) == '(') {
     cw_parse_nextsym(state);
-    if (isfielder(state->sym) || state->sym == 'E') {
+    if (isfielder(state->sym)) {
       if (cw_parse_fielding_credit(state, event, ' ')) {
 	event->advance[runner] = runner + 1;
       }
-      strcpy(event->play[runner], state->token);
+      strncpy(event->play[runner], state->token, 20);
+    }
+    else if (state->sym == 'E') {
+      cw_parse_fielding_credit(state, event, ' ');
+      strncpy(event->play[runner], state->token, 20);
+
+      if (state->sym == '/') {
+	cw_parse_flag(state);
+	if (!strcmp(state->token, "TH") ||
+	    !strcmp(state->token, "TH1") ||
+	    !strcmp(state->token, "TH2") ||
+	    !strcmp(state->token, "TH3") ||
+	    !strcmp(state->token, "THH")) {
+	  event->error_types[event->num_errors - 1] = 'T';
+	}
+	else if (!strcmp(state->token, "INT")) {
+	  /* accept interference flag silently */
+	}
+       	else {
+	  return cw_parse_error(state);
+	}
+      }
     }
     else if (isalpha(state->sym)) {
       cw_parse_primary_event(state);
