@@ -47,6 +47,8 @@ CWGame *cw_game_create(char *game_id)
   game->last_event = NULL;
   game->first_data = NULL;
   game->last_data = NULL;
+  game->first_stat = NULL;
+  game->last_stat = NULL;
   game->first_comment = NULL;
   game->last_comment = NULL;
   game->prev = NULL;
@@ -152,6 +154,25 @@ static void cw_game_cleanup_data(CWGame *game)
   game->last_data = NULL;
 }
 
+/*
+ * Private auxiliary function to cleanup memory from data list
+ */
+static void cw_game_cleanup_stat(CWGame *game)
+{
+  CWData *data = game->first_stat;
+  while (data != NULL) {
+    int i;
+    CWData *next_data = data->next;
+
+    for (i = 0; i < data->num_data; free(data->data[i++]));
+    free(data->data);
+    data = next_data;
+  }
+
+  game->first_stat = NULL;
+  game->last_stat = NULL;
+}
+
 void cw_game_cleanup(CWGame *game)
 {
   cw_game_cleanup_tags(game);
@@ -161,6 +182,7 @@ void cw_game_cleanup(CWGame *game)
     game->first_event = NULL;
   }
   cw_game_cleanup_data(game);
+  cw_game_cleanup_stat(game);
   
   free(game->version);
   game->version = NULL;
@@ -370,6 +392,30 @@ void cw_game_data_append(CWGame *game, int num_data, char **data)
   game->last_data = d;
 }
 
+void cw_game_stat_append(CWGame *game, int num_data, char **data)
+{
+  int i;
+  CWData *d = (CWData *) malloc(sizeof(CWData));
+
+  d->num_data = num_data;
+  d->data = (char **) malloc(sizeof(char *) * num_data);
+  d->next = NULL;
+  
+  for (i = 0; i < num_data; i++) {
+    d->data[i] = (char *) malloc(sizeof(char) * (strlen(data[i]) + 1));
+    strcpy(d->data[i], data[i]);
+  }
+
+  if (game->first_stat) {
+    game->last_stat->next = d;
+  }
+  else {
+    game->first_stat = d;
+  }
+  d->prev = game->last_stat;
+  game->last_stat = d;
+}
+
 void cw_game_comment_append(CWGame *game, char *text)
 {
   CWComment *comment = (CWComment *) malloc(sizeof(CWComment));
@@ -520,6 +566,18 @@ cw_game_read(FILE *file)
 	}
       }
     }
+    else if (!strcmp(tok, "stat")) {
+      char *data[256];
+      int i;
+
+      for (i = 0; i < 256; i++) {
+	data[i] = cw_strtok(NULL);
+	if (!data[i]) {
+	  cw_game_stat_append(game, i, data);
+	  break;
+	}
+      }
+    }
     else if (!strcmp(tok, "badj")) {
       char *batter, *bats;
       batter = cw_strtok(NULL);
@@ -632,6 +690,23 @@ cw_game_write_events(CWGame *game, FILE *file)
 }
 
 static void
+cw_game_write_stat(CWGame *game, FILE *file)
+{
+  CWData *data = game->first_stat;
+  
+  while (data != NULL) {
+    int i;
+
+    fprintf(file, "stat");
+    for (i = 0; i < data->num_data; i++) {
+      fprintf(file, ",%s", data->data[i]);
+    }
+    fprintf(file, "\n");
+    data = data->next;
+  }
+}
+
+static void
 cw_game_write_data(CWGame *game, FILE *file)
 {
   CWData *data = game->first_data;
@@ -655,6 +730,7 @@ cw_game_write(CWGame *game, FILE *file)
   cw_game_write_starters(game, file);
   cw_game_write_comments(game, file);
   cw_game_write_events(game, file);
+  cw_game_write_stat(game, file);
   cw_game_write_data(game, file);
 }
 

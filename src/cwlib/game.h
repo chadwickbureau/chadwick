@@ -72,9 +72,8 @@ typedef struct cw_event_struct {
 } CWEvent;
 
 /*
- * CWData stores the data presented in a 'data,' record in files.
- * This is kept flexible to allow for future expansion (e.g., in
- * "boxscore" files
+ * CWData stores the data presented in a 'data,' or 'stat,' record in files.
+ * This is kept flexible to allow for future expansion.
  */
 typedef struct cw_data_struct {
   int num_data;
@@ -87,7 +86,7 @@ typedef struct cw_game_struct {
   CWInfo *first_info, *last_info;
   CWAppearance *first_starter, *last_starter;
   CWEvent *first_event, *last_event;
-  CWData *first_data, *last_data;
+  CWData *first_data, *last_data, *first_stat, *last_stat;
   CWComment *first_comment, *last_comment; /* for comments before first evt */
   struct cw_game_struct *prev, *next;
 } CWGame;
@@ -179,6 +178,11 @@ void cw_game_substitute_append(CWGame *game, char *playerID, char *name,
  * Add a data record to the game
  */
 void cw_game_data_append(CWGame *game, int num_data, char **data);
+
+/*
+ * Add a stat record to the game
+ */
+void cw_game_stat_append(CWGame *game, int num_data, char **data);
 
 /*
  * Add a comment to the game
