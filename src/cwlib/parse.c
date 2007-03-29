@@ -875,6 +875,7 @@ static int cw_parse_caught_stealing(CWParserState *state, CWParsedEvent *event,
     }
     else if (state->sym == 'E') {
       cw_parse_fielding_credit(state, event, ' ');
+      event->advance[runner] = runner + 1;
       strncpy(event->play[runner], state->token, 20);
 
       if (state->sym == '/') {
