@@ -1951,7 +1951,10 @@ int cw_parse_event(char *text, CWParsedEvent *event)
     for (i = 0; strcmp(primary_table[i].event_string, ""); i++) {
       if (!strcmp(primary_table[i].event_string, state.token)) {
 	event->event_type = primary_table[i].event_code;
-	(*primary_table[i].parse_func)(&state, event, 1);
+	if (!(*primary_table[i].parse_func)(&state, event, 1)) {
+	  cw_parse_cleanup(&state);
+	  return 0;
+	}
 	break;
       }
     }
