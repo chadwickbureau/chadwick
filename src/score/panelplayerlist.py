@@ -83,13 +83,13 @@ class AddPlayerDialog(wx.Dialog):
         sizer.Add(FormattedStaticText(self, "First name"),
                   0, wx.ALL | wx.ALIGN_CENTER, 5)
         self.firstName = wx.TextCtrl(self, wx.ID_ANY, "", size=(150, -1))
-        self.firstName.SetValidator(NameValidator())
+        #self.firstName.SetValidator(NameValidator())
         sizer.Add(self.firstName, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "Last name"),
                   0, wx.ALL | wx.ALIGN_CENTER, 5)
         self.lastName = wx.TextCtrl(self, -1, "", size=(150, -1))
-        self.lastName.SetValidator(NameValidator())
+        #self.lastName.SetValidator(NameValidator())
         sizer.Add(self.lastName, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "Bats"),
@@ -184,14 +184,14 @@ class EditPlayerDialog(wx.Dialog):
                   0, wx.ALL | wx.ALIGN_CENTER, 5)
         self.firstName = wx.TextCtrl(self, wx.ID_ANY, player.GetFirstName(),
                                      size=(150, -1))
-        self.firstName.SetValidator(NameValidator())
+        #self.firstName.SetValidator(NameValidator())
         sizer.Add(self.firstName, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "Last name"),
                   0, wx.ALL | wx.ALIGN_CENTER, 5)
         self.lastName = wx.TextCtrl(self, wx.ID_ANY, player.GetLastName(),
                                     size=(150, -1))
-        self.lastName.SetValidator(NameValidator())
+        #self.lastName.SetValidator(NameValidator())
         sizer.Add(self.lastName, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         sizer.Add(FormattedStaticText(self, "Bats"),
