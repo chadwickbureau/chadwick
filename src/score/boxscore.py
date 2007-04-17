@@ -24,7 +24,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # 
 
-from libchadwick import *
+import libchadwick as cw
 
 class Boxscore:
     def __init__(self, game):
@@ -105,7 +105,7 @@ class Boxscore:
         
             
     def Tabulate(self, game):
-        gameiter = CWGameIterator(game)
+        gameiter = cw.GameIterator(game)
 
         while gameiter.event != None:
             if gameiter.event.event_text == "NP":
@@ -125,37 +125,37 @@ class Boxscore:
                 batter["ab"] += 1
             pitcher["outs"] += event_data.GetOuts()
 
-            if event_data.event_type == CW_EVENT_SINGLE:
+            if event_data.event_type == cw.EVENT_SINGLE:
                 batter["h"] += 1
                 pitcher["h"] += 1
-            elif event_data.event_type == CW_EVENT_DOUBLE:
+            elif event_data.event_type == cw.EVENT_DOUBLE:
                 batter["h"] += 1
                 pitcher["h"] += 1
                 batter["2b"] += 1
-            elif event_data.event_type == CW_EVENT_TRIPLE:
+            elif event_data.event_type == cw.EVENT_TRIPLE:
                 batter["h"] += 1
                 pitcher["h"] += 1
                 batter["3b"] += 1
-            elif event_data.event_type == CW_EVENT_HOMERUN:
+            elif event_data.event_type == cw.EVENT_HOMERUN:
                 batter["h"] += 1
                 pitcher["h"] += 1
                 batter["hr"] += 1
                 pitcher["hr"] += 1
-            elif event_data.event_type == CW_EVENT_WALK:
+            elif event_data.event_type == cw.EVENT_WALK:
                 batter["bb"] += 1
                 pitcher["bb"] += 1
-            elif event_data.event_type == CW_EVENT_INTENTIONALWALK:
+            elif event_data.event_type == cw.EVENT_INTENTIONALWALK:
                 batter["bb"] += 1
                 pitcher["bb"] += 1
                 batter["ibb"] += 1
                 pitcher["ibb"] += 1
-            elif event_data.event_type == CW_EVENT_STRIKEOUT:
+            elif event_data.event_type == cw.EVENT_STRIKEOUT:
                 batter["so"] += 1
                 pitcher["so"] += 1
-            elif event_data.event_type == CW_EVENT_HITBYPITCH:
+            elif event_data.event_type == cw.EVENT_HITBYPITCH:
                 batter["hp"] += 1
                 pitcher["hb"] += 1
-            elif event_data.event_type == CW_EVENT_BALK:
+            elif event_data.event_type == cw.EVENT_BALK:
                 pitcher["bk"] += 1
 
             batter["bi"] += event_data.GetRBI()

@@ -25,7 +25,6 @@
 # 
 
 import wx
-from libchadwick import *
 
 class LineupDialog(wx.Dialog):
     def __init__(self, parent, title):

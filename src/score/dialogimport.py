@@ -25,7 +25,6 @@
 # 
 
 import wx
-from libchadwick import *
 
 #
 # This is virtually identical to the GameListCtrl in panelgamelist.

@@ -25,7 +25,6 @@
 # 
 
 import wx
-from libchadwick import *
 
 def FormattedStaticText(parent, label, size=wx.DefaultSize,
                         style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE):

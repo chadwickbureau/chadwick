@@ -24,7 +24,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # 
 
-from libchadwick import *
+import libchadwick as cw
 
 class BattingStatline:
     def __init__(self):
@@ -38,25 +38,25 @@ class BattingStatline:
     def ProcessBatting(self, eventData):
         if eventData.IsOfficialAB(): self.stats["ab"] += 1
 
-        if eventData.event_type == CW_EVENT_SINGLE:
+        if eventData.event_type == cw.EVENT_SINGLE:
             self.stats["h"] += 1
-        elif eventData.event_type == CW_EVENT_DOUBLE:
+        elif eventData.event_type == cw.EVENT_DOUBLE:
             self.stats["h"] += 1
             self.stats["2b"] += 1
-        elif eventData.event_type == CW_EVENT_TRIPLE:
+        elif eventData.event_type == cw.EVENT_TRIPLE:
             self.stats["h"] += 1
             self.stats["3b"] += 1
-        elif eventData.event_type == CW_EVENT_HOMERUN:
+        elif eventData.event_type == cw.EVENT_HOMERUN:
             self.stats["h"] += 1
             self.stats["hr"] += 1
-        elif eventData.event_type == CW_EVENT_WALK:
+        elif eventData.event_type == cw.EVENT_WALK:
             self.stats["bb"] += 1
-        elif eventData.event_type == CW_EVENT_INTENTIONALWALK:
+        elif eventData.event_type == cw.EVENT_INTENTIONALWALK:
             self.stats["bb"] += 1
             self.stats["ibb"] += 1
-        elif eventData.event_type == CW_EVENT_STRIKEOUT:
+        elif eventData.event_type == cw.EVENT_STRIKEOUT:
             self.stats["so"] += 1
-        elif eventData.event_type == CW_EVENT_HITBYPITCH:
+        elif eventData.event_type == cw.EVENT_HITBYPITCH:
             self.stats["hp"] += 1
 
         self.stats["bi"] += eventData.GetRBI()
@@ -107,27 +107,27 @@ class PitchingStatline:
         if eventData.IsBatterEvent():
             self.stats["bf"] += 1
 
-        if eventData.event_type == CW_EVENT_SINGLE:
+        if eventData.event_type == cw.EVENT_SINGLE:
             self.stats["h"] += 1
-        elif eventData.event_type == CW_EVENT_DOUBLE:
+        elif eventData.event_type == cw.EVENT_DOUBLE:
             self.stats["h"] += 1
             self.stats["2b"] += 1
-        elif eventData.event_type == CW_EVENT_TRIPLE:
+        elif eventData.event_type == cw.EVENT_TRIPLE:
             self.stats["h"] += 1
             self.stats["3b"] += 1
-        elif eventData.event_type == CW_EVENT_HOMERUN:
+        elif eventData.event_type == cw.EVENT_HOMERUN:
             self.stats["h"] += 1
             self.stats["hr"] += 1
-        elif eventData.event_type == CW_EVENT_WALK:
+        elif eventData.event_type == cw.EVENT_WALK:
             self.stats["bb"] += 1
-        elif eventData.event_type == CW_EVENT_INTENTIONALWALK:
+        elif eventData.event_type == cw.EVENT_INTENTIONALWALK:
             self.stats["bb"] += 1
             self.stats["ibb"] += 1
-        elif eventData.event_type == CW_EVENT_STRIKEOUT:
+        elif eventData.event_type == cw.EVENT_STRIKEOUT:
             self.stats["so"] += 1
-        elif eventData.event_type == CW_EVENT_HITBYPITCH:
+        elif eventData.event_type == cw.EVENT_HITBYPITCH:
             self.stats["hb"] += 1
-        elif eventData.event_type == CW_EVENT_BALK:
+        elif eventData.event_type == cw.EVENT_BALK:
             self.stats["bk"] += 1
 
         if eventData.wp_flag > 0:
@@ -196,9 +196,9 @@ class FieldingStatline:
         if eventData.fielded_by == pos and eventData.GetOuts() > 0:
             self.stats["bf"] += 1
         if (eventData.fielded_by > 0 or
-            eventData.event_type in [CW_EVENT_SINGLE,
-                                     CW_EVENT_DOUBLE,
-                                     CW_EVENT_TRIPLE]):
+            eventData.event_type in [cw.EVENT_SINGLE,
+                                     cw.EVENT_DOUBLE,
+                                     cw.EVENT_TRIPLE]):
             self.stats["bip"] += 1
         
     def __add__(self, x):
@@ -231,9 +231,9 @@ class TeamFieldingStatline:
         if eventData.fielded_by > 0 and eventData.GetOuts() > 0:
             self.stats["bf"] += 1
         if (eventData.fielded_by > 0 or
-            eventData.event_type in [CW_EVENT_SINGLE,
-                                     CW_EVENT_DOUBLE,
-                                     CW_EVENT_TRIPLE]):
+            eventData.event_type in [cw.EVENT_SINGLE,
+                                     cw.EVENT_DOUBLE,
+                                     cw.EVENT_TRIPLE]):
             self.stats["bip"] += 1
 
     def __add__(self, x):
@@ -1281,7 +1281,7 @@ class GrandSlamLog:
     def OnSubstitution(self, game, gameiter): pass
 
     def OnEvent(self, game, gameiter):
-        if (gameiter.GetEventData().event_type == CW_EVENT_HOMERUN and
+        if (gameiter.GetEventData().event_type == cw.EVENT_HOMERUN and
             gameiter.GetRunner(1) != "" and
             gameiter.GetRunner(2) != "" and
             gameiter.GetRunner(3) != ""):
@@ -1402,7 +1402,7 @@ class MultiHRLog(BigGameLog):
         eventData = gameiter.GetEventData()
         team = gameiter.event.half_inning
 
-        if eventData.event_type == CW_EVENT_HOMERUN:
+        if eventData.event_type == cw.EVENT_HOMERUN:
             batter = gameiter.event.batter
             if gameiter.event.batter in self.counts[team]:
                 self.counts[team][batter] += 1
@@ -1423,10 +1423,10 @@ class MultiHitLog(BigGameLog):
         eventData = gameiter.GetEventData()
         team = gameiter.event.half_inning
 
-        if eventData.event_type in [ CW_EVENT_SINGLE,
-                                     CW_EVENT_DOUBLE,
-                                     CW_EVENT_TRIPLE,
-                                     CW_EVENT_HOMERUN ]:
+        if eventData.event_type in [ cw.EVENT_SINGLE,
+                                     cw.EVENT_DOUBLE,
+                                     cw.EVENT_TRIPLE,
+                                     cw.EVENT_HOMERUN ]:
             batter = gameiter.event.batter
             if gameiter.event.batter in self.counts[team]:
                 self.counts[team][batter] += 1
@@ -1447,7 +1447,7 @@ class MultiStrikeoutLog(BigGameLog):
         eventData = gameiter.GetEventData()
         team = gameiter.event.half_inning
 
-        if eventData.event_type == CW_EVENT_STRIKEOUT:
+        if eventData.event_type == cw.EVENT_STRIKEOUT:
             pitcher = gameiter.GetFielder(1-team, 1)
             if pitcher in self.counts[team]:
                 self.counts[team][pitcher] += 1
@@ -1456,7 +1456,7 @@ class MultiStrikeoutLog(BigGameLog):
 
 
 def ProcessGame(game, acclist):
-    gameiter = CWGameIterator(game)
+    gameiter = cw.GameIterator(game)
     map(lambda x: x.OnBeginGame(game, gameiter), acclist)
 
     while gameiter.event != None:

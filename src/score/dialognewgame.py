@@ -25,14 +25,6 @@
 # 
 
 import wx, wx.grid, wx.calendar
-from libchadwick import *
-
-def iterate_teams(league):
-    x = league.first_roster
-    while x != None:
-        yield x
-        x = x.next
-    raise StopIteration
 
 class NewGameDialog(wx.Dialog):
     def __init__(self, parent, f):

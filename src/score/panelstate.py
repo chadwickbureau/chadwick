@@ -25,7 +25,6 @@
 # 
 
 import wx
-from libchadwick import *
 
 # Import of dialogs used
 import dialogcomment

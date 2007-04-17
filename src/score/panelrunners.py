@@ -25,7 +25,6 @@
 # 
 
 import wx
-from libchadwick import *
 
 from wxutils import FormattedStaticText
 

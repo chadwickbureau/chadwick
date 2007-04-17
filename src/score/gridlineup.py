@@ -25,7 +25,6 @@
 # 
 
 import wx, wx.grid
-from libchadwick import *
 
 class LineupGrid(wx.ScrolledWindow):
     def __init__(self, parent, team):

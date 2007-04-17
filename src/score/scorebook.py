@@ -24,11 +24,11 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # 
 
-from libchadwick import *
-
 import os                # for low-level manipulation of tempfiles
 import zipfile
 import tempfile
+
+import libchadwick as cw
 import statscan          # for report updating
 
 def TempFile():
@@ -46,7 +46,7 @@ class ChadwickScorebook:
         self.books = { }
         self.modified = False
         self.year = year
-        self.league = CWLeague()
+        self.league = cw.League()
         self.games = [ ]
         self.playerDict = { }
         self.players = [ ]
@@ -97,7 +97,7 @@ class ChadwickScorebook:
         f.close()
         
         f = file(name, "r")
-        self.league = CWLeague()
+        self.league = cw.League()
         self.league.Read(f)
 
         f.close()
@@ -134,7 +134,7 @@ class ChadwickScorebook:
             f.close()
             
             f = file(name, "r")
-            self.books[team.GetID()] = CWScorebook()
+            self.books[team.GetID()] = cw.Scorebook()
             self.books[team.GetID()].Read(f)
             f.close()
             
@@ -142,7 +142,7 @@ class ChadwickScorebook:
         else:
             # Just create an empty scorebook if event file is
             # not present.
-            self.books[team.GetID()] = CWScorebook()
+            self.books[team.GetID()] = cw.Scorebook()
 
     def ReadReport(self, zf, label):
         fn = self.FindEntry(zf, label.upper() + ".RPT")
@@ -268,7 +268,7 @@ class ChadwickScorebook:
         return "%s%03d" % (playerID,i)
 
     def AddPlayer(self, playerID, firstName, lastName, bats, throws, team):
-        p = CWPlayer(playerID, lastName, firstName, bats, throws)
+        p = cw.Player(playerID, lastName, firstName, bats, throws)
         p.AddTeam(team)
 
         roster = self.league.first_roster
@@ -283,7 +283,7 @@ class ChadwickScorebook:
         self.modified = True
 
     def AddToTeam(self, playerID, firstName, lastName, bats, throws, team):
-        p = CWPlayer(playerID, lastName, firstName, bats, throws)
+        p = cw.Player(playerID, lastName, firstName, bats, throws)
 
         roster = self.league.first_roster
         while roster.GetID() != team:  roster = roster.next
@@ -318,7 +318,7 @@ class ChadwickScorebook:
     def GetYear(self):    return self.year
 
     def AddTeam(self, teamID, city, nickname, leagueID):
-        t = CWRoster(teamID, self.year, leagueID, city, nickname)
+        t = cw.Roster(teamID, self.year, leagueID, city, nickname)
         
         # We try to keep teams in playerID order.
         # This really ought to be part of the underlying C library
@@ -342,7 +342,7 @@ class ChadwickScorebook:
                 t.prev.next = t
                 x.prev = t
                 t.next = x
-        self.books[teamID] = CWScorebook()
+        self.books[teamID] = cw.Scorebook()
         self.modified = True
 
     def ModifyTeam(self, teamID, city, nickname, leagueID):
@@ -377,7 +377,7 @@ class ChadwickScorebook:
                     self.AddTeam(team.GetID(),
                                  team.GetCity(), team.GetNickname(),
                                  team.GetLeague())
-                    self.books[game.GetTeam(t)] = CWScorebook()
+                    self.books[game.GetTeam(t)] = cw.Scorebook()
 
                 self.GetTeam(game.GetTeam(t)).Import(book.GetTeam(game.GetTeam(t)))
                 

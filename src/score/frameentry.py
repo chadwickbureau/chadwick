@@ -25,7 +25,6 @@
 # 
 
 import wx, wx.grid
-from libchadwick import *
 
 import icons
 from panelboxscore import BoxscorePanel

@@ -25,7 +25,7 @@
 # 
 
 import wx
-from libchadwick import *
+import libchadwick as cw
 
 def GetInningLabel(inning, halfInning):
     if halfInning == 0:
@@ -116,7 +116,7 @@ class NarrativePanel(wx.Panel):
         return text
 
     def PrintPlays(self):
-        gameiter = CWGameIterator(self.doc.game)
+        gameiter = cw.GameIterator(self.doc.game)
         text = ""
 
         lastHalf = 1

@@ -25,7 +25,6 @@
 # 
 
 import wx
-from libchadwick import *
 import string
 
 def iterate_statlines(list, f):

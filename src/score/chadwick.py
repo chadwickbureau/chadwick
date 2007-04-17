@@ -28,7 +28,6 @@ import string, sys, os
 
 import wx, wx.grid
 
-from libchadwick import *
 import scorebook
 import panelstate
 import icons

@@ -49,6 +49,45 @@ int IsValidPlay(char *play)
 %include <parse.h>
 %include <roster.h>
 
+//==========================================================================
+//                            Renaming constants
+//==========================================================================
+
+// Using %rename doesn't work on #defines, so we instead simply define
+// the appropriate variables
+
+%constant int EVENT_UNKNOWN         = CW_EVENT_UNKNOWN;
+%constant int EVENT_NONE            = CW_EVENT_NONE;
+%constant int EVENT_GENERICOUT      = CW_EVENT_GENERICOUT;
+%constant int EVENT_STRIKEOUT       = CW_EVENT_STRIKEOUT;
+%constant int EVENT_STOLENBASE      = CW_EVENT_STOLENBASE;
+%constant int EVENT_INDIFFERENCE    = CW_EVENT_INDIFFERENCE;
+%constant int EVENT_CAUGHTSTEALING  = CW_EVENT_CAUGHTSTEALING;
+%constant int EVENT_PICKOFFERROR    = CW_EVENT_PICKOFFERROR;
+%constant int EVENT_PICKOFF         = CW_EVENT_PICKOFF;
+%constant int EVENT_WILDPITCH       = CW_EVENT_WILDPITCH;
+%constant int EVENT_PASSEDBALL      = CW_EVENT_PASSEDBALL;
+%constant int EVENT_BALK            = CW_EVENT_BALK;
+%constant int EVENT_OTHERADVANCE    = CW_EVENT_OTHERADVANCE;
+%constant int EVENT_FOULERROR       = CW_EVENT_FOULERROR;
+%constant int EVENT_WALK            = CW_EVENT_WALK;
+%constant int EVENT_INTENTIONALWALK = CW_EVENT_INTENTIONALWALK;
+%constant int EVENT_HITBYPITCH      = CW_EVENT_HITBYPITCH;
+%constant int EVENT_INTERFERENCE    = CW_EVENT_INTERFERENCE;
+%constant int EVENT_ERROR           = CW_EVENT_ERROR;
+%constant int EVENT_FIELDERSCHOICE  = CW_EVENT_FIELDERSCHOICE;
+%constant int EVENT_SINGLE          = CW_EVENT_SINGLE;
+%constant int EVENT_DOUBLE          = CW_EVENT_DOUBLE;
+%constant int EVENT_TRIPLE          = CW_EVENT_TRIPLE;
+%constant int EVENT_HOMERUN         = CW_EVENT_HOMERUN;
+%constant int EVENT_MISSINGPLAY     = CW_EVENT_MISSINGPLAY;
+
+
+//==========================================================================
+//                 Wrapping and extending CWLeague as League
+//==========================================================================
+
+%rename(League) CWLeague;
 %extend CWLeague {
   CWLeague(void)        { return cw_league_create(); }
   ~CWLeague()           { cw_league_cleanup(self);  free(self); }  
@@ -77,6 +116,11 @@ int IsValidPlay(char *play)
 %}
 };
 
+//==========================================================================
+//                 Wrapping and extending CWRoster as Roster
+//==========================================================================
+
+%rename(Roster) CWRoster;
 %extend CWRoster {
   CWRoster(char *team_id, int year, char *league,
            char *city, char *nickname)
@@ -127,14 +171,19 @@ int IsValidPlay(char *play)
 %pythoncode %{
   def Import(self, roster):
     for player in roster.Players():
-        self.InsertPlayer(CWPlayer(player.GetID(),
-				   player.GetLastName(),
-                                   player.GetFirstName(),
-                                   player.GetBats(),
-                                   player.GetThrows()))
+        self.InsertPlayer(Player(player.GetID(),
+				 player.GetLastName(),
+                                 player.GetFirstName(),
+                                 player.GetBats(),
+                                 player.GetThrows()))
 %}
 };
 
+//==========================================================================
+//                Wrapping and extending CWPlayer as Player
+//==========================================================================
+
+%rename(Player) CWPlayer;
 %extend CWPlayer {
   CWPlayer(char *player_id, char *last_name, char *first_name,
            char bats, char throws)
@@ -171,6 +220,11 @@ int IsValidPlay(char *play)
 %}
 };
 
+//==========================================================================
+//            Wrapping and extending CWScorebook as Scorebook
+//==========================================================================
+
+%rename(Scorebook) CWScorebook;
 %extend CWScorebook {
   CWScorebook(void)     { return cw_scorebook_create(); }
   ~CWScorebook()        { cw_scorebook_cleanup(self);  free(self); }
@@ -183,6 +237,11 @@ int IsValidPlay(char *play)
   void Write(FILE *file)       { cw_scorebook_write(self, file); }
 };
 
+//==========================================================================
+//                 Wrapping and extending CWGame as Game
+//==========================================================================
+
+%rename(Game) CWGame;
 %extend CWGame {
   CWGame(char *gameID)  { return cw_game_create(gameID); }
 
@@ -200,7 +259,7 @@ int IsValidPlay(char *play)
 
   def GetScore(self):
     if not hasattr(self, "scorecache"):
-      gameiter = CWGameIterator(self)
+      gameiter = GameIterator(self)
       gameiter.ToEnd()
       self.scorecache = [ gameiter.GetTeamScore(t) for t in [0,1] ]
     return self.scorecache
@@ -260,6 +319,11 @@ int IsValidPlay(char *play)
 
 };
 
+//==========================================================================
+//            Wrapping and extending CWAppearance as Appearance
+//==========================================================================
+
+%rename(Appearance) CWAppearance;
 %extend CWAppearance {
   char *GetPlayerID(void) const { return self->player_id; }
   char *GetName(void) const  { return self->name; }
@@ -269,6 +333,11 @@ int IsValidPlay(char *play)
 
 };
 
+//==========================================================================
+//                  Wrapping and extending CWEvent as Event
+//==========================================================================
+
+%rename(Event) CWEvent;
 %extend CWEvent {
 %pythoncode %{
   def Substitutes(self):
@@ -280,6 +349,11 @@ int IsValidPlay(char *play)
 %}
 };
 
+//==========================================================================
+//          Wrapping and extending CWGameIterator as GameIterator
+//==========================================================================
+
+%rename(GameIterator) CWGameIterator;
 %extend CWGameIterator {
   CWGameIterator(CWGame *game)  { return cw_gameiter_create(game); }
   ~CWGameIterator()             { cw_gameiter_cleanup(self);  free(self); }
@@ -328,6 +402,11 @@ int IsValidPlay(char *play)
   CWParsedEvent *GetEventData(void) const  { return self->event_data; }  
 };
 
+//==========================================================================
+//           Wrapping and extending CWParsedEvent as ParsedEvent
+//==========================================================================
+
+%rename(ParsedEvent) CWParsedEvent;
 %extend CWParsedEvent {
   int IsOfficialAB(void)  { return cw_event_is_official_ab(self); }
   int IsBatterEvent(void) { return cw_event_is_batter(self); }

@@ -25,7 +25,7 @@
 # 
 
 import time    # used for setting inputtime in info field
-from libchadwick import *
+import libchadwick as cw
 from boxscore import Boxscore
 
 def CreateGame(gameId, vis, home):
@@ -35,7 +35,7 @@ def CreateGame(gameId, vis, home):
     'gameId' is in Retrosheet standard format, and 'vis' and
     'home' are the team IDs
     """
-    game = CWGame(gameId)
+    game = cw.Game(gameId)
     
     game.SetVersion("1")
     game.AddInfo("inputprogvers", "Chadwick version 0.3.1")
@@ -83,7 +83,7 @@ class GameEditor:
         self.visRoster = visRoster
         self.homeRoster = homeRoster
 
-        self.gameiter = CWGameIterator(self.game)
+        self.gameiter = cw.GameIterator(self.game)
         if self.game.first_event != None:  self.gameiter.ToEnd()
 
         self.boxscore = Boxscore(self.game)

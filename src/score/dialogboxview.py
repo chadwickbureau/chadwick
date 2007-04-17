@@ -26,8 +26,6 @@
 
 import wx
 
-from libchadwick import *
-
 from panelnarrative import NarrativePanel
 from panelboxscore import BoxscorePanel
 
