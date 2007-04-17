@@ -29,6 +29,7 @@ import string, sys, os
 import wx, wx.grid
 
 import scorebook
+import dw             # For Retrosheet/DiamondWare import and export
 import panelstate
 import icons
 
@@ -139,7 +140,7 @@ CW_MENU_GAME_NEW = 2000
 class ChadwickFrame(wx.Frame):
     def __init__(self, parent):
         wx.Frame.__init__(self, parent, wx.ID_ANY, "Chadwick", size=(800, 600))
-        self.book = scorebook.ChadwickScorebook()
+        self.book = scorebook.Scorebook()
         self.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.NORMAL))
 
         self.MakeMenus()
@@ -287,9 +288,7 @@ class ChadwickFrame(wx.Frame):
         Try to load a scorebook specified on the command line
         """
         try:
-            book = scorebook.ChadwickScorebook()
-            book.Read(filename)
-            self.book = book
+            self.book = dw.Reader(filename)
         except:
             dialog = wx.MessageDialog(self,
                                       "An error occurred in reading "
@@ -307,7 +306,7 @@ class ChadwickFrame(wx.Frame):
 
         dialog = YearDialog(self)
         if dialog.ShowModal() == wx.ID_OK:
-            self.book = scorebook.ChadwickScorebook(dialog.GetYear())
+            self.book = scorebook.Scorebook(dialog.GetYear())
             self.OnUpdate()
 
     def OnFileOpen(self, event):
@@ -320,9 +319,7 @@ class ChadwickFrame(wx.Frame):
                                "All files (*.*)|*.*")
         if dialog.ShowModal() == wx.ID_OK:
             try:
-                book = scorebook.ChadwickScorebook()
-                book.Read(str(dialog.GetPath()))
-                self.book = book
+                self.book = dw.Reader(str(dialog.GetPath()))
                 self.OnUpdate()
                 self.fileHistory.AddFileToHistory(dialog.GetPath())
             except:
@@ -338,9 +335,7 @@ class ChadwickFrame(wx.Frame):
         
         filename = self.fileHistory.GetHistoryFile(event.GetId() - wx.ID_FILE1)
         try:
-            book = scorebook.ChadwickScorebook()
-            book.Read(str(filename))
-            self.book = book
+            self.book = dw.Reader(str(filename))
             self.OnUpdate()
         except:
             dialog = wx.MessageDialog(self,
@@ -369,7 +364,7 @@ class ChadwickFrame(wx.Frame):
 
         # Now try to write this file
         try:
-            self.book.Write(self.book.GetFilename())
+            dw.Writer(self.book, self.book.GetFilename())
             self.OnUpdate()
         except:
             dialog = wx.MessageDialog(self,
@@ -389,7 +384,7 @@ class ChadwickFrame(wx.Frame):
         if dialog.ShowModal() == wx.ID_OK:
             try:
                 # We don't do any backup file writing here
-                self.book.Write(str(dialog.GetPath()))
+                dw.Writer(self.book, str(dialog.GetPath()))
                 self.fileHistory.AddFileToHistory(dialog.GetPath())
                 self.OnUpdate()
             except:
@@ -408,8 +403,7 @@ class ChadwickFrame(wx.Frame):
                                "All files (*.*)|*.*")
         if dialog.ShowModal() == wx.ID_OK:
             try:
-                book = scorebook.ChadwickScorebook()
-                book.Read(str(dialog.GetPath()))
+                book = dw.Reader(str(dialog.GetPath()))
             except:
                 dialog = wx.MessageDialog(self,
                                           "An error occurred in reading "

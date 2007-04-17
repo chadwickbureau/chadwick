@@ -1492,7 +1492,7 @@ if __name__ == "__main__":
 
     fn = sys.argv[1]
 
-    book = scorebook.ChadwickScorebook()
+    book = scorebook.Scorebook()
     book.Read(fn)
 
     #x = [ PitchingRegister(book) ]

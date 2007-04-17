@@ -24,24 +24,10 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # 
 
-import os                # for low-level manipulation of tempfiles
-import zipfile
-import tempfile
-
 import libchadwick as cw
 import statscan          # for report updating
 
-def TempFile():
-    """
-    Wrapper around tempfile.mkstemp(): closes the original file and
-    returns the file name.
-    """
-    f = tempfile.mkstemp()
-    name = f[1]
-    os.close(f[0])
-    return name    
-
-class ChadwickScorebook:
+class Scorebook:
     def __init__(self, year=2007):
         self.books = { }
         self.modified = False
@@ -55,148 +41,6 @@ class ChadwickScorebook:
         
     def GetFilename(self):   return self.filename
 
-    def Read(self, filename):
-        zf = zipfile.ZipFile(filename, "r")
-        self.year = int(self.FindLeagueEntry(zf)[4:])
-        self.books = { }
-
-        self.ReadLeague(zf)
-        self.BuildIndices()
-        self.modified = False
-        self.filename = filename
-
-    def FindLeagueEntry(self, zf):
-        """
-        Find the teamfile entry ('TEAMyyyy') in the
-        zipfile 'zf'.  Robust to the use of capital
-        or lowercase letters in the zipfile.
-        """
-        for entry in zf.namelist():
-            if entry.upper()[:4] == "TEAM":
-                return entry
-        return ""
-
-    def FindEntry(self, zf, fnlist):
-        """
-        Find a file matching an entry in the list 'fnlist' in the
-        zipfile 'zf', being robust to case.  Returns
-        None if no matching name is found: this may happen
-        in Retrosheet zipfiles, where the event files for
-        one league only are present.
-        """
-        for entry in zf.namelist():
-            if entry.upper() in fnlist:
-                return entry
-        return None
-            
-    def ReadLeague(self, zf):
-        name = TempFile()
-        
-        f = file(name, "w")
-        f.write(zf.read(self.FindLeagueEntry(zf)))
-        f.close()
-        
-        f = file(name, "r")
-        self.league = cw.League()
-        self.league.Read(f)
-
-        f.close()
-        os.remove(name)
-
-        for team in self.Teams():
-            self.ReadTeam(zf, team)
-
-        for report in [ "batting-register" ]:
-            self.ReadReport(zf, report)
-
-    def ReadTeam(self, zf, team):
-        fn = self.FindEntry(zf,
-                            [ team.GetID() + str(self.year) + ".ROS" ])
-        if fn != None:
-            name = TempFile()
-            f = file(name, "w")
-            f.write(zf.read(fn))
-            f.close()
-            
-            f = file(name, "r")
-            team.Read(f)
-            f.close()
-
-            os.remove(name)
-            
-        fn = self.FindEntry(zf,
-                            [ str(self.year) + team.GetID() + ".EV" + team.league,
-                              str(self.year % 100) + team.GetID() + ".EV" + team.league ])
-        if fn != None:
-            name = TempFile()
-            f = file(name, "w")
-            f.write(zf.read(fn))
-            f.close()
-            
-            f = file(name, "r")
-            self.books[team.GetID()] = cw.Scorebook()
-            self.books[team.GetID()].Read(f)
-            f.close()
-            
-            os.remove(name)
-        else:
-            # Just create an empty scorebook if event file is
-            # not present.
-            self.books[team.GetID()] = cw.Scorebook()
-
-    def ReadReport(self, zf, label):
-        fn = self.FindEntry(zf, label.upper() + ".RPT")
-        if fn != None:
-            report = statscan.BattingRegister(self)
-            report.derepr(zf.read(fn))
-            self.reports.append(report)
-            
-    def Write(self, filename):
-        zf = zipfile.ZipFile(filename, "w", zipfile.ZIP_DEFLATED)
-        name = TempFile()
-        f = file(name, "w")
-        self.league.Write(f)
-        f.close()
-        
-        f = file(name, "r")
-        zf.writestr("TEAM%d" % self.year, f.read())
-        f.close()
-        os.remove(name)
-
-        for team in self.Teams():
-            self.WriteTeam(zf, team)
-
-        for report in self.reports:
-            self.WriteReport(zf, report)
-        
-        zf.close()
-        self.filename = filename
-        self.modified = False
-
-    def WriteTeam(self, zf, team):
-        fn = team.GetID() + str(self.year) + ".ROS"
-        name = TempFile()
-        f = file(name, "w")
-        team.Write(f)
-        f.close()
-        
-        f = file(name, "r")
-        zf.writestr(fn, f.read())
-        f.close()
-
-        fn = str(self.year) + team.GetID() + ".EV" + team.league
-        f = file(name, "w")
-        self.books[team.GetID()].Write(f)
-        f.close()
-        
-        f = file(name, "r")
-        zf.writestr(fn, f.read())
-        f.close()
-
-    def WriteReport(self, zf, report):
-        fn = report.GetName() + ".rpt"
-        zf.writestr(fn, repr(report))
-        
     def NumTeams(self):
         i = 0
         x = self.league.first_roster
