@@ -39,7 +39,7 @@ class AboutDialog(wx.Dialog):
         topSizer.Add(wx.StaticBitmap(self, wx.ID_ANY, bitmap),
                      0, wx.ALL | wx.ALIGN_CENTER, 5)
                      
-        ht = FormattedStaticText(self, "Chadwick, version 0.3.2")
+        ht = FormattedStaticText(self, "Chadwick, version 0.4.0")
         ht.SetFont(wx.Font(14, wx.SWISS, wx.NORMAL, wx.BOLD))
         topSizer.Add(ht, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
