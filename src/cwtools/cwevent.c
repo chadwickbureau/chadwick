@@ -205,35 +205,10 @@ DECLARE_FIELDFUNC(cwevent_res_batter)
 /* Field 13 */
 DECLARE_FIELDFUNC(cwevent_res_batter_hand)
 {
-  char resPitcherHand, resBatterHand;
-
-  if (gameiter->event->batter_hand == ' ') {
-    resBatterHand = 
-      cw_roster_batting_hand((gameiter->event->half_inning == 0) ?
-			     visitors : home,
-			     cw_gameiter_charged_batter(gameiter));
-  }
-  else {
-    resBatterHand = gameiter->event->batter_hand;
-  }
-
-  if (resBatterHand == 'B') {
-    resPitcherHand = 
-      cw_roster_throwing_hand((gameiter->event->half_inning == 0) ?
-			      home : visitors,
-			      cw_gameiter_charged_pitcher(gameiter));
-    if (resPitcherHand == 'L') {
-      resBatterHand = 'R';
-    }
-    else if (resPitcherHand == 'R') {
-      resBatterHand = 'L';
-    }
-    else {
-      /* Needed in case pitcher hand is unknown */
-      resBatterHand = '?';
-    }
-  }
-  return sprintf(buffer, (ascii) ? "\"%c\"" : "%c", resBatterHand);
+  return sprintf(buffer, (ascii) ? "\"%c\"" : "%c",
+		 cw_gameiter_charged_batter_hand(gameiter,
+						 (gameiter->event->half_inning == 0) ? visitors : home,
+						 (gameiter->event->half_inning == 0) ? home : visitors));
 }
 
 /* Field 14 */

@@ -598,6 +598,42 @@ cw_gameiter_charged_batter(CWGameIterator *gameiter)
   }
 }
 
+char
+cw_gameiter_charged_batter_hand(CWGameIterator *gameiter, 
+				CWRoster *offRoster,
+				CWRoster *defRoster)
+{
+  char resPitcherHand, resBatterHand;
+
+  if (gameiter->event->batter_hand == ' ') {
+    resBatterHand = 
+      cw_roster_batting_hand(offRoster,
+			     cw_gameiter_charged_batter(gameiter));
+  }
+  else {
+    resBatterHand = gameiter->event->batter_hand;
+  }
+
+  if (resBatterHand == 'B') {
+    resPitcherHand = 
+      cw_roster_throwing_hand(defRoster,
+			      cw_gameiter_charged_pitcher(gameiter));
+    if (resPitcherHand == 'L') {
+      return 'R';
+    }
+    else if (resPitcherHand == 'R') {
+      return 'L';
+    }
+    else {
+      /* Needed in case pitcher hand is unknown */
+      return '?';
+    }
+  }
+  else {
+    return resBatterHand;
+  }
+}
+
 char *
 cw_gameiter_charged_pitcher(CWGameIterator *gameiter)
 {

@@ -27,8 +27,13 @@
 #ifndef CW_GAMEITER_H
 #define CW_GAMEITER_H
 
+#include "roster.h"
 #include "game.h"
 
+/*
+ * TODO:
+ * - Add roster context to iterator (or maybe to the game?)
+ */
 typedef struct cw_game_iter_struct {
   CWGame *game;
   CWEvent *event;
@@ -96,6 +101,16 @@ int cw_gameiter_player_position(CWGameIterator *gameiter,
  * (almost always the actual batter, except as indicated in rule 10.17(b)
  */
 char *cw_gameiter_charged_batter(CWGameIterator *gameiter);
+
+/*
+ * The side from which the charged batter was batting.  This may be
+ * explicitly set with a 'badj' record; otherwise, use 'offRoster'
+ * to look up the batter, and 'defRoster' the pitcher, assuming the
+ * opposite-side rule for switch-hitters.
+ */
+char cw_gameiter_charged_batter_hand(CWGameIterator *gameiter,
+				     CWRoster *offRoster,
+				     CWRoster *defRoster);
 
 /*
  * The pitcher who is charged with the outcome of the event
