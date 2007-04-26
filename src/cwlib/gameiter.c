@@ -130,6 +130,42 @@ cw_gameiter_removeds_cleanup(CWGameIterator *gameiter)
   }
 }
 
+/*
+ * Private auxiliary function to check whether go-ahead RBI has changed
+ */
+static void
+cw_gameiter_check_go_ahead_rbi(CWGameIterator *gameiter)
+{
+  int diff = (gameiter->score[gameiter->half_inning] -
+	      gameiter->score[1-gameiter->half_inning]);
+  int base;
+
+  for (base = 3; base >= 0; base--) {
+    if (gameiter->event_data->advance[base] >= 4) {
+      diff++;
+      if (diff == 1) {
+	/* This was the go-ahead run */
+	if (gameiter->event_data->rbi_flag[base]) {
+	  gameiter->go_ahead_rbi = (char *) malloc(strlen(gameiter->event->batter)+1);
+	  strcpy(gameiter->go_ahead_rbi, gameiter->event->batter);
+	}
+	else if (gameiter->go_ahead_rbi) {
+	  free(gameiter->go_ahead_rbi);
+	  gameiter->go_ahead_rbi = NULL;
+	}
+	return;
+      }
+      else if (diff == 0) {
+	/* This was the tying run */
+	if (gameiter->go_ahead_rbi) {
+	  free(gameiter->go_ahead_rbi);
+	  gameiter->go_ahead_rbi = NULL;
+	}
+      }
+    }
+  }
+}
+
 void
 cw_gameiter_reset(CWGameIterator *gameiter)
 {
@@ -161,6 +197,13 @@ cw_gameiter_reset(CWGameIterator *gameiter)
   if (gameiter->event && strcmp(gameiter->event->event_text, "NP")) {
     gameiter->parse_ok = cw_parse_event(gameiter->event->event_text, 
 					gameiter->event_data);
+
+    /*
+     * Most of the cleanup stuff that appears at the end of 
+     * cw_gameiter_next() never applies to the leadoff batter.
+     * Here's the one exception: a leadoff homer sets the go-ahead RBI.
+     */
+    cw_gameiter_check_go_ahead_rbi(gameiter);
   }
 }
 
@@ -437,43 +480,6 @@ cw_gameiter_process_advance(CWGameIterator *gameiter)
 	    gameiter->event->batter, 49);
     strcpy(gameiter->pitchers[gameiter->event_data->advance[0]], 
 	   gameiter->pitchers[0]);
-  }
-}
-
-/*
- * Private auxiliary function to check whether go-ahead RBI has changed
- */
-static void
-cw_gameiter_check_go_ahead_rbi(CWGameIterator *gameiter)
-{
-  int diff = (gameiter->score[gameiter->half_inning] -
-	      gameiter->score[1-gameiter->half_inning]);
-  int base;
-
-  for (base = 3; base >= 0; base--) {
-    if (gameiter->event_data->advance[base] >= 4) {
-      diff++;
-      if (diff == 1) {
-	/* This was the go-ahead run */
-	if (gameiter->event_data->rbi_flag[base]) {
-	  gameiter->go_ahead_rbi = (char *) malloc(strlen(gameiter->event->batter)+1);
-	  strcpy(gameiter->go_ahead_rbi, gameiter->event->batter);
-	}
-	else if (gameiter->go_ahead_rbi) {
-	  free(gameiter->go_ahead_rbi);
-	  gameiter->go_ahead_rbi = NULL;
-	}
-	return;
-      }
-      else if (diff == 0) {
-	/* This was the tying run */
-	if (gameiter->go_ahead_rbi) {
-	  free(gameiter->go_ahead_rbi);
-	  gameiter->go_ahead_rbi = NULL;
-	}
-	return;
-      }
-    }
   }
 }
 
