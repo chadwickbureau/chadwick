@@ -53,6 +53,7 @@ typedef struct cw_game_iter_struct {
   char *walk_pitcher;      /* For application of rule 10.18(h)(1) */
   char *strikeout_batter;  /* For application of rule 10.17(b) */
   int removed_position;
+  char *go_ahead_rbi;
 } CWGameIterator;
 
 /*

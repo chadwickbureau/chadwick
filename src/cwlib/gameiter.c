@@ -91,6 +91,11 @@ cw_gameiter_lineup_cleanup(CWGameIterator *gameiter)
       }
     }
   }
+
+  if (gameiter->go_ahead_rbi) {
+    free(gameiter->go_ahead_rbi);
+    gameiter->go_ahead_rbi = NULL;
+  }
 }
 
 /*
@@ -172,6 +177,7 @@ cw_gameiter_create(CWGame *game)
   gameiter->removed_for_ph = NULL;
   gameiter->walk_pitcher = NULL;
   gameiter->strikeout_batter = NULL;
+  gameiter->go_ahead_rbi = NULL;
 
   for (i = 0; i <= 3; i++) {
     gameiter->removed_for_pr[i] = NULL;
@@ -434,6 +440,43 @@ cw_gameiter_process_advance(CWGameIterator *gameiter)
   }
 }
 
+/*
+ * Private auxiliary function to check whether go-ahead RBI has changed
+ */
+static void
+cw_gameiter_check_go_ahead_rbi(CWGameIterator *gameiter)
+{
+  int diff = (gameiter->score[gameiter->half_inning] -
+	      gameiter->score[1-gameiter->half_inning]);
+  int base;
+
+  for (base = 3; base >= 0; base--) {
+    if (gameiter->event_data->advance[base] >= 4) {
+      diff++;
+      if (diff == 1) {
+	/* This was the go-ahead run */
+	if (gameiter->event_data->rbi_flag[base]) {
+	  gameiter->go_ahead_rbi = (char *) malloc(strlen(gameiter->event->batter)+1);
+	  strcpy(gameiter->go_ahead_rbi, gameiter->event->batter);
+	}
+	else if (gameiter->go_ahead_rbi) {
+	  free(gameiter->go_ahead_rbi);
+	  gameiter->go_ahead_rbi = NULL;
+	}
+	return;
+      }
+      else if (diff == 0) {
+	/* This was the tying run */
+	if (gameiter->go_ahead_rbi) {
+	  free(gameiter->go_ahead_rbi);
+	  gameiter->go_ahead_rbi = NULL;
+	}
+	return;
+      }
+    }
+  }
+}
+
 void 
 cw_gameiter_next(CWGameIterator *gameiter)
 {
@@ -531,6 +574,7 @@ cw_gameiter_next(CWGameIterator *gameiter)
       }
     }
 
+    cw_gameiter_check_go_ahead_rbi(gameiter);
   }
 }
 
