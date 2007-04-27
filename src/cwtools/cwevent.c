@@ -102,7 +102,7 @@ DECLARE_FIELDFUNC(cwevent_half_inning)
 /* Field 4 */
 DECLARE_FIELDFUNC(cwevent_outs)
 {
-  return sprintf(buffer, "%d", gameiter->outs); 
+  return sprintf(buffer, "%d", gameiter->state->outs); 
 }
 
 /* Field 5 */
@@ -146,13 +146,13 @@ DECLARE_FIELDFUNC(cwevent_pitches)
 /* Field 8 */
 DECLARE_FIELDFUNC(cwevent_visitor_score)
 { 
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->score[0]);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->state->score[0]);
 }
 
 /* Field 9 */
 DECLARE_FIELDFUNC(cwevent_home_score)
 { 
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->score[1]);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->state->score[1]);
 }
 
 /* Field 10 */
@@ -179,7 +179,7 @@ DECLARE_FIELDFUNC(cwevent_batter_hand)
     pitcherHand =
       cw_roster_throwing_hand((gameiter->event->half_inning == 0) ?
 			      home : visitors,
-			      gameiter->fielders[1][1-gameiter->half_inning]);
+			      gameiter->state->fielders[1][1-gameiter->state->half_inning]);
 
     if (pitcherHand == 'L') {
       batterHand = 'R';
@@ -199,23 +199,27 @@ DECLARE_FIELDFUNC(cwevent_batter_hand)
 DECLARE_FIELDFUNC(cwevent_res_batter)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 cw_gameiter_charged_batter(gameiter));
+		 cw_gamestate_charged_batter(gameiter->state,
+					     gameiter->event->batter,
+					     gameiter->event_data));
 }
 
 /* Field 13 */
 DECLARE_FIELDFUNC(cwevent_res_batter_hand)
 {
   return sprintf(buffer, (ascii) ? "\"%c\"" : "%c",
-		 cw_gameiter_charged_batter_hand(gameiter,
-						 (gameiter->event->half_inning == 0) ? visitors : home,
-						 (gameiter->event->half_inning == 0) ? home : visitors));
+		 cw_gamestate_charged_batter_hand(gameiter->state,
+						  gameiter->event->batter,
+						  gameiter->event_data,
+						  (gameiter->event->half_inning == 0) ? visitors : home,
+						  (gameiter->event->half_inning == 0) ? home : visitors));
 }
 
 /* Field 14 */
 DECLARE_FIELDFUNC(cwevent_pitcher)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-	  gameiter->fielders[1][1-gameiter->half_inning]);
+	  gameiter->state->fielders[1][1-gameiter->state->half_inning]);
 }
 
 /* Field 15 */
@@ -227,7 +231,7 @@ DECLARE_FIELDFUNC(cwevent_pitcher_hand)
     pitcherHand = 
       cw_roster_throwing_hand((gameiter->event->half_inning == 0) ?
 			      home : visitors,
-			      gameiter->fielders[1][1-gameiter->half_inning]);
+			      gameiter->state->fielders[1][1-gameiter->state->half_inning]);
   }
   else {
     pitcherHand = gameiter->event->pitcher_hand;
@@ -240,7 +244,8 @@ DECLARE_FIELDFUNC(cwevent_pitcher_hand)
 DECLARE_FIELDFUNC(cwevent_res_pitcher)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 cw_gameiter_charged_pitcher(gameiter));
+		 cw_gamestate_charged_pitcher(gameiter->state,
+					      gameiter->event_data));
 }
 
 /* Field 17 */
@@ -252,7 +257,8 @@ DECLARE_FIELDFUNC(cwevent_res_pitcher_hand)
     resPitcherHand = 
       cw_roster_throwing_hand((gameiter->event->half_inning == 0) ?
 			      home : visitors,
-			      cw_gameiter_charged_pitcher(gameiter));
+			      cw_gamestate_charged_pitcher(gameiter->state,
+							   gameiter->event_data));
   }
   else {
     resPitcherHand = gameiter->event->pitcher_hand;
@@ -265,77 +271,77 @@ DECLARE_FIELDFUNC(cwevent_res_pitcher_hand)
 DECLARE_FIELDFUNC(cwevent_catcher)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 gameiter->fielders[2][1-gameiter->half_inning]);
+		 gameiter->state->fielders[2][1-gameiter->state->half_inning]);
 }
 
 /* Field 19 */
 DECLARE_FIELDFUNC(cwevent_first_baseman)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 gameiter->fielders[3][1-gameiter->half_inning]);
+		 gameiter->state->fielders[3][1-gameiter->state->half_inning]);
 }
 
 /* Field 20 */
 DECLARE_FIELDFUNC(cwevent_second_baseman)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 gameiter->fielders[4][1-gameiter->half_inning]);
+		 gameiter->state->fielders[4][1-gameiter->state->half_inning]);
 }
 
 /* Field 21 */
 DECLARE_FIELDFUNC(cwevent_third_baseman)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 gameiter->fielders[5][1-gameiter->half_inning]);
+		 gameiter->state->fielders[5][1-gameiter->state->half_inning]);
 }
 
 /* Field 22 */
 DECLARE_FIELDFUNC(cwevent_shortstop)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 gameiter->fielders[6][1-gameiter->half_inning]);
+		 gameiter->state->fielders[6][1-gameiter->state->half_inning]);
 }
 
 /* Field 23 */
 DECLARE_FIELDFUNC(cwevent_left_fielder)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 gameiter->fielders[7][1-gameiter->half_inning]);
+		 gameiter->state->fielders[7][1-gameiter->state->half_inning]);
 }
 
 /* Field 24 */
 DECLARE_FIELDFUNC(cwevent_center_fielder)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 gameiter->fielders[8][1-gameiter->half_inning]);
+		 gameiter->state->fielders[8][1-gameiter->state->half_inning]);
 }
 
 /* Field 25 */
 DECLARE_FIELDFUNC(cwevent_right_fielder)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-	  gameiter->fielders[9][1-gameiter->half_inning]);
+	  gameiter->state->fielders[9][1-gameiter->state->half_inning]);
 }
 
 /* Field 26 */
 DECLARE_FIELDFUNC(cwevent_runner_first)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 gameiter->runners[1]);
+		 gameiter->state->runners[1]);
 }
 
 /* Field 27 */
 DECLARE_FIELDFUNC(cwevent_runner_second)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 gameiter->runners[2]);
+		 gameiter->state->runners[2]);
 }
 
 /* Field 28 */
 DECLARE_FIELDFUNC(cwevent_runner_third)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 gameiter->runners[3]);
+		 gameiter->state->runners[3]);
 }
 
 /* Field 29 */
@@ -349,23 +355,23 @@ DECLARE_FIELDFUNC(cwevent_event_text)
 DECLARE_FIELDFUNC(cwevent_leadoff_flag)
 {
   return sprintf(buffer, (ascii) ? "\"%c\"" : "%c",
-		 (gameiter->is_leadoff) ? 'T' : 'F');
+		 (gameiter->state->is_leadoff) ? 'T' : 'F');
 }
 
 /* Field 31 */
 DECLARE_FIELDFUNC(cwevent_ph_flag)
 {
   return sprintf(buffer, (ascii) ? "\"%c\"" : "%c",
-		 (gameiter->ph_flag) ? 'T' : 'F');
+		 (gameiter->state->ph_flag) ? 'T' : 'F');
 }
 
 /* Field 32 */
 DECLARE_FIELDFUNC(cwevent_defensive_position)
 {
   return sprintf(buffer, (ascii) ? "%d" : "%2d", 
-		 cw_gameiter_player_position(gameiter,
-					     gameiter->half_inning,
-					     gameiter->event->batter));
+		 cw_gamestate_player_position(gameiter->state,
+					      gameiter->state->half_inning,
+					      gameiter->event->batter));
 }
 
 /* Field 33 */
@@ -373,15 +379,15 @@ DECLARE_FIELDFUNC(cwevent_lineup_position)
 {
   /* A bit of a kludge to handle case where pitcher enters the lineup
    * after DH goes away */
-  int lineupSlot = cw_gameiter_lineup_slot(gameiter,
-					   gameiter->half_inning,
-					   gameiter->event->batter);
+  int lineupSlot = cw_gamestate_lineup_slot(gameiter->state,
+					    gameiter->state->half_inning,
+					    gameiter->event->batter);
   if (lineupSlot > 0) {
     return sprintf(buffer, "%d", lineupSlot);
   }
   else {
     return sprintf(buffer, "%d",
-	    (gameiter->num_batters[gameiter->half_inning]) % 9 + 1);
+	    (gameiter->state->num_batters[gameiter->state->half_inning]) % 9 + 1);
   }
 }
 
@@ -667,25 +673,68 @@ DECLARE_FIELDFUNC(cwevent_po3_flag)
 		 gameiter->event_data->po_flag[3] ? 'T' : 'F');
 }
 
+/*
+ * In cwevent, the "responsible pitcher" is usually the pitcher responsible
+ * at the beginning of the play.  However, on a play like 32(3)/FO.2-H(E2),
+ * the runner scoring should be charged to the pitcher who was initially
+ * responsible for the runner on third, and so that pitcher is listed
+ * as the responsible pitcher so that stats can be calculated directly
+ * from the cwevent output without having to reparse the play.
+ */
+char *
+cwevent_responsible_pitcher(CWGameState *state, CWEventData *event_data,
+			    int base)
+{
+  if (base == 3) {
+    return state->pitchers[3];
+  }
+  else if (base == 2) {
+    if (cw_event_runner_put_out(event_data, 3) &&
+	event_data->fc_flag[3] && event_data->advance[2] >= 4) {
+      return state->pitchers[3];
+    }
+    else {
+      return state->pitchers[2];
+    }
+  }
+  else {
+    if (cw_event_runner_put_out(event_data, 3) &&
+	event_data->fc_flag[3] && event_data->advance[2] >= 4) {
+      return state->pitchers[2];
+    }
+    else if (cw_event_runner_put_out(event_data, 3) &&
+	     !strcmp(state->runners[2], "") &&
+	     event_data->advance[1] >= 4) {
+      return state->pitchers[3];
+    }
+    else {
+      return state->pitchers[1];
+    }
+  }
+}
+
 /* Field 75 */
 DECLARE_FIELDFUNC(cwevent_responsible_pitcher1)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 cw_gameiter_responsible_pitcher(gameiter, 1));
+		 cwevent_responsible_pitcher(gameiter->state, 
+					     gameiter->event_data, 1));
 }
 
 /* Field 76 */
 DECLARE_FIELDFUNC(cwevent_responsible_pitcher2)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 cw_gameiter_responsible_pitcher(gameiter, 2));
+		 cwevent_responsible_pitcher(gameiter->state,
+					     gameiter->event_data, 2));
 }
 
 /* Field 77 */
 DECLARE_FIELDFUNC(cwevent_responsible_pitcher3)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 cw_gameiter_responsible_pitcher(gameiter, 3));
+		 cwevent_responsible_pitcher(gameiter->state,
+					     gameiter->event_data, 3));
 }
 
 /* Field 78 */
@@ -714,61 +763,61 @@ DECLARE_FIELDFUNC(cwevent_end_game_flag)
 DECLARE_FIELDFUNC(cwevent_pr1_flag)
 {
   return sprintf(buffer, (ascii) ? "\"%c\"" : "       %c", 
-		 (gameiter->removed_for_pr[1]) ? 'T' : 'F');
+		 (gameiter->state->removed_for_pr[1]) ? 'T' : 'F');
 }
 
 /* Field 81 */
 DECLARE_FIELDFUNC(cwevent_pr2_flag)
 {
   return sprintf(buffer, (ascii) ? "\"%c\"" : "       %c",
-		 (gameiter->removed_for_pr[2]) ? 'T' : 'F');
+		 (gameiter->state->removed_for_pr[2]) ? 'T' : 'F');
 }
 
 /* Field 82 */
 DECLARE_FIELDFUNC(cwevent_pr3_flag)
 {
   return sprintf(buffer, (ascii) ? "\"%c\"" : "       %c",
-		 (gameiter->removed_for_pr[3]) ? 'T' : 'F');
+		 (gameiter->state->removed_for_pr[3]) ? 'T' : 'F');
 }
 
 /* Field 83 */
 DECLARE_FIELDFUNC(cwevent_removed_runner1)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s", 
-		 ((gameiter->removed_for_pr[1]) ?
-		  gameiter->removed_for_pr[1] : ""));
+		 ((gameiter->state->removed_for_pr[1]) ?
+		  gameiter->state->removed_for_pr[1] : ""));
 }
 
 /* Field 84 */
 DECLARE_FIELDFUNC(cwevent_removed_runner2)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s", 
-		 ((gameiter->removed_for_pr[2]) ?
-		  gameiter->removed_for_pr[2] : ""));
+		 ((gameiter->state->removed_for_pr[2]) ?
+		  gameiter->state->removed_for_pr[2] : ""));
 }
 
 /* Field 85 */
 DECLARE_FIELDFUNC(cwevent_removed_runner3)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s", 
-		 ((gameiter->removed_for_pr[3]) ?
-		  gameiter->removed_for_pr[3] : ""));
+		 ((gameiter->state->removed_for_pr[3]) ?
+		  gameiter->state->removed_for_pr[3] : ""));
 }
 
 /* Field 86 */
 DECLARE_FIELDFUNC(cwevent_removed_batter)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 ((gameiter->removed_for_ph) ? 
-		  gameiter->removed_for_ph : ""));
+		 ((gameiter->state->removed_for_ph) ? 
+		  gameiter->state->removed_for_ph : ""));
 }
 
 /* Field 87 */
 DECLARE_FIELDFUNC(cwevent_removed_batter_position)
 {
   return sprintf(buffer, (ascii) ? "%d" : "%2d", 
-		 ((gameiter->removed_for_ph) ? 
-		  gameiter->removed_position : 0));
+		 ((gameiter->state->removed_for_ph) ? 
+		  gameiter->state->removed_position : 0));
 }
 
 /* Field 88 */
@@ -823,7 +872,7 @@ DECLARE_FIELDFUNC(cwevent_assist5)
 DECLARE_FIELDFUNC(cwevent_event_number)
 {
   return sprintf(buffer, (ascii) ? "%d" : "%3d",		 
-		 gameiter->event_count + 1);
+		 gameiter->state->event_count + 1);
 }
 
 static field_func function_ptrs[] = {

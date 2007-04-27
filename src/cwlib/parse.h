@@ -105,16 +105,16 @@ typedef struct cw_parsed_event_struct {
   char error_types[10];
   char batted_ball_type;
   char hit_location[20];
-} CWParsedEvent;
+} CWEventData;
 
-int cw_parse_event(char *text, CWParsedEvent *event);
+int cw_parse_event(char *text, CWEventData *event);
 
-int cw_event_is_batter(CWParsedEvent *event);
-int cw_event_is_official_ab(CWParsedEvent *event);
-int cw_event_runner_put_out(CWParsedEvent *event, int runner);
-int cw_event_outs_on_play(CWParsedEvent *event);
-int cw_event_runs_on_play(CWParsedEvent *event);
-int cw_event_rbi_on_play(CWParsedEvent *event);
+int cw_event_is_batter(CWEventData *event);
+int cw_event_is_official_ab(CWEventData *event);
+int cw_event_runner_put_out(CWEventData *event, int runner);
+int cw_event_outs_on_play(CWEventData *event);
+int cw_event_runs_on_play(CWEventData *event);
+int cw_event_rbi_on_play(CWEventData *event);
 
 #endif  /* CW_PARSE_H */
 

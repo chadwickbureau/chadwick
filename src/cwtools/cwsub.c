@@ -110,14 +110,14 @@ DECLARE_FIELDFUNC(cwsub_position)
 DECLARE_FIELDFUNC(cwsub_removed_player)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 gameiter->lineups[sub->slot][sub->team].player_id);
+		 gameiter->state->lineups[sub->slot][sub->team].player_id);
 }
 
 /* Field 8 */
 DECLARE_FIELDFUNC(cwsub_removed_position)
 {
   return sprintf(buffer, (ascii) ? "%d" : "%2d",
-		 gameiter->lineups[sub->slot][sub->team].position);
+		 gameiter->state->lineups[sub->slot][sub->team].position);
 }
 
 /* Field 9 */
@@ -125,7 +125,7 @@ DECLARE_FIELDFUNC(cwsub_event_number)
 {
   return sprintf(buffer, (ascii) ? "%d" : "%3d",
 		 (!strcmp(gameiter->event->event_text, "NP")) ?
-		 gameiter->event_count : gameiter->event_count + 1);
+		 gameiter->state->event_count : gameiter->state->event_count + 1);
 }
 
 static field_func function_ptrs[] = {

@@ -30,30 +30,94 @@
 #include "roster.h"
 #include "game.h"
 
-/*
- * TODO:
- * - Add roster context to iterator (or maybe to the game?)
- */
-typedef struct cw_game_iter_struct {
-  CWGame *game;
-  CWEvent *event;
-  CWParsedEvent *event_data;
-  int parse_ok;            /* Nonzero if last event did not parse */
+typedef struct cw_game_state {
   int event_count, inning, half_inning, outs, inning_batters;
   int score[2], hits[2], errors[2], times_out[2];
   int num_batters[2], dh_slot[2];
   int is_leadoff, ph_flag;
+
+  char runners[4][50], pitchers[4][50];
+
   struct {
     char *player_id, *name;
     int position;
   } lineups[10][2];
   char *fielders[10][2];
-  char runners[4][50], pitchers[4][50];
+
   char *removed_for_ph, *removed_for_pr[4];
   char *walk_pitcher;      /* For application of rule 10.18(h)(1) */
   char *strikeout_batter;  /* For application of rule 10.17(b) */
   int removed_position;
   char *go_ahead_rbi;
+
+  char batter_hand;
+} CWGameState;
+
+void cw_gamestate_initialize(CWGameState *);
+void cw_gamestate_cleanup(CWGameState *);
+void cw_gamestate_update(CWGameState *, char *, CWEventData *);
+
+/*
+ * Returns the number of runners left on base by 'team'.
+ * Current baserunners are included in this count (to match official
+ * definition)
+ */
+int cw_gamestate_left_on_base(CWGameState *state, int team);
+
+/*
+ * Returns the position in the batting order currently occupied by
+ * the player with ID 'player_id'.  Returns -1 if player is not found
+ * in the lineup; 0 if the player is a non-batting pitcher.
+ */
+int cw_gamestate_lineup_slot(CWGameState *state,
+			     int team, char *player_id);
+
+
+/*
+ * Returns the position which 'player_id' currently plays on defense.
+ * For this function, 10 = DH, 11 = PH, 12 = PR.
+ */
+int cw_gamestate_player_position(CWGameState *state,
+				 int team, char *player_id);
+
+
+/*
+ * The batter who is charged with the outcome of the event
+ * (almost always the actual batter, except as indicated in rule 10.17(b)
+ */
+char *cw_gamestate_charged_batter(CWGameState *state, 
+				  char *batter, CWEventData *);
+
+/*
+ * The side from which the charged batter was batting.  This may be
+ * explicitly set with a 'badj' record; otherwise, use 'offRoster'
+ * to look up the batter, and 'defRoster' the pitcher, assuming the
+ * opposite-side rule for switch-hitters.
+ */
+char cw_gamestate_charged_batter_hand(CWGameState *state, char *batter,
+				      CWEventData *,
+				      CWRoster *offRoster,
+				      CWRoster *defRoster);
+
+
+/*
+ * The pitcher who is charged with the outcome of the event
+ * (almost always the actual pitcher, except as indicated in rule 10.18(h)
+ */
+char *cw_gamestate_charged_pitcher(CWGameState *state,
+				   CWEventData *event_data);
+
+
+/*
+ * TODO:
+ * - Add roster context to iterator (or maybe to the game?)
+ */
+typedef struct cw_gameiter_struct {
+  CWGame *game;
+  CWEvent *event;
+  CWEventData *event_data;
+  int parse_ok;            /* Nonzero if last event did not parse */
+  CWGameState *state;
 } CWGameIterator;
 
 /*
@@ -80,61 +144,7 @@ void cw_gameiter_reset(CWGameIterator *gameiter);
  */
 void cw_gameiter_next(CWGameIterator *gameiter);
 
-/*
- * Returns the position in the batting order currently occupied by
- * the player with ID 'player_id'.  Returns -1 if player is not found
- * in the lineup; 0 if the player is a non-batting pitcher.
- */
-int cw_gameiter_lineup_slot(CWGameIterator *gameiter,
-			    int team, char *player_id);
 
-
-/*
- * Returns the position which 'player_id' currently plays on defense.
- * For this function, 10 = DH, 11 = PH, 12 = PR.
- */
-int cw_gameiter_player_position(CWGameIterator *gameiter,
-				int team, char *player_id);
-
-
-/*
- * The batter who is charged with the outcome of the event
- * (almost always the actual batter, except as indicated in rule 10.17(b)
- */
-char *cw_gameiter_charged_batter(CWGameIterator *gameiter);
-
-/*
- * The side from which the charged batter was batting.  This may be
- * explicitly set with a 'badj' record; otherwise, use 'offRoster'
- * to look up the batter, and 'defRoster' the pitcher, assuming the
- * opposite-side rule for switch-hitters.
- */
-char cw_gameiter_charged_batter_hand(CWGameIterator *gameiter,
-				     CWRoster *offRoster,
-				     CWRoster *defRoster);
-
-/*
- * The pitcher who is charged with the outcome of the event
- * (almost always the actual pitcher, except as indicated in rule 10.18(h)
- */
-char *cw_gameiter_charged_pitcher(CWGameIterator *gameiter);
-
-/*
- * In cwevent, the "responsible pitcher" is usually the pitcher responsible
- * at the beginning of the play.  However, on a play like 32(3)/FO.2-H(E2),
- * the runner scoring should be charged to the pitcher who was initially
- * responsible for the runner on third, and so that pitcher is listed
- * as the responsible pitcher so that stats can be calculated directly
- * from the cwevent output without having to reparse the play.
- */
-char *cw_gameiter_responsible_pitcher(CWGameIterator *gameiter, int base);
-
-/*
- * Returns the number of runners left on base by 'team'.
- * Current baserunners are included in this count (to match official
- * definition)
- */
-int cw_gameiter_left_on_base(CWGameIterator *gameiter, int team);
 
 
 #endif   /* CW_GAMEITER_H */

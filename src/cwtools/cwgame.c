@@ -468,57 +468,57 @@ DECLARE_FIELDFUNC(cwgame_time_of_game)
 /* Field 33 */
 DECLARE_FIELDFUNC(cwgame_innings)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->inning);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->state->inning);
 }
 
 /* Field 34 */
 DECLARE_FIELDFUNC(cwgame_visitor_score)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->score[0]);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->state->score[0]);
 }
 
 /* Field 35 */
 DECLARE_FIELDFUNC(cwgame_home_score)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->score[1]);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->state->score[1]);
 }
 
 /* Field 36 */
 DECLARE_FIELDFUNC(cwgame_visitor_hits)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->hits[0]);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->state->hits[0]);
 }
 
 /* Field 37 */
 DECLARE_FIELDFUNC(cwgame_home_hits)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->hits[1]);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->state->hits[1]);
 }
 
 /* Field 38 */
 DECLARE_FIELDFUNC(cwgame_visitor_errors)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->errors[0]);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->state->errors[0]);
 }
 
 /* Field 39 */
 DECLARE_FIELDFUNC(cwgame_home_errors)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->errors[1]);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->state->errors[1]);
 }
 
 /* Field 40 */
 DECLARE_FIELDFUNC(cwgame_visitor_lob)
 {
   return sprintf(buffer, (ascii) ? "%d" : "%2d",
-		 cw_gameiter_left_on_base(gameiter, 0));
+		 cw_gamestate_left_on_base(gameiter->state, 0));
 }
 
 /* Field 41 */
 DECLARE_FIELDFUNC(cwgame_home_lob)
 {
   return sprintf(buffer, (ascii) ? "%d" : "%2d",
-		 cw_gameiter_left_on_base(gameiter, 1));
+		 cw_gamestate_left_on_base(gameiter->state, 1));
 }
 
 /* Field 42 */
