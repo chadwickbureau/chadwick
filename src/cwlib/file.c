@@ -132,14 +132,14 @@ char *cw_strtok(char *strToken)
  */
 int cw_file_find_game(char *game_id, FILE *file)
 {
-  char buf[256], *tok, *game;
+  char buf[1024], *tok, *game;
   fpos_t filepos;
 
   rewind(file);
 
   while (!feof(file)) {
     fgetpos(file, &filepos);
-    fgets(buf, 256, file);
+    fgets(buf, 1023, file);
     tok = cw_strtok(buf);
     game = cw_strtok(NULL);
     if (tok && !strcmp(tok, "id") && game && !strcmp(game, game_id)) {
