@@ -1034,6 +1034,7 @@ cwevent_print_help(void)
   fprintf(stderr, "  -f flist  give list of fields to output\n");
   fprintf(stderr, "              Default is 0-6,8-9,12-13,16-17,26-40,43-45,51,58-61\n");
   fprintf(stderr, "  -d        print list of field numbers and descriptions\n\n");
+  fprintf(stderr, "  -q        operate quietly; do not output progress messages\n");
 
   exit(0);
 }

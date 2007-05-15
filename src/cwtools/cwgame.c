@@ -732,6 +732,7 @@ void cwgame_print_help(void)
   fprintf(stderr, "  -f flist  give list of fields to output\n");
   fprintf(stderr, "              Default is 0-83\n");
   fprintf(stderr, "  -d        print list of field numbers and descriptions\n");
+  fprintf(stderr, "  -q        operate quietly; do not output progress messages\n");
 
   exit(0);
 }

@@ -73,6 +73,9 @@ char game_id[20] = "";
 
 int ascii = 1;
 
+/* If 'quiet', programs should write no status messages to stderr */
+int quiet = 0;
+
 void
 cwtools_read_rosters(CWLeague *league)
 {
@@ -159,7 +162,10 @@ cwtools_process_scorebook(CWLeague *league, char *filename)
   CWScorebook *scorebook = cw_scorebook_create();
   FILE *file = fopen(filename, "r");
 
-  fprintf(stderr, "[Processing file %s.]\n", filename);
+  if (!quiet) {
+    fprintf(stderr, "[Processing file %s.]\n", filename);
+  }
+
   if (!file || cw_scorebook_read(scorebook, file) < 0) {
     fprintf(stderr, "Warning: could not open file '%s'\n", filename);
   }
@@ -275,6 +281,9 @@ cwevent_parse_command_line(int argc, char *argv[])
     else if (!strcmp(argv[i], "-h")) {
       (*cwtools_print_help)();
     }
+    else if (!strcmp(argv[i], "-q")) {
+      quiet = 1;
+    }
     else if (!strcmp(argv[i], "-i")) {
       if (++i < argc) {
 	strncpy(game_id, argv[i], 19);
@@ -315,8 +324,10 @@ int main(int argc, char *argv[])
   int i;
   CWLeague *league = cw_league_create();
 
-  (*cwtools_print_welcome_message)(argv[0]);
   i = cwevent_parse_command_line(argc, argv);
+  if (!quiet) {
+    (*cwtools_print_welcome_message)(argv[0]);
+  }
   cwtools_read_rosters(league);
   cwtools_initialize();
   for (; i < argc; i++) {
