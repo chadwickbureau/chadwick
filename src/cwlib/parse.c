@@ -870,8 +870,28 @@ static int cw_parse_caught_stealing(CWParserState *state, CWEventData *event,
     if (isfielder(state->sym)) {
       if (cw_parse_fielding_credit(state, event, ' ')) {
 	event->advance[runner] = runner + 1;
+	strncpy(event->play[runner], state->token, 20);
+
+	if (state->sym == '/') {
+	  cw_parse_flag(state);
+	  if (!strcmp(state->token, "TH") ||
+	      !strcmp(state->token, "TH1") ||
+	      !strcmp(state->token, "TH2") ||
+	      !strcmp(state->token, "TH3") ||
+	      !strcmp(state->token, "THH")) {
+	    event->error_types[event->num_errors - 1] = 'T';
+	  }
+	  else if (!strcmp(state->token, "INT")) {
+	    /* accept interference flag silently */
+	  }
+	  else {
+	    return cw_parse_error(state);
+	  }
+	}
       }
-      strncpy(event->play[runner], state->token, 20);
+      else {
+	strncpy(event->play[runner], state->token, 20);
+      }
     }
     else if (state->sym == 'E') {
       cw_parse_fielding_credit(state, event, ' ');
