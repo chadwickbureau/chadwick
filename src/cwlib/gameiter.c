@@ -555,6 +555,7 @@ cw_gameiter_create(CWGame *game)
 
   gameiter->event_data = (CWEventData *) malloc(sizeof(CWEventData));
   gameiter->state = (CWGameState *) malloc(sizeof(CWGameState));
+  cw_gamestate_initialize(gameiter->state);
 
   cw_gameiter_reset(gameiter);
 
