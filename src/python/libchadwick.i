@@ -33,7 +33,7 @@
 
 int IsValidPlay(char *play)
 {
-  CWParsedEvent data;
+  CWEventData data;
   return cw_parse_event(play, &data); 
 }
 
@@ -303,17 +303,17 @@ int IsValidPlay(char *play)
   char *GetSavePitcher(void)      { return cw_game_info_lookup(self, "save"); }
 
   void SetER(char *pitcher, int er)  {
-    char **foo = (char **) malloc(4 * sizeof(char *));
-    foo[1] = (char *) malloc(3 * sizeof(char));
-    strcpy(foo[1], "er");
-    foo[2] = (char *) malloc((strlen(pitcher)+1) * sizeof(char));
-    strcpy(foo[2], pitcher);
-    foo[3] = (char *) malloc(10 * sizeof(char));
-    sprintf(foo[3], "%d", er);
+    char **foo = (char **) malloc(3 * sizeof(char *));
+    foo[0] = (char *) malloc(3 * sizeof(char));
+    strcpy(foo[0], "er");
+    foo[1] = (char *) malloc((strlen(pitcher)+1) * sizeof(char));
+    strcpy(foo[1], pitcher);
+    foo[2] = (char *) malloc(10 * sizeof(char));
+    sprintf(foo[2], "%d", er);
     cw_game_data_append(self, 3, foo);
-    free(foo[3]);
     free(foo[2]);
     free(foo[1]);
+    free(foo[0]);
     free(foo);
   }
 
@@ -365,49 +365,51 @@ int IsValidPlay(char *play)
   void Reset(void)  { cw_gameiter_reset(self); }
 
   int GetInning(void) {
-    if (self->outs == 3) return self->inning + self->half_inning;
-    else return self->inning;
+    if (self->state->outs == 3) return self->state->inning + self->state->half_inning;
+    else return self->state->inning;
   }
 
   int GetHalfInning(void) {
-    if (self->outs == 3) return (self->half_inning + 1) % 2;
-    else return self->half_inning;
+    if (self->state->outs == 3) return (self->state->half_inning + 1) % 2;
+    else return self->state->half_inning;
   }
+
+  int GetOuts(void)  { return self->state->outs; }
 
   char *GetBatter(void) {
-    int halfInning = self->half_inning;
-    if (self->outs == 3) halfInning = (halfInning + 1) % 2;
-    return self->lineups[self->num_batters[halfInning] % 9 + 1][halfInning].player_id;
+    int halfInning = self->state->half_inning;
+    if (self->state->outs == 3) halfInning = (halfInning + 1) % 2;
+    return self->state->lineups[self->state->num_batters[halfInning] % 9 + 1][halfInning].player_id;
   }
 
-  char *GetPlayer(int team, int slot)  { return self->lineups[slot][team].player_id; }
-  char *GetFielder(int team, int pos)  { return self->fielders[pos][team]; }
+  char *GetPlayer(int team, int slot)  { return self->state->lineups[slot][team].player_id; }
+  char *GetFielder(int team, int pos)  { return self->state->fielders[pos][team]; }
   int GetPosition(int team, char *playerID)
-    { return cw_gameiter_player_position(self, team, playerID); }
+    { return cw_gamestate_player_position(self->state, team, playerID); }
   int GetSlot(int team, char *playerID)
-    { return cw_gameiter_lineup_slot(self, team, playerID); }
+    { return cw_gamestate_lineup_slot(self->state, team, playerID); }
   char *GetNextBatter(int team)
-    { return self->lineups[self->num_batters[team] % 9 + 1][team].player_id; }
+    { return self->state->lineups[self->state->num_batters[team] % 9 + 1][team].player_id; }
 
-  char *GetRunner(int base)            { return self->runners[base]; }
-  char *GetRespPitcher(int base)       { return self->pitchers[base]; }
+  char *GetRunner(int base)            { return self->state->runners[base]; }
+  char *GetRespPitcher(int base)       { return self->state->pitchers[base]; }
 
-  int NumBatters(int team)             { return self->num_batters[team]; }
-  int GetTeamScore(int team)           { return self->score[team]; }
-  int GetTeamHits(int team)            { return self->hits[team]; }
-  int GetTeamErrors(int team)          { return self->errors[team]; }
-  int GetTeamLOB(int team)  { return cw_gameiter_left_on_base(self, team); }
+  int NumBatters(int team)             { return self->state->num_batters[team]; }
+  int GetTeamScore(int team)           { return self->state->score[team]; }
+  int GetTeamHits(int team)            { return self->state->hits[team]; }
+  int GetTeamErrors(int team)          { return self->state->errors[team]; }
+  int GetTeamLOB(int team)  { return cw_gamestate_left_on_base(self->state, team); }
 
   CWEvent *GetEvent(void) const  { return self->event; }
-  CWParsedEvent *GetEventData(void) const  { return self->event_data; }  
+  CWEventData *GetEventData(void) const  { return self->event_data; }  
 };
 
 //==========================================================================
-//           Wrapping and extending CWParsedEvent as ParsedEvent
+//           Wrapping and extending CWEventData as EventData
 //==========================================================================
 
-%rename(ParsedEvent) CWParsedEvent;
-%extend CWParsedEvent {
+%rename(EventData) CWEventData;
+%extend CWEventData {
   int IsOfficialAB(void)  { return cw_event_is_official_ab(self); }
   int IsBatterEvent(void) { return cw_event_is_batter(self); }
   int GetRBI(void)    { return cw_event_rbi_on_play(self); }

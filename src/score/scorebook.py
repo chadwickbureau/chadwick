@@ -201,6 +201,7 @@ class Scorebook:
     def AddGame(self, game):
         hometeam = game.GetTeam(1)
         self.books[hometeam].InsertGame(game)
+        game.thisown = 0
         self.games.append(game)
         self.games.sort(lambda x, y: cmp(x.GetDate(), y.GetDate()))
         statscan.ProcessGame(game, self.reports)

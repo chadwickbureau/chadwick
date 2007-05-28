@@ -25,6 +25,7 @@
 # 
 
 import wx
+import libchadwick as cw
 
 # Import of dialogs used
 import dialogcomment
@@ -186,7 +187,7 @@ class StatePanel(wx.Panel):
             self.playText.SetValue(x.upper())
             self.playText.SetInsertionPoint(y)
 
-        if IsValidPlay(x.upper()):
+        if cw.IsValidPlay(x.upper()):
             self.playText.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
         else:
             self.playText.SetBackgroundColour(wx.NamedColour("pink"))
@@ -194,7 +195,7 @@ class StatePanel(wx.Panel):
             
     def OnPlayEnter(self, event):
         play = str(self.playText.GetValue()).upper()
-        if play == "" or not IsValidPlay(play):
+        if play == "" or not cw.IsValidPlay(play):
             wx.Bell()
         else:
             if hasattr(self, "pitches"):

@@ -166,7 +166,7 @@ class NarrativePanel(wx.Panel):
                 for base in [3, 2, 1]:
                     x += { True: "x", False: "-" }[gameiter.GetRunner(base) != ""]
                 
-                x += "%d): " % gameiter.outs
+                x += "%d): " % gameiter.GetOuts()
                 x += gameiter.event.event_text + "\n"
                 text += x
 

@@ -179,7 +179,7 @@ class GameEditor:
         return self.gameiter.GetTeamLOB(team)
 
     def IsLeadoff(self):
-        return self.game.first_event == None or self.gameiter.outs == 3
+        return self.game.first_event == None or self.gameiter.GetOuts() == 3
 
     def IsGameOver(self):
         event = self.game.last_event
@@ -197,10 +197,10 @@ class GameEditor:
         return False
         
     def GetOuts(self):
-        if self.gameiter.outs == 3:
+        if self.gameiter.GetOuts() == 3:
             return 0
         else:
-            return self.gameiter.outs
+            return self.gameiter.GetOuts()
 
 
 
