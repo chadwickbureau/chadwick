@@ -26,7 +26,7 @@
 
 import string, sys, os
 
-import wx, wx.grid
+import wx, wx.grid, wx.aui
 
 import scorebook
 import dw             # For Retrosheet/DiamondWare import and export
@@ -117,25 +117,72 @@ class ChoosePlayerDialog(wx.Dialog):
     def GetPlayerID(self):
         return self.players[self.playerList.GetSelection()]
 
-# IDs for our menu command events
-CW_MENU_FILE_IMPORT = 2008
-CW_MENU_REPORT_REGISTER = 2009
-CW_MENU_REPORT_REGISTER_BATTING = 2010
-CW_MENU_REPORT_REGISTER_PITCHING = 2011
-CW_MENU_REPORT_REGISTER_FIELDING = 2012
-CW_MENU_REPORT_TEAM = 2020
-CW_MENU_REPORT_TEAM_TOTALS = 2021
-CW_MENU_REPORT_TEAM_GAMELOG = 2022
-CW_MENU_REPORT_TEAM_BATTING = 2023
-CW_MENU_REPORT_TEAM_PITCHING = 2024
-CW_MENU_REPORT_PLAYER = 2030
-CW_MENU_REPORT_PLAYER_DAILY_BATTING = 2031
-CW_MENU_REPORT_EVENTS = 2016
-CW_MENU_REPORT_EVENTS_SLAMS = 2017
-CW_MENU_REPORT_EVENTS_BIGGAME = 2018
+class AddTeamDialog(wx.Dialog):
+    def __init__(self, parent, book):
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, "Add team")
+        self.book = book
 
-# This is duplicated from panelgamelist. We need to refactor!
-CW_MENU_GAME_NEW = 2000
+        self.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.NORMAL))
+
+        sizer = wx.FlexGridSizer(4)
+
+        sizer.Add(FormattedStaticText(self, "City"),
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.city = wx.TextCtrl(self, wx.ID_ANY, "", size=(150, -1))
+        sizer.Add(self.city, 0, wx.ALL | wx.ALIGN_CENTER, 5)
+
+        sizer.Add(FormattedStaticText(self, "Nickname"),
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.nickname = wx.TextCtrl(self, wx.ID_ANY, "", size=(150, -1))
+        sizer.Add(self.nickname, 0, wx.ALL | wx.ALIGN_CENTER, 5)
+
+        sizer.Add(FormattedStaticText(self, "Team ID"),
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.teamID = wx.TextCtrl(self, wx.ID_ANY, "", size=(150, -1))
+        # A blank team ID is invalid, so flag this as invalid
+        self.teamID.SetBackgroundColour(wx.NamedColour("pink"))
+        sizer.Add(self.teamID, 0, wx.ALL | wx.ALIGN_CENTER, 5)
+
+        sizer.Add(FormattedStaticText(self, "League"),
+                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.league = wx.TextCtrl(self, wx.ID_ANY, "", size=(150, -1))
+        sizer.Add(self.league, 0, wx.ALL | wx.ALIGN_CENTER, 5)
+
+        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+        buttonSizer.Add(wx.Button(self, wx.ID_CANCEL, "Cancel"),
+                        0, wx.ALL | wx.ALIGN_CENTER, 5)
+        buttonSizer.Add(wx.Button(self, wx.ID_OK, "OK"),
+                        0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.FindWindowById(wx.ID_OK).Enable(False)
+
+        topSizer = wx.BoxSizer(wx.VERTICAL)
+
+        topSizer.Add(sizer, 0, wx.ALL, 5)
+        topSizer.Add(buttonSizer, 0, wx.ALIGN_RIGHT, 5)
+
+        self.SetSizer(topSizer)
+        self.Layout()
+        topSizer.SetSizeHints(self)
+
+        wx.EVT_TEXT(self, self.teamID.GetId(), self.OnTeamIDChange)
+
+    def OnTeamIDChange(self, event):
+        if str(self.teamID.GetValue()) == "":
+            self.FindWindowById(wx.ID_OK).Enable(False)
+            self.teamID.SetBackgroundColour(wx.NamedColour("pink"))
+        elif (str(self.teamID.GetValue()) in
+              [ x.GetID() for x in self.book.Teams() ]):
+            self.FindWindowById(wx.ID_OK).Enable(False)
+            self.teamID.SetBackgroundColour(wx.NamedColour("pink"))
+        else:
+            self.FindWindowById(wx.ID_OK).Enable(True)
+            self.teamID.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+              
+    def GetCity(self):       return str(self.city.GetValue())
+    def GetNickname(self):   return str(self.nickname.GetValue())
+    def GetTeamID(self):     return str(self.teamID.GetValue())
+    def GetLeague(self):     return str(self.league.GetValue())
+
 
 class ChadwickFrame(wx.Frame):
     def __init__(self, parent):
@@ -146,51 +193,25 @@ class ChadwickFrame(wx.Frame):
         self.MakeMenus()
         self.CreateStatusBar()
 
+        self.manager = wx.aui.AuiManager(self)
+
         icon = wx.IconFromXPMData(icons.baseball_xpm)
         self.SetIcon(icon)
-        sizer = wx.BoxSizer(wx.VERTICAL)
         
-        notebook = wx.Notebook(self, wx.ID_ANY)
-        self.gameList = GameListPanel(notebook)
-        notebook.AddPage(self.gameList, "Games")
+        self.gameList = GameListPanel(self)
+        self.manager.AddPane(self.gameList, wx.CENTER);
         
-        self.teamList = TeamListPanel(notebook)
-        notebook.AddPage(self.teamList, "Teams")
+        self.teamList = TeamListPanel(self)
+        self.manager.AddPane(self.teamList, wx.LEFT, "Teams")
 
-        self.playerList = PlayerListPanel(notebook)
-        notebook.AddPage(self.playerList, "Players")
-        
-        sizer.Add(notebook, 1, wx.EXPAND, 0)
+        self.playerList = PlayerListPanel(self)
+        self.manager.AddPane(self.playerList, wx.RIGHT, "Players")
 
-        self.SetSizer(sizer)
-        self.Layout()
+        self.manager.Update()
 
-        wx.EVT_MENU(self, wx.ID_NEW, self.OnFileNew)
-        wx.EVT_MENU(self, wx.ID_OPEN, self.OnFileOpen)
-        wx.EVT_MENU_RANGE(self, wx.ID_FILE1, wx.ID_FILE9, self.OnFileMRU)
-        wx.EVT_MENU(self, wx.ID_SAVE, self.OnFileSave)
-        wx.EVT_MENU(self, wx.ID_SAVEAS, self.OnFileSaveAs)
-        wx.EVT_MENU(self, CW_MENU_FILE_IMPORT, self.OnFileImport)
-        wx.EVT_MENU(self, wx.ID_EXIT, self.OnFileExit)
-        wx.EVT_MENU(self, wx.ID_ABOUT, self.OnHelpAbout)
-        wx.EVT_BUTTON(self, CW_MENU_GAME_NEW, self.OnGameNew)
-        wx.EVT_MENU(self, CW_MENU_REPORT_REGISTER_BATTING,
-                    self.OnReportRegisterBatting)
-        wx.EVT_MENU(self, CW_MENU_REPORT_REGISTER_PITCHING,
-                    self.OnReportRegisterPitching)
-        wx.EVT_MENU(self, CW_MENU_REPORT_REGISTER_FIELDING,
-                    self.OnReportRegisterFielding)
-        wx.EVT_MENU(self, CW_MENU_REPORT_TEAM_TOTALS, self.OnReportTeamTotals)
-        wx.EVT_MENU(self, CW_MENU_REPORT_TEAM_GAMELOG, self.OnReportTeamGameLog)
-        wx.EVT_MENU(self, CW_MENU_REPORT_TEAM_BATTING, self.OnReportTeamBatting)
-        wx.EVT_MENU(self, CW_MENU_REPORT_TEAM_PITCHING, self.OnReportTeamPitching)
-        wx.EVT_MENU(self, CW_MENU_REPORT_PLAYER_DAILY_BATTING,
-                    self.OnReportPlayerDailyBatting)
-        wx.EVT_MENU(self, CW_MENU_REPORT_EVENTS_SLAMS, self.OnReportEventsSlams)
-        wx.EVT_MENU(self, CW_MENU_REPORT_EVENTS_BIGGAME,
-                    self.OnReportEventsBigGame)
         wx.EVT_BUTTON(self, panelstate.CW_BUTTON_SAVE, self.OnGameSave)
-        wx.EVT_CLOSE(self, self.OnClickClose)
+
+        self.Bind(wx.EVT_CLOSE, self.OnClickClose)
 
         self.OnUpdate()
 
@@ -198,70 +219,133 @@ class ChadwickFrame(wx.Frame):
     def MakeMenus(self):
         fileMenu = wx.Menu()
         fileMenu.Append(wx.ID_NEW, "&New", "Create a new scorebook")
+        self.Connect(wx.ID_NEW, -1,
+                     wx.wxEVT_COMMAND_MENU_SELECTED, self.OnFileNew)
+
         fileMenu.Append(wx.ID_OPEN, "&Open", "Open a saved scorebook")
+        self.Connect(wx.ID_OPEN, -1,
+                     wx.wxEVT_COMMAND_MENU_SELECTED, self.OnFileOpen)
+
         fileMenu.Append(wx.ID_SAVE, "&Save", "Save the current scorebook")
+        self.Connect(wx.ID_SAVE, -1,
+                     wx.wxEVT_COMMAND_MENU_SELECTED, self.OnFileSave)
+
         fileMenu.Append(wx.ID_SAVEAS, "Save &as",
                         "Save the scorebook to a different file")
+        self.Connect(wx.ID_SAVEAS, -1,
+                     wx.wxEVT_COMMAND_MENU_SELECTED, self.OnFileSaveAs)
+
         fileMenu.AppendSeparator()
-        fileMenu.Append(CW_MENU_FILE_IMPORT, "&Import",
-                        "Import games from another scorebook")
+        item = fileMenu.Append(wx.NewId(), "&Import",
+                               "Import games from another scorebook")
+        self.Connect(item.GetId(), -1,
+                     wx.wxEVT_COMMAND_MENU_SELECTED, self.OnFileImport)
+
         fileMenu.AppendSeparator()
         fileMenu.Append(wx.ID_EXIT, "&Exit", "Close Chadwick")
+        self.Connect(wx.ID_EXIT, -1,
+                     wx.wxEVT_COMMAND_MENU_SELECTED, self.OnFileExit)
 
         self.fileHistory = wx.FileHistory()
         self.fileHistory.Load(wx.Config("Chadwick"))
         self.fileHistory.UseMenu(fileMenu)
         self.fileHistory.AddFilesToMenu()
-        
+
+        self.Connect(wx.ID_FILE1, wx.ID_FILE9, wx.wxEVT_COMMAND_MENU_SELECTED,
+                     self.OnFileMRU)
+
+        editMenu = wx.Menu()
+        item = editMenu.Append(wx.NewId(), "New &game",
+                               "Add a new game to the scorebook")
+        self.Connect(item.GetId(), -1, wx.wxEVT_COMMAND_MENU_SELECTED,
+                     self.OnEditGameNew)
+
+
+        item = editMenu.Append(wx.NewId(), "New &team",
+                               "Add a new team to the scorebook")
+        self.Connect(item.GetId(), -1, wx.wxEVT_COMMAND_MENU_SELECTED,
+                     self.OnEditTeamNew)
+
+                               
         reportMenu = wx.Menu()
 
         reportRegisterMenu = wx.Menu()
-        reportRegisterMenu.Append(CW_MENU_REPORT_REGISTER_BATTING,
-                                  "&Batting", "Compile batting register")
-        reportRegisterMenu.Append(CW_MENU_REPORT_REGISTER_PITCHING,
-                                  "&Pitching", "Compile pitching register")
-        reportRegisterMenu.Append(CW_MENU_REPORT_REGISTER_FIELDING,
-                                  "&Fielding", "Compile fielding register")
-        reportMenu.AppendMenu(CW_MENU_REPORT_REGISTER, "&Register",
+        item = reportRegisterMenu.Append(wx.NewId(), "&Batting",
+                                         "Compile batting register")
+        self.Connect(item.GetId(), -1, wx.wxEVT_COMMAND_MENU_SELECTED,
+                     self.OnReportRegisterBatting)
+
+        item = reportRegisterMenu.Append(wx.NewId(), "&Pitching",
+                                         "Compile pitching register")
+        self.Connect(item.GetId(), -1, wx.wxEVT_COMMAND_MENU_SELECTED,
+                     self.OnReportRegisterPitching)
+
+        item = reportRegisterMenu.Append(wx.NewId(), "&Fielding",
+                                         "Compile fielding register")
+        self.Connect(item.GetId(), -1, wx.wxEVT_COMMAND_MENU_SELECTED,
+                     self.OnReportRegisterFielding)
+
+        reportMenu.AppendMenu(wx.NewId(), "&Register",
                               reportRegisterMenu, "Compile registers")
 
         reportTeamMenu = wx.Menu()
-        reportTeamMenu.Append(CW_MENU_REPORT_TEAM_TOTALS,
-                              "&Totals", "Compile team statistical totals")
-        reportTeamMenu.Append(CW_MENU_REPORT_TEAM_GAMELOG,
-                              "&Log", "Compile game logs for teams")
-        reportTeamMenu.Append(CW_MENU_REPORT_TEAM_BATTING,
-                              "&Batting", "Compile individual batting by team")
-        reportTeamMenu.Append(CW_MENU_REPORT_TEAM_PITCHING,
-                              "&Pitching", "Compile individual pitching by team")
-        reportMenu.AppendMenu(CW_MENU_REPORT_TEAM, "&Team",
+
+        item = reportTeamMenu.Append(wx.NewId(), "&Totals",
+                                     "Compile team statistical totals")
+        self.Connect(item.GetId(), -1, wx.wxEVT_COMMAND_MENU_SELECTED,
+                     self.OnReportTeamTotals)
+
+        item = reportTeamMenu.Append(wx.NewId(), "&Log",
+                                     "Compile game logs for teams")
+        self.Connect(item.GetId(), -1, wx.wxEVT_COMMAND_MENU_SELECTED,
+                     self.OnReportTeamGameLog)
+        
+        item = reportTeamMenu.Append(wx.NewId(), "&Batting",
+                                     "Compile individual batting by team")
+        self.Connect(item.GetId(), -1, wx.wxEVT_COMMAND_MENU_SELECTED,
+                     self.OnReportTeamBatting)
+
+        item = reportTeamMenu.Append(wx.NewId(), "&Pitching",
+                                     "Compile individual pitching by team")
+        self.Connect(item.GetId(), -1, wx.wxEVT_COMMAND_MENU_SELECTED,
+                     self.OnReportTeamPitching)
+
+        reportMenu.AppendMenu(wx.NewId(), "&Team",
                               reportTeamMenu, "Compile team-by-team reports")
 
 
         reportPlayerMenu = wx.Menu()
-        reportPlayerMenu.Append(CW_MENU_REPORT_PLAYER_DAILY_BATTING,
-                                "Daily &batting",
-                                "Compile game-by-game batting for player")
-        reportMenu.AppendMenu(CW_MENU_REPORT_PLAYER, "&Player",
-                              reportPlayerMenu,
+        item = reportPlayerMenu.Append(wx.NewId(), "Daily &batting",
+                                       "Compile game-by-game batting for player")
+        self.Connect(item.GetId(), -1, wx.wxEVT_COMMAND_MENU_SELECTED,
+                     self.OnReportPlayerDailyBatting)
+        
+        reportMenu.AppendMenu(wx.NewId(), "&Player", reportPlayerMenu,
                               "Compile reports by player")
         
         reportEventsMenu = wx.Menu()
-        reportEventsMenu.Append(CW_MENU_REPORT_EVENTS_BIGGAME,
-                                "&Big games",
-                                "Compile a log of notable individual performanceS")
-        reportEventsMenu.Append(CW_MENU_REPORT_EVENTS_SLAMS,
-                                "&Grand slams",
-                                "Compile log of grand slam home runs")
-        reportMenu.AppendMenu(CW_MENU_REPORT_EVENTS, "&Events",
+        item = reportEventsMenu.Append(wx.NewId(), "&Big games",
+                                       "Compile a log of notable individual performances")
+        self.Connect(item.GetId(), -1, wx.wxEVT_COMMAND_MENU_SELECTED,
+                     self.OnReportEventsBigGame)
+
+        item = reportEventsMenu.Append(wx.NewId(), "&Grand slams",
+                                       "Compile log of grand slam home runs")
+        self.Connect(item.GetId(), -1, wx.wxEVT_COMMAND_MENU_SELECTED,
+                     self.OnReportEventsSlams)
+
+        reportMenu.AppendMenu(wx.NewId(), "&Events",
                               reportEventsMenu, "Compile logs of events")
         
         
         helpMenu = wx.Menu()
         helpMenu.Append(wx.ID_ABOUT, "&About", "About Chadwick")
+        self.Connect(wx.ID_ABOUT, -1,
+                     wx.wxEVT_COMMAND_MENU_SELECTED, self.OnHelpAbout)
 
         menuBar = wx.MenuBar()
         menuBar.Append(fileMenu, "&File")
+        menuBar.Append(editMenu, "&Edit")
         menuBar.Append(reportMenu, "&Report")
         menuBar.Append(helpMenu, "&Help")
 
@@ -434,7 +518,7 @@ class ChadwickFrame(wx.Frame):
         dialog = AboutDialog(self)
         dialog.ShowModal()
         
-    def OnGameNew(self, event):
+    def OnEditGameNew(self, event):
         dialog = NewGameDialog(self, self.book)
         if dialog.ShowModal() != wx.ID_OK:
             return
@@ -494,13 +578,20 @@ class ChadwickFrame(wx.Frame):
         self.EditGame(doc)
             
 
+    def OnEditTeamNew(self, event):
+        dialog = AddTeamDialog(self, self.book)
+
+        if dialog.ShowModal() == wx.ID_OK:
+            self.book.AddTeam(dialog.GetTeamID(),
+                              dialog.GetCity(), dialog.GetNickname(),
+                              dialog.GetLeague())
+            self.OnUpdate()
+
     def EditGame(self, gameEditor):
         gameEditor.BuildBoxscore()
         self.entryFrame = GameEntryFrame(self, gameEditor) 
         self.entryFrame.SetDocument(gameEditor)
         self.entryFrame.Show(True)
-        
-        
         
         
     def OnGameSave(self, event):

@@ -127,7 +127,6 @@ class GameListCtrl(wx.ListCtrl):
 
     def GetFilter(self):  return self.filter
 
-CW_MENU_GAME_NEW = 2000
 
 class GameListPanel(wx.Panel):
     def __init__(self, parent):
@@ -143,17 +142,12 @@ class GameListPanel(wx.Panel):
         self.teamList.SetSelection(0)
         filterSizer.Add(self.teamList, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
-        newGameButton = wx.Button(self, CW_MENU_GAME_NEW, "Enter new game")
-        newGameButton.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
-
         self.gameList = GameListCtrl(self)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         toolSizer = wx.BoxSizer(wx.HORIZONTAL)
         toolSizer.Add(filterSizer, 0, wx.ALL | wx.ALIGN_CENTER, 5)
-        toolSizer.Add(wx.Size(30, 1))
-        toolSizer.Add(newGameButton, 0, wx.ALL | wx.ALIGN_CENTER, 5)
         sizer.Add(toolSizer, 0, wx.ALL | wx.ALIGN_CENTER, 5)
         sizer.Add(self.gameList, 1, wx.EXPAND, 0)
         self.SetSizer(sizer)
