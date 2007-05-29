@@ -26,19 +26,84 @@
 
 import wx
 
+# This class implements a wx.Choice in which one can select an item by
+# typing the unique first N characters in the item string.
+class KeySearchChoice(wx.Choice):
+    def __init__(self, parent, windowID=wx.ID_ANY,
+                 position=wx.DefaultPosition, size=wx.DefaultSize):
+        wx.Choice.__init__(self, parent, windowID, position, size)
+        self.keybuffer = ""
+
+        self.Bind(wx.EVT_CHAR, self.OnChar)
+        self.Bind(wx.EVT_CHOICE, self.OnSelection)
+        
+    def OnChar(self, event):
+        if event.GetKeyCode() == wx.WXK_TAB:
+            # Need to pass this up to the parent so tab traversal works
+            event.Skip()
+            return
+        elif event.GetKeyCode() in [ wx.WXK_BACK, wx.WXK_DELETE ]:
+            self.keybuffer = self.keybuffer[:-1]
+        else:
+            self.keybuffer = self.keybuffer + chr(event.GetKeyCode())
+
+        for (i, label) in enumerate(self.GetStrings()):
+            if label[:len(self.keybuffer)].upper() == self.keybuffer.upper():
+                self.SetSelection(i)
+                wx.PostEvent(self.GetParent(),
+                             wx.CommandEvent(wx.wxEVT_COMMAND_CHOICE_SELECTED,
+                                             self.GetId()))
+                return
+
+    def OnSelection(self, event):
+        self.keybuffer = ""
+        self.SetFocus()
+        event.Skip()
+
+class PositionChoice(wx.Choice):
+    def __init__(self, parent, windowID=wx.ID_ANY,
+                 position=wx.DefaultPosition, size=wx.DefaultSize):
+        wx.Choice.__init__(self, parent, windowID, position, size)
+
+        posList = [ "-", "p", "c", "1b", "2b", "3b", "ss", "lf", "cf", "rf" ]
+        for pos in posList:  self.Append(pos)
+
+        self.Bind(wx.EVT_CHAR, self.OnChar)
+
+    def OnChar(self, event):
+        if event.GetKeyCode() == wx.WXK_TAB:
+            # Need to pass this up to the parent so tab traversal works
+            event.Skip()
+            return
+        elif chr(event.GetKeyCode()) >= '1' and \
+           chr(event.GetKeyCode()) <= '9':
+            self.SetSelection(event.GetKeyCode() - ord('1') + 1)
+            wx.PostEvent(self.GetParent(),
+                         wx.CommandEvent(wx.wxEVT_COMMAND_CHOICE_SELECTED,
+                                         self.GetId()))
+        elif event.GetKeyCode() in [ 'd', 'D' ] and "dh" in self.GetStrings():
+            self.SetStringSelection("dh")
+            wx.PostEvent(self.GetParent(),
+                         wx.CommandEvent(wx.wxEVT_COMMAND_CHOICE_SELECTED,
+                                         self.GetId()))
+            
+
 class LineupDialog(wx.Dialog):
     def __init__(self, parent, title):
-        wx.Dialog.__init__(self, parent, wx.ID_ANY, title)
+        wx.Dialog.__init__(self, parent, title=title)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         gridSizer = wx.FlexGridSizer(10)
 
-        self.players = [ wx.Choice(self, wx.ID_ANY, size=(300, -1))
+        self.players = [ KeySearchChoice(self, size=(300, -1))
                          for i in range(10) ]
-        self.positions = [ wx.Choice(self, wx.ID_ANY, size=(50, -1))
+        self.positions = [ PositionChoice(self, size=(50, -1))
                            for i in range(10) ]
         
+        for i in range(0, 9):
+            self.positions[i].MoveAfterInTabOrder(self.players[i])
+            self.players[i+1].MoveAfterInTabOrder(self.positions[i])
 
         for i in range(10):
             if i < 9:
@@ -72,6 +137,8 @@ class LineupDialog(wx.Dialog):
         self.players[-1].Enable(False)
         self.positions[-1].Show(False)
 
+        self.players[0].SetFocus()
+        
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOK)
 
     def OnOK(self, event):
@@ -127,8 +194,6 @@ class LineupDialog(wx.Dialog):
 
     def LoadRoster(self, roster, team, useDH):
         self.roster = roster
-        posList = [ "p", "c", "1b", "2b", "3b", "ss", "lf", "cf", "rf" ]
-        if useDH:  posList += [ "dh" ]
 
         fgColors = [ wx.RED, wx.BLUE ]
 
@@ -136,14 +201,12 @@ class LineupDialog(wx.Dialog):
             ctrl.Clear()
             ctrl.Append("")
             for player in self.roster.Players():
-                ctrl.Append(player.GetName())
+                ctrl.Append(player.GetSortName())
             ctrl.SetForegroundColour(fgColors[team])
             ctrl.SetSelection(0)
 
         for ctrl in self.positions:
-            ctrl.Clear()
-            ctrl.Append("-")
-            for pos in posList:  ctrl.Append(pos)
+            if useDH:  ctrl.Append("dh")
             ctrl.SetForegroundColour(fgColors[team])
             ctrl.SetSelection(0)
 
@@ -158,13 +221,13 @@ class LineupDialog(wx.Dialog):
 
             for player in self.roster.Players():
                 if player.player_id == pitcher:
-                    self.players[-1].SetStringSelection(player.GetName())
+                    self.players[-1].SetStringSelection(player.GetSortName())
 
         for slot in range(9):
             playerId = gameiter.GetPlayer(team, slot+1)
             for player in self.roster.Players():
                 if player.player_id == playerId:
-                    self.players[slot].SetStringSelection(player.GetName())
+                    self.players[slot].SetStringSelection(player.GetSortName())
                     self.origPlayers.append(self.players[slot].GetSelection())
             if gameiter.GetPosition(team, playerId) <= 10:
                 self.positions[slot].SetSelection(gameiter.GetPosition(team, playerId))
