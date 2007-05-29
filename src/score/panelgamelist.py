@@ -108,7 +108,7 @@ class GameListCtrl(wx.ListCtrl):
         dialog.ShowModal()
 
     def OnKeyDown(self, event):
-        if event.GetKeyCode() == WX.K_DELETE:
+        if event.GetKeyCode() == wx.WXK_DELETE:
             game = self.games[event.GetIndex()]
             dialog = wx.MessageDialog(self,
                                       "Are you sure you want to delete this game?",
