@@ -38,3 +38,39 @@ def FormattedStaticText(parent, label, size=wx.DefaultSize,
     return ctrl
 
 
+class LEDCtrl(wx.ScrolledWindow):
+    def __init__(self, parent, size):
+        wx.ScrolledWindow.__init__(self, parent, size=size)
+
+        self.size = size
+        self.color = wx.GREEN
+
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
+
+    def OnPaint(self, event):
+        dc = wx.PaintDC(self)
+        dc.SetBrush(wx.Brush(self.color, wx.SOLID))
+        dc.SetPen(wx.Pen(wx.BLACK, 1, wx.SOLID))
+        width = self.GetClientSize().GetWidth()
+        dc.DrawCircle(width / 2, width / 2, width / 4)
+
+    def SetColor(self, color):
+        self.color = color
+        self.Refresh(True)
+
+    def GetColor(self, color):
+        return self.color
+
+
+if __name__ == '__main__':
+    import sys
+
+    app = wx.PySimpleApp()
+
+    frame = wx.Frame(None, size=(100, 100))
+    led = LEDCtrl(frame)
+    led.SetColor(wx.Colour(int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])))
+    frame.Show(True)
+    led.Refresh()
+
+    app.MainLoop()

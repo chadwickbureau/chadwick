@@ -34,7 +34,7 @@ import dialoggame
 import dialoglineup
 
 # Import of controls comprising this panel
-from wxutils import FormattedStaticText
+from wxutils import FormattedStaticText, LEDCtrl
 import gridlineup
 import panellinescore
 import panelrunners
@@ -103,10 +103,15 @@ class StatePanel(wx.Panel):
                                    wx.DefaultPosition, wx.Size(250, 25),
                                    wx.TE_PROCESS_ENTER)
         self.playText.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
-        # playText starts out empty, which is invalid...
-        self.playText.SetBackgroundColour(wx.NamedColour("pink"))
         playTextSizer.Add(self.playText, 1, wx.ALL | wx.ALIGN_CENTER, 5)
 
+        self.ledCtrl = LEDCtrl(self, size=(25, 25))
+        # playText starts out empty
+        self.ledCtrl.SetColor(wx.WHITE)
+        self.ledCtrl.SetToolTipString("The play string is empty.")
+        playTextSizer.Add(self.ledCtrl, 0,
+                          wx.LEFT | wx.RIGHT | wx.ALIGN_CENTER, 0)
+        
         stateSizer.Add(playTextSizer, 0, wx.ALL | wx.EXPAND, 5)
 
         buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -188,9 +193,12 @@ class StatePanel(wx.Panel):
             self.playText.SetInsertionPoint(y)
 
         if cw.IsValidPlay(x.upper()):
-            self.playText.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+            self.ledCtrl.SetColor(wx.GREEN)
+            self.ledCtrl.SetToolTipString("The play string is valid.")
+
         else:
-            self.playText.SetBackgroundColour(wx.NamedColour("pink"))
+            self.ledCtrl.SetColor(wx.RED)
+            self.ledCtrl.SetToolTipString("The play string is not valid.")
         
             
     def OnPlayEnter(self, event):
@@ -206,7 +214,8 @@ class StatePanel(wx.Panel):
                 self.doc.AddPlay("??", "", play)
 
             self.playText.Clear()
-            self.playText.SetBackgroundColour(wx.NamedColour("pink"))
+            self.ledCtrl.SetColor(wx.WHITE)
+            self.ledCtrl.SetToolTipString("The play string is empty.")
             
             wx.PostEvent(self.GetParent(),
                          wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
@@ -331,14 +340,29 @@ class StatePanel(wx.Panel):
         if hasattr(self, "pitches"):
             self.pitches.Enable(not self.doc.IsGameOver())
 
+
         for slot in range(9):
-            if self.doc.GetCurrentPosition(1-self.doc.GetHalfInning(),
-                                           slot+1) > 10:
+            pos = self.doc.GetCurrentPosition(1-self.doc.GetHalfInning(),
+                                              slot+1)
+            if pos == 0 or pos > 10:
                 self.playText.Enable(False)
+                self.ledCtrl.SetColor(wx.Colour(255, 255, 0))
+                self.ledCtrl.SetToolTipString("The defensive alignment is incomplete.")
                 if hasattr(self, "pitches"):
                     self.pitches.Enable(False)
-                    
+                return
+            
         if hasattr(self, "pitches") and self.pitches.IsEnabled():
             self.pitches.SetFocus()
         elif self.playText.IsEnabled():
             self.playText.SetFocus()
+
+        if self.playText.GetValue() == "":
+            self.ledCtrl.SetColor(wx.WHITE)
+            self.ledCtrl.SetToolTipString("The play string is empty.")
+        elif cw.IsValidPlay(self.playText.GetValue()):
+            self.ledCtrl.SetColor(wx.GREEN)
+            self.ledCtrl.SetToolTipString("The play string is valid.")
+        else:
+            self.ledCtrl.SetColor(wx.RED)
+            self.ledCtrl.SetToolTipString("The play string is not valid.")
