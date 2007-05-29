@@ -303,7 +303,22 @@ int IsValidPlay(char *play)
   char *GetSavePitcher(void)      { return cw_game_info_lookup(self, "save"); }
 
   void SetER(char *pitcher, int er)  {
-    char **foo = (char **) malloc(3 * sizeof(char *));
+    char **foo;
+    CWData *data = self->first_data;
+
+    while (data != NULL) {
+      if (data->num_data >= 3 &&
+          !strcmp(data->data[0], "er") &&
+          !strcmp(data->data[1], pitcher)) {
+        free(data->data[2]);
+	data->data[2] = (char *) malloc(10 * sizeof(char));
+        sprintf(data->data[2], "%d", er);
+        return;
+      }
+      data = data->next;
+    }
+
+    foo = (char **) malloc(3 * sizeof(char *));
     foo[0] = (char *) malloc(3 * sizeof(char));
     strcpy(foo[0], "er");
     foo[1] = (char *) malloc((strlen(pitcher)+1) * sizeof(char));

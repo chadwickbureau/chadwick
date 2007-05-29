@@ -29,7 +29,7 @@ from wxutils import FormattedStaticText
 
 class DecisionDialog(wx.Dialog):
     def __init__(self, parent, doc):
-        wx.Dialog.__init__(self, parent, wx.ID_ANY, "Award Decisions...")
+        wx.Dialog.__init__(self, parent, title="Award Decisions...")
         self.doc = doc
         
         if doc.GetScore(0) > doc.GetScore(1):
@@ -50,6 +50,12 @@ class DecisionDialog(wx.Dialog):
                       0, wx.ALL | wx.ALIGN_CENTER, 5)
         self.wp = wx.Choice(self, wx.ID_ANY, size=(300, -1))
         for x in self.wps:  self.wp.Append(x["name"])
+
+        for (i, pitcher) in enumerate(self.wps):
+            if self.doc.game.GetInfo("wp") == pitcher["id"]:
+                self.wp.SetSelection(i)
+                break
+
         self.wp.SetForegroundColour(fgColors[winner])
         self.wp.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
         gridSizer.Add(self.wp, 0, wx.ALL | wx.ALIGN_CENTER, 5)
@@ -63,6 +69,13 @@ class DecisionDialog(wx.Dialog):
             self.save.Append("(none)")
             for x in self.wps: self.save.Append(x["name"])
             self.save.SetSelection(0)
+
+            for (i, pitcher) in enumerate(self.wps):
+                if self.doc.game.GetInfo("save") == pitcher["id"]:
+                    self.save.SetSelection(i+1)
+                    break
+
+
         self.save.SetForegroundColour(fgColors[winner])
         self.save.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
         gridSizer.Add(self.save, 0, wx.ALL | wx.ALIGN_CENTER, 5)
@@ -70,7 +83,13 @@ class DecisionDialog(wx.Dialog):
         gridSizer.Add(FormattedStaticText(self, "Losing pitcher"),
                       0, wx.ALL | wx.ALIGN_CENTER, 5)
         self.lp = wx.Choice(self, wx.ID_ANY, size=(300, -1))
+
         for x in self.lps: self.lp.Append(x["name"])
+        for (i, pitcher) in enumerate(self.lps):
+            if self.doc.game.GetInfo("lp") == pitcher["id"]:
+                self.lp.SetSelection(i)
+                break
+
         self.lp.SetForegroundColour(fgColors[1-winner])
         self.lp.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
         gridSizer.Add(self.lp, 0, wx.ALL | wx.ALIGN_CENTER, 5)

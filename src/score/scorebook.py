@@ -199,10 +199,15 @@ class Scorebook:
         self.modified = True
 
     def AddGame(self, game):
-        hometeam = game.GetTeam(1)
-        self.books[hometeam].InsertGame(game)
-        game.thisown = 0
-        self.games.append(game)
+        # FIXME: We need to be a little more careful about editing
+        # existing games.  (Though, there is no GUI support for
+        # changing teams, dates, or starting lineups as yet.)
+        if game not in self.games:
+            hometeam = game.GetTeam(1)
+            self.books[hometeam].InsertGame(game)
+            game.thisown = 0
+            self.games.append(game)
+
         self.games.sort(lambda x, y: cmp(x.GetDate(), y.GetDate()))
         statscan.ProcessGame(game, self.reports)
         self.modified = True

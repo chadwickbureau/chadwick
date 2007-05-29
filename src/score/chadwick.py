@@ -490,11 +490,18 @@ class ChadwickFrame(wx.Frame):
                                t, 0, 1)
                 doc.GetGame().SetInfo("usedh", "true")
                 
-                                
-        doc.BuildBoxscore()
-        self.entryFrame = GameEntryFrame(self, doc) 
-        self.entryFrame.SetDocument(doc)
+
+            self.EditGame(doc)
+            
+
+    def EditGame(self, gameEditor):
+        gameEditor.BuildBoxscore()
+        self.entryFrame = GameEntryFrame(self, gameEditor) 
+        self.entryFrame.SetDocument(gameEditor)
         self.entryFrame.Show(True)
+        
+        
+        
         
     def OnGameSave(self, event):
         self.book.AddGame(self.entryFrame.GetDocument().GetGame())
@@ -604,7 +611,10 @@ class ChadwickFrame(wx.Frame):
         title = "Chadwick: [%s] %d" % (self.book.GetFilename(),
                                        self.book.GetYear())
         if self.book.IsModified():
-            title += " (unsaved changes)"
+            if self.book.GetFilename() == "untitled.chw":
+                title += " (unsaved changes)"
+            else:
+                self.OnFileSave(wx.CommandEvent())
             
         self.SetTitle(title)
         self.teamList.OnUpdate(self.book)

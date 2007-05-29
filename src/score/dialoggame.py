@@ -222,7 +222,7 @@ class GeneralPanel(wx.Panel):
         box = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_STATIC, "General"),
                                 wx.VERTICAL)
 
-        grid = wx.FlexGridSizer(4)
+        grid = wx.FlexGridSizer(5)
         grid.AddGrowableCol(1)
 
         grid.Add(FormattedStaticText(self, "Start time"),
@@ -244,6 +244,16 @@ class GeneralPanel(wx.Panel):
                 self.dayNight.SetStringSelection(entry)
                 break
         grid.Add(self.dayNight, 0, wx.ALL | wx.EXPAND | wx.ALIGN_CENTER, 5)
+
+        grid.Add(FormattedStaticText(self, "Site"),
+                 0, wx.ALL | wx.ALIGN_CENTER, 5)
+        if doc.GetGame().GetInfo("site") != None:
+            self.site = wx.TextCtrl(self, wx.ID_ANY,
+                                    doc.GetGame().GetInfo("site"))
+        else:
+            self.site = wx.TextCtrl(self)
+            
+        grid.Add(self.site, 0, wx.ALL | wx.EXPAND | wx.ALIGN_CENTER, 5)
 
         grid.Add(FormattedStaticText(self, "Time of game"),
                  0, wx.ALL | wx.ALIGN_CENTER, 5)
@@ -267,6 +277,8 @@ class GeneralPanel(wx.Panel):
                               str(self.startTime.GetValue()))
         doc.GetGame().SetInfo("daynight",
                               str(self.dayNight.GetStringSelection()).lower())
+        doc.GetGame().SetInfo("site",
+                              str(self.site.GetValue()))
         doc.GetGame().SetInfo("timeofgame",
                               str(self.timeOfGame.GetValue()))
         doc.GetGame().SetInfo("attendance",

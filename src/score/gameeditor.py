@@ -37,8 +37,8 @@ def CreateGame(gameId, vis, home):
     """
     game = cw.Game(gameId)
     
-    game.SetVersion("1")
-    game.AddInfo("inputprogvers", "Chadwick version 0.3.1")
+    game.SetVersion("2")
+    game.AddInfo("inputprogvers", "Chadwick version 0.5.0")
     game.AddInfo("visteam", vis)
     game.AddInfo("hometeam", home)
     game.AddInfo("date",
@@ -51,6 +51,7 @@ def CreateGame(gameId, vis, home):
     # These generally correspond to standards for 'data unknown'
     game.AddInfo("starttime", "0:00")
     game.AddInfo("daynight", "unknown")
+    game.AddInfo("site", "")
     game.AddInfo("usedh", "false")
     game.AddInfo("umphome", "")
     game.AddInfo("ump1b", "")
@@ -59,8 +60,7 @@ def CreateGame(gameId, vis, home):
     game.AddInfo("scorer", "")
     game.AddInfo("translator", "")
     game.AddInfo("inputter", "")
-    game.AddInfo("inputtime",
-                        time.strftime("%Y/%m/%d %I:%M%p"))
+    game.AddInfo("inputtime", time.strftime("%Y/%m/%d %I:%M%p"))
     game.AddInfo("howscored", "unknown")
     game.AddInfo("pitches", "none")
     game.AddInfo("temp", "0")
