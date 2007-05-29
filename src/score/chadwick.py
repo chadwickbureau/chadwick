@@ -491,7 +491,7 @@ class ChadwickFrame(wx.Frame):
                 doc.GetGame().SetInfo("usedh", "true")
                 
 
-            self.EditGame(doc)
+        self.EditGame(doc)
             
 
     def EditGame(self, gameEditor):

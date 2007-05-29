@@ -38,13 +38,16 @@ class CommentDialog(wx.Dialog):
         buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
         buttonSizer.Add(wx.Button(self, wx.ID_CANCEL, "Cancel"),
                         0, wx.ALL | wx.ALIGN_CENTER, 5)
-        buttonSizer.Add(wx.Button(self, wx.ID_OK, "OK"), 0,
-                        wx.ALL | wx.ALIGN_CENTER, 5)
+        okButton = wx.Button(self, wx.ID_OK, "OK")
+        okButton.SetDefault()
+        buttonSizer.Add(okButton, 0, wx.ALL | wx.ALIGN_CENTER, 5)
         sizer.Add(buttonSizer, 1, wx.ALIGN_RIGHT, 5)
 
         self.SetSizer(sizer)
         self.Layout()
         sizer.SetSizeHints(self)
+
+        self.text.SetFocus()
 
     def GetComment(self):  return str(self.text.GetValue())
         
