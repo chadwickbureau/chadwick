@@ -558,7 +558,9 @@ class ChadwickFrame(wx.Frame):
                 tm = pg.GetTeams().index(rosters[t].GetID())
                 for slot in range(1, 10):
                     rec = pg.GetStarter(tm, slot)
-                    dialog.SetPlayerInSlot(slot, rec.name, rec.pos)
+                    dialog.SetPlayerInSlot(slot,
+                                           rosters[t].FindPlayer(rec.player_id).GetSortName(),
+                                           rec.pos)
                 
             if dialog.ShowModal() != wx.ID_OK:
                 return

@@ -28,8 +28,8 @@ import wx
 
 from wxutils import FormattedStaticText
 
-# IDs for controls
-CW_BUTTON_PINCH = [ 1000, 1001, 1002, 1003 ] 
+import panelstate    # Temporary -- until we define an "update" event
+
 
 def GetInningLabel(inning, halfInning, outs):
     """
@@ -55,7 +55,7 @@ def GetInningLabel(inning, halfInning, outs):
 
 class RunnersPanel(wx.Panel):
     def __init__(self, parent):
-        wx.Panel.__init__(self, parent, wx.ID_ANY)
+        wx.Panel.__init__(self, parent)
 
         box = wx.StaticBox(self, wx.ID_STATIC, "Current state")
         box.SetBackgroundColour(wx.Colour(0, 150, 0))
@@ -65,47 +65,49 @@ class RunnersPanel(wx.Panel):
         self.inningText = FormattedStaticText(self, "")
         sizer.Add(self.inningText, 0, wx.ALL | wx.EXPAND, 5)
 
-        baseOutSizer = wx.FlexGridSizer(5)
+        baseOutSizer = wx.GridSizer(rows=4, cols=2)
 
-        self.runnerText = [ wx.StaticText(self, wx.ID_STATIC, "",
-                                          wx.DefaultPosition,
-                                          (200, -1),
-                                          wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE)
-                            for i in [0,1,2,3] ]
-        for w in self.runnerText:
-            w.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        self.runnerText = [ [ wx.Choice(self, size=(200,-1))
+                              for i in [0,1,2,3] ] for t in [ 0, 1 ] ]
+
 
         baseOutSizer.Add(FormattedStaticText(self, "Runner on 3rd"),
                          0, wx.ALL | wx.ALIGN_CENTER, 5)
-        baseOutSizer.Add(self.runnerText[3], 1, wx.ALL | wx.ALIGN_CENTER, 5)
-        baseOutSizer.Add(wx.Button(self, CW_BUTTON_PINCH[3], "Pinch run"),
-                         0, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.FindWindowById(CW_BUTTON_PINCH[3]).Enable(False)
-        self.FindWindowById(CW_BUTTON_PINCH[3]).SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        baseOutSizer.Add(self.runnerText[0][3], 1, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.runnerText[1][3].Show(False)
+        
+        for t in [ 0, 1 ]:
+            self.Bind(wx.EVT_CHOICE, lambda event: self.OnPinchRun(event, 3),
+                      self.runnerText[t][3])
 
         baseOutSizer.Add(FormattedStaticText(self, "Runner on 2nd"),
                          0, wx.ALL | wx.ALIGN_CENTER, 5)
-        baseOutSizer.Add(self.runnerText[2], 1, wx.ALL | wx.ALIGN_CENTER, 5)
-        baseOutSizer.Add(wx.Button(self, CW_BUTTON_PINCH[2], "Pinch run"),
-                         0, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.FindWindowById(CW_BUTTON_PINCH[2]).Enable(False)
-        self.FindWindowById(CW_BUTTON_PINCH[2]).SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        baseOutSizer.Add(self.runnerText[0][2], 1, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.runnerText[1][2].Show(False)
+        
+        for t in [ 0, 1 ]:
+            self.Bind(wx.EVT_CHOICE, lambda event: self.OnPinchRun(event, 2),
+                      self.runnerText[t][2])
 
         baseOutSizer.Add(FormattedStaticText(self, "Runner on 1st"),
                          0, wx.ALL | wx.ALIGN_CENTER, 5)
-        baseOutSizer.Add(self.runnerText[1], 1, wx.ALL | wx.ALIGN_CENTER, 5)
-        baseOutSizer.Add(wx.Button(self, CW_BUTTON_PINCH[1], "Pinch run"),
-                         0, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.FindWindowById(CW_BUTTON_PINCH[1]).Enable(False)
-        self.FindWindowById(CW_BUTTON_PINCH[1]).SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        baseOutSizer.Add(self.runnerText[0][1], 1, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.runnerText[1][1].Show(False)
+
+        for t in [ 0, 1 ]:
+            self.Bind(wx.EVT_CHOICE, lambda event: self.OnPinchRun(event, 1),
+                      self.runnerText[t][1])
 
         baseOutSizer.Add(FormattedStaticText(self, "Batter"),
                          0, wx.ALL | wx.ALIGN_CENTER, 5)
-        baseOutSizer.Add(self.runnerText[0], 1, wx.ALL | wx.ALIGN_CENTER, 5)
-        baseOutSizer.Add(wx.Button(self, CW_BUTTON_PINCH[0], "Pinch hit"),
-                         0, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.FindWindowById(CW_BUTTON_PINCH[0]).SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        baseOutSizer.Add(self.runnerText[0][0], 1, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.runnerText[1][0].Show(False)
+        
+        for t in [ 0, 1 ]:
+            self.Bind(wx.EVT_CHOICE, self.OnPinchHit, self.runnerText[t][0])
 
+        self.lastHalfInning = 0
+        
         sizer.Add(baseOutSizer, 1, wx.ALL | wx.ALIGN_CENTER, 5)
  
         self.SetSizer(sizer)
@@ -113,46 +115,91 @@ class RunnersPanel(wx.Panel):
         
     def SetDocument(self, doc):
         self.doc = doc
+        if not hasattr(self, "names"):
+            for t in [ 0, 1 ]:
+                names = [ player.GetSortName()
+                          for player in self.doc.GetRoster(t).Players() ]
+                for ctrl in self.runnerText[t]:
+                    ctrl.Clear()
+                    ctrl.AppendItems(names)
+
         self.OnUpdate()
+
+    def OnPinchHit(self, event):
+        team = self.doc.GetHalfInning()
+        batter = self.doc.gameiter.GetPlayer(team,
+                                             self.doc.gameiter.NumBatters(team) % 9 + 1)
+
+        sub = [x for x in self.doc.GetRoster(self.doc.GetHalfInning()).Players()][event.GetSelection()]
+        
+        slot = self.doc.gameiter.GetSlot(team, batter)
+        self.doc.AddSubstitute(sub, team, slot, 11)
+        wx.PostEvent(self.GetParent(),
+                     wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
+                                     panelstate.CW_BUTTON_UPDATE))
+
+    def OnPinchRun(self, event, base):
+        team = self.doc.GetHalfInning()
+        runner = self.doc.gameiter.GetRunner(base)
+
+        sub = [x for x in self.doc.GetRoster(self.doc.GetHalfInning()).Players()][event.GetSelection()]
+        
+        slot = self.doc.gameiter.GetSlot(team, runner)
+        self.doc.AddSubstitute(sub, team, slot, 12)
+        wx.PostEvent(self.GetParent(),
+                     wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
+                                     panelstate.CW_BUTTON_UPDATE))
+        
         
     def OnUpdate(self):
         if self.doc.IsGameOver():
             self.inningText.SetLabel("The game is over")
-            for ctrl in self.runnerText:
-                ctrl.SetLabel("")
-            for base in [1,2,3]:
-                self.FindWindowById(CW_BUTTON_PINCH[base]).Enable(False)
-            self.FindWindowById(CW_BUTTON_PINCH[0]).Enable(False)
+            for t in self.runnerText:
+                for ctrl in t:
+                    ctrl.Show(False)
             return
         else:
             self.inningText.SetLabel(GetInningLabel(self.doc.GetInning(),
                                                     self.doc.GetHalfInning(),
                                                     self.doc.GetOuts()))
 
-        for base in [0,1,2,3]:
-            if self.doc.GetHalfInning() == 0:
-                self.runnerText[base].SetForegroundColour(wx.RED)
-            else:
-                self.runnerText[base].SetForegroundColour(wx.BLUE)
+        team = self.doc.GetHalfInning()
+        roster = self.doc.GetRoster(team)
 
+        if self.lastHalfInning != self.doc.GetHalfInning():
+            for base in [0, 1, 2, 3]:
+                self.GetSizer().Replace(self.runnerText[self.lastHalfInning][base],
+                                        self.runnerText[1-self.lastHalfInning][base],
+                                        True)
+                self.runnerText[self.lastHalfInning][base].Show(False)
+                self.runnerText[1-self.lastHalfInning][base].Show(True)
+            self.lastHalfInning = self.doc.GetHalfInning()
+            self.Layout()
+        
         playerId = self.doc.GetCurrentBatter()
-        player = self.doc.GetRoster(self.doc.GetHalfInning()).FindPlayer(playerId)
-        self.runnerText[0].SetLabel(player.GetName())
-
-        self.FindWindowById(CW_BUTTON_PINCH[0]).Enable(True)
-        for base in [1,2,3]:
+        player = roster.FindPlayer(playerId)
+        self.runnerText[team][0].SetStringSelection(player.GetSortName())
+        self.runnerText[team][0].SetFont(wx.Font(10, wx.SWISS,
+                                                 wx.NORMAL, wx.BOLD))
+        
+        for (base, ctrl) in zip([1,2,3], self.runnerText[team][1:]):
             playerId = self.doc.GetCurrentRunner(base)
             if playerId == "":
-                self.runnerText[base].SetLabel("")
-                self.FindWindowById(CW_BUTTON_PINCH[base]).Enable(False)
+                ctrl.Show(False)
                 continue
 
-            player = self.doc.GetRoster(self.doc.GetHalfInning()).FindPlayer(playerId)
+            player = roster.FindPlayer(playerId)
 
             if player != None and not self.doc.IsLeadoff():
-                self.runnerText[base].SetLabel(player.GetName())
-                self.FindWindowById(CW_BUTTON_PINCH[base]).Enable(True)
+                ctrl.SetStringSelection(player.GetSortName())
+                ctrl.Show(True)
+                ctrl.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
             else:
-                self.runnerText[base].SetLabel("")
-                self.FindWindowById(CW_BUTTON_PINCH[base]).Enable(False)
+                ctrl.Show(False)
+
+        for ctrl in self.runnerText[team]:
+            if self.doc.GetHalfInning() == 0:
+                ctrl.SetForegroundColour(wx.RED)
+            else:
+                ctrl.SetForegroundColour(wx.BLUE)
 

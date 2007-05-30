@@ -149,12 +149,6 @@ class StatePanel(wx.Panel):
         self.SetSizer(sizer)
         self.Layout()
 
-        # Events propagating up from buttons on runners panel
-        wx.EVT_BUTTON(self, panelrunners.CW_BUTTON_PINCH[3], self.OnPinchRun3)
-        wx.EVT_BUTTON(self, panelrunners.CW_BUTTON_PINCH[2], self.OnPinchRun2)
-        wx.EVT_BUTTON(self, panelrunners.CW_BUTTON_PINCH[1], self.OnPinchRun1)
-        wx.EVT_BUTTON(self, panelrunners.CW_BUTTON_PINCH[0], self.OnPinchHit)
-
         # Events from controls on this panel
         wx.EVT_TEXT(self, CW_PITCHES_CTRL, self.OnPitchesText)
         wx.EVT_TEXT(self, CW_PLAYTEXT_CTRL, self.OnPlayText)
@@ -244,60 +238,6 @@ class StatePanel(wx.Panel):
             wx.PostEvent(self.GetParent(),
                         wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
                                         CW_BUTTON_UPDATE))
-
-    def OnPinchHit(self, event):
-        team = self.doc.GetHalfInning()
-        batter = self.doc.gameiter.GetPlayer(team,
-                                             self.doc.gameiter.NumBatters(team) % 9 + 1)
-        dialog = dialoglineup.PinchDialog(self, "Choose pinch hitter")
-        dialog.LoadRoster(self.doc.GetRoster(self.doc.GetHalfInning()),
-                          self.doc.GetHalfInning())
-
-        if dialog.ShowModal() == wx.ID_OK:
-            dialog.WriteChanges(self.doc, batter,
-                                self.doc.GetHalfInning(), 11)
-            wx.PostEvent(self.GetParent(),
-                         wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
-                                         CW_BUTTON_UPDATE))
-
-    def OnPinchRun3(self, event):
-        dialog = dialoglineup.PinchDialog(self, "Choose pinch runner at third")
-        dialog.LoadRoster(self.doc.GetRoster(self.doc.GetHalfInning()),
-                          self.doc.GetHalfInning())
-
-        if dialog.ShowModal() == wx.ID_OK:
-            dialog.WriteChanges(self.doc,
-                                self.doc.gameiter.GetRunner(3),
-                                self.doc.GetHalfInning(), 12)
-            wx.PostEvent(self.GetParent(),
-                         wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
-                                         CW_BUTTON_UPDATE))
-
-    def OnPinchRun2(self, event):
-        dialog = dialoglineup.PinchDialog(self, "Choose pinch runner at second")
-        dialog.LoadRoster(self.doc.GetRoster(self.doc.GetHalfInning()),
-                          self.doc.GetHalfInning())
-
-        if dialog.ShowModal() == wx.ID_OK:
-            dialog.WriteChanges(self.doc,
-                                self.doc.gameiter.GetRunner(2),
-                                self.doc.GetHalfInning(), 12)
-            wx.PostEvent(self.GetParent(),
-                        wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
-                                        CW_BUTTON_UPDATE))
-
-    def OnPinchRun1(self, event):
-        dialog = dialoglineup.PinchDialog(self, "Choose pinch runner at first")
-        dialog.LoadRoster(self.doc.GetRoster(self.doc.GetHalfInning()),
-                          self.doc.GetHalfInning())
-
-        if dialog.ShowModal() == wx.ID_OK:
-            dialog.WriteChanges(self.doc,
-                                self.doc.gameiter.GetRunner(1),
-                                self.doc.GetHalfInning(), 12)
-            wx.PostEvent(self.GetParent(),
-                         wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
-                                         CW_BUTTON_UPDATE))
 
     def OnSave(self, event):
         if self.doc.GetScore(0) != self.doc.GetScore(1):
