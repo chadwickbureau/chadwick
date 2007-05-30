@@ -29,7 +29,6 @@ import libchadwick as cw
 
 # Import of dialogs used
 import dialogcomment
-import dialogdecision
 import dialoggame
 import dialoglineup
 
@@ -39,19 +38,7 @@ import gridlineup
 import panellinescore
 import panelrunners
 
-# IDs for controls
-CW_PITCHES_CTRL = 1009
-CW_PLAYTEXT_CTRL = 1010
-CW_BUTTON_DEFSUB = 1011
-CW_BUTTON_SAVE = 1012
-CW_BUTTON_COMMENT = 1013
-CW_BUTTON_PROPERTIES = 1014
-CW_BUTTON_UNDO = 1015
-
-# This isn't actually a control -- it's a "fake" button to trigger
-# updates to all relevant windows
-CW_BUTTON_UPDATE = 1016
-
+import gameeditor
 
 def GetCount(pitches):
     """
@@ -71,7 +58,7 @@ def GetCount(pitches):
 
 class StatePanel(wx.Panel):
     def __init__(self, parent, doc):
-        wx.Panel.__init__(self, parent, wx.ID_ANY)
+        wx.Panel.__init__(self, parent)
 
         self.lineups = [ gridlineup.LineupGrid(self, t) for t in [0, 1] ]
         lineupSizer = wx.BoxSizer(wx.VERTICAL)
@@ -90,19 +77,20 @@ class StatePanel(wx.Panel):
             pitchesSizer.Add(FormattedStaticText(self, "Pitches"),
                              0, wx.ALL | wx.ALIGN_CENTER, 5)
 
-            self.pitches = wx.TextCtrl(self, CW_PITCHES_CTRL, "",
-                                       size=(150, -1))
+            self.pitches = wx.TextCtrl(self, size=(150, -1))
             self.pitches.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+            self.Bind(wx.EVT_TEXT, self.OnPitchesText, self.pitches)
             pitchesSizer.Add(self.pitches, 0, wx.ALL | wx.ALIGN_CENTER, 5)
             stateSizer.Add(pitchesSizer, 0, wx.ALL | wx.EXPAND, 5)
 
         playTextSizer = wx.BoxSizer(wx.HORIZONTAL)
         playTextSizer.Add(FormattedStaticText(self, "Play text"),
                           0, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.playText = wx.TextCtrl(self, CW_PLAYTEXT_CTRL, "",
-                                   wx.DefaultPosition, wx.Size(250, 25),
-                                   wx.TE_PROCESS_ENTER)
+        self.playText = wx.TextCtrl(self, size=(250, 25),
+                                    style=wx.TE_PROCESS_ENTER)
         self.playText.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        self.Bind(wx.EVT_TEXT, self.OnPlayText, self.playText)
+        self.Bind(wx.EVT_TEXT_ENTER, self.OnPlayEnter, self.playText)
         playTextSizer.Add(self.playText, 1, wx.ALL | wx.ALIGN_CENTER, 5)
 
         self.ledCtrl = LEDCtrl(self, size=(25, 25))
@@ -115,31 +103,31 @@ class StatePanel(wx.Panel):
         stateSizer.Add(playTextSizer, 0, wx.ALL | wx.EXPAND, 5)
 
         buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        button = wx.Button(self, label="Defensive substitution")
+        button.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        buttonSizer.Add(button, 0, wx.ALL, 5)
+        self.Bind(wx.EVT_BUTTON, self.OnDefensiveSub, button)
+
+        button = wx.Button(self, label="Insert comment")
+        button.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        buttonSizer.Add(button, 0, wx.ALL, 5)
+        self.Bind(wx.EVT_BUTTON, self.OnComment, button)
         
-        buttonSizer.Add(wx.Button(self, CW_BUTTON_DEFSUB,
-                                 "Defensive substitution"),
-                        0, wx.ALL, 5)
-        self.FindWindowById(CW_BUTTON_DEFSUB).SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
-        buttonSizer.Add(wx.Button(self, CW_BUTTON_COMMENT,
-                                 "Insert comment"),
-                        0, wx.ALL, 5)
-        self.FindWindowById(CW_BUTTON_COMMENT).SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
-        buttonSizer.Add(wx.Button(self, CW_BUTTON_UNDO,
-                                 "Undo last play"),
-                         0, wx.ALL, 5)
-        self.FindWindowById(CW_BUTTON_UNDO).SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        button = wx.Button(self, label="Undo last play")
+        button.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        buttonSizer.Add(button, 0, wx.ALL, 5)
+        self.Bind(wx.EVT_BUTTON, self.OnUndo, button)
+
         stateSizer.Add(buttonSizer, 1, wx.ALL | wx.ALIGN_CENTER, 5)
 
         button2Sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        button2Sizer.Add(wx.Button(self, CW_BUTTON_PROPERTIES,
-                                  "Edit game information"), 
-                         0, wx.ALL, 5)
-        self.FindWindowById(CW_BUTTON_PROPERTIES).SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
-        button2Sizer.Add(wx.Button(self, CW_BUTTON_SAVE,
-                                  "Save game and exit"),
-                         0, wx.ALL, 5)
-        self.FindWindowById(CW_BUTTON_SAVE).SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        button = wx.Button(self, label="Edit game information")
+        button.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        button2Sizer.Add(button, 0, wx.ALL, 5)
+        self.Bind(wx.EVT_BUTTON, self.OnProperties, button)
+
         stateSizer.Add(button2Sizer, 1, wx.ALL | wx.ALIGN_CENTER, 5)
 
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -148,16 +136,6 @@ class StatePanel(wx.Panel):
 
         self.SetSizer(sizer)
         self.Layout()
-
-        # Events from controls on this panel
-        wx.EVT_TEXT(self, CW_PITCHES_CTRL, self.OnPitchesText)
-        wx.EVT_TEXT(self, CW_PLAYTEXT_CTRL, self.OnPlayText)
-        wx.EVT_TEXT_ENTER(self, CW_PLAYTEXT_CTRL, self.OnPlayEnter)
-        wx.EVT_BUTTON(self, CW_BUTTON_DEFSUB, self.OnDefensiveSub)
-        wx.EVT_BUTTON(self, CW_BUTTON_SAVE, self.OnSave)
-        wx.EVT_BUTTON(self, CW_BUTTON_COMMENT, self.OnComment)
-        wx.EVT_BUTTON(self, CW_BUTTON_PROPERTIES, self.OnProperties)
-        wx.EVT_BUTTON(self, CW_BUTTON_UNDO, self.OnUndo)
         
     def SetDocument(self, doc):
         self.doc = doc
@@ -212,15 +190,15 @@ class StatePanel(wx.Panel):
             self.ledCtrl.SetToolTipString("The play string is empty.")
             
             wx.PostEvent(self.GetParent(),
-                         wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
-                                         CW_BUTTON_UPDATE))
+                         gameeditor.GameUpdateEvent(self.GetId(),
+                                                    gameDoc=self.doc))
 
     def OnUndo(self, event):
         self.doc.DeletePlay()
         self.playText.Clear()
         wx.PostEvent(self.GetParent(),
-                    wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
-                                    CW_BUTTON_UPDATE))
+                     gameeditor.GameUpdateEvent(self.GetId(),
+                                                gameDoc=self.doc))
 
     def OnDefensiveSub(self, event):
         team = 1 - self.doc.GetHalfInning()
@@ -236,30 +214,16 @@ class StatePanel(wx.Panel):
         if dialog.ShowModal() == wx.ID_OK:
             dialog.WriteChanges(self.doc, team)
             wx.PostEvent(self.GetParent(),
-                        wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
-                                        CW_BUTTON_UPDATE))
-
-    def OnSave(self, event):
-        if self.doc.GetScore(0) != self.doc.GetScore(1):
-            dialog = dialogdecision.DecisionDialog(self, self.doc)
-            if dialog.ShowModal() != wx.ID_OK:  return
-            
-            self.doc.game.SetInfo("wp", dialog.GetWinningPitcher())
-            self.doc.game.SetInfo("save", dialog.GetSavePitcher())
-            self.doc.game.SetInfo("lp", dialog.GetLosingPitcher())
-            
-        for t in [0, 1]:
-            for pitcher in self.doc.boxscore.pitching[t]:
-                self.doc.game.SetER(pitcher["id"], pitcher["er"])
-        event.Skip()
+                         gameeditor.GameUpdateEvent(self.GetId(),
+                                                    gameDoc=self.doc))
 
     def OnComment(self, event):
         dialog = dialogcomment.CommentDialog(self)
         if dialog.ShowModal() == wx.ID_OK:
             self.doc.AddComment(dialog.GetComment())
             wx.PostEvent(self.GetParent(),
-                         wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
-                                         CW_BUTTON_UPDATE))
+                         gameeditor.GameUpdateEvent(self.GetId(),
+                                                    gameDoc=self.doc))
 
             
     def OnProperties(self, event):
@@ -267,8 +231,8 @@ class StatePanel(wx.Panel):
         if dialog.ShowModal() == wx.ID_OK:
             dialog.UpdateDocument(self.doc)
             wx.PostEvent(self.GetParent(),
-                         wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
-                                         CW_BUTTON_UPDATE))
+                         gameeditor.GameUpdateEvent(self.GetId(),
+                                                    gameDoc=self.doc))
 
     def OnUpdate(self):
         self.linescore.OnUpdate()

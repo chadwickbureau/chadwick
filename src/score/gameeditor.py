@@ -28,6 +28,11 @@ import time    # used for setting inputtime in info field
 import libchadwick as cw
 from boxscore import Boxscore
 
+import wx.lib.newevent
+# This event should be posted whenever a change is made to a game
+GameUpdateEvent, EVT_GAME_UPDATE = wx.lib.newevent.NewCommandEvent()
+
+
 def CreateGame(gameId, vis, home):
     """
     Creates a new Chadwick game object, filling in

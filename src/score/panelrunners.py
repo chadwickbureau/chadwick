@@ -28,7 +28,7 @@ import wx
 
 from wxutils import FormattedStaticText
 
-import panelstate    # Temporary -- until we define an "update" event
+import gameeditor
 
 
 def GetInningLabel(inning, halfInning, outs):
@@ -135,8 +135,8 @@ class RunnersPanel(wx.Panel):
         slot = self.doc.gameiter.GetSlot(team, batter)
         self.doc.AddSubstitute(sub, team, slot, 11)
         wx.PostEvent(self.GetParent(),
-                     wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
-                                     panelstate.CW_BUTTON_UPDATE))
+                     gameeditor.GameUpdateEvent(self.GetId(),
+                                                gameDoc=self.doc))
 
     def OnPinchRun(self, event, base):
         team = self.doc.GetHalfInning()
@@ -147,8 +147,8 @@ class RunnersPanel(wx.Panel):
         slot = self.doc.gameiter.GetSlot(team, runner)
         self.doc.AddSubstitute(sub, team, slot, 12)
         wx.PostEvent(self.GetParent(),
-                     wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED,
-                                     panelstate.CW_BUTTON_UPDATE))
+                     gameeditor.GameUpdateEvent(self.GetId(),
+                                                gameDoc=self.doc))
         
         
     def OnUpdate(self):

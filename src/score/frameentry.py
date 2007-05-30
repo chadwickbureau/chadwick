@@ -30,18 +30,19 @@ import icons
 from panelboxscore import BoxscorePanel
 import panelstate
 from panelnarrative import NarrativePanel
+import gameeditor
+import dialogdecision
 
-import sys
 
 class GameEntryFrame(wx.Frame):
     def __init__(self, parent, doc):
-        wx.Frame.__init__(self, parent, wx.ID_OK, "Chadwick Game Entry",
+        wx.Frame.__init__(self, parent, title="Chadwick Game Entry",
                           size=(800, 600))
 
         icon = wx.IconFromXPMData(icons.baseball_xpm)
         self.SetIcon(icon)
 
-        self.notebook = wx.Notebook(self, wx.ID_ANY)
+        self.notebook = wx.Notebook(self)
 
         self.statePanel = panelstate.StatePanel(self.notebook, doc)
         self.notebook.AddPage(self.statePanel, "Current State")
@@ -58,31 +59,37 @@ class GameEntryFrame(wx.Frame):
         self.SetSizer(sizer)
         self.Layout()
         
-        self.disabler = wx.WindowDisabler(self)
-
-        # System event handlers
-        wx.EVT_CLOSE(self, self.OnClickClose)
-
         # Handle an "update" event: make sure all child windows update
-        wx.EVT_BUTTON(self, panelstate.CW_BUTTON_UPDATE, self.OnUpdate)
+        self.Bind(gameeditor.EVT_GAME_UPDATE, self.OnUpdate)
+
+        # Handle a "close" event: set decisions
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
 
         # When switching to the narrative, we rebuild it
         # (but only then, since doing it the current way is slowish)
-        wx.EVT_NOTEBOOK_PAGE_CHANGED(self, self.notebook.GetId(), self.OnNotebook)
+        self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnNotebook, self.notebook)
 
-    def OnClickClose(self, event):
-        if event.CanVeto():
-            dialog = wx.MessageDialog(self,
-                                      "The game has not been saved. "
-                                      "Confirm close? (Changes will be lost!)",
-                                      "Changes not saved",
-                                      wx.OK | wx.CANCEL | wx.ICON_EXCLAMATION)
-            if dialog.ShowModal() == wx.ID_CANCEL:
-                event.Veto()
-            else:
-                event.Skip()
+    def OnClose(self, event):
+        if self.doc.GetScore(0) != self.doc.GetScore(1):
+            dialog = dialogdecision.DecisionDialog(self, self.doc)
+            if dialog.ShowModal() != wx.ID_OK:  return
+            
+            self.doc.game.SetInfo("wp", dialog.GetWinningPitcher())
+            self.doc.game.SetInfo("save", dialog.GetSavePitcher())
+            self.doc.game.SetInfo("lp", dialog.GetLosingPitcher())
         else:
-            event.Skip()
+            self.doc.game.SetInfo("wp", "")
+            self.doc.game.SetInfo("save", "")
+            self.doc.game.SetInfo("lp", "")
+            
+        for t in [0, 1]:
+            for pitcher in self.doc.boxscore.pitching[t]:
+                self.doc.game.SetER(pitcher["id"], pitcher["er"])
+
+        wx.PostEvent(self.GetParent(),
+                     gameeditor.GameUpdateEvent(self.GetId(),
+                                                gameDoc=self.doc))
+        event.Skip()
 
     def OnNotebook(self, event):
         if event.GetSelection() == 1:
@@ -118,7 +125,9 @@ class GameEntryFrame(wx.Frame):
         
 
     def OnUpdate(self, event):
-        self.statePanel.OnUpdate()
         # We only update the boxscore and narrative windows when
         # they are shown
+        self.statePanel.OnUpdate()
 
+        # Let the event propagate upwards, so the game can be saved
+        event.Skip()

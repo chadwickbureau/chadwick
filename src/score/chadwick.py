@@ -33,7 +33,7 @@ import dw             # For Retrosheet/DiamondWare import and export
 import panelstate
 import icons
 
-from gameeditor import GameEditor, CreateGame
+import gameeditor
 from frameentry import GameEntryFrame
 from panelgamelist import GameListCtrl, GameListPanel
 from panelplayerlist import PlayerListPanel
@@ -209,8 +209,7 @@ class ChadwickFrame(wx.Frame):
 
         self.manager.Update()
 
-        wx.EVT_BUTTON(self, panelstate.CW_BUTTON_SAVE, self.OnGameSave)
-
+        self.Bind(gameeditor.EVT_GAME_UPDATE, self.OnGameUpdate)
         self.Bind(wx.EVT_CLOSE, self.OnClickClose)
 
         self.OnUpdate()
@@ -386,7 +385,7 @@ class ChadwickFrame(wx.Frame):
             
 
     def OnFileNew(self, event):
-        if not self.CheckUnsaved():  return
+        if self.CheckUnsaved() == wx.ID_CANCEL:  return
 
         dialog = YearDialog(self)
         if dialog.ShowModal() == wx.ID_OK:
@@ -394,7 +393,7 @@ class ChadwickFrame(wx.Frame):
             self.OnUpdate()
 
     def OnFileOpen(self, event):
-        if not self.CheckUnsaved():  return
+        if self.CheckUnsaved() == wx.ID_CANCEL:  return
         
         dialog = wx.FileDialog(self, "Scorebook to open...",
                                "", "",
@@ -415,7 +414,7 @@ class ChadwickFrame(wx.Frame):
                 dialog.ShowModal()
 
     def OnFileMRU(self, event):
-        if not self.CheckUnsaved():  return
+        if self.CheckUnsaved() == wx.ID_CANCEL:  return
         
         filename = self.fileHistory.GetHistoryFile(event.GetId() - wx.ID_FILE1)
         try:
@@ -503,13 +502,13 @@ class ChadwickFrame(wx.Frame):
             self.OnUpdate()
 
     def OnFileExit(self, event):
-        if not self.CheckUnsaved():  return
+        if self.CheckUnsaved() == wx.ID_CANCEL:  return
         self.fileHistory.Save(wx.Config("Chadwick"))
         global app
         app.ExitMainLoop()
         
     def OnClickClose(self, event):
-        if not self.CheckUnsaved():  return
+        if self.CheckUnsaved() == wx.ID_CANCEL:  return
         self.fileHistory.Save(wx.Config("Chadwick"))
         global app
         app.ExitMainLoop()
@@ -525,10 +524,10 @@ class ChadwickFrame(wx.Frame):
             
         rosters = [ self.book.GetTeam(dialog.GetTeam(t)) for t in [0, 1] ]
 
-        game = CreateGame(dialog.GetGameId(),
-                          rosters[0].GetID(), rosters[1].GetID())
+        game = gameeditor.CreateGame(dialog.GetGameId(),
+                                     rosters[0].GetID(), rosters[1].GetID())
         game.SetInfo("pitches", dialog.GetPitches())
-        doc = GameEditor(game, rosters[0], rosters[1])
+        doc = gameeditor.GameEditor(game, rosters[0], rosters[1])
 
         for t in [0, 1]:
             # This gives a list of all games the team has already had entered
@@ -591,15 +590,16 @@ class ChadwickFrame(wx.Frame):
 
     def EditGame(self, gameEditor):
         gameEditor.BuildBoxscore()
-        self.entryFrame = GameEntryFrame(self, gameEditor) 
-        self.entryFrame.SetDocument(gameEditor)
-        self.entryFrame.Show(True)
+        frame = GameEntryFrame(self, gameEditor) 
+        frame.SetDocument(gameEditor)
+        frame.Show(True)
         
+
+    def OnGameUpdate(self, event):
+        self.SaveGame(event.gameDoc)
         
-    def OnGameSave(self, event):
-        self.book.AddGame(self.entryFrame.GetDocument().GetGame())
-        self.entryFrame.Destroy()
-        del self.entryFrame
+    def SaveGame(self, gameDoc):
+        self.book.AddGame(gameDoc.GetGame())
         self.OnUpdate()
 
     def RunReport(self, message, title, acc):
@@ -704,10 +704,10 @@ class ChadwickFrame(wx.Frame):
         title = "Chadwick: [%s] %d" % (self.book.GetFilename(),
                                        self.book.GetYear())
         if self.book.IsModified():
-            if self.book.GetFilename() == "untitled.chw":
-                title += " (unsaved changes)"
-            else:
-                self.OnFileSave(wx.CommandEvent())
+            #if self.book.GetFilename() == "untitled.chw":
+            title += " (unsaved changes)"
+            #else:
+            #    self.OnFileSave(wx.CommandEvent())
             
         self.SetTitle(title)
         self.teamList.OnUpdate(self.book)
