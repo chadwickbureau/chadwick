@@ -38,6 +38,7 @@ class GameEntryFrame(wx.Frame):
     def __init__(self, parent, doc):
         wx.Frame.__init__(self, parent, title="Chadwick Game Entry",
                           size=(800, 600))
+        self.doc = doc
 
         icon = wx.IconFromXPMData(icons.baseball_xpm)
         self.SetIcon(icon)
@@ -47,10 +48,10 @@ class GameEntryFrame(wx.Frame):
         self.statePanel = panelstate.StatePanel(self.notebook, doc)
         self.notebook.AddPage(self.statePanel, "Current State")
 
-        self.boxscorePanel = BoxscorePanel(self.notebook)
+        self.boxscorePanel = BoxscorePanel(self.notebook, doc)
         self.notebook.AddPage(self.boxscorePanel, "Boxscore")
 
-        self.narrativePanel = NarrativePanel(self.notebook)
+        self.narrativePanel = NarrativePanel(self.notebook, doc)
         self.notebook.AddPage(self.narrativePanel, "Narrative")
 
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -68,6 +69,11 @@ class GameEntryFrame(wx.Frame):
         # When switching to the narrative, we rebuild it
         # (but only then, since doing it the current way is slowish)
         self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnNotebook, self.notebook)
+
+        wx.PostEvent(self,
+                     gameeditor.GameUpdateEvent(self.GetId(),
+                                                gameDoc=self.doc))
+        
 
     def OnClose(self, event):
         if self.doc.GetScore(0) != self.doc.GetScore(1):
@@ -97,34 +103,23 @@ class GameEntryFrame(wx.Frame):
         elif event.GetSelection() == 2:
             self.narrativePanel.Rebuild()
 
-    def SetDocument(self, doc):
-        self.doc = doc
-        self.statePanel.SetDocument(doc)
-        self.narrativePanel.SetDocument(doc)
-        self.boxscorePanel.SetDocument(doc)
-        self.SetGameTitle(doc)
-        
     def GetDocument(self):   return self.doc
         
-    def SetGameTitle(self, doc):
-        teams = [ ]
-        for t in [0, 1]:
-            teams.append(doc.GetRoster(t).GetName())
+
+    def OnUpdate(self, event):
+        teams = [ self.doc.GetRoster(t).GetName() for t in [ 0, 1 ] ]
+        gameDate = self.doc.GetGame().GetDate()
         
-        gameDate = doc.GetGame().GetDate()
-        
-        if doc.game.game_id[-1] == "0":
+        if self.doc.game.game_id[-1] == "0":
             gameNumber = ""
-        elif doc.game.game_id[-1] == "1":
+        elif self.doc.game.game_id[-1] == "1":
             gameNumber = " (first game)"
-        elif doc.game.game_id[-1] == "2":
+        elif self.doc.game.game_id[-1] == "2":
             gameNumber = " (second game)"
         
         self.SetTitle("Chadwick: " +
                       teams[0] + " at " + teams[1] + " on " + gameDate + gameNumber) 
         
-
-    def OnUpdate(self, event):
         # We only update the boxscore and narrative windows when
         # they are shown
         self.statePanel.OnUpdate()

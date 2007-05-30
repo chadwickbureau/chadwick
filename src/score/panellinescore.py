@@ -56,8 +56,9 @@ def GetInningLabel(inning, halfInning, outs):
     return x
 
 class LinescorePanel(wx.Panel):
-    def __init__(self, parent):
-        wx.Panel.__init__(self, parent, -1)
+    def __init__(self, parent, doc):
+        wx.Panel.__init__(self, parent)
+        self.doc = doc
         
         box = wx.StaticBox(self, wx.ID_STATIC, "Linescore")
         box.SetBackgroundColour(wx.Colour(0, 150, 0))
@@ -99,10 +100,6 @@ class LinescorePanel(wx.Panel):
 
         self.SetSizer(sizer)
         self.Layout()
-        
-    def SetDocument(self, doc):
-        self.doc = doc
-        self.OnUpdate()
         
     def OnUpdate(self):
         for t in [0,1]:

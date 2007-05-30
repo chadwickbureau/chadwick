@@ -27,11 +27,12 @@
 import wx, wx.grid
 
 class LineupGrid(wx.ScrolledWindow):
-    def __init__(self, parent, team):
+    def __init__(self, parent, doc, team):
         wx.ScrolledWindow.__init__(self, parent, wx.ID_ANY, size=(270, 265))
+        self.doc = doc
+        self.team = team
 
         self.SetBackgroundColour(wx.WHITE)
-        self.team = team
         if self.team == 0:
             self.fgColor = wx.RED
         else:
@@ -41,10 +42,6 @@ class LineupGrid(wx.ScrolledWindow):
 
         wx.EVT_PAINT(self, self.OnPaint)
 
-    def SetDocument(self, doc):
-        self.doc = doc
-        self.OnUpdate()
-        
     def OnPaint(self, event):
         dc = wx.PaintDC(self)
         self.DoPrepareDC(dc)

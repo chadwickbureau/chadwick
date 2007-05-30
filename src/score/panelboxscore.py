@@ -38,8 +38,9 @@ def PositionList(rec):
     return string.join([ pos[i] for i in rec["pos"] ], "-")
     
 class BoxscorePanel(wx.Panel):
-    def __init__(self, parent):
-        wx.Panel.__init__(self, parent, wx.ID_ANY)
+    def __init__(self, parent, doc):
+        wx.Panel.__init__(self, parent)
+        self.doc = doc
 
         self.text = wx.TextCtrl(self, wx.ID_ANY, "",
                                 style = wx.TE_MULTILINE | wx.TE_READONLY)
@@ -50,10 +51,6 @@ class BoxscorePanel(wx.Panel):
 
         self.SetSizer(sizer)
         self.Layout()
-
-    def SetDocument(self, doc):
-        self.doc = doc
-        self.OnUpdate()
 
     def PrintOffensiveCaption(self, stats, key, label):
         qual = [ x for x

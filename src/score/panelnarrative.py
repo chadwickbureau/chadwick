@@ -45,8 +45,9 @@ def GetInningLabel(inning, halfInning):
 
 
 class NarrativePanel(wx.Panel):
-    def __init__(self, parent):
-        wx.Panel.__init__(self, parent, wx.ID_ANY)
+    def __init__(self, parent, doc):
+        wx.Panel.__init__(self, parent)
+        self.doc = doc
 
         self.textCtrl = wx.TextCtrl(self, wx.ID_ANY, "",
                                     style = wx.TE_MULTILINE | wx.TE_READONLY)
@@ -57,10 +58,6 @@ class NarrativePanel(wx.Panel):
 
         self.SetSizer(sizer)
         self.Layout()
-
-    def SetDocument(self, doc):
-        self.doc = doc
-        self.OnUpdate()
 
     def PrintHeading(self):
         text = ""

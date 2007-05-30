@@ -54,9 +54,10 @@ def GetInningLabel(inning, halfInning, outs):
     return x
 
 class RunnersPanel(wx.Panel):
-    def __init__(self, parent):
+    def __init__(self, parent, doc):
         wx.Panel.__init__(self, parent)
-
+        self.doc = doc
+        
         box = wx.StaticBox(self, wx.ID_STATIC, "Current state")
         box.SetBackgroundColour(wx.Colour(0, 150, 0))
         box.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
@@ -113,15 +114,12 @@ class RunnersPanel(wx.Panel):
         self.SetSizer(sizer)
         self.Layout()
         
-    def SetDocument(self, doc):
-        self.doc = doc
-        if not hasattr(self, "names"):
-            for t in [ 0, 1 ]:
-                names = [ player.GetSortName()
-                          for player in self.doc.GetRoster(t).Players() ]
-                for ctrl in self.runnerText[t]:
-                    ctrl.Clear()
-                    ctrl.AppendItems(names)
+        for t in [ 0, 1 ]:
+            names = [ player.GetSortName()
+                      for player in self.doc.GetRoster(t).Players() ]
+            for ctrl in self.runnerText[t]:
+                ctrl.Clear()
+                ctrl.AppendItems(names)
 
         self.OnUpdate()
 

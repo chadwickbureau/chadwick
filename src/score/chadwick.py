@@ -591,7 +591,6 @@ class ChadwickFrame(wx.Frame):
     def EditGame(self, gameEditor):
         gameEditor.BuildBoxscore()
         frame = GameEntryFrame(self, gameEditor) 
-        frame.SetDocument(gameEditor)
         frame.Show(True)
         
 

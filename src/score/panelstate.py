@@ -28,7 +28,6 @@ import wx
 import libchadwick as cw
 
 # Import of dialogs used
-import dialogcomment
 import dialoggame
 import dialoglineup
 
@@ -59,17 +58,18 @@ def GetCount(pitches):
 class StatePanel(wx.Panel):
     def __init__(self, parent, doc):
         wx.Panel.__init__(self, parent)
+        self.doc = doc
 
-        self.lineups = [ gridlineup.LineupGrid(self, t) for t in [0, 1] ]
+        self.lineups = [ gridlineup.LineupGrid(self, doc, t) for t in [0, 1] ]
         lineupSizer = wx.BoxSizer(wx.VERTICAL)
         lineupSizer.Add(self.lineups[0], 0, wx.ALL, 5)
         lineupSizer.Add(self.lineups[1], 0, wx.ALL, 5)
 
         stateSizer = wx.BoxSizer(wx.VERTICAL)
-        self.linescore = panellinescore.LinescorePanel(self)
+        self.linescore = panellinescore.LinescorePanel(self, doc)
         stateSizer.Add(self.linescore, 0, wx.ALL | wx.EXPAND, 5)
 
-        self.runners = panelrunners.RunnersPanel(self)
+        self.runners = panelrunners.RunnersPanel(self, doc)
         stateSizer.Add(self.runners, 0, wx.ALL | wx.EXPAND, 5)
 
         if doc.GetGame().GetInfo("pitches") == "pitches":
@@ -102,6 +102,16 @@ class StatePanel(wx.Panel):
         
         stateSizer.Add(playTextSizer, 0, wx.ALL | wx.EXPAND, 5)
 
+        commentSizer = wx.BoxSizer(wx.HORIZONTAL)
+        commentSizer.Add(FormattedStaticText(self, "Comment"),
+                         0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.comment = wx.TextCtrl(self, size=(300, 25),
+                                   style=wx.TE_PROCESS_ENTER)
+        self.comment.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
+        self.Bind(wx.EVT_TEXT_ENTER, self.OnCommentEnter, self.comment)
+        commentSizer.Add(self.comment, 1, wx.ALL | wx.ALIGN_CENTER, 5)
+        stateSizer.Add(commentSizer, 0, wx.ALL | wx.EXPAND, 5)
+
         buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
 
         button = wx.Button(self, label="Defensive substitution")
@@ -109,26 +119,17 @@ class StatePanel(wx.Panel):
         buttonSizer.Add(button, 0, wx.ALL, 5)
         self.Bind(wx.EVT_BUTTON, self.OnDefensiveSub, button)
 
-        button = wx.Button(self, label="Insert comment")
-        button.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
-        buttonSizer.Add(button, 0, wx.ALL, 5)
-        self.Bind(wx.EVT_BUTTON, self.OnComment, button)
-        
         button = wx.Button(self, label="Undo last play")
         button.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
         buttonSizer.Add(button, 0, wx.ALL, 5)
         self.Bind(wx.EVT_BUTTON, self.OnUndo, button)
 
-        stateSizer.Add(buttonSizer, 1, wx.ALL | wx.ALIGN_CENTER, 5)
-
-        button2Sizer = wx.BoxSizer(wx.HORIZONTAL)
-
-        button = wx.Button(self, label="Edit game information")
+        button = wx.Button(self, label="Edit game info")
         button.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
-        button2Sizer.Add(button, 0, wx.ALL, 5)
+        buttonSizer.Add(button, 0, wx.ALL, 5)
         self.Bind(wx.EVT_BUTTON, self.OnProperties, button)
 
-        stateSizer.Add(button2Sizer, 1, wx.ALL | wx.ALIGN_CENTER, 5)
+        stateSizer.Add(buttonSizer, 1, wx.ALL | wx.ALIGN_CENTER, 5)
 
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(lineupSizer, 0, wx.ALL | wx.ALIGN_CENTER, 5)
@@ -137,14 +138,6 @@ class StatePanel(wx.Panel):
         self.SetSizer(sizer)
         self.Layout()
         
-    def SetDocument(self, doc):
-        self.doc = doc
-        self.linescore.SetDocument(doc)
-        self.runners.SetDocument(doc)
-        self.lineups[0].SetDocument(doc)
-        self.lineups[1].SetDocument(doc)
-        self.OnUpdate()
-
     def OnPitchesText(self, event):
         x = str(self.pitches.GetValue())
         if x.upper() != x:
@@ -193,6 +186,14 @@ class StatePanel(wx.Panel):
                          gameeditor.GameUpdateEvent(self.GetId(),
                                                     gameDoc=self.doc))
 
+    def OnCommentEnter(self, event):
+        self.doc.AddComment(str(self.comment.GetValue()).replace('"', "'").replace("\n", " ").replace("\r", " "))
+        self.comment.SetValue("")
+        wx.PostEvent(self.GetParent(),
+                     gameeditor.GameUpdateEvent(self.GetId(),
+                                                gameDoc=self.doc))
+        
+
     def OnUndo(self, event):
         self.doc.DeletePlay()
         self.playText.Clear()
@@ -217,15 +218,6 @@ class StatePanel(wx.Panel):
                          gameeditor.GameUpdateEvent(self.GetId(),
                                                     gameDoc=self.doc))
 
-    def OnComment(self, event):
-        dialog = dialogcomment.CommentDialog(self)
-        if dialog.ShowModal() == wx.ID_OK:
-            self.doc.AddComment(dialog.GetComment())
-            wx.PostEvent(self.GetParent(),
-                         gameeditor.GameUpdateEvent(self.GetId(),
-                                                    gameDoc=self.doc))
-
-            
     def OnProperties(self, event):
         dialog = dialoggame.GamePropertyDialog(self, self.doc)
         if dialog.ShowModal() == wx.ID_OK:

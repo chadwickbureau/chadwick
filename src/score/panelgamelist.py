@@ -27,7 +27,6 @@
 import wx
 
 from wxutils import FormattedStaticText
-from dialogboxview import BoxscoreViewDialog
 from gameeditor import GameEditor
 
 class GameListCtrl(wx.ListCtrl):
@@ -104,9 +103,6 @@ class GameListCtrl(wx.ListCtrl):
         game = self.games[event.GetIndex()]
         teams = [ self.book.GetTeam(t) for t in game.GetTeams() ]
         doc = GameEditor(game, teams[0], teams[1])
-
-        #dialog = BoxscoreViewDialog(self, doc)
-        #dialog.ShowModal()
 
         # Hackish.  Should really do this via an event mechanism
         wx.GetApp().GetTopWindow().EditGame(doc)
