@@ -272,7 +272,11 @@ int IsValidPlay(char *play)
 
   void SetVersion(char *version) { cw_game_set_version(self, version); }
 
-  char *GetInfo(char *label) { return cw_game_info_lookup(self, label); }
+  char *GetInfo(char *label) { 
+    char *value = cw_game_info_lookup(self, label);
+    return (value) ? value : "";
+  }
+
   void SetInfo(char *label, char *value)
     { cw_game_info_set(self, label, value); }
   void AddInfo(char *label, char *value)

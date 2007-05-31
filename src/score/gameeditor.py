@@ -62,6 +62,8 @@ def CreateGame(gameId, vis, home):
     game.AddInfo("ump1b", "")
     game.AddInfo("ump2b", "")
     game.AddInfo("ump3b", "")
+    game.AddInfo("umplf", "")
+    game.AddInfo("umprf", "")
     game.AddInfo("scorer", "")
     game.AddInfo("translator", "")
     game.AddInfo("inputter", "")

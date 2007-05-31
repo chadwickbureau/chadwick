@@ -177,33 +177,45 @@ class UmpirePanel(wx.Panel):
         box = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_STATIC, "Umpires"),
                                 wx.VERTICAL)
 
-        grid = wx.FlexGridSizer(4)
+        grid = wx.FlexGridSizer(6)
         grid.AddGrowableCol(1)
 
         grid.Add(FormattedStaticText(self, "Home plate"),
                  0, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.home = wx.TextCtrl(self, wx.ID_ANY,
-                                doc.GetGame().GetInfo("umphome"))
+        self.home = wx.TextCtrl(self,
+                                value=doc.GetGame().GetInfo("umphome"))
         grid.Add(self.home, 0, wx.ALL | wx.EXPAND | wx.ALIGN_CENTER, 5)
 
         grid.Add(FormattedStaticText(self, "First base"),
                  0, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.first = wx.TextCtrl(self, wx.ID_ANY,
-                                 doc.GetGame().GetInfo("ump1b"))
+        self.first = wx.TextCtrl(self,
+                                 value=doc.GetGame().GetInfo("ump1b"))
         grid.Add(self.first, 0, wx.ALL | wx.EXPAND | wx.ALIGN_CENTER, 5)
 
         grid.Add(FormattedStaticText(self, "Second base"),
                  0, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.second = wx.TextCtrl(self, wx.ID_ANY,
-                                 doc.GetGame().GetInfo("ump2b"))
+        self.second = wx.TextCtrl(self,
+                                  value=doc.GetGame().GetInfo("ump2b"))
         grid.Add(self.second, 0, wx.ALL | wx.EXPAND | wx.ALIGN_CENTER, 5)
 
         grid.Add(FormattedStaticText(self, "Third base"),
                  0, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.third = wx.TextCtrl(self, wx.ID_ANY,
-                                 doc.GetGame().GetInfo("ump3b"))
+        self.third = wx.TextCtrl(self,
+                                 value=doc.GetGame().GetInfo("ump3b"))
         grid.Add(self.third, 0, wx.ALL | wx.EXPAND | wx.ALIGN_CENTER, 5)
-        
+
+        grid.Add(FormattedStaticText(self, "Left field"),
+                 0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.left = wx.TextCtrl(self,
+                                value=doc.GetGame().GetInfo("umplf"))
+        grid.Add(self.left, 0, wx.ALL | wx.EXPAND | wx.ALIGN_CENTER, 5)
+
+        grid.Add(FormattedStaticText(self, "Right field"),
+                 0, wx.ALL | wx.ALIGN_CENTER, 5)
+        self.right = wx.TextCtrl(self,
+                                 value=doc.GetGame().GetInfo("umprf"))
+        grid.Add(self.right, 0, wx.ALL | wx.EXPAND | wx.ALIGN_CENTER, 5)
+
         box.Add(grid, 0, wx.ALL | wx.EXPAND, 5)
 
         self.SetSizer(box)
@@ -214,6 +226,8 @@ class UmpirePanel(wx.Panel):
         doc.GetGame().SetInfo("ump1b", str(self.first.GetValue()))
         doc.GetGame().SetInfo("ump2b", str(self.second.GetValue()))
         doc.GetGame().SetInfo("ump3b", str(self.third.GetValue()))
+        doc.GetGame().SetInfo("umplf", str(self.left.GetValue()))
+        doc.GetGame().SetInfo("umprf", str(self.right.GetValue()))
 
 class GeneralPanel(wx.Panel):
     def __init__(self, parent, doc):
