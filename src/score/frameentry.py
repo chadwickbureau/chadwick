@@ -30,7 +30,7 @@ import icons
 from panelboxscore import BoxscorePanel
 import panelstate
 from panelnarrative import NarrativePanel
-import gameeditor
+import game
 import dialogdecision
 
 
@@ -61,7 +61,7 @@ class GameEntryFrame(wx.Frame):
         self.Layout()
         
         # Handle an "update" event: make sure all child windows update
-        self.Bind(gameeditor.EVT_GAME_UPDATE, self.OnUpdate)
+        self.Bind(game.EVT_GAME_UPDATE, self.OnUpdate)
 
         # Handle a "close" event: set decisions
         self.Bind(wx.EVT_CLOSE, self.OnClose)
@@ -71,8 +71,7 @@ class GameEntryFrame(wx.Frame):
         self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnNotebook, self.notebook)
 
         wx.PostEvent(self,
-                     gameeditor.GameUpdateEvent(self.GetId(),
-                                                gameDoc=self.doc))
+                     game.GameUpdateEvent(self.GetId(), gameDoc=self.doc))
         
 
     def OnClose(self, event):
@@ -80,21 +79,20 @@ class GameEntryFrame(wx.Frame):
             dialog = dialogdecision.DecisionDialog(self, self.doc)
             if dialog.ShowModal() != wx.ID_OK:  return
             
-            self.doc.game.SetInfo("wp", dialog.GetWinningPitcher())
-            self.doc.game.SetInfo("save", dialog.GetSavePitcher())
-            self.doc.game.SetInfo("lp", dialog.GetLosingPitcher())
+            self.doc.SetInfo("wp", dialog.GetWinningPitcher())
+            self.doc.SetInfo("save", dialog.GetSavePitcher())
+            self.doc.SetInfo("lp", dialog.GetLosingPitcher())
         else:
-            self.doc.game.SetInfo("wp", "")
-            self.doc.game.SetInfo("save", "")
-            self.doc.game.SetInfo("lp", "")
+            self.doc.SetInfo("wp", "")
+            self.doc.SetInfo("save", "")
+            self.doc.SetInfo("lp", "")
             
         for t in [0, 1]:
-            for pitcher in self.doc.boxscore.pitching[t]:
-                self.doc.game.SetER(pitcher["id"], pitcher["er"])
+            for pitcher in self.doc.GetBoxscore().pitching[t]:
+                self.doc.SetER(pitcher["id"], pitcher["er"])
 
         wx.PostEvent(self.GetParent(),
-                     gameeditor.GameUpdateEvent(self.GetId(),
-                                                gameDoc=self.doc))
+                     game.GameUpdateEvent(self.GetId(), gameDoc=self.doc))
         event.Skip()
 
     def OnNotebook(self, event):
@@ -110,11 +108,11 @@ class GameEntryFrame(wx.Frame):
         teams = [ self.doc.GetRoster(t).GetName() for t in [ 0, 1 ] ]
         gameDate = self.doc.GetGame().GetDate()
         
-        if self.doc.game.game_id[-1] == "0":
+        if self.doc.GetInfo("number") == "0":
             gameNumber = ""
-        elif self.doc.game.game_id[-1] == "1":
+        elif self.doc.GetInfo("number") == "1":
             gameNumber = " (first game)"
-        elif self.doc.game.game_id[-1] == "2":
+        elif self.doc.GetInfo("number") == "2":
             gameNumber = " (second game)"
         
         self.SetTitle("Chadwick: " +

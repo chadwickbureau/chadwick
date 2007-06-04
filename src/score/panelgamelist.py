@@ -27,11 +27,11 @@
 import wx
 
 from wxutils import FormattedStaticText
-from gameeditor import GameEditor
+import game
 
 class GameListCtrl(wx.ListCtrl):
     def __init__(self, parent):
-        wx.ListCtrl.__init__(self, parent, wx.ID_ANY,
+        wx.ListCtrl.__init__(self, parent,
                              style = wx.LC_VIRTUAL | wx.LC_REPORT | wx.LC_SINGLE_SEL)
         self.filter = lambda x: True
 
@@ -100,9 +100,9 @@ class GameListCtrl(wx.ListCtrl):
                 return ""
 
     def OnItemActivate(self, event):
-        game = self.games[event.GetIndex()]
-        teams = [ self.book.GetTeam(t) for t in game.GetTeams() ]
-        doc = GameEditor(game, teams[0], teams[1])
+        thegame = self.games[event.GetIndex()]
+        teams = [ self.book.GetTeam(t) for t in thegame.GetTeams() ]
+        doc = game.Game(thegame, teams[0], teams[1])
 
         # Hackish.  Should really do this via an event mechanism
         wx.GetApp().GetTopWindow().EditGame(doc)

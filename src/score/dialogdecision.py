@@ -39,8 +39,8 @@ class DecisionDialog(wx.Dialog):
 
         fgColors = [ wx.RED, wx.BLUE ]
         
-        self.wps = [ x for x in doc.boxscore.pitching[winner] ]
-        self.lps = [ x for x in doc.boxscore.pitching[1-winner] ]
+        self.wps = [ x for x in doc.GetBoxscore().pitching[winner] ]
+        self.lps = [ x for x in doc.GetBoxscore().pitching[1-winner] ]
         
         sizer = wx.BoxSizer(wx.VERTICAL)
         
@@ -52,7 +52,7 @@ class DecisionDialog(wx.Dialog):
         for x in self.wps:  self.wp.Append(x["name"])
 
         for (i, pitcher) in enumerate(self.wps):
-            if self.doc.game.GetInfo("wp") == pitcher["id"]:
+            if self.doc.GetInfo("wp") == pitcher["id"]:
                 self.wp.SetSelection(i)
                 break
 
@@ -71,7 +71,7 @@ class DecisionDialog(wx.Dialog):
             self.save.SetSelection(0)
 
             for (i, pitcher) in enumerate(self.wps):
-                if self.doc.game.GetInfo("save") == pitcher["id"]:
+                if self.doc.GetInfo("save") == pitcher["id"]:
                     self.save.SetSelection(i+1)
                     break
 
@@ -86,7 +86,7 @@ class DecisionDialog(wx.Dialog):
 
         for x in self.lps: self.lp.Append(x["name"])
         for (i, pitcher) in enumerate(self.lps):
-            if self.doc.game.GetInfo("lp") == pitcher["id"]:
+            if self.doc.GetInfo("lp") == pitcher["id"]:
                 self.lp.SetSelection(i)
                 break
 

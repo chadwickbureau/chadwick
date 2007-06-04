@@ -28,7 +28,7 @@ import wx
 
 from wxutils import FormattedStaticText
 
-import gameeditor
+import game
 
 
 def GetInningLabel(inning, halfInning, outs):
@@ -125,28 +125,28 @@ class RunnersPanel(wx.Panel):
 
     def OnPinchHit(self, event):
         team = self.doc.GetHalfInning()
-        batter = self.doc.gameiter.GetPlayer(team,
-                                             self.doc.gameiter.NumBatters(team) % 9 + 1)
+        batter = self.doc.GetState().GetPlayer(team,
+                                               self.doc.GetState().NumBatters(team) % 9 + 1)
 
         sub = [x for x in self.doc.GetRoster(self.doc.GetHalfInning()).Players()][event.GetSelection()]
-        
-        slot = self.doc.gameiter.GetSlot(team, batter)
-        self.doc.AddSubstitute(sub, team, slot, 11)
-        wx.PostEvent(self.GetParent(),
-                     gameeditor.GameUpdateEvent(self.GetId(),
-                                                gameDoc=self.doc))
+
+        if batter != sub.GetID():
+            slot = self.doc.GetState().GetSlot(team, batter)
+            self.doc.AddSubstitute(sub, team, slot, 11)
+            wx.PostEvent(self.GetParent(),
+                         game.GameUpdateEvent(self.GetId(), gameDoc=self.doc))
 
     def OnPinchRun(self, event, base):
         team = self.doc.GetHalfInning()
-        runner = self.doc.gameiter.GetRunner(base)
+        runner = self.doc.GetState().GetRunner(base)
 
         sub = [x for x in self.doc.GetRoster(self.doc.GetHalfInning()).Players()][event.GetSelection()]
         
-        slot = self.doc.gameiter.GetSlot(team, runner)
-        self.doc.AddSubstitute(sub, team, slot, 12)
-        wx.PostEvent(self.GetParent(),
-                     gameeditor.GameUpdateEvent(self.GetId(),
-                                                gameDoc=self.doc))
+        if runner != sub.GetID():
+            slot = self.doc.GetState().GetSlot(team, runner)
+            self.doc.AddSubstitute(sub, team, slot, 12)
+            wx.PostEvent(self.GetParent(),
+                         game.GameUpdateEvent(self.GetId(), gameDoc=self.doc))
         
         
     def OnUpdate(self):

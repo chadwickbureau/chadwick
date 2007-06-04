@@ -37,7 +37,7 @@ import gridlineup
 import panellinescore
 import panelrunners
 
-import gameeditor
+import game
 
 def GetCount(pitches):
     """
@@ -183,23 +183,20 @@ class StatePanel(wx.Panel):
             self.ledCtrl.SetToolTipString("The play string is empty.")
             
             wx.PostEvent(self.GetParent(),
-                         gameeditor.GameUpdateEvent(self.GetId(),
-                                                    gameDoc=self.doc))
+                         game.GameUpdateEvent(self.GetId(), gameDoc=self.doc))
 
     def OnCommentEnter(self, event):
         self.doc.AddComment(str(self.comment.GetValue()).replace('"', "'").replace("\n", " ").replace("\r", " "))
         self.comment.SetValue("")
         wx.PostEvent(self.GetParent(),
-                     gameeditor.GameUpdateEvent(self.GetId(),
-                                                gameDoc=self.doc))
+                     game.GameUpdateEvent(self.GetId(), gameDoc=self.doc))
         
 
     def OnUndo(self, event):
         self.doc.DeletePlay()
         self.playText.Clear()
         wx.PostEvent(self.GetParent(),
-                     gameeditor.GameUpdateEvent(self.GetId(),
-                                                gameDoc=self.doc))
+                     game.GameUpdateEvent(self.GetId(), gameDoc=self.doc))
 
     def OnDefensiveSub(self, event):
         team = 1 - self.doc.GetHalfInning()
@@ -215,16 +212,14 @@ class StatePanel(wx.Panel):
         if dialog.ShowModal() == wx.ID_OK:
             dialog.WriteChanges(self.doc, team)
             wx.PostEvent(self.GetParent(),
-                         gameeditor.GameUpdateEvent(self.GetId(),
-                                                    gameDoc=self.doc))
+                         game.GameUpdateEvent(self.GetId(), gameDoc=self.doc))
 
     def OnProperties(self, event):
         dialog = dialoggame.GamePropertyDialog(self, self.doc)
         if dialog.ShowModal() == wx.ID_OK:
             dialog.UpdateDocument(self.doc)
             wx.PostEvent(self.GetParent(),
-                         gameeditor.GameUpdateEvent(self.GetId(),
-                                                    gameDoc=self.doc))
+                         game.GameUpdateEvent(self.GetId(), gameDoc=self.doc))
 
     def OnUpdate(self):
         self.linescore.OnUpdate()

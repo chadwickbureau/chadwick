@@ -113,7 +113,7 @@ class NarrativePanel(wx.Panel):
         return text
 
     def PrintPlays(self):
-        gameiter = cw.GameIterator(self.doc.game)
+        gameiter = cw.GameIterator(self.doc.GetGame())
         text = ""
 
         lastHalf = 1

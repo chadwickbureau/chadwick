@@ -33,7 +33,7 @@ import dw             # For Retrosheet/DiamondWare import and export
 import panelstate
 import icons
 
-import gameeditor
+import game
 from frameentry import GameEntryFrame
 from panelgamelist import GameListCtrl, GameListPanel
 from panelplayerlist import PlayerListPanel
@@ -209,7 +209,7 @@ class ChadwickFrame(wx.Frame):
 
         self.manager.Update()
 
-        self.Bind(gameeditor.EVT_GAME_UPDATE, self.OnGameUpdate)
+        self.Bind(game.EVT_GAME_UPDATE, self.OnGameUpdate)
         self.Bind(wx.EVT_CLOSE, self.OnClickClose)
 
         self.OnUpdate()
@@ -524,10 +524,10 @@ class ChadwickFrame(wx.Frame):
             
         rosters = [ self.book.GetTeam(dialog.GetTeam(t)) for t in [0, 1] ]
 
-        game = gameeditor.CreateGame(dialog.GetGameId(),
-                                     rosters[0].GetID(), rosters[1].GetID())
-        game.SetInfo("pitches", dialog.GetPitches())
-        doc = gameeditor.GameEditor(game, rosters[0], rosters[1])
+        thegame = game.CreateGame(dialog.GetGameId(),
+                                  rosters[0].GetID(), rosters[1].GetID())
+        thegame.SetInfo("pitches", dialog.GetPitches())
+        doc = game.Game(thegame, rosters[0], rosters[1])
 
         for t in [0, 1]:
             # This gives a list of all games the team has already had entered
@@ -541,12 +541,12 @@ class ChadwickFrame(wx.Frame):
                 # Find the game that was previous to the current one.
                 # If the game being entered was earlier than all others,
                 # just use the first one
-                if prevGames[0].GetDate() > game.GetDate():
+                if prevGames[0].GetDate() > thegame.GetDate():
                     pg = prevGames[0]
                 else:
                     pg = None
                     for g in prevGames:
-                        if g.GetDate() >= game.GetDate():
+                        if g.GetDate() >= thegame.GetDate():
                             pg = g
                             break
                     if pg == None:  pg = prevGames[-1]
@@ -588,9 +588,9 @@ class ChadwickFrame(wx.Frame):
                               dialog.GetLeague())
             self.OnUpdate()
 
-    def EditGame(self, gameEditor):
-        gameEditor.BuildBoxscore()
-        frame = GameEntryFrame(self, gameEditor) 
+    def EditGame(self, g):
+        g.BuildBoxscore()
+        frame = GameEntryFrame(self, g)
         frame.Show(True)
         
 

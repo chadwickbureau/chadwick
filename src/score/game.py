@@ -1,7 +1,7 @@
 #
 # $Source$
-# $Date$
-# $Revision$
+# $Date: 2007-05-30 21:00:02 -0500 (Wed, 30 May 2007) $
+# $Revision: 285 $
 #
 # DESCRIPTION:
 # A container class for the current state of an edited game
@@ -84,7 +84,7 @@ def CreateGame(gameId, vis, home):
 
     return game
 
-class GameEditor:
+class Game:
     def __init__(self, game, visRoster, homeRoster):
         self.game = game
         self.visRoster = visRoster
@@ -96,6 +96,7 @@ class GameEditor:
         self.boxscore = Boxscore(self.game)
 
     def GetGame(self):     return self.game
+    def GetGameID(self):   return self.game.game_id
     
     def GetBoxscore(self):   return self.boxscore
     def BuildBoxscore(self):  self.boxscore.Build()
@@ -210,4 +211,11 @@ class GameEditor:
             return self.gameiter.GetOuts()
 
 
+    def GetInfo(self, tag):
+        return self.game.GetInfo(tag)
 
+    def SetInfo(self, tag, value):
+        self.game.SetInfo(tag, value)
+
+    def SetER(self, pitcher, value):
+        self.game.SetER(pitcher, value)
