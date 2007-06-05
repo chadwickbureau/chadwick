@@ -81,7 +81,8 @@ class PositionChoice(wx.Choice):
             wx.PostEvent(self.GetParent(),
                          wx.CommandEvent(wx.wxEVT_COMMAND_CHOICE_SELECTED,
                                          self.GetId()))
-        elif event.GetKeyCode() in [ 'd', 'D' ] and "dh" in self.GetStrings():
+        elif chr(event.GetKeyCode()) in [ 'd', 'D' ] and \
+                 "dh" in self.GetStrings():
             self.SetStringSelection("dh")
             wx.PostEvent(self.GetParent(),
                          wx.CommandEvent(wx.wxEVT_COMMAND_CHOICE_SELECTED,
