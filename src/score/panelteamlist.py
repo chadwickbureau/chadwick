@@ -24,7 +24,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # 
 
-import wx 
+import wx, wx.grid
 
 from wxutils import FormattedStaticText
 
@@ -148,67 +148,142 @@ class EditTeamDialog(wx.Dialog):
                                     player.GetBats(), player.GetThrows(),
                                     self.team.GetID())
 
-class TeamListCtrl(wx.ListCtrl):
-    def __init__(self, parent):
-        wx.ListCtrl.__init__(self, parent, -1,
-                            style = wx.LC_VIRTUAL | wx.LC_REPORT | wx.LC_SINGLE_SEL)
-
-        self.InsertColumn(0, "City")
-        self.InsertColumn(1, "Nickname")
-        self.InsertColumn(2, "Team ID")
-        self.InsertColumn(3, "League")
-        
-        self.SetColumnWidth(0, 150)
-        self.SetColumnWidth(1, 150)
-        self.SetColumnWidth(2, 100)
-        self.SetColumnWidth(3, 100)
-
-        item = wx.ListItem()
-        item.m_format = wx.LIST_FORMAT_CENTRE
-        item.m_mask = wx.LIST_MASK_FORMAT
-        for col in [2, 3]:  self.SetColumn(col, item)
-
-        wx.EVT_LIST_ITEM_ACTIVATED(self, self.GetId(), self.OnItemActivate)
-
-    def OnUpdate(self, book):
+class TeamListCtrl(wx.grid.Grid):
+    def __init__(self, parent, book):
+        wx.grid.Grid.__init__(self, parent, size=(500, 400))
         self.book = book
-        self.SetItemCount(book.NumTeams())
 
-    def OnGetItemText(self, item, col):
-        team = [x for x in self.book.Teams()][item]
-        if col == 0:
-            return team.GetCity()
-        elif col == 1:
-            return team.GetNickname()
-        elif col == 2:
-            return team.GetID()
-        else:
-            return team.GetLeague()
+        self.CreateGrid(max(book.NumTeams(), 1), 4)
+        self.EnableEditing(True)
+        self.SetRowLabelSize(0)
         
-    def OnItemActivate(self, event):
-        team = [x for x in self.book.Teams()][event.GetIndex()]
+        for (col, label) in enumerate([ "Team ID", "City", "Nickname",
+                                        "League" ]):
+            self.SetColLabelValue(col, label)
 
-        dialog = EditTeamDialog(self, self.book, team)
-        if dialog.ShowModal() == wx.ID_OK:
-            self.book.ModifyTeam(team.GetID(),
-                                 dialog.GetCity(),
-                                 dialog.GetNickname(),
-                                 dialog.GetLeague())
-            dialog.UpdateTeam()
-            self.GetParent().GetGrandParent().OnUpdate()
+        for (col, width) in enumerate([ 100, 150, 150, 100 ]):
+            self.SetColSize(col, width)
 
-class TeamListPanel(wx.Panel):
-    def __init__(self, parent):
-        wx.Panel.__init__(self, parent, wx.ID_ANY)
+        for (row, team) in enumerate(book.Teams()):
+            # Existing team IDs are read-only for now
+            self.SetReadOnly(row, 0, True)
+            for (col, method) in enumerate([ team.GetID, team.GetCity,
+                                             team.GetNickname,
+                                             team.GetLeague ]):
+                self.SetCellValue(row, col, method())
 
-        self.teamList = TeamListCtrl(self)
+        self.UpdateFeedback()
+        
+        self.Bind(wx.EVT_KEY_DOWN, self.OnGridWindowKey, self.GetGridWindow())
+        self.Bind(wx.grid.EVT_GRID_SELECT_CELL, self.OnSelectCell)
+        self.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.OnGridCellChange)
+
+    def OnGridWindowKey(self, event):
+        """
+        This preprocesses some keystrokes targeted for the grid window,
+        to produce custom behaviors (e.g., creating a new blank row when
+        pressing the down arrow on the last row.)
+        """
+        if event.GetKeyCode() == wx.WXK_DOWN and \
+           self.GetGridCursorRow() == self.GetNumberRows() - 1 and \
+           not self.IsRowBlank(self.GetGridCursorRow()):
+            self.AppendRows()
+            self.UpdateFeedback()
+        elif event.GetKeyCode() == wx.WXK_UP and \
+             self.GetGridCursorRow() > 0 and \
+             self.GetGridCursorRow() == self.GetNumberRows() - 1 and \
+             self.IsRowBlank(self.GetGridCursorRow()):
+            self.DeleteRows(self.GetGridCursorRow());
+            self.SetGridCursor(self.GetNumberRows() - 1,
+                               self.GetGridCursorCol())
+            self.UpdateFeedback()
+            
+        event.Skip()
+
+    def OnSelectCell(self, event):
+        if event.GetRow() < self.GetNumberRows() - 1 and \
+           self.IsRowBlank(self.GetNumberRows() - 1):
+            self.DeleteRows(self.GetNumberRows() - 1)
+            self.UpdateFeedback()
+
+        event.Skip()
+
+    def OnGridCellChange(self, event):
+        """
+        Called when the contents of a cell are changed.
+        Currently, just need to update the feedback.
+        """
+        self.UpdateFeedback()
+        
+    def UpdateFeedback(self):
+        """
+        Implements rich feedback for validity checking.
+        Currently: all team IDs must be unique and nonempty.
+        """
+
+        for row in xrange(self.GetNumberRows()):
+            if self.GetCellValue(row, 0).strip() == "":
+                self.SetCellBackgroundColour(row, 0,
+                                             wx.NamedColour("pink"))
+            else:
+                for row2 in xrange(self.GetNumberRows()):
+                    if row != row2 and \
+                       self.GetCellValue(row, 0) == self.GetCellValue(row2, 0):
+                        self.SetCellBackgroundColour(row, 0,
+                                                     wx.NamedColour("pink"))
+                        break
+                else:
+                    self.SetCellBackgroundColour(row, 0, wx.WHITE)
+                    
+
+    def IsRowBlank(self, row):
+        """
+        Determines if an entire row is blank (i.e., contains nothing
+        but whitespace.
+        """
+        for col in xrange(self.GetNumberCols()):
+            if self.GetCellValue(row, col).strip() != "":
+                return False
+        return True
+    
+
+class TeamListDialog(wx.Dialog):
+    def __init__(self, parent, book):
+        wx.Dialog.__init__(self, parent)
+        self.book = book
+
+        self.teamList = TeamListCtrl(self, book)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.teamList, 1, wx.EXPAND, 0)
+
+        buttonSizer = wx.StdDialogButtonSizer()
+        okButton = wx.Button(self, wx.ID_OK, "OK")
+        buttonSizer.Add(okButton)
+        buttonSizer.Add(wx.Button(self, wx.ID_CANCEL, "Cancel"))
+        buttonSizer.Realize()
+
+        sizer.Add(buttonSizer, 0, wx.ALL | wx.EXPAND, 5)
+
         self.SetSizer(sizer)
         self.Layout()
+        sizer.SetSizeHints(self)
 
-    def OnUpdate(self, book):
-        self.book = book
-        self.teamList.OnUpdate(book)
+        self.Bind(wx.EVT_BUTTON, self.OnOK, okButton)
+
+    def OnOK(self, event):
+        for row in xrange(self.book.NumTeams()):
+            self.book.ModifyTeam(teamID=str(self.teamList.GetCellValue(row, 0)),
+                                 city=str(self.teamList.GetCellValue(row, 1)),
+                                 nickname=str(self.teamList.GetCellValue(row, 2)),
+                                 leagueID=str(self.teamList.GetCellValue(row, 3)))
+
+        for row in xrange(self.book.NumTeams(), self.teamList.GetNumberRows()):
+            self.book.AddTeam(teamID=str(self.teamList.GetCellValue(row, 0)),
+                              city=str(self.teamList.GetCellValue(row, 1)),
+                              nickname=str(self.teamList.GetCellValue(row, 2)),
+                              leagueID=str(self.teamList.GetCellValue(row, 3)))
+            
+        event.Skip()
+        
 

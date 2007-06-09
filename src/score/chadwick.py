@@ -37,7 +37,7 @@ import game
 from frameentry import GameEntryFrame
 from panelgamelist import GameListCtrl, GameListPanel
 from panelplayerlist import PlayerListPanel
-from panelteamlist import TeamListPanel
+import panelteamlist
 
 from dialogimport import ImportDialog
 from dialognewgame import NewGameDialog
@@ -201,9 +201,6 @@ class ChadwickFrame(wx.Frame):
         self.gameList = GameListPanel(self)
         self.manager.AddPane(self.gameList, wx.CENTER);
         
-        self.teamList = TeamListPanel(self)
-        self.manager.AddPane(self.teamList, wx.LEFT, "Teams")
-
         self.playerList = PlayerListPanel(self)
         self.manager.AddPane(self.playerList, wx.RIGHT, "Players")
 
@@ -580,13 +577,7 @@ class ChadwickFrame(wx.Frame):
             
 
     def OnEditTeamNew(self, event):
-        dialog = AddTeamDialog(self, self.book)
-
-        if dialog.ShowModal() == wx.ID_OK:
-            self.book.AddTeam(dialog.GetTeamID(),
-                              dialog.GetCity(), dialog.GetNickname(),
-                              dialog.GetLeague())
-            self.OnUpdate()
+        panelteamlist.TeamListDialog(self, self.book).ShowModal()
 
     def EditGame(self, g):
         g.BuildBoxscore()
@@ -709,7 +700,6 @@ class ChadwickFrame(wx.Frame):
             #    self.OnFileSave(wx.CommandEvent())
             
         self.SetTitle(title)
-        self.teamList.OnUpdate(self.book)
         self.gameList.OnUpdate(self.book)
         self.playerList.OnUpdate(self.book)
 
