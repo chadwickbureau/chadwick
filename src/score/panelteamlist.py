@@ -27,126 +27,7 @@
 import wx, wx.grid
 
 from wxutils import FormattedStaticText
-
-class EditTeamDialog(wx.Dialog):
-    def __init__(self, parent, book, team):
-        wx.Dialog.__init__(self, parent, wx.ID_ANY, "Edit team")
-
-        self.book = book
-        self.team = team
-        
-        self.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.NORMAL))
-
-        sizer = wx.FlexGridSizer(2)
-
-        sizer.Add(FormattedStaticText(self, "City"),
-                  0, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.city = wx.TextCtrl(self, wx.ID_ANY,
-                                team.GetCity(), size=(150, -1))
-        sizer.Add(self.city, 0, wx.ALL | wx.ALIGN_CENTER, 5)
-
-        sizer.Add(FormattedStaticText(self, "Nickname"),
-                  0, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.nickname = wx.TextCtrl(self, wx.ID_ANY, team.GetNickname(),
-                                    size=(150, -1))
-        sizer.Add(self.nickname, 0, wx.ALL | wx.ALIGN_CENTER, 5)
-
-        sizer.Add(FormattedStaticText(self, "Team ID"),
-                  0, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.teamID = wx.TextCtrl(self, wx.ID_ANY, team.GetID(), size=(150,-1))
-        self.teamID.Enable(False)
-        sizer.Add(self.teamID, 0, wx.ALL | wx.ALIGN_CENTER, 5)
-
-        sizer.Add(FormattedStaticText(self, "League"),
-                  0, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.league = wx.TextCtrl(self, wx.ID_ANY, team.GetLeague(),
-                                  size = (150, -1))
-        sizer.Add(self.league, 0, wx.ALL | wx.ALIGN_CENTER, 5)
-
-
-        playerBox = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_STATIC,
-                                                   "Players on team"),
-                                      wx.HORIZONTAL)
-        self.players = wx.ListView(self, wx.ID_ANY, size=(250, 150))
-        self.players.InsertColumn(0, "Name (ID)", width=230)
-        self.playerIDs = [ x.GetID() for x in team.Players() ]
-        for (pl,player) in enumerate(team.Players()):
-            self.players.InsertStringItem(pl,
-                                          "%s (%s)" % (player.GetSortName(),
-                                                       player.GetID()))
-            self.players.SetItemTextColour(pl, wx.BLUE)
-            
-        playerBox.Add(self.players, 0, wx.ALL, 5)
-        
-        allPlayerBox = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_STATIC,
-                                                      "All players"),
-                                         wx.HORIZONTAL)
-        self.allPlayers = wx.ListView(self, wx.ID_ANY, size=(250, 150),
-                                      style=wx.LC_REPORT)
-        self.allPlayers.InsertColumn(0, "Name (ID)", width=230)
-        self.allPlayerIDs = [ x.GetID() for x in book.Players() ]
-        for (pl,player) in enumerate(book.Players()):
-            self.allPlayers.InsertStringItem(pl,
-                                             "%s (%s)" % (player.GetSortName(),
-                                                          player.GetID()))
-            if team.FindPlayer(player.GetID()) != None:
-                self.allPlayers.SetItemTextColour(pl, wx.BLUE)
-            else:
-                self.allPlayers.SetItemTextColour(pl, wx.BLACK)
-
-        wx.EVT_LIST_ITEM_ACTIVATED(self, self.allPlayers.GetId(),
-                                   self.OnPlayerActivated)
-            
-        allPlayerBox.Add(self.allPlayers, 0, wx.ALL, 5)
-
-
-        playerSizer = wx.BoxSizer(wx.HORIZONTAL)
-        playerSizer.Add(playerBox, 0, wx.ALL, 5)
-        playerSizer.Add(allPlayerBox, 0, wx.ALL, 5)
-
-        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
-        buttonSizer.Add(wx.Button(self, wx.ID_CANCEL, "Cancel"),
-                        0, wx.ALL | wx.ALIGN_CENTER, 5)
-        buttonSizer.Add(wx.Button(self, wx.ID_OK, "OK"),
-                        0, wx.ALL | wx.ALIGN_CENTER, 5)
-
-        topSizer = wx.BoxSizer(wx.VERTICAL)
-
-        topSizer.Add(sizer, 0, wx.ALL, 5)
-        topSizer.Add(playerSizer, 0, wx.ALL, 5)
-        topSizer.Add(buttonSizer, 0, wx.ALIGN_RIGHT, 5)
-
-        self.SetSizer(topSizer)
-        self.Layout()
-        topSizer.SetSizeHints(self)
-
-    def GetCity(self):       return str(self.city.GetValue())
-    def GetNickname(self):   return str(self.nickname.GetValue())
-    def GetLeague(self):     return str(self.league.GetValue())
-
-    def OnPlayerActivated(self, event):
-        playerID = self.allPlayerIDs[event.GetIndex()]
-        if self.team.FindPlayer(playerID) == None:
-            player = self.book.GetPlayer(playerID)
-            entry = "%s (%s)" % (player.GetSortName(), player.GetID())
-            self.playerIDs.append(playerID)
-            self.playerIDs.sort(lambda x, y:
-                                cmp(self.book.GetPlayer(x).GetSortName().upper(),
-                                    self.book.GetPlayer(y).GetSortName().upper()))
-            self.players.InsertStringItem(self.playerIDs.index(playerID), entry)
-            self.players.SetItemTextColour(self.playerIDs.index(playerID),
-                                           wx.Colour(0, 192, 0))
-            self.players.EnsureVisible(self.playerIDs.index(playerID))
-            self.allPlayers.SetItemTextColour(event.GetIndex(), wx.BLUE)
-
-    def UpdateTeam(self):
-        for p in self.playerIDs:
-            if self.team.FindPlayer(p) == None:
-                player = self.book.GetPlayer(p)
-                self.book.AddToTeam(p,
-                                    player.GetFirstName(), player.GetLastName(),
-                                    player.GetBats(), player.GetThrows(),
-                                    self.team.GetID())
+import dialogroster
 
 class TeamListCtrl(wx.grid.Grid):
     def __init__(self, parent, book):
@@ -155,7 +36,7 @@ class TeamListCtrl(wx.grid.Grid):
 
         self.CreateGrid(max(book.NumTeams(), 1), 4)
         self.EnableEditing(True)
-        self.SetRowLabelSize(0)
+        self.SetRowLabelSize(10)
         
         for (col, label) in enumerate([ "Team ID", "City", "Nickname",
                                         "League" ]):
@@ -177,6 +58,8 @@ class TeamListCtrl(wx.grid.Grid):
         self.Bind(wx.EVT_KEY_DOWN, self.OnGridWindowKey, self.GetGridWindow())
         self.Bind(wx.grid.EVT_GRID_SELECT_CELL, self.OnSelectCell)
         self.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.OnGridCellChange)
+        self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_DCLICK,
+                  self.OnGridLabelLeftDoubleClick)
 
     def OnGridWindowKey(self, event):
         """
@@ -214,6 +97,19 @@ class TeamListCtrl(wx.grid.Grid):
         Currently, just need to update the feedback.
         """
         self.UpdateFeedback()
+
+    def OnGridLabelLeftDoubleClick(self, event):
+        """
+        Called when a label is left double-clicked.
+        Functionality:
+        * For row labels, brings up a roster dialog
+        """
+        if event.GetCol() == -1 and event.GetRow() < self.book.NumTeams():
+            dlg = dialogroster.RosterDialog(self, self.book,
+                                            str(self.GetCellValue(event.GetRow(),
+                                                                  0)))
+            dlg.ShowModal()
+
         
     def UpdateFeedback(self):
         """
@@ -245,7 +141,7 @@ class TeamListCtrl(wx.grid.Grid):
             if self.GetCellValue(row, col).strip() != "":
                 return False
         return True
-    
+
 
 class TeamListDialog(wx.Dialog):
     def __init__(self, parent, book):
@@ -272,14 +168,8 @@ class TeamListDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.OnOK, okButton)
 
     def OnOK(self, event):
-        for row in xrange(self.book.NumTeams()):
-            self.book.ModifyTeam(teamID=str(self.teamList.GetCellValue(row, 0)),
-                                 city=str(self.teamList.GetCellValue(row, 1)),
-                                 nickname=str(self.teamList.GetCellValue(row, 2)),
-                                 leagueID=str(self.teamList.GetCellValue(row, 3)))
-
-        for row in xrange(self.book.NumTeams(), self.teamList.GetNumberRows()):
-            self.book.AddTeam(teamID=str(self.teamList.GetCellValue(row, 0)),
+        for row in xrange(self.teamList.GetNumberRows()):
+            self.book.SetTeam(teamID=str(self.teamList.GetCellValue(row, 0)),
                               city=str(self.teamList.GetCellValue(row, 1)),
                               nickname=str(self.teamList.GetCellValue(row, 2)),
                               leagueID=str(self.teamList.GetCellValue(row, 3)))

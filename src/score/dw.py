@@ -28,7 +28,7 @@
 Importing and exporting scorebooks to Retrosheet zip archive format.
 """
 
-import os, tempfile, zipfile
+import os, tempfile, zipfile, csv
 import libchadwick as cw
 import scorebook
 
@@ -75,11 +75,11 @@ def FindEntry(zf, fnlist):
             return entry
     return None
 
-def ReadTeam(zf, year, team):
+def ReadTeam(zf, book, team):
     """
     Read a team's roster and event file from the zip archive 'zf'.
     """
-    fn = FindEntry(zf, [ team.GetID() + str(year) + ".ROS" ])
+    fn = FindEntry(zf, [ team.GetID() + str(book.GetYear()) + ".ROS" ])
     if fn != None:
         name = TempFile()
         f = file(name, "w")
@@ -87,14 +87,17 @@ def ReadTeam(zf, year, team):
         f.close()
 
         f = file(name, "r")
-        team.Read(f)
+        for player in csv.reader(f):
+            book.SetPlayer(player[0], player[2], player[1],
+                           player[3], player[4])
+            book.SetPlayerTeam(player[0], team.GetID())
         f.close()
 
         os.remove(name)
 
     fn = FindEntry(zf,
-                   [ str(year) + team.GetID() + ".EV" + team.league,
-                     str(year % 100) + team.GetID() + ".EV" + team.league ])
+                   [ str(book.GetYear()) + team.GetID() + ".EV" + team.GetLeague(),
+                     str(book.GetYear() % 100) + team.GetID() + ".EV" + team.GetLeague() ])
     if fn != None:
         name = TempFile()
         f = file(name, "w")
@@ -102,17 +105,15 @@ def ReadTeam(zf, year, team):
         f.close()
 
         f = file(name, "r")
-        book = cw.Scorebook()
-        book.Read(f)
+        games = cw.Scorebook()
+        games.Read(f)
         f.close()
 
-        os.remove(name)
-    else:
-        # Just create an empty scorebook if event file is
-        # not present.
-        book = cw.Scorebook()
+        while games.first_game != None:
+            g = games.RemoveGame(games.first_game.GetGameID())
+            book.SetGame(g)
 
-    return book
+        os.remove(name)
 
 def ReadLeague(book, zf):
     """
@@ -127,14 +128,13 @@ def ReadLeague(book, zf):
     f.close()
 
     f = file(name, "r")
-    book.league = cw.League()
-    book.league.Read(f)
-
+    for team in csv.reader(f):
+        book.SetTeam(team[0], team[2], team[3], team[1])
     f.close()
     os.remove(name)
 
     for team in book.Teams():
-        book.books[team.GetID()] = ReadTeam(zf, book.year, team)
+        ReadTeam(zf, book, team)
 
 def Reader(filename):
     """
@@ -147,7 +147,6 @@ def Reader(filename):
     book.books = { }
 
     ReadLeague(book, zf)
-    book.BuildIndices()
     book.modified = False
     book.filename = filename
 
@@ -162,19 +161,26 @@ def WriteTeam(book, zf, team):
     """
     Write a team's roster and home game records to the archive
     """
-    fn = team.GetID() + str(book.year) + ".ROS"
+    fn = team.GetID() + str(team.GetYear()) + ".ROS"
+
     name = TempFile()
     f = file(name, "w")
-    team.Write(f)
+    writer = csv.writer(f)
+    for player in team.Players():
+        writer.writerow([ player.GetID(), player.GetLastName(),
+                          player.GetFirstName(),
+                          player.GetBats(), player.GetThrows() ])
     f.close()
 
     f = file(name, "r")
     zf.writestr(fn, f.read())
     f.close()
 
-    fn = str(book.year) + team.GetID() + ".EV" + team.league
+    fn = str(team.GetYear()) + team.GetID() + ".EV" + team.GetLeague()
     f = file(name, "w")
-    book.books[team.GetID()].Write(f)
+    for game in book.Games():
+        if team.GetID() == game.GetTeam(1):
+            game.Write(f)
     f.close()
 
     f = file(name, "r")
@@ -189,13 +195,17 @@ def Writer(book, filename):
     """
 
     zf = zipfile.ZipFile(filename, "w", zipfile.ZIP_DEFLATED)
+
     name = TempFile()
     f = file(name, "w")
-    book.league.Write(f)
+    writer = csv.writer(f)
+    for team in book.Teams():
+        writer.writerow([ team.GetID(), team.GetLeague(),
+                          team.GetCity(), team.GetNickname() ])
     f.close()
 
     f = file(name, "r")
-    zf.writestr("TEAM%d" % book.year, f.read())
+    zf.writestr("TEAM%d" % book.GetYear(), f.read())
     f.close()
     os.remove(name)
 
@@ -211,7 +221,11 @@ if __name__ == '__main__':
     import sys
 
     book = Reader(sys.argv[1])
-    print "Scorebook is from %d" % (book.year)
-    print "There are %d teams" % (len([t for t in book.league.Teams()]))
+    print "Scorebook is from %d" % (book.GetYear())
+    print "There are %d teams" % (book.NumTeams())
+    print "There are %d games" % (book.NumGames())
+    for game in book.Games():
+        print game.GetGameID()
 
-    Writer(book, sys.argv[2])
+    if len(sys.argv) > 2:
+        Writer(book, sys.argv[2])

@@ -85,7 +85,8 @@ def CreateGame(gameId, vis, home):
     return game
 
 class Game:
-    def __init__(self, game, visRoster, homeRoster):
+    def __init__(self, book, game, visRoster, homeRoster):
+        self.book = book
         self.game = game
         self.visRoster = visRoster
         self.homeRoster = homeRoster
@@ -95,8 +96,9 @@ class Game:
 
         self.boxscore = Boxscore(self.game)
 
-    def GetGame(self):     return self.game
-    def GetGameID(self):   return self.game.game_id
+    def GetScorebook(self):   return self.book
+    def GetGame(self):        return self.game
+    def GetGameID(self):      return self.game.GetGameID()
     
     def GetBoxscore(self):   return self.boxscore
     def BuildBoxscore(self):  self.boxscore.Build()

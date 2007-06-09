@@ -26,6 +26,8 @@
 
 import wx
 
+import dialogroster
+
 # This class implements a wx.Choice in which one can select an item by
 # typing the unique first N characters in the item string.
 class KeySearchChoice(wx.Choice):
@@ -124,6 +126,10 @@ class LineupDialog(wx.Dialog):
         sizer.Add(gridSizer, 0, wx.ALL, 0)
 
         buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+        rosterButton = wx.Button(self, label="Roster...")
+        self.Bind(wx.EVT_BUTTON, self.OnRoster, rosterButton)
+        buttonSizer.Add(rosterButton, 0, wx.ALL | wx.ALIGN_CENTER, 5)
+        
         buttonSizer.Add(wx.Button(self, wx.ID_CANCEL, "Cancel"),
                         0, wx.ALL | wx.ALIGN_CENTER, 5)
         buttonSizer.Add(wx.Button(self, wx.ID_OK, "OK"),
@@ -151,6 +157,34 @@ class LineupDialog(wx.Dialog):
         #        return
 
         event.Skip()
+
+    def OnRoster(self, event):
+        self.plist = [ None ] + self.plist
+
+        dialog = dialogroster.RosterDialog(self, self.book,
+                                           self.roster.GetID())
+
+        if dialog.ShowModal() == wx.ID_OK:
+            # Preserve existing selections
+            lineup = [ self.plist[x.GetSelection()] for x in self.players ]
+            pos = [ x.GetSelection() for x in self.positions ]
+
+            self.LoadRoster(self.book, self.roster, self.teamNumber,
+                            self.useDH)
+
+            # Get new list of players
+            self.plist = [ x for x in self.roster.Players() ]
+            self.plist.sort(lambda x, y: cmp(x.GetSortName(), y.GetSortName()))
+
+            for (ctrl, player) in zip(self.players, lineup):
+                if player is not None:
+                    ctrl.SetSelection(self.plist.index(player) + 1)
+
+            for (ctrl, pos) in zip(self.positions, pos):
+                ctrl.SetSelection(pos)
+        else:
+            # Remove the None entry to restore things the way they were
+            self.plist = self.plist[1:]
 
     def OnSetEntry(self, event):
         self.CheckValidity()
@@ -193,15 +227,21 @@ class LineupDialog(wx.Dialog):
         
         self.FindWindowById(wx.ID_OK).Enable(lineupOK)
 
-    def LoadRoster(self, roster, team, useDH):
+    def LoadRoster(self, book, roster, team, useDH):
+        self.book = book
         self.roster = roster
+        self.teamNumber = team
+        self.useDH = useDH
 
         fgColors = [ wx.RED, wx.BLUE ]
+
+        self.plist = [ x for x in self.roster.Players() ]
+        self.plist.sort(lambda x, y: cmp(x.GetSortName(), y.GetSortName()))
 
         for ctrl in self.players:
             ctrl.Clear()
             ctrl.Append("")
-            for player in self.roster.Players():
+            for player in self.plist:
                 ctrl.Append(player.GetSortName())
             ctrl.SetForegroundColour(fgColors[team])
             ctrl.SetSelection(0)
@@ -238,7 +278,7 @@ class LineupDialog(wx.Dialog):
             self.origPlayers.append(self.players[-1].GetSelection())
 
     def GetPlayerInSlot(self, slot):
-        return [x for x in self.roster.Players()][self.players[slot-1].GetSelection()-1]
+        return self.plist[self.players[slot-1].GetSelection()-1]
 
     def SetPlayerInSlot(self, slot, name, pos):
         if slot > 0:
@@ -252,10 +292,7 @@ class LineupDialog(wx.Dialog):
         return self.positions[slot-1].GetSelection()
 
     def HasDH(self):
-        for slot in range(9):
-            if self.positions[slot].GetSelection() == 10:
-                return True
-        return False
+        return 10 in [ x.GetSelection() for x in self.positions ]
 
     def WriteChanges(self, doc, team):
         for slot in range(9):

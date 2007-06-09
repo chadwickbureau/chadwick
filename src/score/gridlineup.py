@@ -107,7 +107,7 @@ class LineupGrid(wx.ScrolledWindow):
             else:
                 self.DrawCenteredText(memdc, "P", 15, ycoord)
 
-            player = roster.FindPlayer(playerId)
+            player = roster.GetPlayer(playerId)
 
             self.DrawVCenteredText(memdc, player.GetName(),
                                    40, ycoord)

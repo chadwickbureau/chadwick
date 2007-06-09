@@ -253,6 +253,8 @@ int IsValidPlay(char *play)
       else           return cw_game_info_lookup(self, "hometeam");
     }
 
+  void Write(FILE *f)   { cw_game_write(self, f); }
+
 %pythoncode %{
   def GetTeams(self):
     return [ self.GetTeam(t) for t in [0,1] ]

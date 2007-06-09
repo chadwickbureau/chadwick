@@ -206,7 +206,8 @@ class StatePanel(wx.Panel):
 
         hasDH = (self.doc.GetState().GetPlayer(team, 0) != None)
 
-        dialog.LoadRoster(self.doc.GetRoster(team), team, hasDH)
+        dialog.LoadRoster(self.doc.GetScorebook(),
+                          self.doc.GetRoster(team), team, hasDH)
         dialog.LoadLineup(self.doc, team)
 
         if dialog.ShowModal() == wx.ID_OK:

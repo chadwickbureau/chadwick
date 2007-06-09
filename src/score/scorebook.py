@@ -24,199 +24,144 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # 
 
+import random            # used for random player ID generation
 import libchadwick as cw
 import statscan          # for report updating
+
+class Team:
+    def __init__(self, teamID, year, league, city, nickname):
+        self.teamID = teamID
+        self.year = year
+        self.league = league
+        self.city = city
+        self.nickname = nickname
+        self.players = { }
+
+    def GetID(self):                   return self.teamID
+
+    def GetCity(self):                 return self.city
+    def SetCity(self, city):           self.city = city
+
+    def GetNickname(self):             return self.nickname
+    def SetNickname(self, nickname):   self.nickname = nickname
+
+    def GetName(self):                 return self.city + " " + self.nickname
+
+    def GetLeague(self):               return self.league
+    def SetLeague(self, league):       self.league = league
+
+    def GetYear(self):                 return self.year
+    def SetYear(self, year):           self.year = year
+
+    def NumPlayers(self):              return len(self.players)
+    def Players(self):                 return self.players.itervalues()
+    
+    def AddPlayer(self, player):
+        self.players[player.GetID()] = player
+
+    def GetPlayer(self, playerID):
+        try:
+            return self.players[playerID]
+        except KeyError:
+            return None
+
+
+class Player:
+    def __init__(self, playerID, nameLast, nameFirst, bats, throws):
+        self.playerID = playerID
+        self.nameLast = nameLast
+        self.nameFirst = nameFirst
+        self.bats = bats
+        self.throws = throws
+
+    def GetID(self):               return self.playerID
+
+    def GetFirstName(self):        return self.nameFirst
+    def SetFirstName(self, name):  self.nameFirst = name
+
+    def GetLastName(self):         return self.nameLast
+    def SetLastName(self, name):   self.nameLast = name
+
+    def GetName(self):             return self.nameFirst + " " + self.nameLast
+    def GetSortName(self):         return self.nameLast + ", " + self.nameFirst
+
+    def GetBats(self):             return self.bats
+    def SetBats(self, side):       self.bats = side
+
+    def GetThrows(self):           return self.throws
+    def SetThrows(self, side):     self.throws = side
+    
 
 class Scorebook:
     def __init__(self, year=2007):
         self.books = { }
         self.modified = False
         self.year = year
-        self.league = cw.League()
-        self.games = [ ]
-        self.playerDict = { }
-        self.players = [ ]
+        self.teams = { }
+        self.games = { }
+        self.players = { }
         self.filename = "untitled.chw"
         self.reports = [ ]
         
     def GetFilename(self):   return self.filename
-
-    def NumTeams(self):
-        i = 0
-        x = self.league.first_roster
-        while x != None:
-            i += 1
-            x = x.next
-        return i
-
-    def Teams(self):
-        x = self.league.first_roster
-        while x != None:
-            yield x
-            x = x.next
-        raise StopIteration
-
-    def BuildIndices(self):
-        self.games = [ ]
-        for x in self.books.keys():
-            g = self.books[x].first_game
-            while g != None:
-                self.games.append(g)
-                g = g.next
-
-        self.games.sort(lambda x, y: cmp(x.GetDate(), y.GetDate()))
-
-        self.playerDict = { }
-        for team in self.Teams():
-            x = team.first_player
-            while x != None:
-                if x.player_id not in self.playerDict.keys():
-                    self.playerDict[x.player_id] = x
-                self.playerDict[x.player_id].AddTeam(team.GetID())
-                x = x.next
-        self.players = self.playerDict.keys()
-        self.players.sort(lambda x, y: cmp(self.playerDict[x].GetSortName(),
-                                           self.playerDict[y].GetSortName()))
-
-    def NumGames(self, crit=lambda x: True):
-        return len(filter(crit, self.games))
-
-    def GetGameNumber(self, i, crit=lambda x: True):
-        return filter(crit, self.games)[i]
-
-    def GetGame(self, gameID):
-        for g in self.games:
-            if g.GetGameID() == gameID:  return g
-        return None
-
-    def Games(self, crit=lambda x: True):
-        for g in self.games:
-            if crit(g):  yield g
-
-    def NumPlayers(self):  return len(self.playerDict)
-
-    def Players(self):
-        keys = self.playerDict.keys()
-        keys.sort()
-        for p in keys: yield self.playerDict[p]
-
-    def GetPlayer(self, playerID):   return self.playerDict[playerID]
-    def GetPlayerNumber(self, i):    return self.playerDict[self.players[i]]
-
-    def UniquePlayerID(self, first, last):
-        playerID = (last.replace(" ", "").replace("'", ""))[:4].lower()
-        while len(playerID) < 4: playerID += "-"
-        playerID += first[0].lower()
-        i = 1
-        while "%s%03d" % (playerID,i) in self.playerDict.keys(): i += 1
-        return "%s%03d" % (playerID,i)
-
-    def AddPlayer(self, playerID, firstName, lastName, bats, throws, team):
-        p = cw.Player(playerID, lastName, firstName, bats, throws)
-        p.AddTeam(team)
-
-        roster = self.league.first_roster
-        while roster.GetID() != team:  roster = roster.next
-
-        roster.InsertPlayer(p)
-        p.thisown = 0
-        self.playerDict[playerID] = p
-        self.players.append(playerID)
-        self.players.sort(lambda x, y: cmp(self.playerDict[x].GetSortName(),
-                                           self.playerDict[y].GetSortName()))
-        self.modified = True
-
-    def AddToTeam(self, playerID, firstName, lastName, bats, throws, team):
-        p = cw.Player(playerID, lastName, firstName, bats, throws)
-
-        roster = self.league.first_roster
-        while roster.GetID() != team:  roster = roster.next
-
-        roster.InsertPlayer(p)
-        p.thisown = 0
-        self.playerDict[playerID].AddTeam(team)
-        self.modified = True
-
-    def ModifyPlayer(self, playerID, firstName, lastName, bats, throws):
-        p = self.playerDict[playerID]
-        p.SetFirstName(firstName)
-        p.SetLastName(lastName)
-        p.bats = bats
-        p.throws = throws
-
-        for team in self.Teams():
-            p = team.FindPlayer(playerID)
-            if p != None:
-                p.SetFirstName(firstName)
-                p.SetLastName(lastName)
-                p.bats = bats
-                p.throws = throws
-                
-        self.players.sort(lambda x, y: cmp(self.playerDict[x].GetSortName(),
-                                           self.playerDict[y].GetSortName()))
-        self.modified = True
-
-    def GetTeam(self, teamId):
-        return self.league.FindRoster(teamId)
-
+    def IsModified(self):   return self.modified
+    def SetModified(self, value):  self.modified = value
     def GetYear(self):    return self.year
 
-    def AddTeam(self, teamID, city, nickname, leagueID):
-        t = cw.Roster(teamID, self.year, leagueID, city, nickname)
-        
-        # We try to keep teams in playerID order.
-        # This really ought to be part of the underlying C library
-        if self.league.first_roster == None:
-            self.league.first_roster = t
-            self.league.last_roster = t
+
+    def NumTeams(self):           return len(self.teams)
+    def Teams(self):              return self.teams.itervalues()
+    def GetTeam(self, teamID):    return self.teams[teamID]
+
+    def SetTeam(self, teamID, city, nickname, leagueID):
+        if teamID in self.teams:
+            t = self.teams[teamID]
+            t.SetCity(city)
+            t.SetNickname(nickname)
+            t.SetLeague(leagueID)
         else:
-            x = self.league.first_roster
-            while x != None and x.GetID() < t.GetID():
-                x = x.next
-            if x == None:
-                t.prev = self.league.last_roster
-                self.league.last_roster.next = t
-                self.league.last_roster = t
-            elif x.prev == None:
-                self.league.first_roster.prev = t
-                t.next = self.league.first_roster
-                self.league.first_roster = t
-            else:
-                t.prev = x.prev
-                t.prev.next = t
-                x.prev = t
-                t.next = x
-        self.books[teamID] = cw.Scorebook()
+            self.teams[teamID] = Team(teamID, self.year,
+                                      leagueID, city, nickname)
         self.modified = True
 
-    def ModifyTeam(self, teamID, city, nickname, leagueID):
-        team = self.league.first_roster
-        while team.GetID() != teamID:  team = team.next
+    def NumPlayers(self):  return len(self.players)
+    def Players(self):     return self.players.itervalues()
+    def GetPlayer(self, playerID):   return self.players[playerID]
 
-        team.SetCity(city)
-        team.SetNickname(nickname)
-        team.SetLeague(leagueID)
+    def SetPlayer(self, playerID, firstName, lastName, bats, throws):
+        if playerID in self.players:
+            p = self.players[playerID]
+            p.SetFirstName(firstName)
+            p.SetLastName(lastName)
+            p.SetBats(bats)
+            p.SetThrows(throws)
+        else:
+            self.players[playerID] = Player(playerID, lastName, firstName,
+                                            bats, throws)
         self.modified = True
 
-    def AddGame(self, game):
-        # FIXME: We need to be a little more careful about editing
-        # existing games.  (Though, there is no GUI support for
-        # changing teams, dates, or starting lineups as yet.)
-        if game not in self.games:
-            hometeam = game.GetTeam(1)
-            self.books[hometeam].InsertGame(game)
-            game.thisown = 0
-            self.games.append(game)
+    def SetPlayerTeam(self, playerID, teamID):
+        self.teams[teamID].AddPlayer(self.players[playerID])
 
-        self.games.sort(lambda x, y: cmp(x.GetDate(), y.GetDate()))
+    def UniquePlayerID(self):
+        i = random.randrange(1, 10000)
+        while "%04d" % i in self.players: i = random.randrange(1, 10000)
+        return "%04d" % i
+
+    def NumGames(self):          return len(self.games)
+    def Games(self):              return self.games.itervalues()
+
+    def GetGame(self, gameID):
+        try:
+            return self.games[gameID]
+        except KeyError:
+            return None
+
+
+    def SetGame(self, game):
+        if game.GetGameID() not in self.games:
+            self.games[game.GetGameID()] = game
         statscan.ProcessGame(game, self.reports)
-        self.modified = True
-
-    def RemoveGame(self, game):
-        hometeam = game.GetTeam(1)
-        self.books[hometeam].RemoveGame(game.GetGameID())
-        self.games.remove(game)
-        self.games.sort(lambda x, y: cmp(x.GetDate(), y.GetDate()))
         self.modified = True
 
     def ImportGames(self, book, games):
@@ -236,11 +181,7 @@ class Scorebook:
             statscan.ProcessGame(game, self.reports)
             
         if len(games) > 0:
-            self.BuildIndices()
             self.modified = True
-        
-    def IsModified(self):   return self.modified
-    def SetModified(self, value):  self.modified = value
         
     def AddReport(self, report):
         self.reports.append(report)

@@ -26,7 +26,7 @@
 
 import string, sys, os
 
-import wx, wx.grid, wx.aui
+import wx, wx.grid
 
 import scorebook
 import dw             # For Retrosheet/DiamondWare import and export
@@ -36,7 +36,6 @@ import icons
 import game
 from frameentry import GameEntryFrame
 from panelgamelist import GameListCtrl, GameListPanel
-from panelplayerlist import PlayerListPanel
 import panelteamlist
 
 from dialogimport import ImportDialog
@@ -117,94 +116,20 @@ class ChoosePlayerDialog(wx.Dialog):
     def GetPlayerID(self):
         return self.players[self.playerList.GetSelection()]
 
-class AddTeamDialog(wx.Dialog):
-    def __init__(self, parent, book):
-        wx.Dialog.__init__(self, parent, wx.ID_ANY, "Add team")
-        self.book = book
-
-        self.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.NORMAL))
-
-        sizer = wx.FlexGridSizer(4)
-
-        sizer.Add(FormattedStaticText(self, "City"),
-                  0, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.city = wx.TextCtrl(self, wx.ID_ANY, "", size=(150, -1))
-        sizer.Add(self.city, 0, wx.ALL | wx.ALIGN_CENTER, 5)
-
-        sizer.Add(FormattedStaticText(self, "Nickname"),
-                  0, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.nickname = wx.TextCtrl(self, wx.ID_ANY, "", size=(150, -1))
-        sizer.Add(self.nickname, 0, wx.ALL | wx.ALIGN_CENTER, 5)
-
-        sizer.Add(FormattedStaticText(self, "Team ID"),
-                  0, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.teamID = wx.TextCtrl(self, wx.ID_ANY, "", size=(150, -1))
-        # A blank team ID is invalid, so flag this as invalid
-        self.teamID.SetBackgroundColour(wx.NamedColour("pink"))
-        sizer.Add(self.teamID, 0, wx.ALL | wx.ALIGN_CENTER, 5)
-
-        sizer.Add(FormattedStaticText(self, "League"),
-                  0, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.league = wx.TextCtrl(self, wx.ID_ANY, "", size=(150, -1))
-        sizer.Add(self.league, 0, wx.ALL | wx.ALIGN_CENTER, 5)
-
-        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
-        buttonSizer.Add(wx.Button(self, wx.ID_CANCEL, "Cancel"),
-                        0, wx.ALL | wx.ALIGN_CENTER, 5)
-        buttonSizer.Add(wx.Button(self, wx.ID_OK, "OK"),
-                        0, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.FindWindowById(wx.ID_OK).Enable(False)
-
-        topSizer = wx.BoxSizer(wx.VERTICAL)
-
-        topSizer.Add(sizer, 0, wx.ALL, 5)
-        topSizer.Add(buttonSizer, 0, wx.ALIGN_RIGHT, 5)
-
-        self.SetSizer(topSizer)
-        self.Layout()
-        topSizer.SetSizeHints(self)
-
-        wx.EVT_TEXT(self, self.teamID.GetId(), self.OnTeamIDChange)
-
-    def OnTeamIDChange(self, event):
-        if str(self.teamID.GetValue()) == "":
-            self.FindWindowById(wx.ID_OK).Enable(False)
-            self.teamID.SetBackgroundColour(wx.NamedColour("pink"))
-        elif (str(self.teamID.GetValue()) in
-              [ x.GetID() for x in self.book.Teams() ]):
-            self.FindWindowById(wx.ID_OK).Enable(False)
-            self.teamID.SetBackgroundColour(wx.NamedColour("pink"))
-        else:
-            self.FindWindowById(wx.ID_OK).Enable(True)
-            self.teamID.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
-              
-    def GetCity(self):       return str(self.city.GetValue())
-    def GetNickname(self):   return str(self.nickname.GetValue())
-    def GetTeamID(self):     return str(self.teamID.GetValue())
-    def GetLeague(self):     return str(self.league.GetValue())
-
 
 class ChadwickFrame(wx.Frame):
     def __init__(self, parent):
-        wx.Frame.__init__(self, parent, wx.ID_ANY, "Chadwick", size=(800, 600))
+        wx.Frame.__init__(self, parent, title="Chadwick", size=(800, 600))
         self.book = scorebook.Scorebook()
         self.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.NORMAL))
 
         self.MakeMenus()
         self.CreateStatusBar()
 
-        self.manager = wx.aui.AuiManager(self)
-
         icon = wx.IconFromXPMData(icons.baseball_xpm)
         self.SetIcon(icon)
         
         self.gameList = GameListPanel(self)
-        self.manager.AddPane(self.gameList, wx.CENTER);
-        
-        self.playerList = PlayerListPanel(self)
-        self.manager.AddPane(self.playerList, wx.RIGHT, "Players")
-
-        self.manager.Update()
 
         self.Bind(game.EVT_GAME_UPDATE, self.OnGameUpdate)
         self.Bind(wx.EVT_CLOSE, self.OnClickClose)
@@ -257,10 +182,10 @@ class ChadwickFrame(wx.Frame):
                      self.OnEditGameNew)
 
 
-        item = editMenu.Append(wx.NewId(), "New &team",
-                               "Add a new team to the scorebook")
+        item = editMenu.Append(wx.NewId(), "&Teams",
+                               "Add teams and edit team information")
         self.Connect(item.GetId(), -1, wx.wxEVT_COMMAND_MENU_SELECTED,
-                     self.OnEditTeamNew)
+                     self.OnEditTeams)
 
                                
         reportMenu = wx.Menu()
@@ -524,15 +449,17 @@ class ChadwickFrame(wx.Frame):
         thegame = game.CreateGame(dialog.GetGameId(),
                                   rosters[0].GetID(), rosters[1].GetID())
         thegame.SetInfo("pitches", dialog.GetPitches())
-        doc = game.Game(thegame, rosters[0], rosters[1])
+        doc = game.Game(self.book, thegame, rosters[0], rosters[1])
 
         for t in [0, 1]:
             # This gives a list of all games the team has already had entered
-            prevGames = [ y for y in self.book.Games(lambda x: rosters[t].GetID() in x.GetTeams()) ]
+            prevGames = [ y for y in self.book.Games()
+                          if rosters[t].GetId() in [ y.GetTeam(0),
+                                                     y.GetTeam(1) ] ]
             dialog = LineupDialog(self, 
                                   "Starting Lineup for %s" % 
                                   rosters[t].GetName())
-            dialog.LoadRoster(doc.GetRoster(t), t, True)
+            dialog.LoadRoster(self.book, doc.GetRoster(t), t, True)
 
             if len(prevGames) > 0:
                 # Find the game that was previous to the current one.
@@ -555,7 +482,7 @@ class ChadwickFrame(wx.Frame):
                 for slot in range(1, 10):
                     rec = pg.GetStarter(tm, slot)
                     dialog.SetPlayerInSlot(slot,
-                                           rosters[t].FindPlayer(rec.player_id).GetSortName(),
+                                           rosters[t].GetPlayer(rec.player_id).GetSortName(),
                                            rec.pos)
                 
             if dialog.ShowModal() != wx.ID_OK:
@@ -563,12 +490,12 @@ class ChadwickFrame(wx.Frame):
                 
             for slot in range(9):
                 player = dialog.GetPlayerInSlot(slot+1)
-                doc.SetStarter(player.player_id, player.GetName(),
+                doc.SetStarter(player.GetID(), player.GetName(),
                                t, slot+1, dialog.GetPositionInSlot(slot+1))
 
             if dialog.HasDH():
                 player = dialog.GetPlayerInSlot(10)
-                doc.SetStarter(player.player_id, player.GetName(),
+                doc.SetStarter(player.GetID(), player.GetName(),
                                t, 0, 1)
                 doc.GetGame().SetInfo("usedh", "true")
                 
@@ -576,7 +503,7 @@ class ChadwickFrame(wx.Frame):
         self.EditGame(doc)
             
 
-    def OnEditTeamNew(self, event):
+    def OnEditTeams(self, event):
         panelteamlist.TeamListDialog(self, self.book).ShowModal()
 
     def EditGame(self, g):
@@ -589,7 +516,7 @@ class ChadwickFrame(wx.Frame):
         self.SaveGame(event.gameDoc)
         
     def SaveGame(self, gameDoc):
-        self.book.AddGame(gameDoc.GetGame())
+        self.book.SetGame(gameDoc.GetGame())
         self.OnUpdate()
 
     def RunReport(self, message, title, acc):
@@ -701,7 +628,6 @@ class ChadwickFrame(wx.Frame):
             
         self.SetTitle(title)
         self.gameList.OnUpdate(self.book)
-        self.playerList.OnUpdate(self.book)
 
         
 class ChadwickApp(wx.App):

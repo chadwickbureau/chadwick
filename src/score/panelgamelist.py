@@ -65,8 +65,8 @@ class GameListCtrl(wx.ListCtrl):
         filter function 'f'
         """
         self.book = book
-        self.games = [ g for g in book.Games(f) ]
-        self.SetItemCount(book.NumGames(f))
+        self.games = [ g for g in book.Games() ]
+        self.SetItemCount(book.NumGames())
 
     def OnGetItemText(self, item, col):
         game = self.games[item]
@@ -102,7 +102,7 @@ class GameListCtrl(wx.ListCtrl):
     def OnItemActivate(self, event):
         thegame = self.games[event.GetIndex()]
         teams = [ self.book.GetTeam(t) for t in thegame.GetTeams() ]
-        doc = game.Game(thegame, teams[0], teams[1])
+        doc = game.Game(self.book, thegame, teams[0], teams[1])
 
         # Hackish.  Should really do this via an event mechanism
         wx.GetApp().GetTopWindow().EditGame(doc)

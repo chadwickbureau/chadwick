@@ -175,7 +175,7 @@ class RunnersPanel(wx.Panel):
             self.Layout()
         
         playerId = self.doc.GetCurrentBatter()
-        player = roster.FindPlayer(playerId)
+        player = roster.GetPlayer(playerId)
         self.runnerText[team][0].SetStringSelection(player.GetSortName())
         self.runnerText[team][0].SetFont(wx.Font(10, wx.SWISS,
                                                  wx.NORMAL, wx.BOLD))
@@ -186,7 +186,7 @@ class RunnersPanel(wx.Panel):
                 ctrl.Show(False)
                 continue
 
-            player = roster.FindPlayer(playerId)
+            player = roster.GetPlayer(playerId)
 
             if player != None and not self.doc.IsLeadoff():
                 ctrl.SetStringSelection(player.GetSortName())
