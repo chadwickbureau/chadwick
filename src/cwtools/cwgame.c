@@ -863,3 +863,5 @@ cwgame_cleanup(void)
 
 void (*cwtools_cleanup)(void) = cwgame_cleanup;
 
+extern int cwtools_default_parse_command_line(int, char *argv[]);
+int (*cwtools_parse_command_line)(int, char *argv[]) = cwtools_default_parse_command_line;

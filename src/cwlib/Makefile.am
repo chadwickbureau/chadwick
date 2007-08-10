@@ -30,6 +30,8 @@ libchadwick_la_SOURCES = \
 	chadwick.h \
 	book.c \
 	book.h \
+	box.c \
+	box.h \
 	file.c \
 	file.h \
 	game.c \
@@ -46,6 +48,7 @@ libchadwick_la_SOURCES = \
 pkginclude_HEADERS = \
 	chadwick.h \
 	book.h \
+	box.h \
 	file.h \
 	game.h \
 	gameiter.h \

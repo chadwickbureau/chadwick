@@ -56,6 +56,9 @@ extern void (*cwtools_print_field_list)(void);
 /* Hook to function to print help message */
 extern void (*cwtools_print_help)(void);
 
+/* Hook to function to parse command line */
+extern int (*cwtools_parse_command_line)(int, char *argv[]);
+
 /* Hook to function to process game */
 extern void (*cwtools_process_game)(CWGame *, CWRoster *, CWRoster *);
 
@@ -261,7 +264,7 @@ cwtools_parse_field_list(char *text)
 }
 
 int
-cwevent_parse_command_line(int argc, char *argv[])
+cwtools_default_parse_command_line(int argc, char *argv[])
 {
   int i;
   strcpy(year, "");
@@ -271,6 +274,7 @@ cwevent_parse_command_line(int argc, char *argv[])
       ascii = 1;
     }
     else if (!strcmp(argv[i], "-d")) {
+      (*cwtools_print_welcome_message)(argv[0]);
       (*cwtools_print_field_list)();
     }
     else if (!strcmp(argv[i], "-e")) {
@@ -279,6 +283,7 @@ cwevent_parse_command_line(int argc, char *argv[])
       }
     }
     else if (!strcmp(argv[i], "-h")) {
+      (*cwtools_print_welcome_message)(argv[0]);
       (*cwtools_print_help)();
     }
     else if (!strcmp(argv[i], "-q")) {
@@ -291,6 +296,7 @@ cwevent_parse_command_line(int argc, char *argv[])
     }
     else if (!strcmp(argv[i], "-f")) {
       if (++i < argc) {
+	(*cwtools_print_welcome_message)(argv[0]);
 	cwtools_parse_field_list(argv[i]);
       }
     }
@@ -324,7 +330,7 @@ int main(int argc, char *argv[])
   int i;
   CWLeague *league = cw_league_create();
 
-  i = cwevent_parse_command_line(argc, argv);
+  i = cwtools_parse_command_line(argc, argv);
   if (!quiet) {
     (*cwtools_print_welcome_message)(argv[0]);
   }
