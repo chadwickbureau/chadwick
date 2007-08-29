@@ -24,7 +24,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # 
 
-bin_PROGRAMS = cwbox cwevent cwgame cwlog cwsub 
+bin_PROGRAMS = cwbox cwcomment cwevent cwgame cwlog cwsub 
 
 AM_CPPFLAGS = -I$(top_srcdir)/src
 
@@ -32,6 +32,11 @@ AM_CPPFLAGS = -I$(top_srcdir)/src
 cwbox_SOURCES = cwbox.c cwtools.c cwboxxml.c cwboxsml.c xmlwrite.c xmlwrite.h
 
 cwbox_LDADD = $(top_builddir)/src/cwlib/libchadwick.la 
+
+
+cwcomment_SOURCES = cwcomment.c cwtools.c
+
+cwcomment_LDADD = $(top_builddir)/src/cwlib/libchadwick.la
 
 
 cwevent_SOURCES = cwevent.c cwtools.c
