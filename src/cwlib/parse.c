@@ -785,6 +785,9 @@ static int cw_parse_balk(CWParserState *state, CWEventData *event, int flags)
   return 1;
 }
 
+static int cw_parse_caught_stealing(CWParserState *state, CWEventData *event,
+				    int flags);
+
 static int cw_parse_stolen_base(CWParserState *state, CWEventData *event, 
 				int flags)
 {
@@ -835,6 +838,14 @@ static int cw_parse_stolen_base(CWParserState *state, CWEventData *event,
 
     if (!strcmp(state->token, "SB")) {
       cw_parse_stolen_base(state, event, 0);
+    }
+    else if (!strcmp(state->token, "CS")) {
+      /* Chadwick extension.  Under modern rules, one cannot have
+       * both a SB and a CS on the same play; however, there are instances
+       * in early history where this was done.  So we permit it,
+       * with the "primary" event being whichever is listed first.
+       */
+      cw_parse_caught_stealing(state, event, 0);
     }
     else {
       return cw_parse_error(state);
@@ -942,6 +953,14 @@ static int cw_parse_caught_stealing(CWParserState *state, CWEventData *event,
 
     if (!strcmp(state->token, "CS")) {
       cw_parse_caught_stealing(state, event, 0);
+    }
+    else if (!strcmp(state->token, "SB")) {
+      /* Chadwick extension.  Under modern rules, one cannot have
+       * both a SB and a CS on the same play; however, there are instances
+       * in early history where this was done.  So we permit it,
+       * with the "primary" event being whichever is listed first.
+       */
+      cw_parse_stolen_base(state, event, 0);
     }
     else {
       return cw_parse_error(state);
