@@ -1734,6 +1734,11 @@ static int cw_parse_walk(CWParserState *state, CWEventData *event, int flags)
     else if (!strcmp(state->token, "DP")) {
       event->dp_flag = 1;
     }
+    else if (state->token[0] == 'R') {
+      /* There are instances of the relay flag /R, for example, in
+	 TEX199709200, where the runner on third got picked off after
+	 a walk */
+    }
     else {
       return cw_parse_error(state);
     }
