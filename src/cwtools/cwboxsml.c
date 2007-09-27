@@ -768,10 +768,10 @@ cwbox_print_sml_pitch(XMLNode *action, XMLNode *node, char *pitch)
     c++;
 
     /* Next, pitch coordinate Y */
-    if (*c != '|') {
+    if (*c != '|' && *c != '}') {
       char buffer[256];
       int i = 0;
-      while (*c != '|') {
+      while (*c != '|' && *c != '}') {
 	buffer[i++] = *c;
 	c++;
       }
@@ -786,8 +786,8 @@ cwbox_print_sml_pitch(XMLNode *action, XMLNode *node, char *pitch)
       return c;
     }
 
-    /* Close the action-baseball-pitch and start action-baseball-contact */
-    contact = xml_node_open(action, "action-baseball-contact");
+    /* Start action-baseball-contact, which is a child of action-baseball-pitch  */
+    contact = xml_node_open(node, "action-baseball-contact");
 
     /* Hit coordinates X and Y follow */
     c++;
