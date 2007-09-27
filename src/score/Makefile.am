@@ -29,8 +29,6 @@ EXTRA_DIST = \
 	boxscore.py \
 	chadwick.py \
 	dialogabout.py \
-	dialogboxview.py \
-	dialogcomment.py \
 	dialogdecision.py \
 	dialoggame.py \
 	dialogimport.py \
@@ -38,14 +36,12 @@ EXTRA_DIST = \
 	dialognewgame.py \
 	dialogreport.py \
 	frameentry.py \
-	gameeditor.py \
 	gridlineup.py \
 	icons.py \
 	panelboxscore.py \
 	panelgamelist.py \
 	panellinescore.py \
 	panelnarrative.py \
-	panelplayerlist.py \
 	panelrunners.py \
 	panelstate.py \
 	panelteamlist.py \
