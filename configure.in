@@ -13,6 +13,15 @@ AC_HEADER_STDC
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_CHECK_MEMBER([struct tm.tm_gmtoff],
+	        [AC_DEFINE(HAVE_STRUCT_TM_TM_GMTOFF)],,
+                [#include <time.h>])
+
+AC_CHECK_DECL([_timezone],
+              [AC_DEFINE(HAVE_UNDERSCORE_TIMEZONE)],,
+              [#include <time.h>])
+
 dnl Checks for library functions.
 
 AC_OUTPUT(src/cwlib/Makefile \

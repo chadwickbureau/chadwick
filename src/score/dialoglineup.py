@@ -261,21 +261,23 @@ class LineupDialog(wx.Dialog):
             self.players[-1].Enable(True)
 
             for player in self.roster.Players():
-                if player.player_id == pitcher:
+                if player.GetID() == pitcher:
                     self.players[-1].SetStringSelection(player.GetSortName())
 
         for slot in range(9):
             playerId = gameiter.GetPlayer(team, slot+1)
             for player in self.roster.Players():
-                if player.player_id == playerId:
+                if player.GetID() == playerId:
                     self.players[slot].SetStringSelection(player.GetSortName())
-                    self.origPlayers.append(self.players[slot].GetSelection())
+                    self.origPlayers.append(player)
             if gameiter.GetPosition(team, playerId) <= 10:
                 self.positions[slot].SetSelection(gameiter.GetPosition(team, playerId))
             self.origPositions.append(gameiter.GetPosition(team, playerId))
             
         if pitcher != None:
-            self.origPlayers.append(self.players[-1].GetSelection())
+            for player in self.roster.Players():
+                if player.GetID() == pitcher:
+                    self.origPlayers.append(player)
 
     def GetPlayerInSlot(self, slot):
         return self.plist[self.players[slot-1].GetSelection()-1]
@@ -296,7 +298,7 @@ class LineupDialog(wx.Dialog):
 
     def WriteChanges(self, doc, team):
         for slot in range(9):
-            if ((self.players[slot].GetSelection() !=
+            if ((self.GetPlayerInSlot(slot+1) !=
                  self.origPlayers[slot]) or
                 (self.positions[slot].GetSelection() !=
                  self.origPositions[slot])):
@@ -305,7 +307,7 @@ class LineupDialog(wx.Dialog):
                                   self.positions[slot].GetSelection())
 
         if self.HasDH():
-            if self.players[-1].GetSelection() != self.origPlayers[-1]:
+            if self.GetPlayerInSlot(10) != self.origPlayers[-1]:
                 player = self.GetPlayerInSlot(10)
                 doc.AddSubstitute(player, team, 0, 1)
 

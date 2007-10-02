@@ -1135,19 +1135,19 @@ class TeamGameLog:
                 
                 if game["wp"] != "":
                     wp = self.cwf.GetPlayer(game["wp"])
-                    wpname = wp.GetFirstName()[0] + ". " + wp.GetLastName()
+                    wpname = wp.GetFirstName()[:1] + ". " + wp.GetLastName()
                 else:
                     wpname = ""
                     
                 if game["lp"] != "":
                     lp = self.cwf.GetPlayer(game["lp"])
-                    lpname = lp.GetFirstName()[0] + ". " + lp.GetLastName()
+                    lpname = lp.GetFirstName()[:1] + ". " + lp.GetLastName()
                 else:
                     lpname = ""
                     
                 if game["save"] != "":
                     save = self.cwf.GetPlayer(game["save"])
-                    savename = save.GetFirstName()[0] + ". " + save.GetLastName()
+                    savename = save.GetFirstName()[:1] + ". " + save.GetLastName()
                 else:
                     savename = ""
 
@@ -1225,7 +1225,7 @@ class TeamRecordTotals:
                 self.stats[ids[win]]["ow"] += 1
                 self.stats[ids[1-win]]["ol"] += 1
 
-            if gameiter.inning >= 10:
+            if gameiter.state.inning >= 10:
                 self.stats[ids[win]]["xw"] += 1
                 self.stats[ids[1-win]]["xl"] += 1
 
@@ -1479,11 +1479,12 @@ def ProcessFile(book, acclist, f=lambda x: True, monitor=None):
     automatically works for this parameter.
     """
     numGames = book.NumGames()
-    for (i,game) in enumerate(book.Games(f)):
-        ProcessGame(game, acclist)
-        if monitor != None:
-            if not monitor.Update(round(float(i)/float(numGames)*100)):
-                return False
+    for (i,game) in enumerate(book.Games()):
+        if f(game):
+            ProcessGame(game, acclist)
+            if monitor != None:
+                if not monitor.Update(round(float(i)/float(numGames)*100)):
+                    return False
     return True
 
 if __name__ == "__main__":

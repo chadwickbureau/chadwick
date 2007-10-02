@@ -537,6 +537,9 @@ class ChadwickFrame(wx.Frame):
         except:
             dialog.Show(False)
         
+            import traceback
+            traceback.print_exc(file=sys.stderr)
+            
             dialog = wx.MessageDialog(self,
                                       "An internal error occurred in "
                                       "generating the report.\n"

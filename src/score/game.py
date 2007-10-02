@@ -135,7 +135,7 @@ class Game:
                            self.GetHalfInning(),
                            self.GetCurrentBatter(),
                            "??", "", "NP")
-        self.game.AddSubstitute(player.player_id, player.GetName(),
+        self.game.AddSubstitute(player.GetID(), player.GetName(),
                                 team, slot, pos)
         self.gameiter.ToEnd()
         self.boxscore.Build()

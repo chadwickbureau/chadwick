@@ -1417,6 +1417,8 @@ cwbox_sports_metadata(XMLNode *parent, CWGame *game,
 #elif defined(HAVE_UNDERSCORE_TIMEZONE)
   sprintf(buffer2, "%s%+03ld%02ld", 
 	  buffer1, _timezone / 3600, _timezone % 3600);
+#else
+#error "Don't know how to find current time zone"
 #endif  /* HAVE_STRUCT_TM_TM_GMTOFF, HAVE_UNDERSCORE_TIMEZONE */
   xml_node_attribute(node, "date-time", buffer2);
 
