@@ -77,9 +77,9 @@ DECLARE_FIELDFUNC(cwsub_inning)
 }
 
 /* Field 2 */
-DECLARE_FIELDFUNC(cwsub_half_inning)
+DECLARE_FIELDFUNC(cwsub_batting_team)
 {
-  return sprintf(buffer, "%d", gameiter->event->half_inning);
+  return sprintf(buffer, "%d", gameiter->event->batting_team);
 }
 
 /* Field 3 */
@@ -131,7 +131,7 @@ DECLARE_FIELDFUNC(cwsub_event_number)
 static field_func function_ptrs[] = {
   cwsub_game_id,                 /* 0 */
   cwsub_inning,                  /* 1 */
-  cwsub_half_inning,             /* 2 */
+  cwsub_batting_team,            /* 2 */
   cwsub_player,                  /* 3 */
   cwsub_team,                    /* 4 */
   cwsub_slot,                    /* 5 */

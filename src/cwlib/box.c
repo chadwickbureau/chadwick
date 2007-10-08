@@ -477,9 +477,9 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
     exit(1);
   }
 
-  pitcher = boxscore->pitchers[1-gameiter->state->half_inning];
+  pitcher = boxscore->pitchers[1-gameiter->state->batting_team];
   if (pitcher == NULL) {
-    if (gameiter->state->half_inning == 0) {
+    if (gameiter->state->batting_team == 0) {
       fprintf(stderr,
 	      "ERROR: In %s, no pitcher in lineup for home team.\n",
 	      gameiter->game->game_id);
@@ -501,7 +501,7 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
     fprintf(stderr, 
 	    "ERROR: In %s, no entry for pitcher '%s' at event %d.\n",
 	    gameiter->game->game_id, 
-	    boxscore->pitchers[1-gameiter->state->half_inning]->player_id,
+	    boxscore->pitchers[1-gameiter->state->batting_team]->player_id,
 	    gameiter->state->event_count);
     fprintf(stderr, "      (Batter ID '%s', event text '%s')\n",
 	    gameiter->event->batter, gameiter->event->event_text);
@@ -518,7 +518,7 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
 
     if (strcmp(gameiter->state->runners[2], "") ||
 	strcmp(gameiter->state->runners[3], "")) {
-      boxscore->risp_ab[gameiter->state->half_inning] += 1;
+      boxscore->risp_ab[gameiter->state->batting_team] += 1;
     }
 
     if (event_data->event_type >= CW_EVENT_SINGLE &&
@@ -527,19 +527,19 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       pitcher->pitching->h++;
       if (strcmp(gameiter->state->runners[2], "") ||
 	  strcmp(gameiter->state->runners[3], "")) {
-	boxscore->risp_h[gameiter->state->half_inning]++;
+	boxscore->risp_h[gameiter->state->batting_team]++;
       }
 
       if (event_data->event_type == CW_EVENT_DOUBLE) {
 	cw_box_add_event(&(boxscore->b2_list), 
-			 gameiter->state->inning, gameiter->state->half_inning,
+			 gameiter->state->inning, gameiter->state->batting_team,
 			 2, player->player_id, pitcher->player_id);
 	player->batting->b2++;
 	pitcher->pitching->b2++;
       }
       else if (event_data->event_type == CW_EVENT_TRIPLE) {
 	cw_box_add_event(&(boxscore->b3_list), 
-			 gameiter->state->inning, gameiter->state->half_inning,
+			 gameiter->state->inning, gameiter->state->batting_team,
 			 2, player->player_id, pitcher->player_id);
 	player->batting->b3++;
 	pitcher->pitching->b3++;
@@ -547,7 +547,7 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       else if (event_data->event_type == CW_EVENT_HOMERUN) {
 	CWBoxEvent *event = 
 	  cw_box_add_event(&(boxscore->hr_list), 
-			   gameiter->state->inning, gameiter->state->half_inning,
+			   gameiter->state->inning, gameiter->state->batting_team,
 			   2, player->player_id, pitcher->player_id);
 	event->runners = cw_event_runs_on_play(gameiter->event_data);
 	event->outs = gameiter->state->outs;
@@ -573,7 +573,7 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       player->batting->ibb++;
       pitcher->pitching->ibb++;
       cw_box_add_event(&(boxscore->ibb_list), 
-		       gameiter->state->inning, gameiter->state->half_inning,
+		       gameiter->state->inning, gameiter->state->batting_team,
 		       2, player->player_id, pitcher->player_id);
     }
   }
@@ -581,13 +581,13 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
     player->batting->hp++;
     pitcher->pitching->hb++;
     cw_box_add_event(&(boxscore->hp_list),
-		     gameiter->state->inning, gameiter->state->half_inning,
+		     gameiter->state->inning, gameiter->state->batting_team,
 		     2, player->player_id, pitcher->player_id);
   }
   else if (event_data->event_type == CW_EVENT_BALK) {
     pitcher->pitching->bk++;
     cw_box_add_event(&(boxscore->bk_list), 
-		     gameiter->state->inning, gameiter->state->half_inning,
+		     gameiter->state->inning, gameiter->state->batting_team,
 		     1, pitcher->player_id);
   }
   else if (event_data->event_type == CW_EVENT_INTERFERENCE) {
@@ -609,9 +609,9 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
   if (event_data->wp_flag) {
     CWBoxPlayer *catcher = 
       cw_box_find_player(boxscore, 
-			 gameiter->state->fielders[2][1-gameiter->state->half_inning]);
+			 gameiter->state->fielders[2][1-gameiter->state->batting_team]);
     cw_box_add_event(&(boxscore->wp_list), 
-		     gameiter->state->inning, gameiter->state->half_inning,
+		     gameiter->state->inning, gameiter->state->batting_team,
 		     2, pitcher->player_id, catcher->player_id);
     pitcher->pitching->wp++;
   }
@@ -620,14 +620,14 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
     player->batting->sh++;
     pitcher->pitching->sh++;
     cw_box_add_event(&(boxscore->sh_list), 
-		     gameiter->state->inning, gameiter->state->half_inning,
+		     gameiter->state->inning, gameiter->state->batting_team,
 		     2, player->player_id, pitcher->player_id);
   }
   if (event_data->sf_flag) {
     player->batting->sf++;
     pitcher->pitching->sf++;
     cw_box_add_event(&(boxscore->sf_list), 
-		     gameiter->state->inning, gameiter->state->half_inning,
+		     gameiter->state->inning, gameiter->state->batting_team,
 		     2, player->player_id, pitcher->player_id);
   }
 
@@ -638,7 +638,7 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       pitcher->pitching->er++;
     }
     if (event_data->advance[0] == 4) {
-      boxscore->er[1-gameiter->state->half_inning]++;
+      boxscore->er[1-gameiter->state->batting_team]++;
     }
   }
 
@@ -681,7 +681,7 @@ cw_box_runner_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       fprintf(stderr, 
 	      "ERROR: In %s, no entry for pitcher '%s' at event %d.\n",
 	      gameiter->game->game_id, 
-	      boxscore->pitchers[1-gameiter->state->half_inning]->player_id,
+	      boxscore->pitchers[1-gameiter->state->batting_team]->player_id,
 	      gameiter->state->event_count);
       fprintf(stderr, "      (Batter ID '%s', event text '%s')\n",
 	      gameiter->event->batter, gameiter->event->event_text);
@@ -692,7 +692,7 @@ cw_box_runner_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
      * we need to point to the player ID in the player's roster entry
      */
     catcher = cw_box_find_player(boxscore, 
-				 gameiter->state->fielders[2][1-gameiter->state->half_inning]);
+				 gameiter->state->fielders[2][1-gameiter->state->batting_team]);
 
     if (gameiter->event_data->advance[base] >= 4) {
       player->batting->r++;
@@ -701,7 +701,7 @@ cw_box_runner_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
 	pitcher->pitching->er++;
       }
       if (gameiter->event_data->advance[base] == 4) {
-	boxscore->er[1-gameiter->state->half_inning]++;
+	boxscore->er[1-gameiter->state->batting_team]++;
       }
     }
 
@@ -712,7 +712,7 @@ cw_box_runner_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
     if (gameiter->event_data->sb_flag[base]) {
       CWBoxEvent *event =
 	cw_box_add_event(&(boxscore->sb_list),
-			 gameiter->state->inning, gameiter->state->half_inning, 3,
+			 gameiter->state->inning, gameiter->state->batting_team, 3,
 			 player->player_id, pitcher->player_id,
 			 catcher->player_id);
       event->runners = base;
@@ -723,7 +723,7 @@ cw_box_runner_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
     if (gameiter->event_data->cs_flag[base]) {
       CWBoxEvent *event = 
 	cw_box_add_event(&(boxscore->cs_list), 
-			 gameiter->state->inning, gameiter->state->half_inning, 3,
+			 gameiter->state->inning, gameiter->state->batting_team, 3,
 			 player->player_id, pitcher->player_id,
 			 catcher->player_id);
       event->runners = base;
@@ -739,12 +739,12 @@ cw_box_runner_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       CWBoxEvent *event;
       if (gameiter->event_data->play[base][0] == '2') {
 	event = cw_box_add_event(&(boxscore->po_list), 
-				 gameiter->state->inning, gameiter->state->half_inning, 2,
+				 gameiter->state->inning, gameiter->state->batting_team, 2,
 				 player->player_id, catcher->player_id);
       }
       else {
 	event = cw_box_add_event(&(boxscore->po_list), 
-				 gameiter->state->inning, gameiter->state->half_inning, 2,
+				 gameiter->state->inning, gameiter->state->batting_team, 2,
 				 player->player_id, pitcher->player_id);
       }
       event->pickoff = (gameiter->event_data->play[base][0] - '0');
@@ -767,7 +767,7 @@ cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
     int accepted = 0;
 
     fielding = cw_box_find_player(boxscore, 
-				  gameiter->state->fielders[pos][1-gameiter->state->half_inning])->fielding[pos];
+				  gameiter->state->fielders[pos][1-gameiter->state->batting_team])->fielding[pos];
     if (fielding == NULL) {
       fprintf(stderr, 
 	      "ERROR: In %s, no entry for fielder at position %d at event %d.\n",
@@ -778,7 +778,7 @@ cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       exit(1);
     }
     player_id = cw_box_find_player(boxscore, 
-				   gameiter->state->fielders[pos][1-gameiter->state->half_inning])->player_id;
+				   gameiter->state->fielders[pos][1-gameiter->state->batting_team])->player_id;
     
     fielding->outs += cw_event_outs_on_play(gameiter->event_data);
 
@@ -814,7 +814,7 @@ cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       if (gameiter->event_data->errors[i] == pos) {
 	fielding->e++;
 	cw_box_add_event(&(boxscore->err_list), 
-			 gameiter->state->inning, gameiter->state->half_inning,
+			 gameiter->state->inning, gameiter->state->batting_team,
 			 1, player_id);
       }
     }
@@ -833,7 +833,7 @@ cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
 							 gameiter->event_data));
       fielding->pb++;
       cw_box_add_event(&(boxscore->pb_list), 
-		       gameiter->state->inning, gameiter->state->half_inning,
+		       gameiter->state->inning, gameiter->state->batting_team,
 		       2, pitcher->player_id, player_id);
     }
   }  
@@ -841,24 +841,24 @@ cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
   if (gameiter->event_data->dp_flag) {
     CWBoxEvent *event = 
       cw_box_add_event(&(boxscore->dp_list), 
-		       gameiter->state->inning, gameiter->state->half_inning, 0);
+		       gameiter->state->inning, gameiter->state->batting_team, 0);
     for (i = 0; i < gameiter->event_data->num_touches; i++) {
       int pos = gameiter->event_data->touches[i];
       CWBoxPlayer *player = 
 	cw_box_find_player(boxscore, 
-			   gameiter->state->fielders[pos][1-gameiter->state->half_inning]); 
+			   gameiter->state->fielders[pos][1-gameiter->state->batting_team]); 
       event->players[i] = player->player_id;
     }
   }
   else if (gameiter->event_data->tp_flag) {
     CWBoxEvent *event = 
       cw_box_add_event(&(boxscore->tp_list), 
-		       gameiter->state->inning, gameiter->state->half_inning, 0);
+		       gameiter->state->inning, gameiter->state->batting_team, 0);
     for (i = 0; i < gameiter->event_data->num_touches; i++) {
       int pos = gameiter->event_data->touches[i];
       CWBoxPlayer *player = 
 	cw_box_find_player(boxscore, 
-			   gameiter->state->fielders[pos][1-gameiter->state->half_inning]); 
+			   gameiter->state->fielders[pos][1-gameiter->state->batting_team]); 
       event->players[i] = player->player_id;
     }
   }
@@ -1008,8 +1008,8 @@ cw_box_iterate_game(CWBoxscore *boxscore, CWGame *game)
   CWGameIterator *gameiter = cw_gameiter_create(game);
 
   while (gameiter->event != NULL) {
-    if (boxscore->linescore[gameiter->state->inning][gameiter->state->half_inning] < 0) {
-      boxscore->linescore[gameiter->state->inning][gameiter->state->half_inning] = 0;
+    if (boxscore->linescore[gameiter->state->inning][gameiter->state->batting_team] < 0) {
+      boxscore->linescore[gameiter->state->inning][gameiter->state->batting_team] = 0;
     }
 
     if (strcmp(gameiter->event->event_text, "NP")) {
@@ -1019,17 +1019,17 @@ cw_box_iterate_game(CWBoxscore *boxscore, CWGame *game)
       cw_box_runner_stats(boxscore, gameiter);
       cw_box_fielder_stats(boxscore, gameiter);
       if (gameiter->event_data->dp_flag) {
-	boxscore->dp[1-gameiter->state->half_inning]++;
+	boxscore->dp[1-gameiter->state->batting_team]++;
       }
       if (gameiter->event_data->tp_flag) {
-	boxscore->tp[1-gameiter->state->half_inning]++;
+	boxscore->tp[1-gameiter->state->batting_team]++;
       }
-      boxscore->linescore[gameiter->state->inning][gameiter->state->half_inning] += cw_event_runs_on_play(gameiter->event_data);
-      if (gameiter->state->score[gameiter->state->half_inning] +
+      boxscore->linescore[gameiter->state->inning][gameiter->state->batting_team] += cw_event_runs_on_play(gameiter->event_data);
+      if (gameiter->state->score[gameiter->state->batting_team] +
 	  cw_event_runs_on_play(gameiter->event_data) > 
-	  gameiter->state->score[1-gameiter->state->half_inning] &&
-	  gameiter->state->score[gameiter->state->half_inning] -
-	  gameiter->state->score[1-gameiter->state->half_inning] <= 0) {
+	  gameiter->state->score[1-gameiter->state->batting_team] &&
+	  gameiter->state->score[gameiter->state->batting_team] -
+	  gameiter->state->score[1-gameiter->state->batting_team] <= 0) {
 	lead_change = 1;
       }
       else {

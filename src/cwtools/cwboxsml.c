@@ -844,8 +844,15 @@ cwbox_action_baseball_play(XMLNode *parent, CWGameIterator *gameiter,
 
   xml_node_attribute_int(node, "sequence-number", seq);
   xml_node_attribute_int(node, "inning-value", gameiter->state->inning);
-  xml_node_attribute(node, "inning-half",
-	     ((gameiter->state->half_inning == 0) ? "top" : "bottom"));
+  if (cw_game_info_lookup(gameiter->game, "htbf") &&
+      !strcmp(cw_game_info_lookup(gameiter->game, "htbf"), "true")) {
+    xml_node_attribute(node, "inning-half",
+		       ((gameiter->state->batting_team == 0) ? "bottom" : "top"));
+  }
+  else {
+    xml_node_attribute(node, "inning-half",
+		       ((gameiter->state->batting_team == 0) ? "top" : "bottom"));
+  }
   xml_node_attribute_int(node, "outs", gameiter->state->outs);
 
   if (strcmp(gameiter->state->runners[1], "")) {
@@ -876,8 +883,8 @@ cwbox_action_baseball_play(XMLNode *parent, CWGameIterator *gameiter,
   batHand = cw_gamestate_charged_batter_hand(gameiter->state,
 					     gameiter->event->batter,
 					     gameiter->event_data,
-					     (gameiter->state->half_inning == 0) ? visitors : home,
-					     (gameiter->state->half_inning == 0) ? home : visitors);
+					     (gameiter->state->batting_team == 0) ? visitors : home,
+					     (gameiter->state->batting_team == 0) ? home : visitors);
   /* Note that batHand might be '?', unknown */
   if (batHand == 'R') {
     xml_node_attribute(node, "batter-side", "right");
@@ -913,10 +920,10 @@ cwbox_action_baseball_play(XMLNode *parent, CWGameIterator *gameiter,
 			   ((gameiter->event_data->advance[3] == 4) ? 1 : 0));
 
     xml_node_attribute_int(node, "score-team",
-			   gameiter->state->score[gameiter->state->half_inning] +
+			   gameiter->state->score[gameiter->state->batting_team] +
 			   cw_event_runs_on_play(gameiter->event_data));
     xml_node_attribute_int(node, "score-team-opposing",
-			   gameiter->state->score[1-gameiter->state->half_inning]);
+			   gameiter->state->score[1-gameiter->state->batting_team]);
   }
 
   /* Pitches here */
@@ -1047,8 +1054,15 @@ cwbox_action_baseball_substitution(XMLNode *parent,
 
   xml_node_attribute_int(node, "sequence-number", seq);
   xml_node_attribute_int(node, "inning-value", gameiter->state->inning);
-  xml_node_attribute(node, "inning-half",
-		     (gameiter->state->half_inning == 0) ? "top" : "bottom");
+  if (cw_game_info_lookup(gameiter->game, "htbf") &&
+      !strcmp(cw_game_info_lookup(gameiter->game, "htbf"), "true")) {
+    xml_node_attribute(node, "inning-half",
+		       ((gameiter->state->batting_team == 0) ? "bottom" : "top"));
+  }
+  else {
+    xml_node_attribute(node, "inning-half",
+		       ((gameiter->state->batting_team == 0) ? "top" : "bottom"));
+  }
   xml_node_attribute_int(node, "outs", gameiter->state->outs);
   xml_node_attribute(node, "person-type", "player");
 
@@ -1084,7 +1098,7 @@ cwbox_action_baseball_substitution(XMLNode *parent,
 			 sub->player_id);
   
   if (gameiter->state->lineups[sub->slot][sub->team].position == 10 &&
-      gameiter->state->half_inning == sub->team) {
+      gameiter->state->batting_team == sub->team) {
     /* Convention: when pinch-hitting or pinch-running for the DH,
        report new position as DH
     */

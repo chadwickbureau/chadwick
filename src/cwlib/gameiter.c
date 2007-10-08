@@ -35,14 +35,14 @@
  * if it's not currently NULL. */
 #define XFREE(var)    if (var) { free((var)); (var) = NULL; }
     
-   
-void cw_gamestate_initialize(CWGameState *state)
+void 
+cw_gamestate_initialize(CWGameState *state)
 {
   int i, t;
 
   state->event_count = 0;
   state->inning = 1;
-  state->half_inning = 0;
+  state->batting_team = 0;
   state->outs = 0;
   state->inning_batters = 0;
 
@@ -115,8 +115,8 @@ static void
 cw_gamestate_check_go_ahead_rbi(CWGameState *state, char *batter,
 				CWEventData *event_data)
 {
-  int diff = (state->score[state->half_inning] -
-	      state->score[1-state->half_inning]);
+  int diff = (state->score[state->batting_team] -
+	      state->score[1-state->batting_team]);
   int base;
 
   for (base = 3; base >= 0; base--) {
@@ -179,7 +179,7 @@ cw_gamestate_process_advance(CWGameState *state,
   }
   else {
     strncpy(state->pitchers[0],
-	    state->fielders[1][1-state->half_inning], 49);
+	    state->fielders[1][1-state->batting_team], 49);
   }
 
   if (event_data->advance[3] >= 4 ||
@@ -238,18 +238,18 @@ void cw_gamestate_update(CWGameState *state,
   cw_gamestate_check_go_ahead_rbi(state, batter, event_data);
 
   state->event_count++;
-  state->score[state->half_inning] += cw_event_runs_on_play(event_data);
-  state->hits[state->half_inning] +=
+  state->score[state->batting_team] += cw_event_runs_on_play(event_data);
+  state->hits[state->batting_team] +=
     (event_data->event_type >= CW_EVENT_SINGLE &&
      event_data->event_type <= CW_EVENT_HOMERUN) ? 1 : 0;
-  state->errors[1 - state->half_inning] += event_data->num_errors;
-  state->times_out[state->half_inning] += cw_event_outs_on_play(event_data);
+  state->errors[1 - state->batting_team] += event_data->num_errors;
+  state->times_out[state->batting_team] += cw_event_outs_on_play(event_data);
   state->outs += cw_event_outs_on_play(event_data);
 
   cw_gamestate_process_advance(state, batter, event_data);
 
   if (cw_event_is_batter(event_data)) {
-    state->num_batters[state->half_inning]++;
+    state->num_batters[state->batting_team]++;
     state->inning_batters++;
     state->ph_flag = 0;
     state->is_leadoff = 0;
@@ -342,12 +342,13 @@ cw_gamestate_substitute(CWGameState *state,
   }
 }
 
-void cw_gamestate_change_sides(CWGameState *state)
+static void
+cw_gamestate_change_sides(CWGameState *state, CWEvent *event)
 {
   int i;
 
-  state->inning += state->half_inning;
-  state->half_inning = (state->half_inning + 1) % 2;
+  state->inning = event->inning;
+  state->batting_team = event->batting_team;
   state->outs = 0;
   state->is_leadoff = 1;
   state->ph_flag = 0;
@@ -490,7 +491,7 @@ cw_gamestate_charged_pitcher(CWGameState *state, CWEventData *event_data)
     return state->walk_pitcher;
   }
   else {
-    return state->fielders[1][1-state->half_inning];
+    return state->fielders[1][1-state->batting_team];
   }
 }
 
@@ -540,6 +541,14 @@ cw_gameiter_reset(CWGameIterator *gameiter)
   cw_gamestate_initialize(gameiter->state);
   cw_gameiter_lineup_setup(gameiter);
 
+  if (cw_game_info_lookup(gameiter->game, "htbf") &&
+      !strcmp(cw_game_info_lookup(gameiter->game, "htbf"), "true")) {
+    gameiter->state->batting_team = 1;
+  }
+  else {
+    gameiter->state->batting_team = 0;
+  }
+
   if (gameiter->event && strcmp(gameiter->event->event_text, "NP")) {
     gameiter->state->batter_hand = gameiter->event->batter_hand;
     gameiter->parse_ok = cw_parse_event(gameiter->event->event_text, 
@@ -555,8 +564,9 @@ cw_gameiter_create(CWGame *game)
 
   gameiter->event_data = (CWEventData *) malloc(sizeof(CWEventData));
   gameiter->state = (CWGameState *) malloc(sizeof(CWGameState));
-  cw_gamestate_initialize(gameiter->state);
 
+  /* Initialize before reset, since initialization checks for cleanup */
+  cw_gamestate_initialize(gameiter->state);
   cw_gameiter_reset(gameiter);
 
   return gameiter;
@@ -591,10 +601,6 @@ cw_gameiter_next(CWGameIterator *gameiter)
     cw_gamestate_update(gameiter->state, 
 			gameiter->event->batter, gameiter->event_data);
 
-    if (gameiter->state->outs >= 3 && gameiter->event->next != NULL) {
-      /* Suppress changing sides if game is over */
-      cw_gamestate_change_sides(gameiter->state);
-    }
   }
 
   cw_gameiter_process_subs(gameiter);
@@ -605,6 +611,27 @@ cw_gameiter_next(CWGameIterator *gameiter)
    * event text alone.  The remaining code handles those cases.
    */
   gameiter->event = gameiter->event->next;
+
+  if (gameiter->event != NULL &&
+      (gameiter->state->inning != gameiter->event->inning || 
+       gameiter->state->batting_team != gameiter->event->batting_team)) {
+    /* Starting in version 0.5, we change sides whenever the event file
+     * tells us the inning or batting team changes.  Prior versions
+     * changed sides only when three were out -- basically ignoring
+     * the inning and batting team portions of play records.  This was
+     * because when Chadwick was first written, there were some Retrosheet
+     * event files which had play records with incorrect inning fields,
+     * presumably due to manual editing.  (They involved stolen base
+     * plays which appear to have been moved from a different inning.)
+     * Since these no longer occur in Retrosheet files, we respect
+     * what the file tells us.
+     *
+     * Therefore, this would be a good place to put in some possible
+     * error reporting for innings which don't have three outs.
+     */
+    cw_gamestate_change_sides(gameiter->state, gameiter->event);
+  }
+
   if (gameiter->event && strcmp(gameiter->event->event_text, "NP")) {
     int i;
     gameiter->state->batter_hand = gameiter->event->batter_hand;

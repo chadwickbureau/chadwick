@@ -308,13 +308,13 @@ cw_game_starter_find_by_position(CWGame *game, int team, int pos)
   return NULL;
 }
 
-void cw_game_event_append(CWGame *game, int inning, int half_inning,
+void cw_game_event_append(CWGame *game, int inning, int batting_team,
 			  char *batter, char *count, char *pitches,
 			  char *event_text)
 {
   CWEvent *event = (CWEvent *) malloc(sizeof(CWEvent));
   event->inning = inning;
-  event->half_inning = half_inning;
+  event->batting_team = batting_team;
   event->batter = (char *) malloc(sizeof(char) * (strlen(batter) + 1));
   strcpy(event->batter, batter);
   event->count = (char *) malloc(sizeof(char) * (strlen(count) + 1));
@@ -509,15 +509,15 @@ cw_game_read(FILE *file)
       }
     } 
     else if (!strcmp(tok, "play")) {
-      char *inning, *half_inning, *batter, *count, *pitches, *play;
+      char *inning, *batting_team, *batter, *count, *pitches, *play;
       inning = cw_strtok(NULL);
-      half_inning = cw_strtok(NULL);
+      batting_team = cw_strtok(NULL);
       batter = cw_strtok(NULL);
       count = cw_strtok(NULL);
       pitches = cw_strtok(NULL);
       play = cw_strtok(NULL);
-      if (inning && half_inning && batter && count && pitches && play) {
-	cw_game_event_append(game, atoi(inning), atoi(half_inning),
+      if (inning && batting_team && batter && count && pitches && play) {
+	cw_game_event_append(game, atoi(inning), atoi(batting_team),
 			     batter, count, pitches, play);
       }
       if (batHand != ' ' && !strcmp(batHandBatter, batter)) {
@@ -666,7 +666,7 @@ cw_game_write_events(CWGame *game, FILE *file)
     }
 	      
     fprintf(file, "play,%d,%d,%s,%s,%s,%s\n",
-	    event->inning, event->half_inning,
+	    event->inning, event->batting_team,
 	    event->batter, event->count, event->pitches,
 	    event->event_text);
     if (event->first_sub != NULL) {

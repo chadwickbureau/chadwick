@@ -296,7 +296,6 @@ cwtools_default_parse_command_line(int argc, char *argv[])
     }
     else if (!strcmp(argv[i], "-f")) {
       if (++i < argc) {
-	(*cwtools_print_welcome_message)(argv[0]);
 	cwtools_parse_field_list(argv[i]);
       }
     }

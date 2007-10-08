@@ -1472,7 +1472,13 @@ DECLARE_FIELDFUNC(cwlog_home_pitcher_name)
 /* Field 159 */
 DECLARE_FIELDFUNC(cwlog_additional_info)
 {
-  return sprintf(buffer, "");
+  if (cw_game_info_lookup(gameiter->game, "htbf") &&
+      !strcmp(cw_game_info_lookup(gameiter->game, "htbf"), "true")) {
+    return sprintf(buffer, "HTBF");
+  }
+  else {
+    return sprintf(buffer, "");
+  }
 }
 
 /* Field 160 */

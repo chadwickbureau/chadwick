@@ -62,7 +62,7 @@ typedef struct cw_comment_struct {
 } CWComment;
 
 typedef struct cw_event_struct {
-  int inning, half_inning;
+  int inning, batting_team;
   char *batter, *count, *pitches, *event_text;
   /* These are used for badj and padj; if spaces, use roster file */
   char batter_hand, pitcher_hand;
@@ -159,7 +159,7 @@ CWAppearance *cw_game_starter_find_by_position(CWGame *game,
 /*
  * Add an event record to the game
  */
-void cw_game_event_append(CWGame *game, int inning, int halfInning,
+void cw_game_event_append(CWGame *game, int inning, int batting_team,
 			  char *batter, char *count, char *pitches,
 			  char *event_text);
 
