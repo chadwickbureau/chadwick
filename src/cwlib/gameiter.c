@@ -34,6 +34,17 @@
 /* This macro is a convenient shorthand for free()ing and NULLing a pointer
  * if it's not currently NULL. */
 #define XFREE(var)    if (var) { free((var)); (var) = NULL; }
+
+/* This macro is a convenient shortland for malloc()ing and copying a
+ * pointer to a string, if it's not currently NULL */
+#define XCOPY(dest, src) \
+  if (src) {  \
+    dest = (char *) malloc(sizeof(char) * (strlen(src) + 1)); \
+    strcpy(dest, src); \
+  } \
+  else { \
+    dest = NULL; \
+  }
     
 void 
 cw_gamestate_initialize(CWGameState *state)
@@ -82,6 +93,59 @@ cw_gamestate_initialize(CWGameState *state)
   }
 
   state->batter_hand = ' ';
+}
+
+/* Create a copy of orig_state */
+CWGameState * 
+cw_gamestate_copy(CWGameState *orig_state)
+{
+  int i, t;
+  CWGameState *state = (CWGameState *) malloc(sizeof(CWGameState));
+
+  state->event_count = orig_state->event_count;
+  state->inning = orig_state->inning;
+  state->batting_team = orig_state->batting_team;
+  state->outs = orig_state->outs;
+  state->inning_batters = orig_state->inning_batters;
+
+  for (t = 0; t <= 1; t++) {
+    state->score[t] = orig_state->score[t];
+    state->hits[t] = orig_state->hits[t];
+    state->errors[t] = orig_state->errors[t];
+    state->times_out[t] = orig_state->times_out[t];
+    state->num_batters[t] = orig_state->num_batters[t];
+    state->dh_slot[t] = orig_state->dh_slot[t];
+  }
+
+  state->is_leadoff = orig_state->is_leadoff;
+  state->ph_flag = orig_state->ph_flag;
+
+  for (i = 0; i <= 3; i++) {
+    strcpy(state->runners[i], orig_state->runners[i]);
+    strcpy(state->pitchers[i], orig_state->pitchers[i]);
+  }
+
+  XCOPY(state->removed_for_ph, orig_state->removed_for_ph);
+  XCOPY(state->walk_pitcher, orig_state->walk_pitcher);
+  XCOPY(state->strikeout_batter, orig_state->strikeout_batter);
+  XCOPY(state->go_ahead_rbi, orig_state->go_ahead_rbi);
+
+  for (i = 0; i <= 3; i++) {
+    XCOPY(state->removed_for_pr[i], orig_state->removed_for_pr[i]);
+  }
+
+  for (t = 0; t <= 1; t++) {
+    for (i = 0; i <= 9; i++) {
+      XCOPY(state->lineups[i][t].player_id, 
+	    orig_state->lineups[i][t].player_id);
+      XCOPY(state->lineups[i][t].name, orig_state->lineups[i][t].name);
+      XCOPY(state->fielders[i][t], orig_state->fielders[i][t]);
+    }
+  }
+
+  state->batter_hand = orig_state->batter_hand;
+
+  return state;
 }
 
 void
@@ -568,6 +632,23 @@ cw_gameiter_create(CWGame *game)
   /* Initialize before reset, since initialization checks for cleanup */
   cw_gamestate_initialize(gameiter->state);
   cw_gameiter_reset(gameiter);
+
+  return gameiter;
+}
+
+CWGameIterator *
+cw_gameiter_copy(CWGameIterator *orig_gameiter)
+{
+  CWGameIterator *gameiter = (CWGameIterator *) malloc(sizeof(CWGameIterator));
+
+  gameiter->game = orig_gameiter->game;
+  gameiter->event = orig_gameiter->event;
+
+  gameiter->event_data = (CWEventData *) malloc(sizeof(CWEventData));
+  cw_event_data_copy(gameiter->event_data, orig_gameiter->event_data);
+
+  gameiter->parse_ok = orig_gameiter->parse_ok;
+  gameiter->state = cw_gamestate_copy(orig_gameiter->state);
 
   return gameiter;
 }

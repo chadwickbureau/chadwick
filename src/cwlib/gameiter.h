@@ -54,6 +54,7 @@ typedef struct cw_game_state {
 } CWGameState;
 
 void cw_gamestate_initialize(CWGameState *);
+CWGameState *cw_gamestate_copy(CWGameState *);
 void cw_gamestate_cleanup(CWGameState *);
 void cw_gamestate_update(CWGameState *, char *, CWEventData *);
 
@@ -126,6 +127,12 @@ typedef struct cw_gameiter_struct {
  * (see cw_gameiter_reset).
  */
 CWGameIterator *cw_gameiter_create(CWGame *game);
+
+/*
+ * Copies a CWGameIterator, allocating memory and initializing
+ * data fields.
+ */
+CWGameIterator *cw_gameiter_copy(CWGameIterator *gameiter);
 
 /*
  * Cleans up a CWGameIterator, deallocating internal memory.

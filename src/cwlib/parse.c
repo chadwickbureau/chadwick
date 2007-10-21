@@ -35,6 +35,59 @@
  * Data access on CWEventData objects
  **************************************************************************/
 
+void
+cw_event_data_copy(CWEventData *dest, CWEventData *src)
+{
+  int i;
+
+  dest->event_type = src->event_type;
+  for (i = 0; i < 4; i++) {
+    dest->advance[i] = src->advance[i];
+    dest->rbi_flag[i] = src->rbi_flag[i];
+    dest->fc_flag[i] = src->fc_flag[i];
+    strcpy(dest->play[i], src->play[i]);
+  }
+
+  dest->sh_flag = src->sh_flag;
+  dest->sf_flag = src->sf_flag;
+  dest->dp_flag = src->dp_flag;
+  dest->gdp_flag = src->gdp_flag;
+  dest->tp_flag = src->tp_flag;
+  dest->wp_flag = src->wp_flag;
+  dest->pb_flag = src->pb_flag;
+  dest->foul_flag = src->foul_flag;
+  dest->bunt_flag = src->bunt_flag;
+  
+  for (i = 0; i < 4; i++) {
+    dest->sb_flag[i] = src->sb_flag[i];
+    dest->cs_flag[i] = src->cs_flag[i];
+    dest->po_flag[i] = src->po_flag[i];
+  }
+
+  dest->fielded_by = src->fielded_by;
+  dest->num_putouts = src->num_putouts;
+  dest->num_assists = src->num_assists;
+  dest->num_errors = src->num_errors;
+  dest->num_touches = src->num_touches;
+
+  for (i = 0; i < 3; i++) {
+    dest->putouts[i] = src->putouts[i];
+  }
+
+  for (i = 0; i < 10; i++) {
+    dest->assists[i] = src->assists[i];
+    dest->errors[i] = src->errors[i];
+    dest->error_types[i] = src->error_types[i];
+  }
+
+  for (i = 0; i < 20; i++) {
+    dest->touches[i] = src->touches[i];
+  }
+  
+  dest->batted_ball_type = src->batted_ball_type;
+  strcpy(dest->hit_location, src->hit_location);
+}
+
 int
 cw_event_is_batter(CWEventData *event)
 {

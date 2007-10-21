@@ -53,7 +53,47 @@ int fields[97] = {
 
 int max_field = 96;
 
+/* Extended fields to display (-x) */
+int ext_fields[34] = {
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0
+};
+
+int max_ext_field = 33;
+
 char program_name[20] = "cwevent";
+
+/*************************************************************************
+ * Utility functions (in some cases, candidates for refactor to cwlib)
+ *************************************************************************/
+
+/* Compute the eventual "fate" of the runner on 'base' */
+int cwevent_runner_fate(CWGameIterator *orig_gameiter, int base)
+{
+  CWGameIterator *gameiter;
+  if (orig_gameiter->event_data->advance[base] == 0 ||
+      orig_gameiter->event_data->advance[base] >= 4) {
+    return orig_gameiter->event_data->advance[base];
+  }
+  
+  base = orig_gameiter->event_data->advance[base];
+  gameiter = cw_gameiter_copy(orig_gameiter);
+  while (gameiter->event != NULL && 
+	 gameiter->state->inning == orig_gameiter->state->inning &&
+	 gameiter->state->batting_team == orig_gameiter->state->batting_team &&
+	 base >= 1 && base <= 3) {
+    cw_gameiter_next(gameiter);
+    base = gameiter->event_data->advance[base];
+  }
+
+  cw_gameiter_cleanup(gameiter);
+  free(gameiter);
+  return base;
+}			
+
+
 
 /*************************************************************************
  * Functions to output fields
@@ -975,6 +1015,442 @@ static field_func function_ptrs[] = {
   cwevent_event_number            /* 96 */
 };
 
+/**** "Extended" fields start here ****/
+
+DECLARE_FIELDFUNC(cwevent_home_team_id)
+{
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-3s",
+		 cw_game_info_lookup(gameiter->game, "hometeam"));
+}
+
+DECLARE_FIELDFUNC(cwevent_batting_team_id)
+{
+  if (gameiter->state->batting_team == 0) {
+    return sprintf(buffer, (ascii) ? "\"%s\"" : "%-3s",
+		   cw_game_info_lookup(gameiter->game, "visteam"));
+  }
+  else {
+    return sprintf(buffer, (ascii) ? "\"%s\"" : "%-3s",
+		   cw_game_info_lookup(gameiter->game, "hometeam"));
+  }
+}
+
+DECLARE_FIELDFUNC(cwevent_fielding_team_id)
+{
+  if (gameiter->state->batting_team == 1) {
+    return sprintf(buffer, (ascii) ? "\"%s\"" : "%-3s",
+		   cw_game_info_lookup(gameiter->game, "visteam"));
+  }
+  else {
+    return sprintf(buffer, (ascii) ? "\"%s\"" : "%-3s",
+		   cw_game_info_lookup(gameiter->game, "hometeam"));
+  }
+}
+
+DECLARE_FIELDFUNC(cwevent_half_inning)
+{
+  if (cw_game_info_lookup(gameiter->game, "htbf") &&
+      !strcmp(cw_game_info_lookup(gameiter->game, "htbf"), "true")) {
+    return sprintf(buffer, "%d", 1-gameiter->state->batting_team);
+  }
+  else {
+    return sprintf(buffer, "%d", gameiter->state->batting_team);
+  }
+}
+
+DECLARE_FIELDFUNC(cwevent_start_half_inning)
+{
+  CWEvent *event = gameiter->event->prev;
+
+  while (event) {
+    if (event->inning != gameiter->event->inning ||
+	event->batting_team != gameiter->event->batting_team) {
+      return sprintf(buffer, "T");
+    }
+    else if (strcmp(event->event_text, "NP")) {
+      return sprintf(buffer, "F");
+    }
+    else {
+      event = event->prev;
+    }
+  }
+
+  return sprintf(buffer, "T");
+}
+
+DECLARE_FIELDFUNC(cwevent_end_half_inning)
+{
+  CWEvent *event = gameiter->event->next;
+
+  while (event) {
+    if (event->inning != gameiter->event->inning ||
+	event->batting_team != gameiter->event->batting_team) {
+      return sprintf(buffer, "T");
+    }
+    else if (strcmp(event->event_text, "NP")) {
+      return sprintf(buffer, "F");
+    }
+    else {
+      event = event->next;
+    }
+  }
+
+  return sprintf(buffer, "T");
+}
+
+DECLARE_FIELDFUNC(cwevent_offense_score)
+{ 
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", 
+		 gameiter->state->score[gameiter->state->batting_team]);
+}
+
+DECLARE_FIELDFUNC(cwevent_defense_score)
+{ 
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", 
+		 gameiter->state->score[1-gameiter->state->batting_team]);
+}
+
+DECLARE_FIELDFUNC(cwevent_runner1_defensive_position)
+{
+  if (!strcmp(gameiter->state->runners[1], "")) {
+    return sprintf(buffer, "0");
+  }
+  else {
+    return sprintf(buffer, (ascii) ? "%d" : "%2d", 
+		   cw_gamestate_player_position(gameiter->state,
+						gameiter->state->batting_team,
+						gameiter->state->runners[1]));
+  }
+}
+
+DECLARE_FIELDFUNC(cwevent_runner1_lineup_position)
+{
+  int lineupSlot;
+
+  if (!strcmp(gameiter->state->runners[1], "")) {
+    return sprintf(buffer, "0");
+  }
+
+  /* A bit of a kludge to handle case where pitcher enters the lineup
+   * after DH goes away */
+  lineupSlot = cw_gamestate_lineup_slot(gameiter->state,
+					gameiter->state->batting_team,
+					gameiter->state->runners[1]);
+  if (lineupSlot > 0) {
+    return sprintf(buffer, "%d", lineupSlot);
+  }
+  else {
+    return sprintf(buffer, "%d",
+	    (gameiter->state->num_batters[gameiter->state->batting_team]) % 9 + 1);
+  }
+}
+
+DECLARE_FIELDFUNC(cwevent_runner2_defensive_position)
+{
+  if (!strcmp(gameiter->state->runners[2], "")) {
+    return sprintf(buffer, "0");
+  }
+  else {
+    return sprintf(buffer, (ascii) ? "%d" : "%2d", 
+		   cw_gamestate_player_position(gameiter->state,
+						gameiter->state->batting_team,
+						gameiter->state->runners[2]));
+  }
+}
+
+DECLARE_FIELDFUNC(cwevent_runner2_lineup_position)
+{
+  int lineupSlot;
+
+  if (!strcmp(gameiter->state->runners[2], "")) {
+    return sprintf(buffer, "0");
+  }
+
+  /* A bit of a kludge to handle case where pitcher enters the lineup
+   * after DH goes away */
+  lineupSlot = cw_gamestate_lineup_slot(gameiter->state,
+					gameiter->state->batting_team,
+					gameiter->state->runners[2]);
+  if (lineupSlot > 0) {
+    return sprintf(buffer, "%d", lineupSlot);
+  }
+  else {
+    return sprintf(buffer, "%d",
+	    (gameiter->state->num_batters[gameiter->state->batting_team]) % 9 + 1);
+  }
+}
+
+DECLARE_FIELDFUNC(cwevent_runner3_defensive_position)
+{
+  if (!strcmp(gameiter->state->runners[3], "")) {
+    return sprintf(buffer, "0");
+  }
+  else {
+    return sprintf(buffer, (ascii) ? "%d" : "%2d", 
+		   cw_gamestate_player_position(gameiter->state,
+						gameiter->state->batting_team,
+						gameiter->state->runners[3]));
+  }
+}
+
+DECLARE_FIELDFUNC(cwevent_runner3_lineup_position)
+{
+  int lineupSlot;
+
+  if (!strcmp(gameiter->state->runners[3], "")) {
+    return sprintf(buffer, "0");
+  }
+
+  /* A bit of a kludge to handle case where pitcher enters the lineup
+   * after DH goes away */
+  lineupSlot = cw_gamestate_lineup_slot(gameiter->state,
+					gameiter->state->batting_team,
+					gameiter->state->runners[3]);
+  if (lineupSlot > 0) {
+    return sprintf(buffer, "%d", lineupSlot);
+  }
+  else {
+    return sprintf(buffer, "%d",
+	    (gameiter->state->num_batters[gameiter->state->batting_team]) % 9 + 1);
+  }
+}
+
+DECLARE_FIELDFUNC(cwevent_pitches_balls)
+{
+  int balls = 0;
+  char *pitch = gameiter->event->pitches;
+
+  while (*pitch != '\0') {
+    if (*pitch == 'B' || *pitch == 'H' || *pitch == 'I' || *pitch == 'P' || 
+	*pitch == 'V') {
+      balls++;
+    }
+    pitch++;
+  }
+
+  return sprintf(buffer, (ascii) ? "%d" : "%02d", balls);
+}
+
+DECLARE_FIELDFUNC(cwevent_pitches_balls_intentional)
+{
+  int balls = 0;
+  char *pitch = gameiter->event->pitches;
+
+  while (*pitch != '\0') {
+    if (*pitch == 'I') {
+      balls++;
+    }
+    pitch++;
+  }
+
+  return sprintf(buffer, (ascii) ? "%d" : "%02d", balls);
+}
+
+DECLARE_FIELDFUNC(cwevent_pitches_balls_pitchout)
+{
+  int balls = 0;
+  char *pitch = gameiter->event->pitches;
+
+  while (*pitch != '\0') {
+    if (*pitch == 'P') {
+      balls++;
+    }
+    pitch++;
+  }
+
+  return sprintf(buffer, (ascii) ? "%d" : "%02d", balls);
+}
+
+DECLARE_FIELDFUNC(cwevent_pitches_balls_other)
+{
+  int balls = 0;
+  char *pitch = gameiter->event->pitches;
+
+  while (*pitch != '\0') {
+    if (*pitch == 'H' || *pitch == 'V') {
+      balls++;
+    }
+    pitch++;
+  }
+
+  return sprintf(buffer, (ascii) ? "%d" : "%02d", balls);
+}
+
+DECLARE_FIELDFUNC(cwevent_pitches_strikes)
+{
+  int strikes = 0;
+  char *pitch = gameiter->event->pitches;
+
+  while (*pitch != '\0') {
+    if (*pitch == 'C' || *pitch == 'F' || *pitch == 'K' || *pitch == 'L' ||
+	*pitch == 'M' || *pitch == 'O' || *pitch == 'Q' || *pitch == 'R' ||
+	*pitch == 'S' || *pitch == 'T' || *pitch == 'X' || *pitch == 'Y') {
+      strikes++;
+    }
+    pitch++;
+  }
+
+  return sprintf(buffer, (ascii) ? "%d" : "%02d", strikes);
+}
+
+DECLARE_FIELDFUNC(cwevent_pitches_strikes_called)
+{
+  int strikes = 0;
+  char *pitch = gameiter->event->pitches;
+
+  while (*pitch != '\0') {
+    if (*pitch == 'C') {
+      strikes++;
+    }
+    pitch++;
+  }
+
+  return sprintf(buffer, (ascii) ? "%d" : "%02d", strikes);
+}
+
+DECLARE_FIELDFUNC(cwevent_pitches_strikes_swinging)
+{
+  int strikes = 0;
+  char *pitch = gameiter->event->pitches;
+
+  while (*pitch != '\0') {
+    if (*pitch == 'M' || *pitch == 'S') {
+      strikes++;
+    }
+    pitch++;
+  }
+
+  return sprintf(buffer, (ascii) ? "%d" : "%02d", strikes);
+}
+
+DECLARE_FIELDFUNC(cwevent_pitches_strikes_foul)
+{
+  int strikes = 0;
+  char *pitch = gameiter->event->pitches;
+
+  while (*pitch != '\0') {
+    if (*pitch == 'F' || *pitch == 'L' || *pitch == 'O' || *pitch == 'T') {
+      strikes++;
+    }
+    pitch++;
+  }
+
+  return sprintf(buffer, (ascii) ? "%d" : "%02d", strikes);
+}
+
+DECLARE_FIELDFUNC(cwevent_pitches_strikes_other)
+{
+  int strikes = 0;
+  char *pitch = gameiter->event->pitches;
+
+  while (*pitch != '\0') {
+    if (*pitch == 'K') {
+      strikes++;
+    }
+    pitch++;
+  }
+
+  return sprintf(buffer, (ascii) ? "%d" : "%02d", strikes);
+}
+
+DECLARE_FIELDFUNC(cwevent_runs_on_play)
+{
+  return sprintf(buffer, "%d", cw_event_runs_on_play(gameiter->event_data));
+}
+
+DECLARE_FIELDFUNC(cwevent_fielded_by_id)
+{
+  if (gameiter->event_data->fielded_by == 0) {
+    return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s", "");
+  }
+  else {
+    return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+		   gameiter->state->fielders[gameiter->event_data->fielded_by][1-gameiter->state->batting_team]);
+  }
+}
+
+DECLARE_FIELDFUNC(cwevent_batter_fate)
+{
+  return sprintf(buffer, "%d", cwevent_runner_fate(gameiter, 0));
+}
+
+DECLARE_FIELDFUNC(cwevent_runner1_fate)
+{
+  return sprintf(buffer, "%d", cwevent_runner_fate(gameiter, 1));
+}
+
+DECLARE_FIELDFUNC(cwevent_runner2_fate)
+{
+  return sprintf(buffer, "%d", cwevent_runner_fate(gameiter, 2));
+}
+
+DECLARE_FIELDFUNC(cwevent_runner3_fate)
+{
+  return sprintf(buffer, "%d", cwevent_runner_fate(gameiter, 3));
+}
+
+DECLARE_FIELDFUNC(cwevent_assist6)
+{
+  return sprintf(buffer, "%d", gameiter->event_data->assists[5]);
+}
+
+DECLARE_FIELDFUNC(cwevent_assist7)
+{
+  return sprintf(buffer, "%d", gameiter->event_data->assists[6]);
+}
+
+DECLARE_FIELDFUNC(cwevent_assist8)
+{
+  return sprintf(buffer, "%d", gameiter->event_data->assists[7]);
+}
+
+DECLARE_FIELDFUNC(cwevent_assist9)
+{
+  return sprintf(buffer, "%d", gameiter->event_data->assists[8]);
+}
+
+DECLARE_FIELDFUNC(cwevent_assist10)
+{
+  return sprintf(buffer, "%d", gameiter->event_data->assists[9]);
+}
+
+static field_func ext_function_ptrs[] = {
+  cwevent_home_team_id,
+  cwevent_batting_team_id,
+  cwevent_fielding_team_id,
+  cwevent_half_inning,
+  cwevent_start_half_inning,
+  cwevent_end_half_inning,
+  cwevent_offense_score,
+  cwevent_defense_score,
+  cwevent_runner1_defensive_position,
+  cwevent_runner1_lineup_position,
+  cwevent_runner2_defensive_position,
+  cwevent_runner2_lineup_position,
+  cwevent_runner3_defensive_position,
+  cwevent_runner3_lineup_position,
+  cwevent_pitches_balls,
+  cwevent_pitches_balls_intentional,
+  cwevent_pitches_balls_pitchout,
+  cwevent_pitches_balls_other,
+  cwevent_pitches_strikes,
+  cwevent_pitches_strikes_called,
+  cwevent_pitches_strikes_swinging,
+  cwevent_pitches_strikes_foul,
+  cwevent_pitches_strikes_other,
+  cwevent_runs_on_play,
+  cwevent_fielded_by_id,
+  cwevent_batter_fate,
+  cwevent_runner1_fate,
+  cwevent_runner2_fate,
+  cwevent_runner3_fate,
+  cwevent_assist6,
+  cwevent_assist7,
+  cwevent_assist8,
+  cwevent_assist9,
+  cwevent_assist10
+};
+
 void
 cwevent_process_game(CWGame *game, CWRoster *visitors, CWRoster *home) 
 {
@@ -994,7 +1470,7 @@ cwevent_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
     comma = 0;
     strcpy(output_line, "");
     buf = output_line;
-    for (i = 0; i < 97; i++) {
+    for (i = 0; i <= max_field; i++) {
       if (fields[i]) {
 	if (ascii && comma) {
 	  *(buf++) = ',';
@@ -1005,6 +1481,19 @@ cwevent_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 	buf += (*function_ptrs[i])(buf, gameiter, visitors, home);
       }
     }
+
+    for (i = 0; i <= max_ext_field; i++) {
+      if (ext_fields[i]) {
+	if (ascii && comma) {
+	  *(buf++) = ',';
+	}
+	else {
+	  comma = 1;
+	}
+	buf += (*ext_function_ptrs[i])(buf, gameiter, visitors, home);
+      }
+    };
+
     printf(output_line);
     printf("\n");
 
@@ -1033,6 +1522,8 @@ cwevent_print_help(void)
   fprintf(stderr, "  -ft       generate Fortran format files\n");
   fprintf(stderr, "  -f flist  give list of fields to output\n");
   fprintf(stderr, "              Default is 0-6,8-9,12-13,16-17,26-40,43-45,51,58-61\n");
+  fprintf(stderr, "  -x flist  give list of extended fields to output\n");
+  fprintf(stderr, "              Default is none\n");
   fprintf(stderr, "  -d        print list of field numbers and descriptions\n\n");
   fprintf(stderr, "  -q        operate quietly; do not output progress messages\n");
 
@@ -1177,5 +1668,80 @@ cwevent_cleanup(void)
 
 void (*cwtools_cleanup)(void) = cwevent_cleanup;
 
-extern int cwtools_default_parse_command_line(int, char *argv[]);
-int (*cwtools_parse_command_line)(int, char *argv[]) = cwtools_default_parse_command_line;
+extern char year[5];
+extern char first_date[5];
+extern char last_date[5];
+extern char game_id[20];
+extern int ascii;
+extern int quiet;
+
+extern void
+cwtools_parse_field_list(char *text, int max_field, int *fields);
+
+int
+cwevent_parse_command_line(int argc, char *argv[])
+{
+  int i;
+  strcpy(year, "");
+
+  for (i = 1; i < argc; i++) {
+    if (!strcmp(argv[i], "-a")) {
+      ascii = 1;
+    }
+    else if (!strcmp(argv[i], "-d")) {
+      (*cwtools_print_welcome_message)(argv[0]);
+      (*cwtools_print_field_list)();
+    }
+    else if (!strcmp(argv[i], "-e")) {
+      if (++i < argc) {
+	strncpy(last_date, argv[i], 4);
+      }
+    }
+    else if (!strcmp(argv[i], "-h")) {
+      (*cwtools_print_welcome_message)(argv[0]);
+      (*cwtools_print_help)();
+    }
+    else if (!strcmp(argv[i], "-q")) {
+      quiet = 1;
+    }
+    else if (!strcmp(argv[i], "-i")) {
+      if (++i < argc) {
+	strncpy(game_id, argv[i], 19);
+      }
+    }
+    else if (!strcmp(argv[i], "-f")) {
+      if (++i < argc) {
+	cwtools_parse_field_list(argv[i], max_field, fields);
+      }
+    }
+    else if (!strcmp(argv[i], "-ft")) {
+      ascii = 0;
+    }
+    else if (!strcmp(argv[i], "-s")) {
+      if (++i < argc) {
+	strncpy(first_date, argv[i], 4);
+      }
+    }
+    else if (!strcmp(argv[i], "-x")) {
+      if (++i < argc) {
+	cwtools_parse_field_list(argv[i], max_ext_field, ext_fields);
+      }
+    }
+    else if (!strcmp(argv[i], "-y")) {
+      if (++i < argc) {
+	strncpy(year, argv[i], 5);
+      }
+    }
+    else if (argv[i][0] == '-') {
+      fprintf(stderr, "*** Invalid option '%s'.\n", argv[i]);
+      exit(1);
+    }
+    else {
+      break;
+    }
+  }
+
+  return i;
+}
+
+int (*cwtools_parse_command_line)(int, char *argv[]) = cwevent_parse_command_line;

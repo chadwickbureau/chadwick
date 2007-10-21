@@ -200,11 +200,11 @@ cwtools_process_filespec(CWLeague *league, char *filespec)
 #endif  /* MSDOS/not MSDOS */
 
 void
-cwtools_parse_field_list(char *text)
+cwtools_parse_field_list(char *text, int maxfield, int *field)
 {
   unsigned int i = 0, j, firstNum, secondNum, err = 0;
 
-  for (j = 0; j <= max_field; fields[j++] = 0);
+  for (j = 0; j <= maxfield; field[j++] = 0);
 
   while (i < strlen(text)) {
     if (!isdigit(text[i])) {
@@ -216,7 +216,7 @@ cwtools_parse_field_list(char *text)
       firstNum = firstNum * 10 + text[i++] - '0';
     }
 
-    if (firstNum > max_field) {
+    if (firstNum > maxfield) {
       break;
     }
 
@@ -231,15 +231,15 @@ cwtools_parse_field_list(char *text)
 	secondNum = secondNum * 10 + text[i++] - '0';
       }
 
-      if (secondNum > max_field || secondNum < firstNum) {
+      if (secondNum > maxfield || secondNum < firstNum) {
 	err = 1;
 	break;
       }
       
-      for (j = firstNum; j <= secondNum; fields[j++] = 1);
+      for (j = firstNum; j <= secondNum; field[j++] = 1);
     }
     else {
-      fields[firstNum] = 1;
+      field[firstNum] = 1;
     }
 
     if (text[i] == ',') {
@@ -258,7 +258,7 @@ cwtools_parse_field_list(char *text)
     fprintf(stderr, "  %s -f 0-4,7,12,20-31\n", program_name);
     fprintf(stderr,
 	    "The spec is invalid if any value is larger than the max\n");
-    fprintf(stderr, "field number, %d.\n", max_field);
+    fprintf(stderr, "field number, %d.\n", maxfield);
     exit(1);
   }
 }
@@ -296,7 +296,7 @@ cwtools_default_parse_command_line(int argc, char *argv[])
     }
     else if (!strcmp(argv[i], "-f")) {
       if (++i < argc) {
-	cwtools_parse_field_list(argv[i]);
+	cwtools_parse_field_list(argv[i], max_field, fields);
       }
     }
     else if (!strcmp(argv[i], "-ft")) {

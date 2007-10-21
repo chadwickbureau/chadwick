@@ -107,6 +107,8 @@ typedef struct cw_parsed_event_struct {
   char hit_location[20];
 } CWEventData;
 
+void cw_event_data_copy(CWEventData *dest, CWEventData *src);
+
 int cw_parse_event(char *text, CWEventData *event);
 
 int cw_event_is_batter(CWEventData *event);
