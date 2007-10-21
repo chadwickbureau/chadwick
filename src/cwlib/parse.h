@@ -89,11 +89,12 @@ typedef enum {
 
 typedef struct cw_parsed_event_struct {
   CWEventType event_type;
-  /* rbiFlag: 2 == (RBI) actually in play text */
-  int advance[4], rbi_flag[4], fc_flag[4];
+  /* rbi_flag: 2 == (RBI) actually in play text */
+  /* muff_flag: nonzero if runner is safe on a play like 1X2(6E4) */
+  int advance[4], rbi_flag[4], fc_flag[4], muff_flag[4];
   char play[4][20];
   int sh_flag, sf_flag, dp_flag, gdp_flag, tp_flag;
-  int wp_flag, pb_flag, foul_flag, bunt_flag;
+  int wp_flag, pb_flag, foul_flag, bunt_flag, force_flag;
   int sb_flag[4], cs_flag[4], po_flag[4];
   int fielded_by;
   /* touches lists players in the order fielding credits are assigned;

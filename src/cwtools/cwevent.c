@@ -54,14 +54,15 @@ int fields[97] = {
 int max_field = 96;
 
 /* Extended fields to display (-x) */
-int ext_fields[34] = {
+int ext_fields[46] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0
 };
 
-int max_ext_field = 33;
+int max_ext_field = 45;
 
 char program_name[20] = "cwevent";
 
@@ -85,7 +86,9 @@ int cwevent_runner_fate(CWGameIterator *orig_gameiter, int base)
 	 gameiter->state->batting_team == orig_gameiter->state->batting_team &&
 	 base >= 1 && base <= 3) {
     cw_gameiter_next(gameiter);
-    base = gameiter->event_data->advance[base];
+    if (gameiter->event && strcmp(gameiter->event->event_text, "NP")) {
+      base = gameiter->event_data->advance[base];
+    }
   }
 
   cw_gameiter_cleanup(gameiter);
@@ -93,6 +96,25 @@ int cwevent_runner_fate(CWGameIterator *orig_gameiter, int base)
   return base;
 }			
 
+/* Compute the number of runs scored after this play in half inning */
+int cwevent_future_runs(CWGameIterator *orig_gameiter)
+{
+  int runs = 0;
+  CWGameIterator *gameiter = cw_gameiter_copy(orig_gameiter);
+  cw_gameiter_next(gameiter);
+  while (gameiter->event != NULL &&
+	 gameiter->state->inning == orig_gameiter->state->inning &&
+	 gameiter->state->batting_team == orig_gameiter->state->batting_team) {
+    if (strcmp(gameiter->event->event_text, "NP")) {
+      runs += cw_event_runs_on_play(gameiter->event_data);
+    }
+    cw_gameiter_next(gameiter);
+  }
+  
+  cw_gameiter_cleanup(gameiter);
+  free(gameiter);
+  return runs;
+}
 
 
 /*************************************************************************
@@ -1015,14 +1037,18 @@ static field_func function_ptrs[] = {
   cwevent_event_number            /* 96 */
 };
 
-/**** "Extended" fields start here ****/
+/*************************************************************************
+ * Implementation of "extended" fields
+ *************************************************************************/
 
+/* Extended Field 0 */
 DECLARE_FIELDFUNC(cwevent_home_team_id)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-3s",
 		 cw_game_info_lookup(gameiter->game, "hometeam"));
 }
 
+/* Extended Field 1 */
 DECLARE_FIELDFUNC(cwevent_batting_team_id)
 {
   if (gameiter->state->batting_team == 0) {
@@ -1035,6 +1061,7 @@ DECLARE_FIELDFUNC(cwevent_batting_team_id)
   }
 }
 
+/* Extended Field 2 */
 DECLARE_FIELDFUNC(cwevent_fielding_team_id)
 {
   if (gameiter->state->batting_team == 1) {
@@ -1047,6 +1074,7 @@ DECLARE_FIELDFUNC(cwevent_fielding_team_id)
   }
 }
 
+/* Extended Field 3 */
 DECLARE_FIELDFUNC(cwevent_half_inning)
 {
   if (cw_game_info_lookup(gameiter->game, "htbf") &&
@@ -1058,6 +1086,7 @@ DECLARE_FIELDFUNC(cwevent_half_inning)
   }
 }
 
+/* Extended Field 4 */
 DECLARE_FIELDFUNC(cwevent_start_half_inning)
 {
   CWEvent *event = gameiter->event->prev;
@@ -1065,19 +1094,20 @@ DECLARE_FIELDFUNC(cwevent_start_half_inning)
   while (event) {
     if (event->inning != gameiter->event->inning ||
 	event->batting_team != gameiter->event->batting_team) {
-      return sprintf(buffer, "T");
+      return sprintf(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
     }
     else if (strcmp(event->event_text, "NP")) {
-      return sprintf(buffer, "F");
+      return sprintf(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
     }
     else {
       event = event->prev;
     }
   }
 
-  return sprintf(buffer, "T");
+  return sprintf(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
 }
 
+/* Extended Field 5 */
 DECLARE_FIELDFUNC(cwevent_end_half_inning)
 {
   CWEvent *event = gameiter->event->next;
@@ -1085,31 +1115,115 @@ DECLARE_FIELDFUNC(cwevent_end_half_inning)
   while (event) {
     if (event->inning != gameiter->event->inning ||
 	event->batting_team != gameiter->event->batting_team) {
-      return sprintf(buffer, "T");
+      return sprintf(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
     }
     else if (strcmp(event->event_text, "NP")) {
-      return sprintf(buffer, "F");
+      return sprintf(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
     }
     else {
       event = event->next;
     }
   }
 
-  return sprintf(buffer, "T");
+  return sprintf(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
 }
 
+/* Extended Field 6 */
 DECLARE_FIELDFUNC(cwevent_offense_score)
 { 
   return sprintf(buffer, (ascii) ? "%d" : "%2d", 
 		 gameiter->state->score[gameiter->state->batting_team]);
 }
 
+/* Extended Field 7 */
 DECLARE_FIELDFUNC(cwevent_defense_score)
 { 
   return sprintf(buffer, (ascii) ? "%d" : "%2d", 
 		 gameiter->state->score[1-gameiter->state->batting_team]);
 }
 
+/* Extended Field 8 */
+DECLARE_FIELDFUNC(cwevent_offense_score_inning)
+{
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", 
+		 gameiter->state->inning_score);
+}
+
+/* Extended Field 9 */
+DECLARE_FIELDFUNC(cwevent_offense_batters_game)
+{ 
+  return sprintf(buffer, (ascii) ? "%d" : "%3d", 
+		 gameiter->state->num_batters[gameiter->state->batting_team]);
+}
+
+/* Extended Field 10 */
+DECLARE_FIELDFUNC(cwevent_offense_batters_inning)
+{ 
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", 
+		 gameiter->state->inning_batters);
+}
+
+/* Extended Field 11 */
+DECLARE_FIELDFUNC(cwevent_start_pa_flag)
+{
+  return sprintf(buffer, (ascii) ? "\"%c\"" : "%c", 
+		 ((gameiter->state->is_new_pa) ? 'T' : 'F'));
+}
+
+/* Extended Field 12 */
+DECLARE_FIELDFUNC(cwevent_truncated_pa_flag)
+{
+  CWGameIterator *gi;
+
+  if (cw_event_is_batter(gameiter->event_data)) {
+    return sprintf(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
+  }
+
+  gi = cw_gameiter_copy(gameiter);
+  cw_gameiter_next(gi);
+  while (gi->event != NULL &&
+	 gi->state->inning == gameiter->state->inning &&
+	 gi->state->batting_team == gameiter->state->batting_team) {
+    if (strcmp(gi->event->event_text, "NP")) {
+      if (cw_event_is_batter(gi->event_data)) {
+	cw_gameiter_cleanup(gi);
+	free(gi);
+	return sprintf(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
+      }
+    }
+    cw_gameiter_next(gi);
+  }
+
+  cw_gameiter_cleanup(gi);
+  free(gi);
+  return sprintf(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
+}
+
+/* Extended Field 13 */
+DECLARE_FIELDFUNC(cwevent_base_state_start)
+{
+  return sprintf(buffer, "%d",
+		 ((strcmp(gameiter->state->runners[3], "") ? 4 : 0) +
+		  (strcmp(gameiter->state->runners[2], "") ? 2 : 0) +
+		  (strcmp(gameiter->state->runners[1], "") ? 1 : 0)));
+}
+
+/* Extended Field 14 */
+DECLARE_FIELDFUNC(cwevent_base_state_end)
+{
+  int r3 = 0, r2 = 0, r1 = 0;
+  int base;
+
+  for (base = 0; base <= 3; base++) {
+    if (gameiter->event_data->advance[base] == 3)  r3 = 1;
+    if (gameiter->event_data->advance[base] == 2)  r2 = 1;
+    if (gameiter->event_data->advance[base] == 1)  r1 = 1;
+  }
+
+  return sprintf(buffer, "%d", 4*r3 + 2*r2 + r1);
+}
+
+/* Extended Field 15 */
 DECLARE_FIELDFUNC(cwevent_runner1_defensive_position)
 {
   if (!strcmp(gameiter->state->runners[1], "")) {
@@ -1123,6 +1237,7 @@ DECLARE_FIELDFUNC(cwevent_runner1_defensive_position)
   }
 }
 
+/* Extended Field 16 */
 DECLARE_FIELDFUNC(cwevent_runner1_lineup_position)
 {
   int lineupSlot;
@@ -1145,6 +1260,7 @@ DECLARE_FIELDFUNC(cwevent_runner1_lineup_position)
   }
 }
 
+/* Extended Field 17 */
 DECLARE_FIELDFUNC(cwevent_runner2_defensive_position)
 {
   if (!strcmp(gameiter->state->runners[2], "")) {
@@ -1158,6 +1274,7 @@ DECLARE_FIELDFUNC(cwevent_runner2_defensive_position)
   }
 }
 
+/* Extended Field 18 */
 DECLARE_FIELDFUNC(cwevent_runner2_lineup_position)
 {
   int lineupSlot;
@@ -1180,6 +1297,7 @@ DECLARE_FIELDFUNC(cwevent_runner2_lineup_position)
   }
 }
 
+/* Extended Field 19 */
 DECLARE_FIELDFUNC(cwevent_runner3_defensive_position)
 {
   if (!strcmp(gameiter->state->runners[3], "")) {
@@ -1193,6 +1311,7 @@ DECLARE_FIELDFUNC(cwevent_runner3_defensive_position)
   }
 }
 
+/* Extended Field 20 */
 DECLARE_FIELDFUNC(cwevent_runner3_lineup_position)
 {
   int lineupSlot;
@@ -1215,6 +1334,7 @@ DECLARE_FIELDFUNC(cwevent_runner3_lineup_position)
   }
 }
 
+/* Extended Field 21 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls)
 {
   int balls = 0;
@@ -1231,6 +1351,7 @@ DECLARE_FIELDFUNC(cwevent_pitches_balls)
   return sprintf(buffer, (ascii) ? "%d" : "%02d", balls);
 }
 
+/* Extended Field 22 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls_intentional)
 {
   int balls = 0;
@@ -1246,6 +1367,7 @@ DECLARE_FIELDFUNC(cwevent_pitches_balls_intentional)
   return sprintf(buffer, (ascii) ? "%d" : "%02d", balls);
 }
 
+/* Extended Field 23 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls_pitchout)
 {
   int balls = 0;
@@ -1261,6 +1383,7 @@ DECLARE_FIELDFUNC(cwevent_pitches_balls_pitchout)
   return sprintf(buffer, (ascii) ? "%d" : "%02d", balls);
 }
 
+/* Extended Field 24 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls_other)
 {
   int balls = 0;
@@ -1276,6 +1399,7 @@ DECLARE_FIELDFUNC(cwevent_pitches_balls_other)
   return sprintf(buffer, (ascii) ? "%d" : "%02d", balls);
 }
 
+/* Extended Field 25 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes)
 {
   int strikes = 0;
@@ -1293,6 +1417,7 @@ DECLARE_FIELDFUNC(cwevent_pitches_strikes)
   return sprintf(buffer, (ascii) ? "%d" : "%02d", strikes);
 }
 
+/* Extended Field 26 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_called)
 {
   int strikes = 0;
@@ -1308,6 +1433,7 @@ DECLARE_FIELDFUNC(cwevent_pitches_strikes_called)
   return sprintf(buffer, (ascii) ? "%d" : "%02d", strikes);
 }
 
+/* Extended Field 27 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_swinging)
 {
   int strikes = 0;
@@ -1323,6 +1449,7 @@ DECLARE_FIELDFUNC(cwevent_pitches_strikes_swinging)
   return sprintf(buffer, (ascii) ? "%d" : "%02d", strikes);
 }
 
+/* Extended Field 28 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_foul)
 {
   int strikes = 0;
@@ -1338,6 +1465,7 @@ DECLARE_FIELDFUNC(cwevent_pitches_strikes_foul)
   return sprintf(buffer, (ascii) ? "%d" : "%02d", strikes);
 }
 
+/* Extended Field 29 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_other)
 {
   int strikes = 0;
@@ -1353,11 +1481,13 @@ DECLARE_FIELDFUNC(cwevent_pitches_strikes_other)
   return sprintf(buffer, (ascii) ? "%d" : "%02d", strikes);
 }
 
+/* Extended Field 30 */
 DECLARE_FIELDFUNC(cwevent_runs_on_play)
 {
   return sprintf(buffer, "%d", cw_event_runs_on_play(gameiter->event_data));
 }
 
+/* Extended Field 31 */
 DECLARE_FIELDFUNC(cwevent_fielded_by_id)
 {
   if (gameiter->event_data->fielded_by == 0) {
@@ -1369,86 +1499,150 @@ DECLARE_FIELDFUNC(cwevent_fielded_by_id)
   }
 }
 
+/* Extended Field 32 */
+DECLARE_FIELDFUNC(cwevent_force_second_flag)
+{
+  return sprintf(buffer, (ascii) ? "\"%c\"" : "%c",
+		 (gameiter->event_data->fc_flag[1] &&
+		  (gameiter->event_data->gdp_flag || 
+		   gameiter->event_data->force_flag)) ? 'T' : 'F');
+}
+
+/* Extended Field 33 */
+DECLARE_FIELDFUNC(cwevent_force_third_flag)
+{
+  return sprintf(buffer, (ascii) ? "\"%c\"" : "%c",
+		 (gameiter->event_data->fc_flag[2] &&
+		  (gameiter->event_data->gdp_flag || 
+		   gameiter->event_data->force_flag)) ? 'T' : 'F');
+}
+
+/* Extended Field 34 */
+DECLARE_FIELDFUNC(cwevent_force_home_flag)
+{
+  return sprintf(buffer, (ascii) ? "\"%c\"" : "%c",
+		 (gameiter->event_data->fc_flag[3] &&
+		  (gameiter->event_data->gdp_flag || 
+		   gameiter->event_data->force_flag)) ? 'T' : 'F');
+}
+
+/* Extended Field 35 */
+DECLARE_FIELDFUNC(cwevent_safe_on_error_flag)
+{
+  return sprintf(buffer, (ascii) ? "\"%c\"" : "%c",
+		 (gameiter->event_data->event_type == CW_EVENT_ERROR ||
+		  (gameiter->event_data->event_type == CW_EVENT_GENERICOUT &&
+		   gameiter->event_data->muff_flag[0])) ? 'T' : 'F');
+}
+
+/* Extended Field 36 */
 DECLARE_FIELDFUNC(cwevent_batter_fate)
 {
   return sprintf(buffer, "%d", cwevent_runner_fate(gameiter, 0));
 }
 
+/* Extended Field 37 */
 DECLARE_FIELDFUNC(cwevent_runner1_fate)
 {
   return sprintf(buffer, "%d", cwevent_runner_fate(gameiter, 1));
 }
 
+/* Extended Field 38 */
 DECLARE_FIELDFUNC(cwevent_runner2_fate)
 {
   return sprintf(buffer, "%d", cwevent_runner_fate(gameiter, 2));
 }
 
+/* Extended Field 39 */
 DECLARE_FIELDFUNC(cwevent_runner3_fate)
 {
   return sprintf(buffer, "%d", cwevent_runner_fate(gameiter, 3));
 }
 
+/* Extended Field 40 */
+DECLARE_FIELDFUNC(cwevent_inning_future_runs)
+{
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+		 cwevent_future_runs(gameiter));
+}
+
+/* Extended Field 41 */
 DECLARE_FIELDFUNC(cwevent_assist6)
 {
   return sprintf(buffer, "%d", gameiter->event_data->assists[5]);
 }
 
+/* Extended Field 42 */
 DECLARE_FIELDFUNC(cwevent_assist7)
 {
   return sprintf(buffer, "%d", gameiter->event_data->assists[6]);
 }
 
+/* Extended Field 43 */
 DECLARE_FIELDFUNC(cwevent_assist8)
 {
   return sprintf(buffer, "%d", gameiter->event_data->assists[7]);
 }
 
+/* Extended Field 44 */
 DECLARE_FIELDFUNC(cwevent_assist9)
 {
   return sprintf(buffer, "%d", gameiter->event_data->assists[8]);
 }
 
+/* Extended Field 45 */
 DECLARE_FIELDFUNC(cwevent_assist10)
 {
   return sprintf(buffer, "%d", gameiter->event_data->assists[9]);
 }
 
 static field_func ext_function_ptrs[] = {
-  cwevent_home_team_id,
-  cwevent_batting_team_id,
-  cwevent_fielding_team_id,
-  cwevent_half_inning,
-  cwevent_start_half_inning,
-  cwevent_end_half_inning,
-  cwevent_offense_score,
-  cwevent_defense_score,
-  cwevent_runner1_defensive_position,
-  cwevent_runner1_lineup_position,
-  cwevent_runner2_defensive_position,
-  cwevent_runner2_lineup_position,
-  cwevent_runner3_defensive_position,
-  cwevent_runner3_lineup_position,
-  cwevent_pitches_balls,
-  cwevent_pitches_balls_intentional,
-  cwevent_pitches_balls_pitchout,
-  cwevent_pitches_balls_other,
-  cwevent_pitches_strikes,
-  cwevent_pitches_strikes_called,
-  cwevent_pitches_strikes_swinging,
-  cwevent_pitches_strikes_foul,
-  cwevent_pitches_strikes_other,
-  cwevent_runs_on_play,
-  cwevent_fielded_by_id,
-  cwevent_batter_fate,
-  cwevent_runner1_fate,
-  cwevent_runner2_fate,
-  cwevent_runner3_fate,
-  cwevent_assist6,
-  cwevent_assist7,
-  cwevent_assist8,
-  cwevent_assist9,
-  cwevent_assist10
+  /*  0 */ cwevent_home_team_id,             
+  /*  1 */ cwevent_batting_team_id,          
+  /*  2 */ cwevent_fielding_team_id,         
+  /*  3 */ cwevent_half_inning,
+  /*  4 */ cwevent_start_half_inning,
+  /*  5 */ cwevent_end_half_inning,
+  /*  6 */ cwevent_offense_score,
+  /*  7 */ cwevent_defense_score,
+  /*  8 */ cwevent_offense_score_inning,
+  /*  9 */ cwevent_offense_batters_game,
+  /* 10 */ cwevent_offense_batters_inning,
+  /* 11 */ cwevent_start_pa_flag,
+  /* 12 */ cwevent_truncated_pa_flag,
+  /* 13 */ cwevent_base_state_start,
+  /* 14 */ cwevent_base_state_end,
+  /* 15 */ cwevent_runner1_defensive_position,
+  /* 16 */ cwevent_runner1_lineup_position,
+  /* 17 */ cwevent_runner2_defensive_position,
+  /* 18 */ cwevent_runner2_lineup_position,
+  /* 19 */ cwevent_runner3_defensive_position,
+  /* 20 */ cwevent_runner3_lineup_position,
+  /* 21 */ cwevent_pitches_balls,
+  /* 22 */ cwevent_pitches_balls_intentional,
+  /* 23 */ cwevent_pitches_balls_pitchout,
+  /* 24 */ cwevent_pitches_balls_other,
+  /* 25 */ cwevent_pitches_strikes,
+  /* 26 */ cwevent_pitches_strikes_called,
+  /* 27 */ cwevent_pitches_strikes_swinging,
+  /* 28 */ cwevent_pitches_strikes_foul,
+  /* 29 */ cwevent_pitches_strikes_other,
+  /* 30 */ cwevent_runs_on_play,
+  /* 31 */ cwevent_fielded_by_id,
+  /* 32 */ cwevent_force_second_flag,
+  /* 33 */ cwevent_force_third_flag,
+  /* 34 */ cwevent_force_home_flag,
+  /* 35 */ cwevent_safe_on_error_flag,
+  /* 36 */ cwevent_batter_fate,
+  /* 37 */ cwevent_runner1_fate,
+  /* 38 */ cwevent_runner2_fate,
+  /* 39 */ cwevent_runner3_fate,
+  /* 40 */ cwevent_inning_future_runs,
+  /* 41 */ cwevent_assist6,
+  /* 42 */ cwevent_assist7,
+  /* 43 */ cwevent_assist8,
+  /* 44 */ cwevent_assist9,
+  /* 45 */ cwevent_assist10
 };
 
 void
@@ -1637,6 +1831,63 @@ cwevent_print_field_list(void)
   fprintf(stderr, "94      Fielder with Fourth Assist (0 if none)\n");
   fprintf(stderr, "95      Fielder with Fifth Assist (0 if none)\n");
   fprintf(stderr, "96      event num\n");
+  
+  fprintf(stderr, "\n");
+
+  fprintf(stderr, "These additional fields are available in this version of cwevent.\n");
+  fprintf(stderr, "These are specified using the -x option, and appear in the output\n");
+  fprintf(stderr, "after all fields specified with -f. By default, none of these\n");
+  fprintf(stderr, "fields are output.\n");
+  fprintf(stderr, "\n");
+  fprintf(stderr, "number  field\n");
+  fprintf(stderr, "------  -----\n");
+  fprintf(stderr, "0       home team id\n");
+  fprintf(stderr, "1       batting team id\n");
+  fprintf(stderr, "2       fielding team id\n");
+  fprintf(stderr, "3       half inning (differs from batting team if home team bats first\n");
+  fprintf(stderr, "4       start of half inning flag\n");
+  fprintf(stderr, "5       end of half inning flag\n");
+  fprintf(stderr, "6       score for team on offense\n");
+  fprintf(stderr, "7       score for team on defense\n");
+  fprintf(stderr, "8       runs scored in this half inning\n");
+  fprintf(stderr, "9       number of plate appearances in game for team on offense\n");
+  fprintf(stderr, "10      number of plate appearances in inning for team on offense\n");
+  fprintf(stderr, "11      start of plate appearance flag\n");
+  fprintf(stderr, "12      truncated plate appearance flag\n");
+  fprintf(stderr, "13      base state at start of play\n");
+  fprintf(stderr, "14      base state at end of play\n");
+  fprintf(stderr, "15      defensive position of runner on first\n");
+  fprintf(stderr, "16      lineup position of runner on first\n");
+  fprintf(stderr, "17      defensive position of runner on second\n");
+  fprintf(stderr, "18      lineup position of runner on second\n");
+  fprintf(stderr, "19      defensive position of runner on third\n");
+  fprintf(stderr, "20      lineup position of runner on third\n");
+  fprintf(stderr, "21      number of balls in plate appearance\n");
+  fprintf(stderr, "22      number of intentional balls in plate appearance\n");
+  fprintf(stderr, "23      number of pitchouts in plate appearance\n");
+  fprintf(stderr, "24      number of other balls in plate appearance\n");
+  fprintf(stderr, "25      number of strikes in plate appearance\n");
+  fprintf(stderr, "26      number of called strikes in plate appearance\n");
+  fprintf(stderr, "27      number of swinging strikes in plate appearance\n");
+  fprintf(stderr, "28      number of foul balls in plate appearance\n");
+  fprintf(stderr, "29      number of other strikes in plate appearance\n");
+  fprintf(stderr, "30      number of runs on play\n");
+  fprintf(stderr, "31      id of player fielding batted ball\n");
+  fprintf(stderr, "32      force play at second flag\n");
+  fprintf(stderr, "33      force play at third flag\n");
+  fprintf(stderr, "34      force play at home flag\n");
+  fprintf(stderr, "35      batter safe on error flag\n");
+  fprintf(stderr, "36      fate of batter (base ultimately advanced to)\n");
+  fprintf(stderr, "37      fate of runner on first\n");
+  fprintf(stderr, "38      fate of runner on second\n");
+  fprintf(stderr, "39      fate of runner on third\n");
+  fprintf(stderr, "40      runs scored in half inning after this event\n");
+  fprintf(stderr, "41      fielder with sixth assist\n");
+  fprintf(stderr, "42      fielder with seventh assist\n");
+  fprintf(stderr, "43      fielder with eighth assist\n");
+  fprintf(stderr, "44      fielder with ninth assist\n");
+  fprintf(stderr, "45      fielder with tenth assist\n");
+  
   exit(0);
 }
 

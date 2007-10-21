@@ -31,10 +31,10 @@
 #include "game.h"
 
 typedef struct cw_game_state {
-  int event_count, inning, batting_team, outs, inning_batters;
+  int event_count, inning, batting_team, outs, inning_batters, inning_score;
   int score[2], hits[2], errors[2], times_out[2];
   int num_batters[2], dh_slot[2];
-  int is_leadoff, ph_flag;
+  int is_leadoff, is_new_pa, ph_flag;
 
   char runners[4][50], pitchers[4][50];
 

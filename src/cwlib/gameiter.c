@@ -56,6 +56,7 @@ cw_gamestate_initialize(CWGameState *state)
   state->batting_team = 0;
   state->outs = 0;
   state->inning_batters = 0;
+  state->inning_score = 0;
 
   state->score[0] = state->score[1] = 0;
   state->hits[0] = state->hits[1] = 0;
@@ -65,6 +66,7 @@ cw_gamestate_initialize(CWGameState *state)
   state->dh_slot[0] = state->dh_slot[1] = 0;
 
   state->is_leadoff = 1;
+  state->is_new_pa = 1;
   state->ph_flag = 0;
 
   for (i = 0; i <= 3; i++) {
@@ -107,6 +109,7 @@ cw_gamestate_copy(CWGameState *orig_state)
   state->batting_team = orig_state->batting_team;
   state->outs = orig_state->outs;
   state->inning_batters = orig_state->inning_batters;
+  state->inning_score = orig_state->inning_score;
 
   for (t = 0; t <= 1; t++) {
     state->score[t] = orig_state->score[t];
@@ -118,6 +121,7 @@ cw_gamestate_copy(CWGameState *orig_state)
   }
 
   state->is_leadoff = orig_state->is_leadoff;
+  state->is_new_pa = orig_state->is_new_pa;
   state->ph_flag = orig_state->ph_flag;
 
   for (i = 0; i <= 3; i++) {
@@ -303,6 +307,7 @@ void cw_gamestate_update(CWGameState *state,
 
   state->event_count++;
   state->score[state->batting_team] += cw_event_runs_on_play(event_data);
+  state->inning_score += cw_event_runs_on_play(event_data);
   state->hits[state->batting_team] +=
     (event_data->event_type >= CW_EVENT_SINGLE &&
      event_data->event_type <= CW_EVENT_HOMERUN) ? 1 : 0;
@@ -317,10 +322,14 @@ void cw_gamestate_update(CWGameState *state,
     state->inning_batters++;
     state->ph_flag = 0;
     state->is_leadoff = 0;
+    state->is_new_pa = 1;
 
     XFREE(state->removed_for_ph);
     XFREE(state->walk_pitcher);
     XFREE(state->strikeout_batter);
+  }
+  else {
+    state->is_new_pa = 0;
   }
 
   for (i = 1; i <= 3; i++) {
@@ -415,8 +424,10 @@ cw_gamestate_change_sides(CWGameState *state, CWEvent *event)
   state->batting_team = event->batting_team;
   state->outs = 0;
   state->is_leadoff = 1;
+  state->is_new_pa = 1;
   state->ph_flag = 0;
   state->inning_batters = 0;
+  state->inning_score = 0;
 
   for (i = 0; i <= 3; i++) {
     strcpy(state->runners[i], "");
