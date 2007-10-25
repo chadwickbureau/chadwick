@@ -1437,6 +1437,9 @@ static int cw_parse_other_advance(CWParserState *state, CWEventData *event,
     else if (!strcmp(state->token, "TP")) {
       event->tp_flag = 1;
     }
+    else if (state->token[0] == 'R') {
+      /* accept "relay" notation flags silently */
+    }
     else {
       return cw_parse_invalid(state);
     }
