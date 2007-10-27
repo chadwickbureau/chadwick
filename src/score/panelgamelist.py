@@ -66,6 +66,10 @@ class GameListCtrl(wx.ListCtrl):
         """
         self.book = book
         self.games = [ g for g in book.Games() ]
+        self.games.sort(lambda x, y: cmp([x.GetDate(), x.GetTeam(1),
+                                          x.GetNumber()],
+                                         [y.GetDate(), y.GetTeam(1),
+                                          y.GetNumber()]))
         self.SetItemCount(book.NumGames())
 
     def OnGetItemText(self, item, col):
@@ -157,7 +161,10 @@ class GameListPanel(wx.Panel):
         self.teamList.Clear()
         self.teamList.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
         self.teamList.Append("all teams")
-        for team in book.Teams():
+        teams = [ x for x in book.Teams() ]
+        teams.sort(lambda x, y: cmp([x.GetCity(), x.GetNickname()],
+                                    [y.GetCity(), y.GetNickname()]))
+        for team in teams:
             self.teamList.Append(team.GetName())
         self.teamList.SetStringSelection(teamChoice)
         

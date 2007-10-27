@@ -54,7 +54,14 @@ class Team:
     def SetYear(self, year):           self.year = year
 
     def NumPlayers(self):              return len(self.players)
-    def Players(self):                 return self.players.itervalues()
+    def Players(self, sorted=True):
+        if not sorted:
+            return self.players.itervalues()
+        else:
+            players = [ x for x in self.players.values() ]
+            players.sort(lambda x, y: cmp(x.GetSortName(), y.GetSortName()))
+            return players
+                         
     
     def AddPlayer(self, player):
         self.players[player.GetID()] = player
@@ -184,7 +191,8 @@ class Scorebook:
             self.modified = True
         
     def AddReport(self, report):
-        self.reports.append(report)
+        #self.reports.append(report)
+        pass
 
     def GetReport(self, label):
         report = filter(lambda x: x.GetName() == label, self.reports)

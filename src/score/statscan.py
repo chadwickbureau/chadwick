@@ -510,7 +510,9 @@ class TeamBattingRegister:
                  stat["sh"], stat["sf"],
                  stat["sb"], stat["cs"]))
 
-        stat = reduce(lambda x,y: x+y, [self.stats[key] for key in self.stats])
+        stat = reduce(lambda x,y: x+y,
+                      [self.stats[key] for key in self.stats],
+                      BattingStatline())
 
         s += ("%-20s %s %s %s    %4d    %4d   %3d   %4d    %3d     %2d    %2d    %2d\n" %
               ("Totals",
@@ -827,7 +829,9 @@ class TeamPitchingRegister:
                  stat["bb"], stat["ibb"], stat["so"],
                  stat["bk"], stat["wp"], stat["hb"]))
 
-        stat = reduce(lambda x,y: x+y, [self.stats[key] for key in self.stats])
+        stat = reduce(lambda x,y: x+y,
+                      [self.stats[key] for key in self.stats],
+                      PitchingStatline())
 
         if stat["outs"] == 0:
             era = "-----"

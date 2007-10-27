@@ -88,16 +88,21 @@ class YearDialog(wx.Dialog):
 
 class ChoosePlayerDialog(wx.Dialog):
     def __init__(self, parent, title, book):
-        wx.Dialog.__init__(self, parent, wx.ID_ANY, title)
+        wx.Dialog.__init__(self, parent, title=title)
 
         topSizer = wx.BoxSizer(wx.VERTICAL)
 
-        self.playerList = wx.ListBox(self, wx.ID_ANY, style=wx.LB_SINGLE)
-        self.players = [ ]
-        for (pl,player) in enumerate(book.Players()):
+        self.playerList = wx.ListBox(self, style=wx.LB_SINGLE)
+        self.playerIDs = [ ]
+
+        players = [ x for x in book.Players() ]
+        players.sort(lambda x, y: cmp(x.GetSortName(), y.GetSortName()))
+
+        for (pl,player) in enumerate(players):
             self.playerList.Append("%s (%s)" % (player.GetSortName(),
                                                 player.GetID()))
-            self.players.append(player.GetID())
+            self.playerIDs.append(player.GetID())
+
 
         self.playerList.SetSelection(0)
         topSizer.Add(self.playerList, 0, wx.ALL | wx.ALIGN_CENTER, 5)
@@ -114,7 +119,7 @@ class ChoosePlayerDialog(wx.Dialog):
         topSizer.SetSizeHints(self)
 
     def GetPlayerID(self):
-        return self.players[self.playerList.GetSelection()]
+        return self.playerIDs[self.playerList.GetSelection()]
 
 
 class ChadwickFrame(wx.Frame):
@@ -455,7 +460,8 @@ class ChadwickFrame(wx.Frame):
             # This gives a list of all games the team has already had entered
             prevGames = [ y for y in self.book.Games()
                           if rosters[t].GetID() in [ y.GetTeam(0),
-                                                     y.GetTeam(1) ] ]
+                                                     y.GetTeam(1) ] and
+                             y.GetDate() <= thegame.GetDate() ]
             dialog = LineupDialog(self, 
                                   "Starting Lineup for %s" % 
                                   rosters[t].GetName())

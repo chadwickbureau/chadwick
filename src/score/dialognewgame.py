@@ -95,7 +95,10 @@ class NewGameDialog(wx.Dialog):
         self.teams[1].Clear()
         self.teamIDs = [ ]
 
-        for t in f.Teams():
+        teams = [ x for x in f.Teams() ]
+        teams.sort(lambda x, y: cmp([x.GetCity(), x.GetNickname()],
+                                    [y.GetCity(), y.GetNickname()]))
+        for t in teams:
             t.year = f.GetYear()
             self.teams[0].Append(t.GetName())
             self.teams[1].Append(t.GetName())
