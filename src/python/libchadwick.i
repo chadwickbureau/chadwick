@@ -386,19 +386,19 @@ int IsValidPlay(char *play)
   void Reset(void)  { cw_gameiter_reset(self); }
 
   int GetInning(void) {
-    if (self->state->outs == 3) return self->state->inning + self->state->half_inning;
+    if (self->state->outs == 3) return self->state->inning + self->state->batting_team;
     else return self->state->inning;
   }
 
   int GetHalfInning(void) {
-    if (self->state->outs == 3) return (self->state->half_inning + 1) % 2;
-    else return self->state->half_inning;
+    if (self->state->outs == 3) return (self->state->batting_team + 1) % 2;
+    else return self->state->batting_team;
   }
 
   int GetOuts(void)  { return self->state->outs; }
 
   char *GetBatter(void) {
-    int halfInning = self->state->half_inning;
+    int halfInning = self->state->batting_team;
     if (self->state->outs == 3) halfInning = (halfInning + 1) % 2;
     return self->state->lineups[self->state->num_batters[halfInning] % 9 + 1][halfInning].player_id;
   }

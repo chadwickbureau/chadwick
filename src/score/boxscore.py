@@ -183,7 +183,7 @@ class Boxscore:
                 self.dp[1-team] += 1
 
             inning = gameiter.event.inning
-            halfInning = gameiter.event.half_inning
+            halfInning = gameiter.event.batting_team
 
             if inning > len(self.byInnings[halfInning]):
                 self.byInnings[halfInning].append(0)

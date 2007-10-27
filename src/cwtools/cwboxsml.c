@@ -1245,6 +1245,11 @@ cwbox_event_metadata(XMLNode *parent, CWGame *game)
 			 (atoi(cw_game_info_lookup(game, "number")) == 0) ? 1 :
 			 atoi(cw_game_info_lookup(game, "number")));
 
+  if (cw_game_info_lookup(game, "htbf") &&
+      !strcmp(cw_game_info_lookup(game, "htbf"), "true")) {
+    xml_node_attribute(node, "site-alignment", "away");
+  }
+
 
   /* For the moment, <event-metadata-baseball> is empty, so we just
    * create it here rather than using a separate function.

@@ -1400,7 +1400,7 @@ class MultiHRLog(BigGameLog):
     
     def OnEvent(self, game, gameiter):
         eventData = gameiter.GetEventData()
-        team = gameiter.event.half_inning
+        team = gameiter.event.batting_team
 
         if eventData.event_type == cw.EVENT_HOMERUN:
             batter = gameiter.event.batter
@@ -1421,7 +1421,7 @@ class MultiHitLog(BigGameLog):
     
     def OnEvent(self, game, gameiter):
         eventData = gameiter.GetEventData()
-        team = gameiter.event.half_inning
+        team = gameiter.event.batting_team
 
         if eventData.event_type in [ cw.EVENT_SINGLE,
                                      cw.EVENT_DOUBLE,
@@ -1445,7 +1445,7 @@ class MultiStrikeoutLog(BigGameLog):
     
     def OnEvent(self, game, gameiter):
         eventData = gameiter.GetEventData()
-        team = gameiter.event.half_inning
+        team = gameiter.event.batting_team
 
         if eventData.event_type == cw.EVENT_STRIKEOUT:
             pitcher = gameiter.GetFielder(1-team, 1)

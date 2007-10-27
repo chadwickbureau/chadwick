@@ -66,50 +66,38 @@ class RunnersPanel(wx.Panel):
         self.inningText = FormattedStaticText(self, "")
         sizer.Add(self.inningText, 0, wx.ALL | wx.EXPAND, 5)
 
-        baseOutSizer = wx.GridSizer(rows=4, cols=2)
+        self.baseOutSizer = wx.GridSizer(rows=4, cols=2)
 
+        self.runnerLabels = [ FormattedStaticText(self, label)
+                              for label in [ "Batter", "Runner on 1st",
+                                             "Runner on 2nd", "Runner on 3rd" ] ]
         self.runnerText = [ [ wx.Choice(self, size=(200,-1))
                               for i in [0,1,2,3] ] for t in [ 0, 1 ] ]
 
-
-        baseOutSizer.Add(FormattedStaticText(self, "Runner on 3rd"),
-                         0, wx.ALL | wx.ALIGN_CENTER, 5)
-        baseOutSizer.Add(self.runnerText[0][3], 1, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.runnerText[1][3].Show(False)
+        for base in [3,2,1,0]:
+            self.baseOutSizer.Add(self.runnerLabels[base],
+                                  0, wx.ALL | wx.ALIGN_CENTER, 5)
+            self.baseOutSizer.Add(self.runnerText[0][base],
+                                  1, wx.ALL | wx.ALIGN_CENTER, 5)
+            self.runnerText[1][base].Show(False)
         
+
         for t in [ 0, 1 ]:
-            self.Bind(wx.EVT_CHOICE, lambda event: self.OnPinchRun(event, 3),
+            self.Bind(wx.EVT_CHOICE,
+                      lambda event: self.OnPinchRun(event, 3),
                       self.runnerText[t][3])
-
-        baseOutSizer.Add(FormattedStaticText(self, "Runner on 2nd"),
-                         0, wx.ALL | wx.ALIGN_CENTER, 5)
-        baseOutSizer.Add(self.runnerText[0][2], 1, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.runnerText[1][2].Show(False)
-        
-        for t in [ 0, 1 ]:
-            self.Bind(wx.EVT_CHOICE, lambda event: self.OnPinchRun(event, 2),
+            self.Bind(wx.EVT_CHOICE,
+                      lambda event: self.OnPinchRun(event, 2),
                       self.runnerText[t][2])
-
-        baseOutSizer.Add(FormattedStaticText(self, "Runner on 1st"),
-                         0, wx.ALL | wx.ALIGN_CENTER, 5)
-        baseOutSizer.Add(self.runnerText[0][1], 1, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.runnerText[1][1].Show(False)
-
-        for t in [ 0, 1 ]:
-            self.Bind(wx.EVT_CHOICE, lambda event: self.OnPinchRun(event, 1),
+            self.Bind(wx.EVT_CHOICE,
+                      lambda event: self.OnPinchRun(event, 1),
                       self.runnerText[t][1])
-
-        baseOutSizer.Add(FormattedStaticText(self, "Batter"),
-                         0, wx.ALL | wx.ALIGN_CENTER, 5)
-        baseOutSizer.Add(self.runnerText[0][0], 1, wx.ALL | wx.ALIGN_CENTER, 5)
-        self.runnerText[1][0].Show(False)
-        
-        for t in [ 0, 1 ]:
-            self.Bind(wx.EVT_CHOICE, self.OnPinchHit, self.runnerText[t][0])
+            self.Bind(wx.EVT_CHOICE, self.OnPinchHit,
+                      self.runnerText[t][0])
 
         self.lastHalfInning = 0
         
-        sizer.Add(baseOutSizer, 1, wx.ALL | wx.ALIGN_CENTER, 5)
+        sizer.Add(self.baseOutSizer, 1, wx.ALL | wx.ALIGN_CENTER, 5)
  
         self.SetSizer(sizer)
         self.Layout()
@@ -165,12 +153,16 @@ class RunnersPanel(wx.Panel):
         roster = self.doc.GetRoster(team)
 
         if self.lastHalfInning != self.doc.GetHalfInning():
-            for base in [0, 1, 2, 3]:
-                self.GetSizer().Replace(self.runnerText[self.lastHalfInning][base],
-                                        self.runnerText[1-self.lastHalfInning][base],
-                                        True)
-                self.runnerText[self.lastHalfInning][base].Show(False)
+            self.baseOutSizer.Clear()
+
+            for base in [3,2,1,0]:
+                self.baseOutSizer.Add(self.runnerLabels[base],
+                                      0, wx.ALL | wx.ALIGN_CENTER, 5)
+                self.baseOutSizer.Add(self.runnerText[1-self.lastHalfInning][base],
+                                      1, wx.ALL | wx.ALIGN_CENTER, 5)
                 self.runnerText[1-self.lastHalfInning][base].Show(True)
+                self.runnerText[self.lastHalfInning][base].Show(False)
+
             self.lastHalfInning = self.doc.GetHalfInning()
             self.Layout()
         
