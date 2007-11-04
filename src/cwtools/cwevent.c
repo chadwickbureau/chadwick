@@ -66,6 +66,8 @@ int max_ext_field = 45;
 
 char program_name[20] = "cwevent";
 
+int print_header = 0;
+
 /*************************************************************************
  * Utility functions (in some cases, candidates for refactor to cwlib)
  *************************************************************************/
@@ -126,6 +128,7 @@ int cwevent_future_runs(CWGameIterator *orig_gameiter)
  */
 typedef int (*field_func)(char *, CWGameIterator *,
 			  CWRoster *, CWRoster *);
+
 
 /*
  * preprocessor directive for conveniently declaring function signature
@@ -1037,6 +1040,106 @@ static field_func function_ptrs[] = {
   cwevent_event_number            /* 96 */
 };
 
+static char *field_names[] = {
+  /*  0 */ "GAME_ID",
+  /*  1 */ "AWAY_TEAM_ID",
+  /*  2 */ "INN_CT",
+  /*  3 */ "HOME_ID",
+  /*  4 */ "OUTS_CT",
+  /*  5 */ "BALLS_CT",
+  /*  6 */ "STRIKES_CT",
+  /*  7 */ "PITCH_SEQ_TX",
+  /*  8 */ "AWAY_SCORE_CT",
+  /*  9 */ "HOME_SCORE_CT",
+  /* 10 */ "BAT_ID",
+  /* 11 */ "BAT_HAND_CD",
+  /* 12 */ "RESP_BAT_ID",
+  /* 13 */ "RESP_BAT_HAND_CD",
+  /* 14 */ "PIT_ID",
+  /* 15 */ "PIT_HAND_CD",
+  /* 16 */ "RESP_PIT_ID",
+  /* 17 */ "RESP_PIT_HAND_CD",
+  /* 18 */ "POS2_FLD_ID",
+  /* 19 */ "POS3_FLD_ID",
+  /* 20 */ "POS4_FLD_ID",
+  /* 21 */ "POS5_FLD_ID",
+  /* 22 */ "POS6_FLD_ID",
+  /* 23 */ "POS7_FLD_ID",
+  /* 24 */ "POS8_FLD_ID",
+  /* 25 */ "POS9_FLD_ID",
+  /* 26 */ "BASE1_RUN_ID",
+  /* 27 */ "BASE2_RUN_ID",
+  /* 28 */ "BASE3_RUN_ID",
+  /* 29 */ "EVENT_TX",
+  /* 30 */ "LEADOFF_FL",
+  /* 31 */ "PH_FL",
+  /* 32 */ "BAT_FLD_CD",
+  /* 33 */ "BAT_LINEUP_ID",
+  /* 34 */ "EVENT_CD",
+  /* 35 */ "BAT_EVENT_FL",
+  /* 36 */ "AB_FL",
+  /* 37 */ "H_CD",
+  /* 38 */ "SH_FL",
+  /* 39 */ "SF_FL",
+  /* 40 */ "EVENT_OUTS_CT",
+  /* 41 */ "DP_FL",
+  /* 42 */ "TP_FL",
+  /* 43 */ "RBI_CT",
+  /* 44 */ "WP_FL",
+  /* 45 */ "PB_FL",
+  /* 46 */ "FLD_ID",
+  /* 47 */ "BATTEDBALL_CD",
+  /* 48 */ "BUNT_FL",
+  /* 49 */ "FOUL_FL",
+  /* 50 */ "BATTEDBALL_LOC_TX",
+  /* 51 */ "ERR_CT",
+  /* 52 */ "ERR1_FLD_ID",
+  /* 53 */ "ERR1_CD",
+  /* 54 */ "ERR2_FLD_ID",
+  /* 55 */ "ERR2_CD",
+  /* 56 */ "ERR3_FLD_ID",
+  /* 57 */ "ERR3_CD",
+  /* 58 */ "BAT_DEST_ID",
+  /* 59 */ "RUN1_DEST_ID",
+  /* 60 */ "RUN2_DEST_ID",
+  /* 61 */ "RUN3_DEST_ID",
+  /* 62 */ "BAT_PLAY_TX",
+  /* 63 */ "RUN1_PLAY_TX",
+  /* 64 */ "RUN2_PLAY_TX",
+  /* 65 */ "RUN3_PLAY_TX",
+  /* 66 */ "RUN1_SB_FL",
+  /* 67 */ "RUN2_SB_FL",
+  /* 68 */ "RUN3_SB_FL",
+  /* 69 */ "RUN1_CS_FL",
+  /* 70 */ "RUN2_CS_FL",
+  /* 71 */ "RUN3_CS_FL",
+  /* 72 */ "RUN1_PK_FL",
+  /* 73 */ "RUN2_PK_FL",
+  /* 74 */ "RUN3_PK_FL",
+  /* 75 */ "RUN1_RESP_PIT_ID",
+  /* 76 */ "RUN2_RESP_PIT_ID",
+  /* 77 */ "RUN3_RESP_PIT_ID",
+  /* 78 */ "GAME_NEW_FL",
+  /* 79 */ "GAME_END_FL",
+  /* 80 */ "PR_RUN1_FL",
+  /* 81 */ "PR_RUN2_FL",
+  /* 82 */ "PR_RUN3_FL",
+  /* 83 */ "REMOVED_FOR_PR_RUN1_ID",
+  /* 84 */ "REMOVED_FOR_PR_RUN2_ID",
+  /* 85 */ "REMOVED_FOR_PR_RUN3_ID",
+  /* 86 */ "REMOVED_FOR_PH_BAT_ID",
+  /* 87 */ "REMOVED_FOR_PH_BAT_FLD_ID",
+  /* 88 */ "PO1_FLD_ID",
+  /* 89 */ "PO2_FLD_ID",
+  /* 90 */ "PO3_FLD_ID",
+  /* 91 */ "ASS1_FLD_ID",
+  /* 92 */ "ASS2_FLD_ID",
+  /* 93 */ "ASS3_FLD_ID",
+  /* 94 */ "ASS4_FLD_ID",
+  /* 95 */ "ASS5_FLD_ID",
+  /* 96 */ "EVENT_CT"
+};
+
 /*************************************************************************
  * Implementation of "extended" fields
  *************************************************************************/
@@ -1645,11 +1748,60 @@ static field_func ext_function_ptrs[] = {
   /* 45 */ cwevent_assist10
 };
 
+static char *ext_field_names[] = {
+  /*  0 */ "HOME_TEAM_ID",
+  /*  1 */ "BAT_TEAM_ID",
+  /*  2 */ "FLD_TEAM_ID",
+  /*  3 */ "INN_ID",
+  /*  4 */ "INN_NEW_FL",
+  /*  5 */ "INN_END_FL",
+  /*  6 */ "START_BAT_SCORE_CT",
+  /*  7 */ "START_OPP_SCORE_CT",
+  /*  8 */ "INN_RUNS_CT",
+  /*  9 */ "GAME_PA_CT",
+  /* 10 */ "INN_PA_CT",
+  /* 11 */ "PA_NEW_FL",
+  /* 12 */ "PA_TRUNC_FL",
+  /* 13 */ "START_BASES_CD",
+  /* 14 */ "END_BASES_CD",
+  /* 15 */ "RUN1_FLD_CD",
+  /* 16 */ "RUN1_LINEUP_CD",
+  /* 17 */ "RUN2_FLD_CD",
+  /* 18 */ "RUN2_LINEUP_CD",
+  /* 19 */ "RUN3_FLD_CD",
+  /* 20 */ "RUN3_LINEUP_CD",
+  /* 21 */ "PA_BALL_CT",
+  /* 22 */ "PA_INTENT_BALL_CT",
+  /* 23 */ "PA_PITCHOUT_BALL_CT",
+  /* 24 */ "PA_OTHER_BALL_CT",
+  /* 25 */ "PA_STRIKE_CT",
+  /* 26 */ "PA_CALLED_STRIKE_CT",
+  /* 27 */ "PA_SWINGMISS_STRIKE_CT",
+  /* 28 */ "PA_FOUL_STRIKE_CT",
+  /* 29 */ "PA_OTHER_STRIKE_CT",
+  /* 30 */ "EVENT_RUNS_CT",
+  /* 31 */ "FLD_ID",
+  /* 32 */ "BASE2_FORCE_FL",
+  /* 33 */ "BASE3_FORCE_FL",
+  /* 34 */ "BASE4_FORCE_FL",
+  /* 35 */ "BAT_SAFE_ERR_FL",
+  /* 36 */ "BAT_FATE_ID",
+  /* 37 */ "RUN1_FATE_ID",
+  /* 38 */ "RUN2_FATE_ID",
+  /* 39 */ "RUN3_FATE_ID",
+  /* 40 */ "FATE_RUNS_CT",
+  /* 41 */ "ASS6_FLD_ID",
+  /* 42 */ "ASS7_FLD_ID",
+  /* 43 */ "ASS8_FLD_ID",
+  /* 44 */ "ASS9_FLD_ID",
+  /* 45 */ "ASS10_FLD_ID"
+};
+
 void
 cwevent_process_game(CWGame *game, CWRoster *visitors, CWRoster *home) 
 {
   char *buf;
-  char output_line[1024];
+  char output_line[4096];
   int i, comma;
   CWGameIterator *gameiter = cw_gameiter_create(game);
 
@@ -1718,8 +1870,9 @@ cwevent_print_help(void)
   fprintf(stderr, "              Default is 0-6,8-9,12-13,16-17,26-40,43-45,51,58-61\n");
   fprintf(stderr, "  -x flist  give list of extended fields to output\n");
   fprintf(stderr, "              Default is none\n");
-  fprintf(stderr, "  -d        print list of field numbers and descriptions\n\n");
+  fprintf(stderr, "  -d        print list of field numbers and descriptions\n");
   fprintf(stderr, "  -q        operate quietly; do not output progress messages\n");
+  fprintf(stderr, "  -n        print field names in first row of output\n\n");
 
   exit(0);
 }
@@ -1844,7 +1997,7 @@ cwevent_print_field_list(void)
   fprintf(stderr, "0       home team id\n");
   fprintf(stderr, "1       batting team id\n");
   fprintf(stderr, "2       fielding team id\n");
-  fprintf(stderr, "3       half inning (differs from batting team if home team bats first\n");
+  fprintf(stderr, "3       half inning (differs from batting team if home team bats first)\n");
   fprintf(stderr, "4       start of half inning flag\n");
   fprintf(stderr, "5       end of half inning flag\n");
   fprintf(stderr, "6       score for team on offense\n");
@@ -1908,6 +2061,43 @@ void (*cwtools_print_welcome_message)(char *) = cwevent_print_welcome_message;
 void
 cwevent_initialize(void)
 {
+  int i, comma = 0;
+  char output_line[4096];
+  char *buf;
+
+  if (!ascii || !print_header) {
+    return;
+  }
+
+  strcpy(output_line, "");
+  buf = output_line;
+
+  for (i = 0; i <= max_field; i++) {
+    if (fields[i]) {
+      if (ascii && comma) {
+	*(buf++) = ',';
+      }
+      else {
+	comma = 1;
+      }
+      buf += sprintf(buf, "\"%s\"", field_names[i]);
+    }
+  }
+
+  for (i = 0; i <= max_ext_field; i++) {
+    if (ext_fields[i]) {
+      if (ascii && comma) {
+	*(buf++) = ',';
+      }
+      else {
+	comma = 1;
+      }
+      buf += sprintf(buf, "\"%s\"", ext_field_names[i]);
+    }
+  }
+
+  printf(output_line);
+  printf("\n");
 }
 
 void (*cwtools_initialize)(void) = cwevent_initialize;
@@ -1964,6 +2154,9 @@ cwevent_parse_command_line(int argc, char *argv[])
       if (++i < argc) {
 	cwtools_parse_field_list(argv[i], max_field, fields);
       }
+    }
+    else if (!strcmp(argv[i], "-n")) {
+      print_header = 1;
     }
     else if (!strcmp(argv[i], "-ft")) {
       ascii = 0;
