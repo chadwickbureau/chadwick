@@ -68,6 +68,7 @@ char program_name[20] = "cwevent";
 
 int print_header = 0;
 
+
 /*************************************************************************
  * Utility functions (in some cases, candidates for refactor to cwlib)
  *************************************************************************/
@@ -128,6 +129,16 @@ int cwevent_future_runs(CWGameIterator *orig_gameiter)
  */
 typedef int (*field_func)(char *, CWGameIterator *,
 			  CWRoster *, CWRoster *);
+
+
+/*
+ * convenient structure to hold all information relating to a field
+ * together in one place
+ */
+typedef struct field_struct {
+  field_func f;
+  char *header, *description;
+} field_struct;
 
 
 /*
@@ -940,204 +951,127 @@ DECLARE_FIELDFUNC(cwevent_event_number)
 		 gameiter->state->event_count + 1);
 }
 
-static field_func function_ptrs[] = {
-  cwevent_game_id,                /* 0 */
-  cwevent_visiting_team,          /* 1 */
-  cwevent_inning,                 /* 2 */
-  cwevent_batting_team,           /* 3 */
-  cwevent_outs,                   /* 4 */
-  cwevent_balls,                  /* 5 */
-  cwevent_strikes,                /* 6 */
-  cwevent_pitches,                /* 7 */
-  cwevent_visitor_score,          /* 8 */ 
-  cwevent_home_score,             /* 9 */
-  cwevent_batter,                 /* 10 */
-  cwevent_batter_hand,            /* 11 */
-  cwevent_res_batter,             /* 12 */
-  cwevent_res_batter_hand,        /* 13 */
-  cwevent_pitcher,                /* 14 */
-  cwevent_pitcher_hand,           /* 15 */
-  cwevent_res_pitcher,            /* 16 */
-  cwevent_res_pitcher_hand,       /* 17 */
-  cwevent_catcher,                /* 18 */
-  cwevent_first_baseman,          /* 19 */
-  cwevent_second_baseman,         /* 20 */
-  cwevent_third_baseman,          /* 21 */
-  cwevent_shortstop,              /* 22 */
-  cwevent_left_fielder,           /* 23 */
-  cwevent_center_fielder,         /* 24 */
-  cwevent_right_fielder,          /* 25 */
-  cwevent_runner_first,           /* 26 */
-  cwevent_runner_second,          /* 27 */
-  cwevent_runner_third,           /* 28 */
-  cwevent_event_text,             /* 29 */
-  cwevent_leadoff_flag,           /* 30 */
-  cwevent_ph_flag,                /* 31 */
-  cwevent_defensive_position,     /* 32 */
-  cwevent_lineup_position,        /* 33 */
-  cwevent_event_type,             /* 34 */
-  cwevent_batter_event_flag,      /* 35 */
-  cwevent_ab_flag,                /* 36 */
-  cwevent_hit_value,              /* 37 */
-  cwevent_sh_flag,                /* 38 */
-  cwevent_sf_flag,                /* 39 */
-  cwevent_outs_on_play,           /* 40 */
-  cwevent_dp_flag,                /* 41 */
-  cwevent_tp_flag,                /* 42 */
-  cwevent_rbi_on_play,            /* 43 */
-  cwevent_wp_flag,                /* 44 */
-  cwevent_pb_flag,                /* 45 */
-  cwevent_fielded_by,             /* 46 */
-  cwevent_batted_ball_type,       /* 47 */
-  cwevent_bunt_flag,              /* 48 */
-  cwevent_foul_flag,              /* 49 */
-  cwevent_hit_location,           /* 50 */
-  cwevent_num_errors,             /* 51 */
-  cwevent_error1_player,          /* 52 */
-  cwevent_error1_type,            /* 53 */
-  cwevent_error2_player,          /* 54 */
-  cwevent_error2_type,            /* 55 */
-  cwevent_error3_player,          /* 56 */
-  cwevent_error3_type,            /* 57 */
-  cwevent_batter_advance,         /* 58 */
-  cwevent_runner1_advance,        /* 59 */
-  cwevent_runner2_advance,        /* 60 */
-  cwevent_runner3_advance,        /* 61 */
-  cwevent_play_on_batter,         /* 62 */
-  cwevent_play_on_runner1,        /* 63 */
-  cwevent_play_on_runner2,        /* 64 */
-  cwevent_play_on_runner3,        /* 65 */
-  cwevent_sb2_flag,               /* 66 */
-  cwevent_sb3_flag,               /* 67 */
-  cwevent_sbh_flag,               /* 68 */
-  cwevent_cs2_flag,               /* 69 */
-  cwevent_cs3_flag,               /* 70 */
-  cwevent_csh_flag,               /* 71 */
-  cwevent_po1_flag,               /* 72 */
-  cwevent_po2_flag,               /* 73 */
-  cwevent_po3_flag,               /* 74 */
-  cwevent_responsible_pitcher1,   /* 75 */
-  cwevent_responsible_pitcher2,   /* 76 */
-  cwevent_responsible_pitcher3,   /* 77 */
-  cwevent_new_game_flag,          /* 78 */
-  cwevent_end_game_flag,          /* 79 */
-  cwevent_pr1_flag,               /* 80 */
-  cwevent_pr2_flag,               /* 81 */
-  cwevent_pr3_flag,               /* 82 */
-  cwevent_removed_runner1,        /* 83 */
-  cwevent_removed_runner2,        /* 84 */
-  cwevent_removed_runner3,        /* 85 */
-  cwevent_removed_batter,         /* 86 */
-  cwevent_removed_batter_position, /* 87 */
-  cwevent_putout1,                /* 88 */
-  cwevent_putout2,                /* 89 */
-  cwevent_putout3,                /* 90 */
-  cwevent_assist1,                /* 91 */
-  cwevent_assist2,                /* 92 */
-  cwevent_assist3,                /* 93 */
-  cwevent_assist4,                /* 94 */
-  cwevent_assist5,                /* 95 */
-  cwevent_event_number            /* 96 */
-};
-
-static char *field_names[] = {
-  /*  0 */ "GAME_ID",
-  /*  1 */ "AWAY_TEAM_ID",
-  /*  2 */ "INN_CT",
-  /*  3 */ "HOME_ID",
-  /*  4 */ "OUTS_CT",
-  /*  5 */ "BALLS_CT",
-  /*  6 */ "STRIKES_CT",
-  /*  7 */ "PITCH_SEQ_TX",
-  /*  8 */ "AWAY_SCORE_CT",
-  /*  9 */ "HOME_SCORE_CT",
-  /* 10 */ "BAT_ID",
-  /* 11 */ "BAT_HAND_CD",
-  /* 12 */ "RESP_BAT_ID",
-  /* 13 */ "RESP_BAT_HAND_CD",
-  /* 14 */ "PIT_ID",
-  /* 15 */ "PIT_HAND_CD",
-  /* 16 */ "RESP_PIT_ID",
-  /* 17 */ "RESP_PIT_HAND_CD",
-  /* 18 */ "POS2_FLD_ID",
-  /* 19 */ "POS3_FLD_ID",
-  /* 20 */ "POS4_FLD_ID",
-  /* 21 */ "POS5_FLD_ID",
-  /* 22 */ "POS6_FLD_ID",
-  /* 23 */ "POS7_FLD_ID",
-  /* 24 */ "POS8_FLD_ID",
-  /* 25 */ "POS9_FLD_ID",
-  /* 26 */ "BASE1_RUN_ID",
-  /* 27 */ "BASE2_RUN_ID",
-  /* 28 */ "BASE3_RUN_ID",
-  /* 29 */ "EVENT_TX",
-  /* 30 */ "LEADOFF_FL",
-  /* 31 */ "PH_FL",
-  /* 32 */ "BAT_FLD_CD",
-  /* 33 */ "BAT_LINEUP_ID",
-  /* 34 */ "EVENT_CD",
-  /* 35 */ "BAT_EVENT_FL",
-  /* 36 */ "AB_FL",
-  /* 37 */ "H_CD",
-  /* 38 */ "SH_FL",
-  /* 39 */ "SF_FL",
-  /* 40 */ "EVENT_OUTS_CT",
-  /* 41 */ "DP_FL",
-  /* 42 */ "TP_FL",
-  /* 43 */ "RBI_CT",
-  /* 44 */ "WP_FL",
-  /* 45 */ "PB_FL",
-  /* 46 */ "FLD_ID",
-  /* 47 */ "BATTEDBALL_CD",
-  /* 48 */ "BUNT_FL",
-  /* 49 */ "FOUL_FL",
-  /* 50 */ "BATTEDBALL_LOC_TX",
-  /* 51 */ "ERR_CT",
-  /* 52 */ "ERR1_FLD_ID",
-  /* 53 */ "ERR1_CD",
-  /* 54 */ "ERR2_FLD_ID",
-  /* 55 */ "ERR2_CD",
-  /* 56 */ "ERR3_FLD_ID",
-  /* 57 */ "ERR3_CD",
-  /* 58 */ "BAT_DEST_ID",
-  /* 59 */ "RUN1_DEST_ID",
-  /* 60 */ "RUN2_DEST_ID",
-  /* 61 */ "RUN3_DEST_ID",
-  /* 62 */ "BAT_PLAY_TX",
-  /* 63 */ "RUN1_PLAY_TX",
-  /* 64 */ "RUN2_PLAY_TX",
-  /* 65 */ "RUN3_PLAY_TX",
-  /* 66 */ "RUN1_SB_FL",
-  /* 67 */ "RUN2_SB_FL",
-  /* 68 */ "RUN3_SB_FL",
-  /* 69 */ "RUN1_CS_FL",
-  /* 70 */ "RUN2_CS_FL",
-  /* 71 */ "RUN3_CS_FL",
-  /* 72 */ "RUN1_PK_FL",
-  /* 73 */ "RUN2_PK_FL",
-  /* 74 */ "RUN3_PK_FL",
-  /* 75 */ "RUN1_RESP_PIT_ID",
-  /* 76 */ "RUN2_RESP_PIT_ID",
-  /* 77 */ "RUN3_RESP_PIT_ID",
-  /* 78 */ "GAME_NEW_FL",
-  /* 79 */ "GAME_END_FL",
-  /* 80 */ "PR_RUN1_FL",
-  /* 81 */ "PR_RUN2_FL",
-  /* 82 */ "PR_RUN3_FL",
-  /* 83 */ "REMOVED_FOR_PR_RUN1_ID",
-  /* 84 */ "REMOVED_FOR_PR_RUN2_ID",
-  /* 85 */ "REMOVED_FOR_PR_RUN3_ID",
-  /* 86 */ "REMOVED_FOR_PH_BAT_ID",
-  /* 87 */ "REMOVED_FOR_PH_BAT_FLD_ID",
-  /* 88 */ "PO1_FLD_ID",
-  /* 89 */ "PO2_FLD_ID",
-  /* 90 */ "PO3_FLD_ID",
-  /* 91 */ "ASS1_FLD_ID",
-  /* 92 */ "ASS2_FLD_ID",
-  /* 93 */ "ASS3_FLD_ID",
-  /* 94 */ "ASS4_FLD_ID",
-  /* 95 */ "ASS5_FLD_ID",
-  /* 96 */ "EVENT_CT"
+static field_struct field_data[] = {
+  /*  0 */ { cwevent_game_id, "GAME_ID", "game id*" },
+  /*  1 */ { cwevent_visiting_team, "AWAY_TEAM_ID", "visiting team*" },
+  /*  2 */ { cwevent_inning, "INN_CT", "inning*" },
+  /*  3 */ { cwevent_batting_team, "HOME_ID", "batting_team*" },
+  /*  4 */ { cwevent_outs, "OUTS_CT", "outs*" },
+  /*  5 */ { cwevent_balls, "BALLS_CT", "balls*" },
+  /*  6 */ { cwevent_strikes, "STRIKES_CT", "strikes*" },
+  /*  7 */ { cwevent_pitches, "PITCH_SEQ_TX", "pitch sequence" },
+  /*  8 */ { cwevent_visitor_score, "AWAY_SCORE_CT", "vis score*" },
+  /*  9 */ { cwevent_home_score, "HOME_SCORE_CT", "home score*" },
+  /* 10 */ { cwevent_batter, "BAT_ID", "batter" },
+  /* 11 */ { cwevent_batter_hand, "BAT_HAND_CD", "batter hand" },
+  /* 12 */ { cwevent_res_batter, "RESP_BAT_ID", "res batter*" },
+  /* 13 */ { cwevent_res_batter_hand, "RESP_BAT_HAND_CD", "res batter hand*" },
+  /* 14 */ { cwevent_pitcher, "PIT_ID", "pitcher" },
+  /* 15 */ { cwevent_pitcher_hand, "PIT_HAND_CD", "pitcher hand" },
+  /* 16 */ { cwevent_res_pitcher, "RES_PIT_ID", "res pitcher*" },
+  /* 17 */ { cwevent_res_pitcher_hand, "RES_PIT_HAND_CD", "res pitcher hand*" },
+  /* 18 */ { cwevent_catcher, "POS2_FLD_ID", "catcher" },
+  /* 19 */ { cwevent_first_baseman, "POS3_FLD_ID", "first base" },
+  /* 20 */ { cwevent_second_baseman, "POS4_FLD_ID", "second base" },
+  /* 21 */ { cwevent_third_baseman, "POS5_FLD_ID", "third base" },
+  /* 22 */ { cwevent_shortstop, "POS6_FLD_ID", "shortstop" },
+  /* 23 */ { cwevent_left_fielder, "POS7_FLD_ID", "left field" },
+  /* 24 */ { cwevent_center_fielder, "POS8_FLD_ID", "center field" },
+  /* 25 */ { cwevent_right_fielder, "POS9_FLD_ID", "right field" },
+  /* 26 */ { cwevent_runner_first, "BASE1_RUN_ID", "first runner*" },
+  /* 27 */ { cwevent_runner_second, "BASE2_RUN_ID", "second runner*" },
+  /* 28 */ { cwevent_runner_third, "BASE3_RUN_ID", "third runner*" },
+  /* 29 */ { cwevent_event_text, "EVENT_TX", "event text*" },
+  /* 30 */ { cwevent_leadoff_flag, "LEADOFF_FL", "leadoff flag*" },
+  /* 31 */ { cwevent_ph_flag, "PH_FL", "pinchhit flag*" },
+  /* 32 */ { cwevent_defensive_position, "BAT_FLD_CD", "defensive position*" },
+  /* 33 */ { cwevent_lineup_position, "BAT_LINEUP_ID", "lineup position*" },
+  /* 34 */ { cwevent_event_type, "EVENT_CD", "event type*" },
+  /* 35 */ { cwevent_batter_event_flag, "BAT_EVENT_FL", "batter event flag*" },
+  /* 36 */ { cwevent_ab_flag, "AB_FL", "ab flag*" },
+  /* 37 */ { cwevent_hit_value, "H_CD", "hit value*" },
+  /* 38 */ { cwevent_sh_flag, "SH_FL", "SH flag*" },
+  /* 39 */ { cwevent_sf_flag, "SF_FL", "SF flag*" },
+  /* 40 */ { cwevent_outs_on_play, "EVENT_OUTS_CT", "outs on play*" },
+  /* 41 */ { cwevent_dp_flag, "DP_FL", "double play flag" },
+  /* 42 */ { cwevent_tp_flag, "TP_FL", "triple play flag" },
+  /* 43 */ { cwevent_rbi_on_play, "RBI_CT", "RBI on play*" },
+  /* 44 */ { cwevent_wp_flag, "WP_FL", "wild pitch flag*" },
+  /* 45 */ { cwevent_pb_flag, "PB_FL", "passed ball flag*" },
+  /* 46 */ { cwevent_fielded_by, "FLD_ID", "fielded by" },
+  /* 47 */ { cwevent_batted_ball_type, "BATTEDBALL_CD", "batted ball type" },
+  /* 48 */ { cwevent_bunt_flag, "BUNT_FL", "bunt flag" },
+  /* 49 */ { cwevent_foul_flag, "FOUL_FL", "foul flag" },
+  /* 50 */ { cwevent_hit_location, "BATTEDBALL_LOC_TX", "hit location" },
+  /* 51 */ { cwevent_num_errors, "ERR_CT", "num errors*" },
+  /* 52 */ { cwevent_error1_player, "ERR1_FLD_ID", "1st error player" },
+  /* 53 */ { cwevent_error1_type, "ERR1_CD", "1st error type" },
+  /* 54 */ { cwevent_error2_player, "ERR2_FLD_ID", "2nd error player" },
+  /* 55 */ { cwevent_error2_type, "ERR2_CD", "2nd error type" },
+  /* 56 */ { cwevent_error3_player, "ERR3_FLD_ID", "3rd error player" },
+  /* 57 */ { cwevent_error3_type, "ERR3_CD", "3rd error type" },
+  /* 58 */ { cwevent_batter_advance, "BAT_DEST_ID", 
+	     "batter dest* (5 if scores and unearned, 6 if team unearned)" },
+  /* 59 */ { cwevent_runner1_advance, "RUN1_DEST_ID",
+	     "runner on 1st dest* (5 if scores and unearned, 6 if team unearned)" },
+  /* 60 */ { cwevent_runner2_advance, "RUN2_DEST_ID",
+	     "runner on 2nd dest* (5 if scores and unearned, 6 if team unearned)" },
+  /* 61 */ { cwevent_runner3_advance, "RUN3_DEST_ID",
+	     "runner on 3rd dest* (5 if scores and unearned, 6 if team unearned)" },
+  /* 62 */ { cwevent_play_on_batter, "BAT_PLAY_TX", "play on batter" },
+  /* 63 */ { cwevent_play_on_runner1, "RUN1_PLAY_TX", 
+	     "play on runner on first" },
+  /* 64 */ { cwevent_play_on_runner2, "RUN2_PLAY_TX", 
+	     "play on runner on second" },
+  /* 65 */ { cwevent_play_on_runner3, "RUN3_PLAY_TX", 
+	     "play on runner on third" },
+  /* 66 */ { cwevent_sb2_flag, "RUN1_SB_FL", "SB for runner on 1st flag" },
+  /* 67 */ { cwevent_sb3_flag, "RUN2_SB_FL", "SB for runner on 2nd flag" },
+  /* 68 */ { cwevent_sbh_flag, "RUN3_SB_FL", "SB for runner on 3rd flag" },
+  /* 69 */ { cwevent_cs2_flag, "RUN1_CS_FL", "CS for runner on 1st flag" },
+  /* 70 */ { cwevent_cs3_flag, "RUN2_CS_FL", "CS for runner on 2nd flag" },
+  /* 71 */ { cwevent_csh_flag, "RUN3_CS_FL", "CS for runner on 3rd flag" },
+  /* 72 */ { cwevent_po1_flag, "RUN1_PK_FL", "PO for runner on 1st flag" },
+  /* 73 */ { cwevent_po2_flag, "RUN2_PK_FL", "PO for runner on 2nd flag" },
+  /* 74 */ { cwevent_po3_flag, "RUN3_PK_FL", "PO for runner on 3rd flag" },
+  /* 75 */ { cwevent_responsible_pitcher1, "RUN1_RESP_PIT_ID", 
+	     "Responsible pitcher for runner on 1st" },
+  /* 76 */ { cwevent_responsible_pitcher2, "RUN2_RESP_PIT_ID", 
+	     "Responsible pitcher for runner on 2nd" },
+  /* 77 */ { cwevent_responsible_pitcher3, "RUN3_RESP_PIT_ID", 
+	     "Responsible pitcher for runner on 3rd" },
+  /* 78 */ { cwevent_new_game_flag, "GAME_NEW_FL", "New Game Flag" },
+  /* 79 */ { cwevent_end_game_flag, "GAME_END_FL", "End Game Flag" },
+  /* 80 */ { cwevent_pr1_flag, "PR_RUN1_FL", "Pinch-runner on 1st" },
+  /* 81 */ { cwevent_pr2_flag, "PR_RUN2_FL", "Pinch-runner on 2nd" },
+  /* 82 */ { cwevent_pr3_flag, "PR_RUN3_FL", "Pinch-runner on 3rd" },
+  /* 83 */ { cwevent_removed_runner1, "REMOVED_FOR_PR_RUN1_ID",
+	     "Runner removed for pinch-runner on 1st" },
+  /* 84 */ { cwevent_removed_runner2, "REMOVED_FOR_PR_RUN2_ID",
+	     "Runner removed for pinch-runner on 2nd" },
+  /* 85 */ { cwevent_removed_runner3, "REMOVED_FOR_PR_RUN3_ID",
+	     "Runner removed for pinch-runner on 3rd" },
+  /* 86 */ { cwevent_removed_batter, "REMOVED_FOR_PH_BAT_ID",
+	     "Batter removed for pinch-hitter " },
+  /* 87 */ { cwevent_removed_batter_position, "REMOVED_FOR_PH_BAT_FLD_ID",
+	     "Position of batter removed for pinch-hitter" },
+  /* 88 */ { cwevent_putout1, "PO1_FLD_ID",
+	     "Fielder with First Putout (0 if none)" },
+  /* 89 */ { cwevent_putout2, "PO2_FLD_ID",
+	     "Fielder with Second Putout (0 if none)" },
+  /* 90 */ { cwevent_putout3, "PO3_FLD_ID",
+	     "Fielder with Third Putout (0 if none)" },
+  /* 91 */ { cwevent_assist1, "ASS1_FLD_ID",
+	     "Fielder with First Assist (0 if none)" },
+  /* 92 */ { cwevent_assist2, "ASS2_FLD_ID",
+	     "Fielder with Second Assist (0 if none)" },
+  /* 93 */ { cwevent_assist3, "ASS3_FLD_ID",
+	     "Fielder with Third Assist (0 if none)" },
+  /* 94 */ { cwevent_assist4, "ASS4_FLD_ID",
+	     "Fielder with Fourth Assist (0 if none)" },
+  /* 95 */ { cwevent_assist5, "ASS5_FLD_ID",
+	     "Fielder with Fifth Assist (0 if none)" },
+  /* 96 */ { cwevent_event_number, "EVENT_CT", "event num" }
 };
 
 /*************************************************************************
@@ -1699,102 +1633,90 @@ DECLARE_FIELDFUNC(cwevent_assist10)
   return sprintf(buffer, "%d", gameiter->event_data->assists[9]);
 }
 
-static field_func ext_function_ptrs[] = {
-  /*  0 */ cwevent_home_team_id,             
-  /*  1 */ cwevent_batting_team_id,          
-  /*  2 */ cwevent_fielding_team_id,         
-  /*  3 */ cwevent_half_inning,
-  /*  4 */ cwevent_start_half_inning,
-  /*  5 */ cwevent_end_half_inning,
-  /*  6 */ cwevent_offense_score,
-  /*  7 */ cwevent_defense_score,
-  /*  8 */ cwevent_offense_score_inning,
-  /*  9 */ cwevent_offense_batters_game,
-  /* 10 */ cwevent_offense_batters_inning,
-  /* 11 */ cwevent_start_pa_flag,
-  /* 12 */ cwevent_truncated_pa_flag,
-  /* 13 */ cwevent_base_state_start,
-  /* 14 */ cwevent_base_state_end,
-  /* 15 */ cwevent_runner1_defensive_position,
-  /* 16 */ cwevent_runner1_lineup_position,
-  /* 17 */ cwevent_runner2_defensive_position,
-  /* 18 */ cwevent_runner2_lineup_position,
-  /* 19 */ cwevent_runner3_defensive_position,
-  /* 20 */ cwevent_runner3_lineup_position,
-  /* 21 */ cwevent_pitches_balls,
-  /* 22 */ cwevent_pitches_balls_intentional,
-  /* 23 */ cwevent_pitches_balls_pitchout,
-  /* 24 */ cwevent_pitches_balls_other,
-  /* 25 */ cwevent_pitches_strikes,
-  /* 26 */ cwevent_pitches_strikes_called,
-  /* 27 */ cwevent_pitches_strikes_swinging,
-  /* 28 */ cwevent_pitches_strikes_foul,
-  /* 29 */ cwevent_pitches_strikes_other,
-  /* 30 */ cwevent_runs_on_play,
-  /* 31 */ cwevent_fielded_by_id,
-  /* 32 */ cwevent_force_second_flag,
-  /* 33 */ cwevent_force_third_flag,
-  /* 34 */ cwevent_force_home_flag,
-  /* 35 */ cwevent_safe_on_error_flag,
-  /* 36 */ cwevent_batter_fate,
-  /* 37 */ cwevent_runner1_fate,
-  /* 38 */ cwevent_runner2_fate,
-  /* 39 */ cwevent_runner3_fate,
-  /* 40 */ cwevent_inning_future_runs,
-  /* 41 */ cwevent_assist6,
-  /* 42 */ cwevent_assist7,
-  /* 43 */ cwevent_assist8,
-  /* 44 */ cwevent_assist9,
-  /* 45 */ cwevent_assist10
-};
-
-static char *ext_field_names[] = {
-  /*  0 */ "HOME_TEAM_ID",
-  /*  1 */ "BAT_TEAM_ID",
-  /*  2 */ "FLD_TEAM_ID",
-  /*  3 */ "INN_ID",
-  /*  4 */ "INN_NEW_FL",
-  /*  5 */ "INN_END_FL",
-  /*  6 */ "START_BAT_SCORE_CT",
-  /*  7 */ "START_OPP_SCORE_CT",
-  /*  8 */ "INN_RUNS_CT",
-  /*  9 */ "GAME_PA_CT",
-  /* 10 */ "INN_PA_CT",
-  /* 11 */ "PA_NEW_FL",
-  /* 12 */ "PA_TRUNC_FL",
-  /* 13 */ "START_BASES_CD",
-  /* 14 */ "END_BASES_CD",
-  /* 15 */ "RUN1_FLD_CD",
-  /* 16 */ "RUN1_LINEUP_CD",
-  /* 17 */ "RUN2_FLD_CD",
-  /* 18 */ "RUN2_LINEUP_CD",
-  /* 19 */ "RUN3_FLD_CD",
-  /* 20 */ "RUN3_LINEUP_CD",
-  /* 21 */ "PA_BALL_CT",
-  /* 22 */ "PA_INTENT_BALL_CT",
-  /* 23 */ "PA_PITCHOUT_BALL_CT",
-  /* 24 */ "PA_OTHER_BALL_CT",
-  /* 25 */ "PA_STRIKE_CT",
-  /* 26 */ "PA_CALLED_STRIKE_CT",
-  /* 27 */ "PA_SWINGMISS_STRIKE_CT",
-  /* 28 */ "PA_FOUL_STRIKE_CT",
-  /* 29 */ "PA_OTHER_STRIKE_CT",
-  /* 30 */ "EVENT_RUNS_CT",
-  /* 31 */ "FLD_ID",
-  /* 32 */ "BASE2_FORCE_FL",
-  /* 33 */ "BASE3_FORCE_FL",
-  /* 34 */ "BASE4_FORCE_FL",
-  /* 35 */ "BAT_SAFE_ERR_FL",
-  /* 36 */ "BAT_FATE_ID",
-  /* 37 */ "RUN1_FATE_ID",
-  /* 38 */ "RUN2_FATE_ID",
-  /* 39 */ "RUN3_FATE_ID",
-  /* 40 */ "FATE_RUNS_CT",
-  /* 41 */ "ASS6_FLD_ID",
-  /* 42 */ "ASS7_FLD_ID",
-  /* 43 */ "ASS8_FLD_ID",
-  /* 44 */ "ASS9_FLD_ID",
-  /* 45 */ "ASS10_FLD_ID"
+static field_struct ext_field_data[] = {
+  /*  0 */ { cwevent_home_team_id, "HOME_TEAM_ID", "home team id" },
+  /*  1 */ { cwevent_batting_team_id, "BAT_TEAM_ID", "batting team id" },
+  /*  2 */ { cwevent_fielding_team_id, "FLD_TEAM_ID", "fielding_team_id" },    
+  /*  3 */ { cwevent_half_inning, "INN_ID", 
+	     "half inning (differs from batting team if home team bats first" },
+  /*  4 */ { cwevent_start_half_inning, "INN_NEW_FL", 
+	     "start of half inning flag" },
+  /*  5 */ { cwevent_end_half_inning, "INN_END_FL", 
+	     "end of half inning flag" },
+  /*  6 */ { cwevent_offense_score, "START_BAT_SCORE_CT", 
+	     "score for team on offense" },
+  /*  7 */ { cwevent_defense_score, "START_OPP_SCORE_CT", 
+	     "score for team on defense" },
+  /*  8 */ { cwevent_offense_score_inning, "INN_RUNS_CT", 
+	     "runs scored in this half inning" },
+  /*  9 */ { cwevent_offense_batters_game, "GAME_PA_CT", 
+	     "number of plate appearances in game for team on offense" },
+  /* 10 */ { cwevent_offense_batters_inning, "INN_PA_CT", 
+	     "number of plate appearances in inning for team on offense" },
+  /* 11 */ { cwevent_start_pa_flag, "PA_NEW_FL", 
+	     "start of plate appearance flag" },
+  /* 12 */ { cwevent_truncated_pa_flag, "PA_TRUNC_FL", 
+	     "truncated plate appearance flag" },
+  /* 13 */ { cwevent_base_state_start, "START_BASES_CD", 
+	     "base state at start of play" },
+  /* 14 */ { cwevent_base_state_end, "END_BASES_CD", 
+	     "base state at end of play" },
+  /* 15 */ { cwevent_runner1_defensive_position, "RUN1_FLD_CD", 
+	     "defensive position of runner on first" },
+  /* 16 */ { cwevent_runner1_lineup_position, "RUN1_LINEUP_CD", 
+	     "lineup position of runner on first" },
+  /* 17 */ { cwevent_runner2_defensive_position, "RUN2_FLD_CD", 
+	     "defensive position of runner on second" },
+  /* 18 */ { cwevent_runner2_lineup_position, "RUN2_LINEUP_CD", 
+	     "lineup position of runner on second" },
+  /* 19 */ { cwevent_runner3_defensive_position, "RUN3_FLD_CD", 
+	     "defensive position of runner on third" },
+  /* 20 */ { cwevent_runner3_lineup_position, "RUN3_LINEUP_CD", 
+	     "lineup position of runner on third" },
+  /* 21 */ { cwevent_pitches_balls, "PA_BALL_CT", 
+	     "number of balls in plate appearance" },
+  /* 22 */ { cwevent_pitches_balls_intentional, "PA_INTENT_BALL_CT", 
+	     "number of intentional balls in plate appearance" },
+  /* 23 */ { cwevent_pitches_balls_pitchout, "PA_PITCHOUT_BALL_CT", 
+	     "number of pitchouts in plate appearance" },
+  /* 24 */ { cwevent_pitches_balls_other, "PA_OTHER_BALL_CT", 
+	     "number of other balls in plate appearance" },
+  /* 25 */ { cwevent_pitches_strikes, "PA_STRIKE_CT", 
+	     "number of strikes in plate appearance" },
+  /* 26 */ { cwevent_pitches_strikes_called, "PA_CALLED_STRIKE_CT", 
+	     "number of called strikes in plate appearance" },
+  /* 27 */ { cwevent_pitches_strikes_swinging, "PA_SWINGMISS_STRIKE_CT", 
+	     "number of swinging strikes in plate appearance" },
+  /* 28 */ { cwevent_pitches_strikes_foul, "PA_FOUL_STRIKE_CT", 
+	     "number of foul balls in plate appearance" },
+  /* 29 */ { cwevent_pitches_strikes_other, "PA_OTHER_STRIKE_CT", 
+	     "number of other strikes in plate appearance" },
+  /* 30 */ { cwevent_runs_on_play, "EVENT_RUNS_CT", "number of runs on play" },
+  /* 31 */ { cwevent_fielded_by_id, "FLD_ID", 
+"id of player fielding batted ball" },
+  /* 32 */ { cwevent_force_second_flag, "BASE2_FORCE_FL", 
+	     "force play at second flag" },
+  /* 33 */ { cwevent_force_third_flag, "BASE3_FORCE_FL", 
+	     "force play at third flag" },
+  /* 34 */ { cwevent_force_home_flag, "BASE4_FORCE_FL", 
+	     "force play at home flag" },
+  /* 35 */ { cwevent_safe_on_error_flag, "BAT_SAFE_ERR_FL", 
+	     "batter safe on error flag" },
+  /* 36 */ { cwevent_batter_fate, "BAT_FATE_ID", 
+	     "fate of batter (base ultimately advanced to)" },
+  /* 37 */ { cwevent_runner1_fate, "RUN1_FATE_ID", 
+	     "fate of runner on first" },
+  /* 38 */ { cwevent_runner2_fate, "RUN2_FATE_ID", 
+	     "fate of runner on second" },
+  /* 39 */ { cwevent_runner3_fate, "RUN3_FATE_ID", 
+	     "fate of runner on third" },
+  /* 40 */ { cwevent_inning_future_runs, "FATE_RUNS_CT", 
+	     "runs scored in half inning after this event" },
+  /* 41 */ { cwevent_assist6, "ASS6_FLD_ID", "fielder with sixth assist" },
+  /* 42 */ { cwevent_assist7, "ASS7_FLD_ID", "fielder with seventh assist" },
+  /* 43 */ { cwevent_assist8, "ASS8_FLD_ID", "fielder with eighth assist" },
+  /* 44 */ { cwevent_assist9, "ASS9_FLD_ID", "fielder with ninth assist" },
+  /* 45 */ { cwevent_assist10, "ASS10_FLD_ID", "fielder with tenth assist" }
 };
 
 void
@@ -1824,7 +1746,7 @@ cwevent_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 	else {
 	  comma = 1;
 	}
-	buf += (*function_ptrs[i])(buf, gameiter, visitors, home);
+	buf += (*field_data[i].f)(buf, gameiter, visitors, home);
       }
     }
 
@@ -1836,7 +1758,7 @@ cwevent_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 	else {
 	  comma = 1;
 	}
-	buf += (*ext_function_ptrs[i])(buf, gameiter, visitors, home);
+	buf += (*ext_field_data[i].f)(buf, gameiter, visitors, home);
       }
     };
 
@@ -1882,109 +1804,16 @@ void (*cwtools_print_help)(void) = cwevent_print_help;
 void
 cwevent_print_field_list(void)
 {
+  int i;
+
   fprintf(stderr, "\nThese are the available fields and the numbers to use with the -f option\n");
   fprintf(stderr, "to name them.  The default fields are marked with an asterisk (*).\n");
   fprintf(stderr, "\n");
   fprintf(stderr, "number  field\n");
   fprintf(stderr, "------  -----\n");
-  fprintf(stderr, "0       game id*\n");
-  fprintf(stderr, "1       visiting team*\n");
-  fprintf(stderr, "2       inning*\n");
-  fprintf(stderr, "3       batting team*\n");
-  fprintf(stderr, "4       outs*\n");
-  fprintf(stderr, "5       balls*\n");
-  fprintf(stderr, "6       strikes*\n");
-  fprintf(stderr, "7       pitch sequence\n");
-  fprintf(stderr, "8       vis score*\n");
-  fprintf(stderr, "9       home score*\n");
-  fprintf(stderr, "10      batter\n");
-  fprintf(stderr, "11      batter hand\n");
-  fprintf(stderr, "12      res batter*\n");
-  fprintf(stderr, "13      res batter hand*\n");
-  fprintf(stderr, "14      pitcher\n");
-  fprintf(stderr, "15      pitcher hand\n");
-  fprintf(stderr, "16      res pitcher*\n");
-  fprintf(stderr, "17      res pitcher hand*\n");
-  fprintf(stderr, "18      catcher\n");
-  fprintf(stderr, "19      first base\n");
-  fprintf(stderr, "20      second base\n");
-  fprintf(stderr, "21      third base\n");
-  fprintf(stderr, "22      shortstop\n");
-  fprintf(stderr, "23      left field\n");
-  fprintf(stderr, "24      center field\n");
-  fprintf(stderr, "25      right field\n");
-  fprintf(stderr, "26      first runner*\n");
-  fprintf(stderr, "27      second runner*\n");
-  fprintf(stderr, "28      third runner*\n");
-  fprintf(stderr, "29      event text*\n");
-  fprintf(stderr, "30      leadoff flag*\n");
-  fprintf(stderr, "31      pinchhit flag*\n");
-  fprintf(stderr, "32      defensive position*\n");
-  fprintf(stderr, "33      lineup position*\n");
-  fprintf(stderr, "34      event type*\n");
-  fprintf(stderr, "35      batter event flag*\n");
-  fprintf(stderr, "36      ab flag*\n");
-  fprintf(stderr, "37      hit value*\n");
-  fprintf(stderr, "38      SH flag*\n");
-  fprintf(stderr, "39      SF flag*\n");
-  fprintf(stderr, "40      outs on play*\n");
-  fprintf(stderr, "41      double play flag\n");
-  fprintf(stderr, "42      triple play flag\n");
-  fprintf(stderr, "43      RBI on play*\n");
-  fprintf(stderr, "44      wild pitch flag*\n");
-  fprintf(stderr, "45      passed ball flag*\n");
-  fprintf(stderr, "46      fielded by\n");
-  fprintf(stderr, "47      batted ball type\n");
-  fprintf(stderr, "48      bunt flag\n");
-  fprintf(stderr, "49      foul flag\n");
-  fprintf(stderr, "50      hit location\n");
-  fprintf(stderr, "51      num errors*\n");
-  fprintf(stderr, "52      1st error player\n");
-  fprintf(stderr, "53      1st error type\n");
-  fprintf(stderr, "54      2nd error player\n");
-  fprintf(stderr, "55      2nd error type\n");
-  fprintf(stderr, "56      3rd error player\n");
-  fprintf(stderr, "57      3rd error type\n");
-  fprintf(stderr, "58      batter dest* (5 if scores and unearned, 6 if team unearned)\n");
-  fprintf(stderr, "59      runner on 1st dest* (5 if scores and unearned, 6 if team unearned)\n");
-  fprintf(stderr, "60      runner on 2nd dest* (5 if scores and unearned, 6 if team unearned)\n");
-  fprintf(stderr, "61      runner on 3rd dest* (5 if scores and unearned, 6 if team unearned)\n");
-  fprintf(stderr, "62      play on batter\n");
-  fprintf(stderr, "63      play on runner on 1st\n");
-  fprintf(stderr, "64      play on runner on 2nd\n");
-  fprintf(stderr, "65      play on runner on 3rd\n");
-  fprintf(stderr, "66      SB for runner on 1st flag\n");
-  fprintf(stderr, "67      SB for runner on 2nd flag\n");
-  fprintf(stderr, "68      SB for runner on 3rd flag\n");
-  fprintf(stderr, "69      CS for runner on 1st flag\n");
-  fprintf(stderr, "70      CS for runner on 2nd flag\n");
-  fprintf(stderr, "71      CS for runner on 3rd flag\n");
-  fprintf(stderr, "72      PO for runner on 1st flag\n");
-  fprintf(stderr, "73      PO for runner on 2nd flag\n");
-  fprintf(stderr, "74      PO for runner on 3rd flag\n");
-  fprintf(stderr, "75      Responsible pitcher for runner on 1st\n");
-  fprintf(stderr, "76      Responsible pitcher for runner on 2nd\n");
-  fprintf(stderr, "77      Responsible pitcher for runner on 3rd\n");
-  fprintf(stderr, "78      New Game Flag\n");
-  fprintf(stderr, "79      End Game Flag\n");
-  fprintf(stderr, "80      Pinch-runner on 1st\n");
-  fprintf(stderr, "81      Pinch-runner on 2nd\n");
-  fprintf(stderr, "82      Pinch-runner on 3rd\n");
-  fprintf(stderr, "83      Runner removed for pinch-runner on 1st\n");
-  fprintf(stderr, "84      Runner removed for pinch-runner on 2nd\n");
-  fprintf(stderr, "85      Runner removed for pinch-runner on 3rd\n");
-  fprintf(stderr, "86      Batter removed for pinch-hitter\n");
-  fprintf(stderr, "87      Position of batter removed for pinch-hitter\n");
-  fprintf(stderr, "88      Fielder with First Putout (0 if none)\n");
-  fprintf(stderr, "89      Fielder with Second Putout (0 if none)\n");
-  fprintf(stderr, "90      Fielder with Third Putout (0 if none)\n");
-  fprintf(stderr, "91      Fielder with First Assist (0 if none)\n");
-  fprintf(stderr, "92      Fielder with Second Assist (0 if none)\n");
-  fprintf(stderr, "93      Fielder with Third Assist (0 if none)\n");
-  fprintf(stderr, "94      Fielder with Fourth Assist (0 if none)\n");
-  fprintf(stderr, "95      Fielder with Fifth Assist (0 if none)\n");
-  fprintf(stderr, "96      event num\n");
-  
+  for (i = 0; i <= max_field; i++) {
+    fprintf(stderr, "%-2d      %s\n", i, field_data[i].description);
+  }
   fprintf(stderr, "\n");
 
   fprintf(stderr, "These additional fields are available in this version of cwevent.\n");
@@ -1994,52 +1823,10 @@ cwevent_print_field_list(void)
   fprintf(stderr, "\n");
   fprintf(stderr, "number  field\n");
   fprintf(stderr, "------  -----\n");
-  fprintf(stderr, "0       home team id\n");
-  fprintf(stderr, "1       batting team id\n");
-  fprintf(stderr, "2       fielding team id\n");
-  fprintf(stderr, "3       half inning (differs from batting team if home team bats first)\n");
-  fprintf(stderr, "4       start of half inning flag\n");
-  fprintf(stderr, "5       end of half inning flag\n");
-  fprintf(stderr, "6       score for team on offense\n");
-  fprintf(stderr, "7       score for team on defense\n");
-  fprintf(stderr, "8       runs scored in this half inning\n");
-  fprintf(stderr, "9       number of plate appearances in game for team on offense\n");
-  fprintf(stderr, "10      number of plate appearances in inning for team on offense\n");
-  fprintf(stderr, "11      start of plate appearance flag\n");
-  fprintf(stderr, "12      truncated plate appearance flag\n");
-  fprintf(stderr, "13      base state at start of play\n");
-  fprintf(stderr, "14      base state at end of play\n");
-  fprintf(stderr, "15      defensive position of runner on first\n");
-  fprintf(stderr, "16      lineup position of runner on first\n");
-  fprintf(stderr, "17      defensive position of runner on second\n");
-  fprintf(stderr, "18      lineup position of runner on second\n");
-  fprintf(stderr, "19      defensive position of runner on third\n");
-  fprintf(stderr, "20      lineup position of runner on third\n");
-  fprintf(stderr, "21      number of balls in plate appearance\n");
-  fprintf(stderr, "22      number of intentional balls in plate appearance\n");
-  fprintf(stderr, "23      number of pitchouts in plate appearance\n");
-  fprintf(stderr, "24      number of other balls in plate appearance\n");
-  fprintf(stderr, "25      number of strikes in plate appearance\n");
-  fprintf(stderr, "26      number of called strikes in plate appearance\n");
-  fprintf(stderr, "27      number of swinging strikes in plate appearance\n");
-  fprintf(stderr, "28      number of foul balls in plate appearance\n");
-  fprintf(stderr, "29      number of other strikes in plate appearance\n");
-  fprintf(stderr, "30      number of runs on play\n");
-  fprintf(stderr, "31      id of player fielding batted ball\n");
-  fprintf(stderr, "32      force play at second flag\n");
-  fprintf(stderr, "33      force play at third flag\n");
-  fprintf(stderr, "34      force play at home flag\n");
-  fprintf(stderr, "35      batter safe on error flag\n");
-  fprintf(stderr, "36      fate of batter (base ultimately advanced to)\n");
-  fprintf(stderr, "37      fate of runner on first\n");
-  fprintf(stderr, "38      fate of runner on second\n");
-  fprintf(stderr, "39      fate of runner on third\n");
-  fprintf(stderr, "40      runs scored in half inning after this event\n");
-  fprintf(stderr, "41      fielder with sixth assist\n");
-  fprintf(stderr, "42      fielder with seventh assist\n");
-  fprintf(stderr, "43      fielder with eighth assist\n");
-  fprintf(stderr, "44      fielder with ninth assist\n");
-  fprintf(stderr, "45      fielder with tenth assist\n");
+  for (i = 0; i <= max_ext_field; i++) {
+    fprintf(stderr, "%-2d      %s\n", i, ext_field_data[i].description);
+  }
+
   
   exit(0);
 }
@@ -2080,7 +1867,7 @@ cwevent_initialize(void)
       else {
 	comma = 1;
       }
-      buf += sprintf(buf, "\"%s\"", field_names[i]);
+      buf += sprintf(buf, "\"%s\"", field_data[i].header);
     }
   }
 
@@ -2092,7 +1879,7 @@ cwevent_initialize(void)
       else {
 	comma = 1;
       }
-      buf += sprintf(buf, "\"%s\"", ext_field_names[i]);
+      buf += sprintf(buf, "\"%s\"", ext_field_data[i].header);
     }
   }
 
