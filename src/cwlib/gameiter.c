@@ -71,6 +71,7 @@ cw_gamestate_initialize(CWGameState *state)
 
   for (i = 0; i <= 3; i++) {
     strcpy(state->runners[i], "");
+    state->runner_src_event[i] = 0;
     strcpy(state->pitchers[i], "");
   }
 
@@ -126,6 +127,7 @@ cw_gamestate_copy(CWGameState *orig_state)
 
   for (i = 0; i <= 3; i++) {
     strcpy(state->runners[i], orig_state->runners[i]);
+    state->runner_src_event[i] = orig_state->runner_src_event[i];
     strcpy(state->pitchers[i], orig_state->pitchers[i]);
   }
 
@@ -256,11 +258,13 @@ cw_gamestate_process_advance(CWGameState *state,
       cw_gamestate_push_pitchers(state, 3);
     }
     strcpy(state->runners[3], "");
+    state->runner_src_event[3] = 0;
     strcpy(state->pitchers[3], "");
   }
 
   if (event_data->advance[2] == 3) {
     strcpy(state->runners[3], state->runners[2]);
+    state->runner_src_event[3] = state->runner_src_event[2];
     strcpy(state->pitchers[3], state->pitchers[2]);
   }
   if (event_data->advance[2] >= 3 ||
@@ -269,15 +273,18 @@ cw_gamestate_process_advance(CWGameState *state,
       cw_gamestate_push_pitchers(state, 2);
     }
     strcpy(state->runners[2], "");
+    state->runner_src_event[2] = 0;
     strcpy(state->pitchers[2], "");
   }
     
   if (event_data->advance[1] == 2) {
     strcpy(state->runners[2], state->runners[1]);
+    state->runner_src_event[2] = state->runner_src_event[1];
     strcpy(state->pitchers[2], state->pitchers[1]);
   }
   else if (event_data->advance[1] == 3) {
     strcpy(state->runners[3], state->runners[1]);
+    state->runner_src_event[3] = state->runner_src_event[1];
     strcpy(state->pitchers[3], state->pitchers[1]);
   }
   if (event_data->advance[1] >= 2 || cw_event_runner_put_out(event_data, 1)) {
@@ -285,11 +292,13 @@ cw_gamestate_process_advance(CWGameState *state,
       strcpy(state->pitchers[0], state->pitchers[1]);
     }
     strcpy(state->runners[1], "");
+    state->runner_src_event[1] = 0;
     strcpy(state->pitchers[1], "");
   }
 
   if (event_data->advance[0] >= 1 && event_data->advance[0] <= 3) {
     strncpy(state->runners[event_data->advance[0]], batter, 49);
+    state->runner_src_event[event_data->advance[0]] = state->event_count;
     strcpy(state->pitchers[event_data->advance[0]], 
 	   state->pitchers[0]);
   }
@@ -431,6 +440,7 @@ cw_gamestate_change_sides(CWGameState *state, CWEvent *event)
 
   for (i = 0; i <= 3; i++) {
     strcpy(state->runners[i], "");
+    state->runner_src_event[i] = 0;
     strcpy(state->pitchers[i], "");
   }
 

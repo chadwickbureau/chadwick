@@ -54,15 +54,16 @@ int fields[97] = {
 int max_field = 96;
 
 /* Extended fields to display (-x) */
-int ext_fields[48] = {
+int ext_fields[51] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0
 };
 
-int max_ext_field = 47;
+int max_ext_field = 50;
 
 char program_name[20] = "cwevent";
 
@@ -1327,6 +1328,13 @@ DECLARE_FIELDFUNC(cwevent_runner1_lineup_position)
 }
 
 /* Extended Field 19 */
+DECLARE_FIELDFUNC(cwevent_runner1_src_event)
+{
+  return sprintf(buffer, (ascii) ? "%d" : "%3d",
+		 gameiter->state->runner_src_event[1]);
+}
+
+/* Extended Field 20 */
 DECLARE_FIELDFUNC(cwevent_runner2_defensive_position)
 {
   if (!strcmp(gameiter->state->runners[2], "")) {
@@ -1340,7 +1348,7 @@ DECLARE_FIELDFUNC(cwevent_runner2_defensive_position)
   }
 }
 
-/* Extended Field 20 */
+/* Extended Field 21 */
 DECLARE_FIELDFUNC(cwevent_runner2_lineup_position)
 {
   int lineupSlot;
@@ -1363,7 +1371,14 @@ DECLARE_FIELDFUNC(cwevent_runner2_lineup_position)
   }
 }
 
-/* Extended Field 21 */
+/* Extended Field 22 */
+DECLARE_FIELDFUNC(cwevent_runner2_src_event)
+{
+  return sprintf(buffer, (ascii) ? "%d" : "%3d",
+		 gameiter->state->runner_src_event[2]);
+}
+
+/* Extended Field 23 */
 DECLARE_FIELDFUNC(cwevent_runner3_defensive_position)
 {
   if (!strcmp(gameiter->state->runners[3], "")) {
@@ -1377,7 +1392,7 @@ DECLARE_FIELDFUNC(cwevent_runner3_defensive_position)
   }
 }
 
-/* Extended Field 22 */
+/* Extended Field 24 */
 DECLARE_FIELDFUNC(cwevent_runner3_lineup_position)
 {
   int lineupSlot;
@@ -1400,7 +1415,14 @@ DECLARE_FIELDFUNC(cwevent_runner3_lineup_position)
   }
 }
 
-/* Extended Field 23 */
+/* Extended Field 25 */
+DECLARE_FIELDFUNC(cwevent_runner3_src_event)
+{
+  return sprintf(buffer, (ascii) ? "%d" : "%3d",
+		 gameiter->state->runner_src_event[3]);
+}
+
+/* Extended Field 26 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls)
 {
   int balls = 0;
@@ -1417,7 +1439,7 @@ DECLARE_FIELDFUNC(cwevent_pitches_balls)
   return sprintf(buffer, (ascii) ? "%d" : "%02d", balls);
 }
 
-/* Extended Field 24 */
+/* Extended Field 27 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls_intentional)
 {
   int balls = 0;
@@ -1433,7 +1455,7 @@ DECLARE_FIELDFUNC(cwevent_pitches_balls_intentional)
   return sprintf(buffer, (ascii) ? "%d" : "%02d", balls);
 }
 
-/* Extended Field 25 */
+/* Extended Field 28 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls_pitchout)
 {
   int balls = 0;
@@ -1449,7 +1471,7 @@ DECLARE_FIELDFUNC(cwevent_pitches_balls_pitchout)
   return sprintf(buffer, (ascii) ? "%d" : "%02d", balls);
 }
 
-/* Extended Field 26 */
+/* Extended Field 29 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls_other)
 {
   int balls = 0;
@@ -1465,7 +1487,7 @@ DECLARE_FIELDFUNC(cwevent_pitches_balls_other)
   return sprintf(buffer, (ascii) ? "%d" : "%02d", balls);
 }
 
-/* Extended Field 27 */
+/* Extended Field 30 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes)
 {
   int strikes = 0;
@@ -1483,7 +1505,7 @@ DECLARE_FIELDFUNC(cwevent_pitches_strikes)
   return sprintf(buffer, (ascii) ? "%d" : "%02d", strikes);
 }
 
-/* Extended Field 28 */
+/* Extended Field 31 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_called)
 {
   int strikes = 0;
@@ -1499,7 +1521,7 @@ DECLARE_FIELDFUNC(cwevent_pitches_strikes_called)
   return sprintf(buffer, (ascii) ? "%d" : "%02d", strikes);
 }
 
-/* Extended Field 29 */
+/* Extended Field 32 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_swinging)
 {
   int strikes = 0;
@@ -1515,7 +1537,7 @@ DECLARE_FIELDFUNC(cwevent_pitches_strikes_swinging)
   return sprintf(buffer, (ascii) ? "%d" : "%02d", strikes);
 }
 
-/* Extended Field 30 */
+/* Extended Field 33 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_foul)
 {
   int strikes = 0;
@@ -1531,7 +1553,7 @@ DECLARE_FIELDFUNC(cwevent_pitches_strikes_foul)
   return sprintf(buffer, (ascii) ? "%d" : "%02d", strikes);
 }
 
-/* Extended Field 31 */
+/* Extended Field 34 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_other)
 {
   int strikes = 0;
@@ -1547,13 +1569,13 @@ DECLARE_FIELDFUNC(cwevent_pitches_strikes_other)
   return sprintf(buffer, (ascii) ? "%d" : "%02d", strikes);
 }
 
-/* Extended Field 32 */
+/* Extended Field 35 */
 DECLARE_FIELDFUNC(cwevent_runs_on_play)
 {
   return sprintf(buffer, "%d", cw_event_runs_on_play(gameiter->event_data));
 }
 
-/* Extended Field 33 */
+/* Extended Field 36 */
 DECLARE_FIELDFUNC(cwevent_fielded_by_id)
 {
   if (gameiter->event_data->fielded_by == 0) {
@@ -1565,7 +1587,7 @@ DECLARE_FIELDFUNC(cwevent_fielded_by_id)
   }
 }
 
-/* Extended Field 34 */
+/* Extended Field 37 */
 DECLARE_FIELDFUNC(cwevent_force_second_flag)
 {
   return sprintf(buffer, (ascii) ? "\"%c\"" : "%c",
@@ -1574,7 +1596,7 @@ DECLARE_FIELDFUNC(cwevent_force_second_flag)
 		   gameiter->event_data->force_flag)) ? 'T' : 'F');
 }
 
-/* Extended Field 35 */
+/* Extended Field 38 */
 DECLARE_FIELDFUNC(cwevent_force_third_flag)
 {
   return sprintf(buffer, (ascii) ? "\"%c\"" : "%c",
@@ -1583,7 +1605,7 @@ DECLARE_FIELDFUNC(cwevent_force_third_flag)
 		   gameiter->event_data->force_flag)) ? 'T' : 'F');
 }
 
-/* Extended Field 36 */
+/* Extended Field 39 */
 DECLARE_FIELDFUNC(cwevent_force_home_flag)
 {
   return sprintf(buffer, (ascii) ? "\"%c\"" : "%c",
@@ -1592,7 +1614,7 @@ DECLARE_FIELDFUNC(cwevent_force_home_flag)
 		   gameiter->event_data->force_flag)) ? 'T' : 'F');
 }
 
-/* Extended Field 37 */
+/* Extended Field 40 */
 DECLARE_FIELDFUNC(cwevent_safe_on_error_flag)
 {
   return sprintf(buffer, (ascii) ? "\"%c\"" : "%c",
@@ -1601,62 +1623,62 @@ DECLARE_FIELDFUNC(cwevent_safe_on_error_flag)
 		   gameiter->event_data->muff_flag[0])) ? 'T' : 'F');
 }
 
-/* Extended Field 38 */
+/* Extended Field 41 */
 DECLARE_FIELDFUNC(cwevent_batter_fate)
 {
   return sprintf(buffer, "%d", cwevent_runner_fate(gameiter, 0));
 }
 
-/* Extended Field 39 */
+/* Extended Field 42 */
 DECLARE_FIELDFUNC(cwevent_runner1_fate)
 {
   return sprintf(buffer, "%d", cwevent_runner_fate(gameiter, 1));
 }
 
-/* Extended Field 40 */
+/* Extended Field 43 */
 DECLARE_FIELDFUNC(cwevent_runner2_fate)
 {
   return sprintf(buffer, "%d", cwevent_runner_fate(gameiter, 2));
 }
 
-/* Extended Field 41 */
+/* Extended Field 44 */
 DECLARE_FIELDFUNC(cwevent_runner3_fate)
 {
   return sprintf(buffer, "%d", cwevent_runner_fate(gameiter, 3));
 }
 
-/* Extended Field 42 */
+/* Extended Field 45 */
 DECLARE_FIELDFUNC(cwevent_inning_future_runs)
 {
   return sprintf(buffer, (ascii) ? "%d" : "%02d",
 		 cwevent_future_runs(gameiter));
 }
 
-/* Extended Field 43 */
+/* Extended Field 46 */
 DECLARE_FIELDFUNC(cwevent_assist6)
 {
   return sprintf(buffer, "%d", gameiter->event_data->assists[5]);
 }
 
-/* Extended Field 44 */
+/* Extended Field 47 */
 DECLARE_FIELDFUNC(cwevent_assist7)
 {
   return sprintf(buffer, "%d", gameiter->event_data->assists[6]);
 }
 
-/* Extended Field 45 */
+/* Extended Field 48 */
 DECLARE_FIELDFUNC(cwevent_assist8)
 {
   return sprintf(buffer, "%d", gameiter->event_data->assists[7]);
 }
 
-/* Extended Field 46 */
+/* Extended Field 49 */
 DECLARE_FIELDFUNC(cwevent_assist9)
 {
   return sprintf(buffer, "%d", gameiter->event_data->assists[8]);
 }
 
-/* Extended Field 47 */
+/* Extended Field 50 */
 DECLARE_FIELDFUNC(cwevent_assist10)
 {
   return sprintf(buffer, "%d", gameiter->event_data->assists[9]);
@@ -1698,58 +1720,64 @@ static field_struct ext_field_data[] = {
 	     "defensive position of runner on first" },
   /* 18 */ { cwevent_runner1_lineup_position, "RUN1_LINEUP_CD", 
 	     "lineup position of runner on first" },
-  /* 19 */ { cwevent_runner2_defensive_position, "RUN2_FLD_CD", 
+  /* 19 */ { cwevent_runner1_src_event, "RUN1_ORIGIN_EVT_CD",
+	     "event number on which runner on first reached base" },
+  /* 20 */ { cwevent_runner2_defensive_position, "RUN2_FLD_CD", 
 	     "defensive position of runner on second" },
-  /* 20 */ { cwevent_runner2_lineup_position, "RUN2_LINEUP_CD", 
+  /* 21 */ { cwevent_runner2_lineup_position, "RUN2_LINEUP_CD", 
 	     "lineup position of runner on second" },
-  /* 21 */ { cwevent_runner3_defensive_position, "RUN3_FLD_CD", 
+  /* 22 */ { cwevent_runner2_src_event, "RUN2_ORIGIN_EVT_CD",
+	     "event number on which runner on first reached base" },
+  /* 23 */ { cwevent_runner3_defensive_position, "RUN3_FLD_CD", 
 	     "defensive position of runner on third" },
-  /* 22 */ { cwevent_runner3_lineup_position, "RUN3_LINEUP_CD", 
+  /* 24 */ { cwevent_runner3_lineup_position, "RUN3_LINEUP_CD", 
 	     "lineup position of runner on third" },
-  /* 23 */ { cwevent_pitches_balls, "PA_BALL_CT", 
+  /* 25 */ { cwevent_runner3_src_event, "RUN3_ORIGIN_EVT_CD",
+	     "event number on which runner on first reached base" },
+  /* 26 */ { cwevent_pitches_balls, "PA_BALL_CT", 
 	     "number of balls in plate appearance" },
-  /* 24 */ { cwevent_pitches_balls_intentional, "PA_INTENT_BALL_CT", 
+  /* 27 */ { cwevent_pitches_balls_intentional, "PA_INTENT_BALL_CT", 
 	     "number of intentional balls in plate appearance" },
-  /* 25 */ { cwevent_pitches_balls_pitchout, "PA_PITCHOUT_BALL_CT", 
+  /* 28 */ { cwevent_pitches_balls_pitchout, "PA_PITCHOUT_BALL_CT", 
 	     "number of pitchouts in plate appearance" },
-  /* 26 */ { cwevent_pitches_balls_other, "PA_OTHER_BALL_CT", 
+  /* 29 */ { cwevent_pitches_balls_other, "PA_OTHER_BALL_CT", 
 	     "number of other balls in plate appearance" },
-  /* 27 */ { cwevent_pitches_strikes, "PA_STRIKE_CT", 
+  /* 30 */ { cwevent_pitches_strikes, "PA_STRIKE_CT", 
 	     "number of strikes in plate appearance" },
-  /* 28 */ { cwevent_pitches_strikes_called, "PA_CALLED_STRIKE_CT", 
+  /* 31 */ { cwevent_pitches_strikes_called, "PA_CALLED_STRIKE_CT", 
 	     "number of called strikes in plate appearance" },
-  /* 29 */ { cwevent_pitches_strikes_swinging, "PA_SWINGMISS_STRIKE_CT", 
+  /* 32 */ { cwevent_pitches_strikes_swinging, "PA_SWINGMISS_STRIKE_CT", 
 	     "number of swinging strikes in plate appearance" },
-  /* 30 */ { cwevent_pitches_strikes_foul, "PA_FOUL_STRIKE_CT", 
+  /* 33 */ { cwevent_pitches_strikes_foul, "PA_FOUL_STRIKE_CT", 
 	     "number of foul balls in plate appearance" },
-  /* 31 */ { cwevent_pitches_strikes_other, "PA_OTHER_STRIKE_CT", 
+  /* 34 */ { cwevent_pitches_strikes_other, "PA_OTHER_STRIKE_CT", 
 	     "number of other strikes in plate appearance" },
-  /* 32 */ { cwevent_runs_on_play, "EVENT_RUNS_CT", "number of runs on play" },
-  /* 33 */ { cwevent_fielded_by_id, "FLD_ID", 
+  /* 35 */ { cwevent_runs_on_play, "EVENT_RUNS_CT", "number of runs on play" },
+  /* 36 */ { cwevent_fielded_by_id, "FLD_ID", 
 "id of player fielding batted ball" },
-  /* 34 */ { cwevent_force_second_flag, "BASE2_FORCE_FL", 
+  /* 37 */ { cwevent_force_second_flag, "BASE2_FORCE_FL", 
 	     "force play at second flag" },
-  /* 35 */ { cwevent_force_third_flag, "BASE3_FORCE_FL", 
+  /* 38 */ { cwevent_force_third_flag, "BASE3_FORCE_FL", 
 	     "force play at third flag" },
-  /* 36 */ { cwevent_force_home_flag, "BASE4_FORCE_FL", 
+  /* 39 */ { cwevent_force_home_flag, "BASE4_FORCE_FL", 
 	     "force play at home flag" },
-  /* 37 */ { cwevent_safe_on_error_flag, "BAT_SAFE_ERR_FL", 
+  /* 40 */ { cwevent_safe_on_error_flag, "BAT_SAFE_ERR_FL", 
 	     "batter safe on error flag" },
-  /* 38 */ { cwevent_batter_fate, "BAT_FATE_ID", 
+  /* 41 */ { cwevent_batter_fate, "BAT_FATE_ID", 
 	     "fate of batter (base ultimately advanced to)" },
-  /* 39 */ { cwevent_runner1_fate, "RUN1_FATE_ID", 
+  /* 42 */ { cwevent_runner1_fate, "RUN1_FATE_ID", 
 	     "fate of runner on first" },
-  /* 40 */ { cwevent_runner2_fate, "RUN2_FATE_ID", 
+  /* 43 */ { cwevent_runner2_fate, "RUN2_FATE_ID", 
 	     "fate of runner on second" },
-  /* 41 */ { cwevent_runner3_fate, "RUN3_FATE_ID", 
+  /* 44 */ { cwevent_runner3_fate, "RUN3_FATE_ID", 
 	     "fate of runner on third" },
-  /* 42 */ { cwevent_inning_future_runs, "FATE_RUNS_CT", 
+  /* 45 */ { cwevent_inning_future_runs, "FATE_RUNS_CT", 
 	     "runs scored in half inning after this event" },
-  /* 43 */ { cwevent_assist6, "ASS6_FLD_ID", "fielder with sixth assist" },
-  /* 44 */ { cwevent_assist7, "ASS7_FLD_ID", "fielder with seventh assist" },
-  /* 45 */ { cwevent_assist8, "ASS8_FLD_ID", "fielder with eighth assist" },
-  /* 46 */ { cwevent_assist9, "ASS9_FLD_ID", "fielder with ninth assist" },
-  /* 47 */ { cwevent_assist10, "ASS10_FLD_ID", "fielder with tenth assist" }
+  /* 46 */ { cwevent_assist6, "ASS6_FLD_ID", "fielder with sixth assist" },
+  /* 47 */ { cwevent_assist7, "ASS7_FLD_ID", "fielder with seventh assist" },
+  /* 48 */ { cwevent_assist8, "ASS8_FLD_ID", "fielder with eighth assist" },
+  /* 49 */ { cwevent_assist9, "ASS9_FLD_ID", "fielder with ninth assist" },
+  /* 50 */ { cwevent_assist10, "ASS10_FLD_ID", "fielder with tenth assist" }
 };
 
 void
