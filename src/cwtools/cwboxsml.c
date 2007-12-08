@@ -927,7 +927,14 @@ cwbox_action_baseball_play(XMLNode *parent, CWGameIterator *gameiter,
   }
 
   /* Pitches here */
-  if (!strcmp(cw_game_info_lookup(gameiter->game, "pitches"), "pitches")) {
+  /* Earlier versions checked for whether the "info,pitches" field
+   * read "pitches."  However, some files aren't marked as having pitches,
+   * but do have pitches for some plate appearances; and, some are marked
+   * as having pitches, but clearly only have incomplete pitch data.
+   * So, we ignore the info,pitches field, and simply report what the
+   * event file has.
+   */
+  {
     char *pitches = gameiter->event->pitches;
     char *c;
 
@@ -1198,8 +1205,10 @@ cwbox_site(XMLNode *parent, CWGame *game)
   xml_node_open(metadataNode, "home-location");
 
   statsNode = xml_node_open(siteNode, "site-stats");
-  xml_node_attribute(statsNode, "attendance", 
-		     cw_game_info_lookup(game, "attendance"));
+  if (cw_game_info_lookup(game, "attendance")) {
+    xml_node_attribute(statsNode, "attendance", 
+		       cw_game_info_lookup(game, "attendance"));
+  }
 }
 
 /*
