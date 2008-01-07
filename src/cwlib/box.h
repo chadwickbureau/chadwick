@@ -29,11 +29,12 @@
 #include "game.h"
 
 typedef struct cw_box_batting_struct {
-  int g, ab, r, h, b2, b3, hr, bi, bi2out, bb, ibb, so, gdp, hp, sh, sf, sb, cs, xi;;
+  int g, pa, ab, r, h, b2, b3, hr, hrslam, bi, bi2out, bb, ibb, so, gdp, hp, sh, sf, sb, cs, xi;
+  int lisp, movedup;
 } CWBoxBatting;
 
 typedef struct cw_box_fielding_struct {
-  int g, outs, bip, bf, po, a, e, dp, tp, pb;
+  int g, outs, bip, bf, po, a, e, dp, tp, pb, xi;
 } CWBoxFielding;
 
 /*
@@ -52,7 +53,7 @@ typedef struct cw_box_player_struct {
 
 typedef struct cw_box_pitching_struct {
   int g, gs, cg, sho, gf, outs, r, er, h, b2, b3, hr, bb, ibb, so, bf, bk, wp, hb;
-  int sh, sf;
+  int sh, sf, pk;
   /* xb is 'extra batters' -- batters faced in an inning without getting
    * an out; xbinn is inning in which this occurred */
   int xb, xbinn;

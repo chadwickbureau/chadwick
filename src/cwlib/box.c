@@ -38,12 +38,14 @@ cw_box_batting_create(void)
 {
   CWBoxBatting *batting = (CWBoxBatting *) malloc(sizeof(CWBoxBatting));
   batting->g = 0;
+  batting->pa = 0;
   batting->ab = 0;
   batting->r = 0;
   batting->h = 0;
   batting->b2 = 0;
   batting->b3 = 0;
   batting->hr = 0;
+  batting->hrslam = 0;
   batting->bi = 0;
   batting->bi2out = 0;
   batting->bb = 0;
@@ -56,6 +58,8 @@ cw_box_batting_create(void)
   batting->sb = 0;
   batting->cs = 0;
   batting->xi = 0;
+  batting->lisp = 0;
+  batting->movedup = 0;
   return batting;
 }
 
@@ -76,6 +80,7 @@ cw_box_fielding_create(void)
   fielding->dp = 0;
   fielding->tp = 0;
   fielding->pb = 0;
+  fielding->xi = 0;
   return fielding;
 }
 
@@ -107,6 +112,7 @@ cw_box_pitching_create(void)
   pitching->hb = 0;
   pitching->sh = 0;
   pitching->sf = 0;
+  pitching->pk = 0;
   pitching->xb = 0;
   pitching->xbinn = 0;
   pitching->gb = 0;
@@ -476,7 +482,7 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
 	    gameiter->event->batter, gameiter->event->event_text);
     exit(1);
   }
-
+  
   pitcher = boxscore->pitchers[1-gameiter->state->batting_team];
   if (pitcher == NULL) {
     if (gameiter->state->batting_team == 0) {
@@ -509,6 +515,7 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
   }
 
   if (cw_event_is_batter(event_data)) {
+    player->batting->pa++;
     pitcher->pitching->bf++;
   }
   pitcher->pitching->outs += cw_event_outs_on_play(event_data);
@@ -553,6 +560,9 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
 	event->outs = gameiter->state->outs;
 	strcpy(event->location, gameiter->event_data->hit_location);
 	player->batting->hr++;
+	if (cw_event_rbi_on_play(event_data) == 4) {
+	  player->batting->hrslam++;
+	}
 	pitcher->pitching->hr++;
       }
     }
@@ -648,6 +658,30 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       player->batting->bi2out += cw_event_rbi_on_play(event_data);
     }
   }
+
+  if (gameiter->state->outs + cw_event_outs_on_play(event_data) == 3) {
+    if (strcmp(gameiter->state->runners[3], "") && 
+	event_data->advance[3] < 4) {
+      player->batting->lisp++;
+    }
+    if (strcmp(gameiter->state->runners[2], "") && 
+	event_data->advance[2] < 4) {
+      player->batting->lisp++;
+    }
+  }
+  else if (gameiter->event_data->event_type == CW_EVENT_GENERICOUT) {
+    if (strcmp(gameiter->state->runners[1], "") &&
+	event_data->advance[1] > 1 && 
+	(event_data->advance[1] < 4 || 
+	 (event_data->advance[1] >= 4 && event_data->rbi_flag[1] == 0))) {
+      player->batting->movedup++;
+    }
+    if (strcmp(gameiter->state->runners[2], "") &&
+	(event_data->advance[2] == 3 ||
+	 (event_data->advance[2] >= 4 && event_data->rbi_flag[2] == 0))) {
+      player->batting->movedup++;
+    }
+  }
 }
 
 /*
@@ -734,6 +768,10 @@ cw_box_runner_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       else {
 	event->pickoff = 0;
       }
+
+      if (event->pickoff == 1) {
+	pitcher->pitching->pk++;
+      }
     }
     else if (gameiter->event_data->po_flag[base]) {
       CWBoxEvent *event;
@@ -748,8 +786,12 @@ cw_box_runner_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
 				 player->player_id, pitcher->player_id);
       }
       event->pickoff = (gameiter->event_data->play[base][0] - '0');
+      if (event->pickoff == 1) {
+	pitcher->pitching->pk++;
+      }
       event->runners = base;
     }
+
   }
 }
 
@@ -835,6 +877,12 @@ cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       cw_box_add_event(&(boxscore->pb_list), 
 		       gameiter->state->inning, gameiter->state->batting_team,
 		       2, pitcher->player_id, player_id);
+    }
+
+    if (pos == 2 && 
+	gameiter->event_data->event_type == CW_EVENT_INTERFERENCE &&
+	gameiter->event_data->errors[0] == 2) {
+      fielding->xi++;
     }
   }  
 
