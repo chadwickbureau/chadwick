@@ -111,11 +111,11 @@ cwbox_player_stats_offensive(XMLNode *parent, CWBoxPlayer *player)
   xml_node_attribute_int(node, "sac-flies", player->batting->sf);
   xml_node_attribute_int(node, "stolen-bases", player->batting->sb);
   xml_node_attribute_int(node, "stolen-bases-caught", player->batting->cs);
+  xml_node_attribute_int(node, "reached-base-defensive-interference",
+			 player->batting->xi);
   xml_node_attribute_int(node, "left-in-scoring-position",
 			 player->batting->lisp);
   xml_node_attribute_int(node, "moved-up", player->batting->movedup);
-  xml_node_attribute_int(node, "defensive-interference-reaches",
-			 player->batting->xi);
 }
 
 /*
@@ -199,6 +199,8 @@ cwbox_player_stats_pitching(XMLNode *parent,
   xml_node_attribute_int(node, "balks", pitcher->pitching->bk);
   xml_node_attribute_int(node, "pick-offs", pitcher->pitching->pk);
 
+  /* FIXME: A pitcher gets a shutout if he records all outs for a team,
+   * even if not the starting pitcher! */
   xml_node_attribute_int(node, "shutouts",
 			 ((pitcher->prev == NULL && pitcher->next == NULL &&
 			   pitcher->pitching->r == 0) ? 1 : 0));
@@ -264,25 +266,27 @@ cwbox_team_stats_baseball(XMLNode *parent,
   CWBoxPlayer *player;
   CWBoxPitcher *pitcher;
 
-  int ab = 0, r = 0, h = 0, b2 = 0, b3 = 0, hr = 0, bi = 0;
+  int pa = 0, ab = 0, r = 0, h = 0, b2 = 0, b3 = 0, hr = 0, hrslam = 0, bi = 0;
   int bb = 0, ibb = 0, so = 0, gdp = 0, hp = 0, sh = 0, sf = 0;
-  int sb = 0, cs = 0;
+  int sb = 0, cs = 0, xi = 0, lisp = 0, movedup = 0;
 
-  int e = 0, pb = 0;
+  int po = 0, a = 0, e = 0, pb = 0, dxi = 0;
 
-  int outs = 0, ha = 0, ra = 0, er = 0, hra = 0, bba = 0, soa = 0;
-  int sha = 0, sfa = 0, hb = 0, wp = 0, bk = 0;
+  int outs = 0, ha = 0, ra = 0, er = 0, hra = 0, bba = 0, ibba = 0, soa = 0;
+  int sha = 0, sfa = 0, hb = 0, wp = 0, bk = 0, pk = 0;
 
   for (slot = 1; slot <= 9; slot++) {
     player = cw_box_get_starter(boxscore, t, slot);
     
     while (player != NULL) {
+      pa += player->batting->pa;
       ab += player->batting->ab;
       r += player->batting->r;
       h += player->batting->h;
       b2 += player->batting->b2;
       b3 += player->batting->b3;
       hr += player->batting->hr;
+      hrslam += player->batting->hrslam;
       bi += player->batting->bi;
       bb += player->batting->bb;
       ibb += player->batting->ibb;
@@ -292,15 +296,21 @@ cwbox_team_stats_baseball(XMLNode *parent,
       sh += player->batting->sh;
       sf += player->batting->sf;
       sb += player->batting->sb;
+      xi += player->batting->xi;
       cs += player->batting->cs;
+      lisp += player->batting->lisp;
+      movedup += player->batting->movedup;
 
       for (pos = 1; pos <= 9; pos++) {
 	if (player->fielding[pos] != NULL) {
+	  po += player->fielding[pos]->po;
+	  a += player->fielding[pos]->a;
 	  e += player->fielding[pos]->e;
 	}
       }
       if (player->fielding[2] != NULL) {
 	pb += player->fielding[2]->pb;
+	dxi += player->fielding[2]->xi;
       }
 
       player = player->next;
@@ -310,14 +320,17 @@ cwbox_team_stats_baseball(XMLNode *parent,
   statsNode = xml_node_open(parent, "team-stats-baseball");
 
   node = xml_node_open(statsNode, "stats-baseball-offensive");
+  xml_node_attribute_int(node, "plate-appearances", pa);
   xml_node_attribute_int(node, "at-bats", ab);
   xml_node_attribute_int(node, "runs-scored", r);
   xml_node_attribute_int(node, "hits", h);
   xml_node_attribute_int(node, "total-bases", h+b2+2*b3+3*hr);
+  xml_node_attribute_int(node, "hits-extra-base", b2+b3+hr);
   xml_node_attribute_int(node, "singles", h-b2-b3-hr);
   xml_node_attribute_int(node, "doubles", b2);
   xml_node_attribute_int(node, "triples", b3);
   xml_node_attribute_int(node, "home-runs", hr);
+  xml_node_attribute_int(node, "grand-slams", hrslam);
   xml_node_attribute_int(node, "rbi", bi);
   xml_node_attribute_int(node, "bases-on-balls", bb);
   xml_node_attribute_int(node, "strikeouts", so);
@@ -327,11 +340,19 @@ cwbox_team_stats_baseball(XMLNode *parent,
   xml_node_attribute_int(node, "sac-flies", sf);
   xml_node_attribute_int(node, "stolen-bases", sb);
   xml_node_attribute_int(node, "stolen-bases-caught", cs);
+  xml_node_attribute_int(node, "reached-base-defensive-interferences", xi);
   xml_node_attribute_int(node, "left-on-base", boxscore->lob[t]);
+  xml_node_attribute_int(node, "left-in-scoring-position", lisp);
+  xml_node_attribute_int(node, "moved-up", movedup);
 
   node = xml_node_open(statsNode, "stats-baseball-defensive");
+  xml_node_attribute_int(node, "putouts", po);
+  xml_node_attribute_int(node, "assists", a);
   xml_node_attribute_int(node, "errors", e);
+  xml_node_attribute_int(node, "double-plays", boxscore->dp[t]);
+  xml_node_attribute_int(node, "triple-plays", boxscore->tp[t]);
   xml_node_attribute_int(node, "errors-passed-ball", pb);
+  xml_node_attribute_int(node, "errors-defensive-interference", dxi);
 
   pitcher = cw_box_get_starting_pitcher(boxscore, t);
   while (pitcher != NULL) {
@@ -343,11 +364,13 @@ cwbox_team_stats_baseball(XMLNode *parent,
     sha += pitcher->pitching->sh;
     sfa += pitcher->pitching->sf;
     bba += pitcher->pitching->bb;
+    ibba += pitcher->pitching->ibb;
     soa += pitcher->pitching->so;
     hb += pitcher->pitching->hb;
     wp += pitcher->pitching->wp;
     bk += pitcher->pitching->bk;
-
+    pk += pitcher->pitching->pk;
+    
     pitcher = pitcher->next;
   }
 
@@ -364,12 +387,22 @@ cwbox_team_stats_baseball(XMLNode *parent,
   xml_node_attribute_int(node, "hits", ha);
   xml_node_attribute_int(node, "home-runs-allowed", hra);
   xml_node_attribute_int(node, "bases-on-balls", bba);
+  xml_node_attribute_int(node, "bases-on-balls-intentional", ibba);
   xml_node_attribute_int(node, "strikeouts", soa);
   xml_node_attribute_int(node, "sacrifice-bunts-allowed", sha);
   xml_node_attribute_int(node, "sacrifice-flies-allowed", sfa);
   xml_node_attribute_int(node, "errors-hit-with-pitch", hb);
   xml_node_attribute_int(node, "errors-wild-pitch", wp);
   xml_node_attribute_int(node, "balks", bk);
+  xml_node_attribute_int(node, "pick-offs", pk);
+  if (cw_box_get_starting_pitcher(boxscore, t)->next == NULL) {
+    xml_node_attribute_int(node, "games-complete", 1);
+    xml_node_attribute_int(node, "games-finished", 0);
+  }
+  else {
+    xml_node_attribute_int(node, "games-complete", 0);
+    xml_node_attribute_int(node, "games-finished", 1);
+  }
   xml_node_attribute(node, "shutouts", ((ra == 0) ? "1" : "0"));
 }
 
