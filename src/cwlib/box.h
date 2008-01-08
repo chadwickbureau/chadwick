@@ -54,6 +54,13 @@ typedef struct cw_box_player_struct {
 typedef struct cw_box_pitching_struct {
   int g, gs, cg, sho, gf, outs, r, er, h, b2, b3, hr, bb, ibb, so, bf, bk, wp, hb;
   int sh, sf, pk;
+
+  /* inherited runners/inherited runners scored
+   * inherited runner is counted as scoring even if pitcher was relieved
+   * before the runner scored
+   */
+  int inr, inrs;
+
   /* xb is 'extra batters' -- batters faced in an inning without getting
    * an out; xbinn is inning in which this occurred */
   int xb, xbinn;

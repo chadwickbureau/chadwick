@@ -770,5 +770,29 @@ cw_gameiter_next(CWGameIterator *gameiter)
   }
 }
 
+/* Compute the eventual "fate" of the runner on 'base' */
+int cw_gameiter_runner_fate(CWGameIterator *orig_gameiter, int base)
+{
+  CWGameIterator *gameiter;
+  if (orig_gameiter->event_data->advance[base] == 0 ||
+      orig_gameiter->event_data->advance[base] >= 4) {
+    return orig_gameiter->event_data->advance[base];
+  }
+  
+  base = orig_gameiter->event_data->advance[base];
+  gameiter = cw_gameiter_copy(orig_gameiter);
+  while (gameiter->event != NULL && 
+	 gameiter->state->inning == orig_gameiter->state->inning &&
+	 gameiter->state->batting_team == orig_gameiter->state->batting_team &&
+	 base >= 1 && base <= 3) {
+    cw_gameiter_next(gameiter);
+    if (gameiter->event && strcmp(gameiter->event->event_text, "NP")) {
+      base = gameiter->event_data->advance[base];
+    }
+  }
 
+  cw_gameiter_cleanup(gameiter);
+  free(gameiter);
+  return base;
+}		
 

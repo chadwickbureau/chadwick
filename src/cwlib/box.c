@@ -113,6 +113,8 @@ cw_box_pitching_create(void)
   pitching->sh = 0;
   pitching->sf = 0;
   pitching->pk = 0;
+  pitching->inr = 0;
+  pitching->inrs = 0;
   pitching->xb = 0;
   pitching->xbinn = 0;
   pitching->gb = 0;
@@ -324,6 +326,7 @@ cw_box_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
 
     boxscore->slots[sub->slot][sub->team]->positions[boxscore->slots[sub->slot][sub->team]->num_positions++] = sub->pos;
 
+
     /* Guard against possibility of pitcher being subbed into batting
      * order slot when a team loses the DH -- don't want to create a
      * pitcher record for this! */
@@ -346,6 +349,21 @@ cw_box_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
       pitcher->prev = boxscore->pitchers[sub->team];
       boxscore->pitchers[sub->team] = pitcher;
     }
+
+    if (sub->pos == 1) {
+      int base;
+      CWBoxPitching *pitcher = boxscore->pitchers[sub->team]->pitching;
+
+      for (base = 1; base <= 3; base++) {
+	if (strcmp(gameiter->state->runners[base], "")) {
+	  pitcher->inr++;
+	  if (cw_gameiter_runner_fate(gameiter, base) >= 4) {
+	    pitcher->inrs++;
+	  }
+	}
+      }
+    }
+
     sub = sub->next;
   }
 }

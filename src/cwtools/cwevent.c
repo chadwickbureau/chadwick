@@ -74,32 +74,6 @@ int print_header = 0;
  * Utility functions (in some cases, candidates for refactor to cwlib)
  *************************************************************************/
 
-/* Compute the eventual "fate" of the runner on 'base' */
-int cwevent_runner_fate(CWGameIterator *orig_gameiter, int base)
-{
-  CWGameIterator *gameiter;
-  if (orig_gameiter->event_data->advance[base] == 0 ||
-      orig_gameiter->event_data->advance[base] >= 4) {
-    return orig_gameiter->event_data->advance[base];
-  }
-  
-  base = orig_gameiter->event_data->advance[base];
-  gameiter = cw_gameiter_copy(orig_gameiter);
-  while (gameiter->event != NULL && 
-	 gameiter->state->inning == orig_gameiter->state->inning &&
-	 gameiter->state->batting_team == orig_gameiter->state->batting_team &&
-	 base >= 1 && base <= 3) {
-    cw_gameiter_next(gameiter);
-    if (gameiter->event && strcmp(gameiter->event->event_text, "NP")) {
-      base = gameiter->event_data->advance[base];
-    }
-  }
-
-  cw_gameiter_cleanup(gameiter);
-  free(gameiter);
-  return base;
-}			
-
 /* Compute the number of runs scored after this play in half inning */
 int cwevent_future_runs(CWGameIterator *orig_gameiter)
 {
@@ -1626,25 +1600,25 @@ DECLARE_FIELDFUNC(cwevent_safe_on_error_flag)
 /* Extended Field 41 */
 DECLARE_FIELDFUNC(cwevent_batter_fate)
 {
-  return sprintf(buffer, "%d", cwevent_runner_fate(gameiter, 0));
+  return sprintf(buffer, "%d", cw_gameiter_runner_fate(gameiter, 0));
 }
 
 /* Extended Field 42 */
 DECLARE_FIELDFUNC(cwevent_runner1_fate)
 {
-  return sprintf(buffer, "%d", cwevent_runner_fate(gameiter, 1));
+  return sprintf(buffer, "%d", cw_gameiter_runner_fate(gameiter, 1));
 }
 
 /* Extended Field 43 */
 DECLARE_FIELDFUNC(cwevent_runner2_fate)
 {
-  return sprintf(buffer, "%d", cwevent_runner_fate(gameiter, 2));
+  return sprintf(buffer, "%d", cw_gameiter_runner_fate(gameiter, 2));
 }
 
 /* Extended Field 44 */
 DECLARE_FIELDFUNC(cwevent_runner3_fate)
 {
-  return sprintf(buffer, "%d", cwevent_runner_fate(gameiter, 3));
+  return sprintf(buffer, "%d", cw_gameiter_runner_fate(gameiter, 3));
 }
 
 /* Extended Field 45 */

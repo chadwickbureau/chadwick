@@ -152,7 +152,10 @@ void cw_gameiter_reset(CWGameIterator *gameiter);
  */
 void cw_gameiter_next(CWGameIterator *gameiter);
 
-
+/*
+ * Compute the eventual "fate" of the runner on 'base'
+ */
+int cw_gameiter_runner_fate(CWGameIterator *gameiter, int base);
 
 
 #endif   /* CW_GAMEITER_H */

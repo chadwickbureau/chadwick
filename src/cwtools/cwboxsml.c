@@ -198,6 +198,11 @@ cwbox_player_stats_pitching(XMLNode *parent,
   xml_node_attribute_int(node, "errors-wild-pitch", pitcher->pitching->wp);
   xml_node_attribute_int(node, "balks", pitcher->pitching->bk);
   xml_node_attribute_int(node, "pick-offs", pitcher->pitching->pk);
+  xml_node_attribute_int(node, "inherited-runners-total",
+			 pitcher->pitching->inr);
+  xml_node_attribute_int(node, "inherited-runners-scored",
+			 pitcher->pitching->inrs);
+  
 
   /* FIXME: A pitcher gets a shutout if he records all outs for a team,
    * even if not the starting pitcher! */
@@ -273,7 +278,7 @@ cwbox_team_stats_baseball(XMLNode *parent,
   int po = 0, a = 0, e = 0, pb = 0, dxi = 0;
 
   int outs = 0, ha = 0, ra = 0, er = 0, hra = 0, bba = 0, ibba = 0, soa = 0;
-  int sha = 0, sfa = 0, hb = 0, wp = 0, bk = 0, pk = 0;
+  int sha = 0, sfa = 0, hb = 0, wp = 0, bk = 0, pk = 0, inr = 0, inrs = 0;
 
   for (slot = 1; slot <= 9; slot++) {
     player = cw_box_get_starter(boxscore, t, slot);
@@ -370,6 +375,8 @@ cwbox_team_stats_baseball(XMLNode *parent,
     wp += pitcher->pitching->wp;
     bk += pitcher->pitching->bk;
     pk += pitcher->pitching->pk;
+    inr += pitcher->pitching->inr;
+    inrs += pitcher->pitching->inrs;
     
     pitcher = pitcher->next;
   }
@@ -395,6 +402,9 @@ cwbox_team_stats_baseball(XMLNode *parent,
   xml_node_attribute_int(node, "errors-wild-pitch", wp);
   xml_node_attribute_int(node, "balks", bk);
   xml_node_attribute_int(node, "pick-offs", pk);
+  xml_node_attribute_int(node, "inherited-runners-total", inr);
+  xml_node_attribute_int(node, "inherited-runners-scored", inrs);
+
   if (cw_box_get_starting_pitcher(boxscore, t)->next == NULL) {
     xml_node_attribute_int(node, "games-complete", 1);
     xml_node_attribute_int(node, "games-finished", 0);
