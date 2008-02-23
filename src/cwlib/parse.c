@@ -574,6 +574,9 @@ static int cw_parse_advance_modifier(CWParserState *state,
       else if (!strcmp(state->token, "AP")) {
 	/* 1X3(15/AP) appears in 2005SFN.EVN; appeal play? */
       }	
+      else if (!strcmp(state->token, "BR")) {
+	/* 1X2(6/BR) appears in NYA195605132 */
+      }	
       else {
 	return cw_parse_invalid(state);
       }
