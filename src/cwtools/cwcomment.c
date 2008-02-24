@@ -145,6 +145,9 @@ cwcomment_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 	buf += (*function_ptrs[i])(buf, gameiter, 1);
       }
     }
+
+    printf(output_line);
+    printf("\n");
   }
 
   while (gameiter->event != NULL) {
