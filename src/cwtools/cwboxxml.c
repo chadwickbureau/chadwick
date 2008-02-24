@@ -430,6 +430,11 @@ cwbox_print_xml(CWGame *game, CWBoxscore *boxscore,
 	   boxscore->walk_off, boxscore->outs_at_end);
   }
 
+  if (cw_game_info_lookup(game, "htbf") &&
+      !strcmp(cw_game_info_lookup(game, "htbf"), "true")) {
+    printf("htbf=\"1\" ");
+  }
+
   printf(">\n");
 
   cwbox_xml_linescore(boxscore);
