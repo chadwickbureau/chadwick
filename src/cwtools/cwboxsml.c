@@ -922,17 +922,66 @@ cwbox_action_baseball_play(XMLNode *parent, CWGameIterator *gameiter,
   }
   xml_node_attribute_int(node, "outs", gameiter->state->outs);
 
+  if (gameiter->event_data->advance[0] >= 1 &&
+      gameiter->event_data->advance[0] <= 3) {
+    xml_node_attribute_int(node, "batter-advance",
+			   gameiter->event_data->advance[0]);
+  }
+  else if (gameiter->event_data->advance[0] >= 4) {
+    xml_node_attribute(node, "batter-advance", "home");
+  }
+  else if (strcmp(gameiter->event_data->play[0], "") &&
+	   !strstr(gameiter->event_data->play[0], "E")) {
+    xml_node_attribute(node, "batter-advance", "out");
+  }
+
   if (strcmp(gameiter->state->runners[1], "")) {
     xml_node_attribute_fmt(node, "runner-on-first-idref", "p.%s",
 			   gameiter->state->runners[1]);
+    if (gameiter->event_data->advance[1] >= 1 &&
+	gameiter->event_data->advance[1] <= 3) {
+      xml_node_attribute_int(node, "runner-on-first-advance",
+			     gameiter->event_data->advance[1]);
+    }
+    else if (gameiter->event_data->advance[1] >= 4) {
+      xml_node_attribute(node, "runner-on-first-advance", "home");
+    }
+    else if (strcmp(gameiter->event_data->play[1], "") &&
+	     !strstr(gameiter->event_data->play[1], "E")) {
+      xml_node_attribute(node, "runner-on-first-advance", "out");
+    }
   }
   if (strcmp(gameiter->state->runners[2], "")) {
     xml_node_attribute_fmt(node, "runner-on-second-idref", "p.%s",
 			   gameiter->state->runners[2]);
+    if (gameiter->event_data->advance[2] >= 1 &&
+	gameiter->event_data->advance[2] <= 3) {
+      xml_node_attribute_int(node, "runner-on-second-advance",
+			     gameiter->event_data->advance[2]);
+    }
+    else if (gameiter->event_data->advance[2] >= 4) {
+      xml_node_attribute(node, "runner-on-second-advance", "home");
+    }
+    else if (strcmp(gameiter->event_data->play[2], "") &&
+	     !strstr(gameiter->event_data->play[2], "E")) {
+      xml_node_attribute(node, "runner-on-second-advance", "out");
+    }
   }
   if (strcmp(gameiter->state->runners[3], "")) {
     xml_node_attribute_fmt(node, "runner-on-third-idref", "p.%s",
 			   gameiter->state->runners[3]);
+    if (gameiter->event_data->advance[3] >= 1 &&
+	gameiter->event_data->advance[3] <= 3) {
+      xml_node_attribute_int(node, "runner-on-third-advance",
+			     gameiter->event_data->advance[3]);
+    }
+    else if (gameiter->event_data->advance[3] >= 4) {
+      xml_node_attribute(node, "runner-on-third-advance", "home");
+    }
+    else if (strcmp(gameiter->event_data->play[3], "") &&
+	     !strstr(gameiter->event_data->play[3], "E")) {
+      xml_node_attribute(node, "runner-on-third-advance", "out");
+    }
   }
 
   /* ASSUMPTION: batter-idref and pitcher-idref refer to the
