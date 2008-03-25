@@ -104,6 +104,7 @@ cwbox_player_stats_offensive(XMLNode *parent, CWBoxPlayer *player)
   xml_node_attribute_int(node, "grand-slams", player->batting->hrslam);
   xml_node_attribute_int(node, "rbi", player->batting->bi);
   xml_node_attribute_int(node, "bases-on-balls", player->batting->bb);
+  xml_node_attribute_int(node, "bases-on-balls-intentional", player->batting->ibb);
   xml_node_attribute_int(node, "strikeouts", player->batting->so);
   xml_node_attribute_int(node, "grounded-into-double-play", player->batting->gdp);
   xml_node_attribute_int(node, "hit-by-pitch", player->batting->hp);
@@ -338,10 +339,11 @@ cwbox_team_stats_baseball(XMLNode *parent,
   xml_node_attribute_int(node, "grand-slams", hrslam);
   xml_node_attribute_int(node, "rbi", bi);
   xml_node_attribute_int(node, "bases-on-balls", bb);
+  xml_node_attribute_int(node, "bases-on-balls-intentional", ibb);
   xml_node_attribute_int(node, "strikeouts", so);
   xml_node_attribute_int(node, "grounded-into-double-play", gdp);
   xml_node_attribute_int(node, "hit-by-pitch", hp);
-  xml_node_attribute_int(node, "sac-bunts", sb);
+  xml_node_attribute_int(node, "sac-bunts", sh);
   xml_node_attribute_int(node, "sac-flies", sf);
   xml_node_attribute_int(node, "stolen-bases", sb);
   xml_node_attribute_int(node, "stolen-bases-caught", cs);
