@@ -930,7 +930,7 @@ static field_struct field_data[] = {
   /*  0 */ { cwevent_game_id, "GAME_ID", "game id*" },
   /*  1 */ { cwevent_visiting_team, "AWAY_TEAM_ID", "visiting team*" },
   /*  2 */ { cwevent_inning, "INN_CT", "inning*" },
-  /*  3 */ { cwevent_batting_team, "BAT_ID", "batting_team*" },
+  /*  3 */ { cwevent_batting_team, "BAT_HOME_ID", "batting_team*" },
   /*  4 */ { cwevent_outs, "OUTS_CT", "outs*" },
   /*  5 */ { cwevent_balls, "BALLS_CT", "balls*" },
   /*  6 */ { cwevent_strikes, "STRIKES_CT", "strikes*" },
