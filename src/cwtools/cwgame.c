@@ -54,6 +54,8 @@ int max_field = 83;
 
 char program_name[20] = "cwgame";
 
+int print_header = 0;
+
 
 /*************************************************************************
  * Utility routines to compute day of week
@@ -116,6 +118,15 @@ cwgame_lookup(char *text, CWLookup *table)
  */
 typedef int (*field_func)(char *, CWGameIterator *,
 			  CWRoster *, CWRoster *);
+
+/*
+ * convenient structure to hold all information relating to a field
+ * together in one place
+ */
+typedef struct field_struct {
+  field_func f;
+  char *header, *description;
+} field_struct;
 
 /*
  * preprocessor directive for conveniently declaring function signature
@@ -602,59 +613,102 @@ cwgame_starting_position(char *buffer, CWGame *game, int team, int slot)
   return 0;
 }
 
-static field_func function_ptrs[] = {
-  cwgame_game_id,                 /* 0 */
-  cwgame_date,                    /* 1 */
-  cwgame_number,                  /* 2 */
-  cwgame_day_of_week,             /* 3 */
-  cwgame_start_time,              /* 4 */
-  cwgame_use_dh,                  /* 5 */
-  cwgame_day_night,               /* 6 */
-  cwgame_visitors,                /* 7 */
-  cwgame_home,                    /* 8 */
-  cwgame_site,                    /* 9 */
-  cwgame_visitors_pitcher,        /* 10 */
-  cwgame_home_pitcher,            /* 11 */
-  cwgame_umpire_home,             /* 12 */
-  cwgame_umpire_1b,               /* 13 */
-  cwgame_umpire_2b,               /* 14 */
-  cwgame_umpire_3b,               /* 15 */
-  cwgame_umpire_lf,               /* 16 */
-  cwgame_umpire_rf,               /* 17 */
-  cwgame_attendance,              /* 18 */
-  cwgame_scorer,                  /* 19 */
-  cwgame_translator,              /* 20 */
-  cwgame_inputter,                /* 21 */
-  cwgame_inputtime,               /* 22 */
-  cwgame_edittime,                /* 23 */
-  cwgame_howscored,               /* 24 */
-  cwgame_pitches,                 /* 25 */
-  cwgame_temperature,             /* 26 */
-  cwgame_wind_direction,          /* 27 */
-  cwgame_wind_speed,              /* 28 */
-  cwgame_field_condition,         /* 29 */
-  cwgame_precipitation,           /* 30 */
-  cwgame_sky,                     /* 31 */
-  cwgame_time_of_game,            /* 32 */
-  cwgame_innings,                 /* 33 */
-  cwgame_visitor_score,           /* 34 */
-  cwgame_home_score,              /* 35 */
-  cwgame_visitor_hits,            /* 36 */
-  cwgame_home_hits,               /* 37 */
-  cwgame_visitor_errors,          /* 38 */
-  cwgame_home_errors,             /* 39 */
-  cwgame_visitor_lob,             /* 40 */
-  cwgame_home_lob,                /* 41 */
-  cwgame_winning_pitcher,         /* 42 */
-  cwgame_losing_pitcher,          /* 43 */
-  cwgame_save,                    /* 44 */
-  cwgame_gwrbi                    /* 45 */
+static field_struct field_data[] = {
+  /*  0 */ { cwgame_game_id, "GAME_ID", "game id" },
+  /*  1 */ { cwgame_date, "GAME_DT", "date" },
+  /*  2 */ { cwgame_number, "GAME_CT", "game number (0 = no double header)" },
+  /*  3 */ { cwgame_day_of_week, "GAME_DY", "day of week" },
+  /*  4 */ { cwgame_start_time, "START_GAME_TM", "start time" },
+  /*  5 */ { cwgame_use_dh, "DH_FL", "DH used flag" },
+  /*  6 */ { cwgame_day_night, "DAYNIGHT_PARK_CD", "day/night flag" },
+  /*  7 */ { cwgame_visitors, "AWAY_TEAM_ID", "visiting team" },
+  /*  8 */ { cwgame_home, "HOME_TEAM_ID", "home team" },
+  /*  9 */ { cwgame_site, "PARK_ID", "game site" },
+  /* 10 */ { cwgame_visitors_pitcher, "AWAY_START_PIT_ID", 
+	     "vis. starting pitcher" },
+  /* 11 */ { cwgame_home_pitcher, "HOME_START_PIT_ID", 
+	     "home starting pitcher" },
+  /* 12 */ { cwgame_umpire_home, "BASE4_UMP_ID", "home plate umpire" },
+  /* 13 */ { cwgame_umpire_1b, "BASE1_UMP_ID", "first base umpire" },
+  /* 14 */ { cwgame_umpire_2b, "BASE2_UMP_ID", "second base umpire" },
+  /* 15 */ { cwgame_umpire_3b, "BASE3_UMP_ID", "third base umpire" },
+  /* 16 */ { cwgame_umpire_lf, "LF_UMP_ID", "left field umpire" },
+  /* 17 */ { cwgame_umpire_rf, "RF_UMP_ID", "right field umpire" },
+  /* 18 */ { cwgame_attendance, "ATTEND_PARK_CT", "attendance" },
+  /* 19 */ { cwgame_scorer, "SCORER_RECORD_ID", "PS scorer" },
+  /* 20 */ { cwgame_translator, "TRANSLATOR_RECORD_ID", "translator" },
+  /* 21 */ { cwgame_inputter, "INPUTTER_RECORD_ID", "inputter" },
+  /* 22 */ { cwgame_inputtime, "INPUT_RECORD_TS", "input time" },
+  /* 23 */ { cwgame_edittime, "EDIT_RECORD_TS", "edit time" },
+  /* 24 */ { cwgame_howscored, "METHOD_RECORD_CD", "how scored" },
+  /* 25 */ { cwgame_pitches, "PITCHES_RECORD_CD", "pitches entered?" },
+  /* 26 */ { cwgame_temperature, "TEMP_PARK_CT", "temperature" },
+  /* 27 */ { cwgame_wind_direction, "WIND_DIRECTION_PARK_CD", 
+	     "wind direction" },
+  /* 28 */ { cwgame_wind_speed, "WIND_SPEED_PARK_CT", "wind speed" },
+  /* 29 */ { cwgame_field_condition, "FIELD_PARK_CD", "field condition" },
+  /* 30 */ { cwgame_precipitation, "PRECIP_PARK_CD", "precipitation" },
+  /* 31 */ { cwgame_sky, "SKY_PARK_CD", "sky" },
+  /* 32 */ { cwgame_time_of_game, "MINUTES_GAME_CT", "time of game" },
+  /* 33 */ { cwgame_innings, "INN_CT", "number of innings" },
+  /* 34 */ { cwgame_visitor_score, "AWAY_SCORE_CT", "visitor final score" },
+  /* 35 */ { cwgame_home_score, "HOME_SCORE_CT", "home final score" },
+  /* 36 */ { cwgame_visitor_hits, "AWAY_HITS_CT", "visitor hits" },
+  /* 37 */ { cwgame_home_hits, "HOME_HITS_CT", "home hits" },
+  /* 38 */ { cwgame_visitor_errors, "AWAY_ERR_CT", "visitor errors" },
+  /* 39 */ { cwgame_home_errors, "HOME_ERR_CT", "home errors" },
+  /* 40 */ { cwgame_visitor_lob, "AWAY_LOB_CT", "visitor left on base" },
+  /* 41 */ { cwgame_home_lob, "HOME_LOB_CT", "home left on base" },
+  /* 42 */ { cwgame_winning_pitcher, "WIN_PIT_ID", "winning pitcher" },
+  /* 43 */ { cwgame_losing_pitcher, "LOSE_PIT_ID", "losing pitcher" },
+  /* 44 */ { cwgame_save, "SAVE_PIT_ID", "save for" },
+  /* 45 */ { cwgame_gwrbi, "GWRBI_BAT_ID", "GW RBI" },
+  /* 46 */ { NULL, "AWAY_LINEUP1_BAT_ID", "visitor batter 1" },
+  /* 47 */ { NULL, "AWAY_LINEUP1_FLD_CD", "visitor position 1" },
+  /* 48 */ { NULL, "AWAY_LINEUP2_BAT_ID", "visitor batter 2" },
+  /* 49 */ { NULL, "AWAY_LINEUP2_FLD_CD", "visitor position 2" },
+  /* 50 */ { NULL, "AWAY_LINEUP3_BAT_ID", "visitor batter 3" },
+  /* 51 */ { NULL, "AWAY_LINEUP3_FLD_CD", "visitor position 3" },
+  /* 52 */ { NULL, "AWAY_LINEUP4_BAT_ID", "visitor batter 4" },
+  /* 53 */ { NULL, "AWAY_LINEUP4_FLD_CD", "visitor position 4" },
+  /* 54 */ { NULL, "AWAY_LINEUP5_BAT_ID", "visitor batter 5" },
+  /* 55 */ { NULL, "AWAY_LINEUP5_FLD_CD", "visitor position 5" },
+  /* 56 */ { NULL, "AWAY_LINEUP6_BAT_ID", "visitor batter 6" },
+  /* 57 */ { NULL, "AWAY_LINEUP6_FLD_CD", "visitor position 6" },
+  /* 58 */ { NULL, "AWAY_LINEUP7_BAT_ID", "visitor batter 7" },
+  /* 59 */ { NULL, "AWAY_LINEUP7_FLD_CD", "visitor position 7" },
+  /* 60 */ { NULL, "AWAY_LINEUP8_BAT_ID", "visitor batter 8" },
+  /* 61 */ { NULL, "AWAY_LINEUP8_FLD_CD", "visitor position 8" },
+  /* 62 */ { NULL, "AWAY_LINEUP9_BAT_ID", "visitor batter 9" },
+  /* 63 */ { NULL, "AWAY_LINEUP9_FLD_CD", "visitor position 9" },
+  /* 64 */ { NULL, "HOME_LINEUP1_BAT_ID", "home batter 1" },
+  /* 65 */ { NULL, "HOME_LINEUP1_FLD_CD", "home position 1" },
+  /* 66 */ { NULL, "HOME_LINEUP2_BAT_ID", "home batter 2" },
+  /* 67 */ { NULL, "HOME_LINEUP2_FLD_CD", "home position 2" },
+  /* 68 */ { NULL, "HOME_LINEUP3_BAT_ID", "home batter 3" },
+  /* 69 */ { NULL, "HOME_LINEUP3_FLD_CD", "home position 3" },
+  /* 70 */ { NULL, "HOME_LINEUP4_BAT_ID", "home batter 4" },
+  /* 71 */ { NULL, "HOME_LINEUP4_FLD_CD", "home position 4" },
+  /* 72 */ { NULL, "HOME_LINEUP5_BAT_ID", "home batter 5" },
+  /* 73 */ { NULL, "HOME_LINEUP5_FLD_CD", "home position 5" },
+  /* 74 */ { NULL, "HOME_LINEUP6_BAT_ID", "home batter 6" },
+  /* 75 */ { NULL, "HOME_LINEUP6_FLD_CD", "home position 6" },
+  /* 76 */ { NULL, "HOME_LINEUP7_BAT_ID", "home batter 7" },
+  /* 77 */ { NULL, "HOME_LINEUP7_FLD_CD", "home position 7" },
+  /* 78 */ { NULL, "HOME_LINEUP8_BAT_ID", "home batter 8" },
+  /* 79 */ { NULL, "HOME_LINEUP8_FLD_CD", "home position 8" },
+  /* 80 */ { NULL, "HOME_LINEUP9_BAT_ID", "home batter 9" },
+  /* 81 */ { NULL, "HOME_LINEUP9_FLD_CD", "home position 9" },
+  /* 82 */ { NULL, "AWAY_FINISH_PIT_ID", 
+	     "visiting finisher (NULL if complete game)" },
+  /* 83 */ { NULL, "HOME_FINISH_PIT_ID", 
+	     "home finisher (NULL if complete game)" }
 };
 
 void cwgame_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 {
   char *buf;
-  char output_line[1024];
+  char output_line[4096];
   int i, j, t, comma = 0;
   CWGameIterator *gameiter = cw_gameiter_create(game);
 
@@ -672,7 +726,7 @@ void cwgame_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
       else {
 	comma = 1;
       }
-      buf += (*function_ptrs[i])(buf, gameiter, visitors, home);
+      buf += (*field_data[i].f)(buf, gameiter, visitors, home);
     }
   }
 
@@ -733,6 +787,7 @@ void cwgame_print_help(void)
   fprintf(stderr, "              Default is 0-83\n");
   fprintf(stderr, "  -d        print list of field numbers and descriptions\n");
   fprintf(stderr, "  -q        operate quietly; do not output progress messages\n");
+  fprintf(stderr, "  -n        print field names in first row of output\n\n");
 
   exit(0);
 }
@@ -742,95 +797,17 @@ void (*cwtools_print_help)(void) = cwgame_print_help;
 void
 cwgame_print_field_list(void)
 {
+  int i;
+
   fprintf(stderr, "\nThese are the available fields and the numbers to use with the -f option\n");
   fprintf(stderr, "to name them.  All are included by default.\n");
   fprintf(stderr, "\n");
   fprintf(stderr, "number  field\n");
   fprintf(stderr, "------  -----\n");
-  fprintf(stderr, "0       game id\n");
-  fprintf(stderr, "1       date\n");
-  fprintf(stderr, "2       game number (0 = no double header)\n");
-  fprintf(stderr, "3       day of week\n");
-  fprintf(stderr, "4       start time\n");
-  fprintf(stderr, "5       DH used flag\n");
-  fprintf(stderr, "6       day/night flag\n");
-  fprintf(stderr, "7       visiting team\n");
-  fprintf(stderr, "8       home team\n");
-  fprintf(stderr, "9       game site\n");
-  fprintf(stderr, "10      vis. starting pitcher\n");
-  fprintf(stderr, "11      home starting pitcher\n");
-  fprintf(stderr, "12      home plate umpire\n");
-  fprintf(stderr, "13      first base umpire\n");
-  fprintf(stderr, "14      second base umpire\n");
-  fprintf(stderr, "15      third base umpire\n");
-  fprintf(stderr, "16      left field umpire\n");
-  fprintf(stderr, "17      right field umpire\n");
-  fprintf(stderr, "18      attendance\n");
-  fprintf(stderr, "19      PS scorer\n");
-  fprintf(stderr, "20      translator\n");
-  fprintf(stderr, "21      inputter\n");
-  fprintf(stderr, "22      input time\n");
-  fprintf(stderr, "23      edit time\n");
-  fprintf(stderr, "24      how scored\n");
-  fprintf(stderr, "25      pitches entered?\n");
-  fprintf(stderr, "26      temperature\n");
-  fprintf(stderr, "27      wind direction\n");
-  fprintf(stderr, "28      wind speed\n");
-  fprintf(stderr, "29      field condition\n");
-  fprintf(stderr, "30      precipitation\n");
-  fprintf(stderr, "31      sky\n");
-  fprintf(stderr, "32      time of game\n");
-  fprintf(stderr, "33      number of innings\n");
-  fprintf(stderr, "34      visitor final score\n");
-  fprintf(stderr, "35      home final score\n");
-  fprintf(stderr, "36      visitor hits\n");
-  fprintf(stderr, "37      home hits\n");
-  fprintf(stderr, "38      visitor errors\n");
-  fprintf(stderr, "39      home errors\n");
-  fprintf(stderr, "40      visitor left on base\n");
-  fprintf(stderr, "41      home left on base\n");
-  fprintf(stderr, "42      winning pitcher\n");
-  fprintf(stderr, "43      losing pitcher\n");
-  fprintf(stderr, "44      save for\n");
-  fprintf(stderr, "45      GW RBI\n");
-  fprintf(stderr, "46      visitor batter 1\n");
-  fprintf(stderr, "47      visitor position 1\n");
-  fprintf(stderr, "48      visitor batter 2\n");
-  fprintf(stderr, "49      visitor position 2\n");
-  fprintf(stderr, "50      visitor batter 3\n");
-  fprintf(stderr, "51      visitor position 3\n");
-  fprintf(stderr, "52      visitor batter 4\n");
-  fprintf(stderr, "53      visitor position 4\n");
-  fprintf(stderr, "54      visitor batter 5\n");
-  fprintf(stderr, "55      visitor position 5\n");
-  fprintf(stderr, "56      visitor batter 6\n");
-  fprintf(stderr, "57      visitor position 6\n");
-  fprintf(stderr, "58      visitor batter 7\n");
-  fprintf(stderr, "59      visitor position 7\n");
-  fprintf(stderr, "60      visitor batter 8\n");
-  fprintf(stderr, "61      visitor position 8\n");
-  fprintf(stderr, "62      visitor batter 9\n");
-  fprintf(stderr, "63      visitor position 9\n");
-  fprintf(stderr, "64      home batter 1\n");
-  fprintf(stderr, "65      home position 1\n");
-  fprintf(stderr, "66      home batter 2\n");
-  fprintf(stderr, "67      home position 2\n");
-  fprintf(stderr, "68      home batter 3\n");
-  fprintf(stderr, "69      home position 3\n");
-  fprintf(stderr, "70      home batter 4\n");
-  fprintf(stderr, "71      home position 4\n");
-  fprintf(stderr, "72      home batter 5\n");
-  fprintf(stderr, "73      home position 5\n");
-  fprintf(stderr, "74      home batter 6\n");
-  fprintf(stderr, "75      home position 6\n");
-  fprintf(stderr, "76      home batter 7\n");
-  fprintf(stderr, "77      home position 7\n");
-  fprintf(stderr, "78      home batter 8\n");
-  fprintf(stderr, "79      home position 8\n");
-  fprintf(stderr, "80      home batter 9\n");
-  fprintf(stderr, "81      home position 9\n");
-  fprintf(stderr, "82      visiting finisher (NULL if complete game)\n");
-  fprintf(stderr, "83      home finisher (NULL if complete game)\n");
+  for (i = 0; i <= max_field; i++) {
+    fprintf(stderr, "%-2d      %s\n", i, field_data[i].description);
+  }
+  fprintf(stderr, "\n");
 
   exit(0);
 }
@@ -852,6 +829,31 @@ void (*cwtools_print_welcome_message)(char *) = cwgame_print_welcome_message;
 void
 cwgame_initialize(void)
 {
+  int i, comma = 0;
+  char output_line[4096];
+  char *buf;
+
+  if (!ascii || !print_header) {
+    return;
+  }
+
+  strcpy(output_line, "");
+  buf = output_line;
+
+  for (i = 0; i <= max_field; i++) {
+    if (fields[i]) {
+      if (ascii && comma) {
+	*(buf++) = ',';
+      }
+      else {
+	comma = 1;
+      }
+      buf += sprintf(buf, "\"%s\"", field_data[i].header);
+    }
+  }
+
+  printf(output_line);
+  printf("\n");
 }
 
 void (*cwtools_initialize)(void) = cwgame_initialize;
@@ -863,5 +865,78 @@ cwgame_cleanup(void)
 
 void (*cwtools_cleanup)(void) = cwgame_cleanup;
 
-extern int cwtools_default_parse_command_line(int, char *argv[]);
-int (*cwtools_parse_command_line)(int, char *argv[]) = cwtools_default_parse_command_line;
+extern char year[5];
+extern char first_date[5];
+extern char last_date[5];
+extern char game_id[20];
+extern int ascii;
+extern int quiet;
+
+extern void
+cwtools_parse_field_list(char *text, int max_field, int *fields);
+
+int
+cwgame_parse_command_line(int argc, char *argv[])
+{
+  int i;
+  strcpy(year, "");
+
+  for (i = 1; i < argc; i++) {
+    if (!strcmp(argv[i], "-a")) {
+      ascii = 1;
+    }
+    else if (!strcmp(argv[i], "-d")) {
+      (*cwtools_print_welcome_message)(argv[0]);
+      (*cwtools_print_field_list)();
+    }
+    else if (!strcmp(argv[i], "-e")) {
+      if (++i < argc) {
+	strncpy(last_date, argv[i], 4);
+      }
+    }
+    else if (!strcmp(argv[i], "-h")) {
+      (*cwtools_print_welcome_message)(argv[0]);
+      (*cwtools_print_help)();
+    }
+    else if (!strcmp(argv[i], "-q")) {
+      quiet = 1;
+    }
+    else if (!strcmp(argv[i], "-i")) {
+      if (++i < argc) {
+	strncpy(game_id, argv[i], 19);
+      }
+    }
+    else if (!strcmp(argv[i], "-f")) {
+      if (++i < argc) {
+	cwtools_parse_field_list(argv[i], max_field, fields);
+      }
+    }
+    else if (!strcmp(argv[i], "-n")) {
+      print_header = 1;
+    }
+    else if (!strcmp(argv[i], "-ft")) {
+      ascii = 0;
+    }
+    else if (!strcmp(argv[i], "-s")) {
+      if (++i < argc) {
+	strncpy(first_date, argv[i], 4);
+      }
+    }
+    else if (!strcmp(argv[i], "-y")) {
+      if (++i < argc) {
+	strncpy(year, argv[i], 5);
+      }
+    }
+    else if (argv[i][0] == '-') {
+      fprintf(stderr, "*** Invalid option '%s'.\n", argv[i]);
+      exit(1);
+    }
+    else {
+      break;
+    }
+  }
+
+  return i;
+}
+
+int (*cwtools_parse_command_line)(int, char *argv[]) = cwgame_parse_command_line;
