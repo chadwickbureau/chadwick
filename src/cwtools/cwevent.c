@@ -54,16 +54,16 @@ int fields[97] = {
 int max_field = 96;
 
 /* Extended fields to display (-x) */
-int ext_fields[51] = {
+int ext_fields[53] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0
+  0, 0, 0
 };
 
-int max_ext_field = 50;
+int max_ext_field = 52;
 
 char program_name[20] = "cwevent";
 
@@ -1658,10 +1658,27 @@ DECLARE_FIELDFUNC(cwevent_assist10)
   return sprintf(buffer, "%d", gameiter->event_data->assists[9]);
 }
 
+/* Extended Field 51 */
+DECLARE_FIELDFUNC(cwevent_unknown_out_flag)
+{
+  return sprintf(buffer, "%c",
+		 (!strcmp(gameiter->event_data->play[0], "99") ||
+		  !strcmp(gameiter->event_data->play[1], "99") ||
+		  !strcmp(gameiter->event_data->play[2], "99") ||
+		  !strcmp(gameiter->event_data->play[3], "99")) ? 'T' : 'F');
+}
+
+/* Extended Field 52 */
+DECLARE_FIELDFUNC(cwevent_uncertain_play_flag)
+{
+  return sprintf(buffer, "%c",
+		 (gameiter->event->event_text[strlen(gameiter->event->event_text)-1] == '#') ? 'T' : 'F');
+}
+
 static field_struct ext_field_data[] = {
   /*  0 */ { cwevent_home_team_id, "HOME_TEAM_ID", "home team id" },
   /*  1 */ { cwevent_batting_team_id, "BAT_TEAM_ID", "batting team id" },
-  /*  2 */ { cwevent_fielding_team_id, "FLD_TEAM_ID", "fielding_team_id" },    
+  /*  2 */ { cwevent_fielding_team_id, "FLD_TEAM_ID", "fielding team id" },    
   /*  3 */ { cwevent_half_inning, "BAT_LAST_ID", 
 	     "half inning (differs from batting team if home team bats first" },
   /*  4 */ { cwevent_start_half_inning, "INN_NEW_FL", 
@@ -1751,7 +1768,11 @@ static field_struct ext_field_data[] = {
   /* 47 */ { cwevent_assist7, "ASS7_FLD_CD", "fielder with seventh assist" },
   /* 48 */ { cwevent_assist8, "ASS8_FLD_CD", "fielder with eighth assist" },
   /* 49 */ { cwevent_assist9, "ASS9_FLD_CD", "fielder with ninth assist" },
-  /* 50 */ { cwevent_assist10, "ASS10_FLD_CD", "fielder with tenth assist" }
+  /* 50 */ { cwevent_assist10, "ASS10_FLD_CD", "fielder with tenth assist" },
+  /* 51 */ { cwevent_unknown_out_flag, "EXC_UNKNOWN_OUT_FL",
+             "unknown fielding credit flag" },
+  /* 52 */ { cwevent_uncertain_play_flag, "EXC_UNCERTAIN_PLAY_FL",
+             "uncertain play flag" }
 };
 
 void
