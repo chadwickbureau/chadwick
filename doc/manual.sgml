@@ -1,1308 +1,3436 @@
-<!DOCTYPE Book PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
-]>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <book id="chadwick">
   <bookinfo>
     <title>Chadwick</title>
+
     <subtitle>Software for Baseball Game Scoring and Record-Keeping</subtitle>
+
     <author>
       <firstname>Theodore</firstname>
+
       <surname>Turocy</surname>
     </author>
+
     <edition>Version 0.5.x</edition>
+
     <pubdate>May 2008</pubdate>
+
     <copyright>
       <year>2008</year>
+
       <holder>Theodore Turocy</holder>
     </copyright>
   </bookinfo>
 
-<chapter id="intro">
+  <chapter id="intro">
     <title>Introduction</title>
-    <para>
-Chadwick is an Open Source Software project dedicated to making
-available a quality suite of tools for use in baseball scorekeeping and
-statistics collection.
-</para>
 
-    <sect1 id="intro.why">
-      <title>Why does Chadwick exist?</title>
-
-      <para>If one takes the writings of Eric S. Raymond literally,
-then Chadwick exists because I needed to scratch an itch, which in
-my case was the need to be able to very efficiently scan Retrosheet
-files to extract actual future runs scored from a variety of
-game situations.  The <application>bevent</application> program 
-which DiamondWare generously has licensed for use on Retrosheet data
-is not convenient for doing this, since even after extracting the
-data, I would either need to write my own program to read in the output
-and analyze it, or use a database.  In the former case, I would still
-be doing a decent amount of work to get to the point I needed to;
-in the latter case, attempts to write efficient queries over the
-whole of the Retrosheet data set (running around 20 seasons at this
-writing) were, to put it mildly, inefficient.</para>
-
-      <para>In the 1980s, after the ancestor of this scoring notation
-was first described in one of Bill James' Abstracts at the dawn of
-Project Scoresheet, I wrote some simple BASIC code which parsed a
-stripped-down version of the notation and generated statistics from it.
-Later on, after some computer science training, I understood the
-beauty of the notation, which is that all allowable play codes can be
-parsed by only looking at the next character in the string (called
-an LL grammar).  So, I knew just how to go about writing code to parse
-the notation on my own.</para>
-
-      <para>Finally, as I was going to set out to write some of my own
-code, I looked around and realized that not infrequently, someone would
-post to the Retrosheet mailing list asking about the availability
-of input tools to create Retrosheet-style files for scorekeeping and
-statistics gathering, or about the availability of more modern (that is,
-non-command-line) tools for extracting information from Retrosheet files,
-or about the availability of tools to run natively on operating systems
-other than Windows.  Some interpid souls have produced programs which
-act as front ends for the DiamondWare tools, or which use processed output
-from them as input into a customized database program.  Both approaches
-definitely took some effort, yet still are quite kludgy.  Being able to
-incorporate the ability to read, parse, and write the actual Retrosheet
-files within an application remained impossible, since the DiamondWare
-engine is proprietary.</para>
-
-      <para>So, as I wrote my application, I wrote new code that 
-manipulates Retrosheet files, and it is this code that forms the
-basis of Chadwick.  This toolset and programs built on it focus on
-the DiamondWare/Retrosheet notation, both because it is an efficient
-and elegant way of recording what occurs on a baseball play, and because
-the existence of the DiamondWare tools provides an excellent standard.
-The DiamondWare tools are stable and time-tested, and, to use the
-metaphor, are excellent taillights to chase at the start of this project.
-</para>
-
-      <para>Currently, Chadwick still mostly provides replacements for
-DiamondWare tools, plus small companion utilities, like the
-<application>cwsub</application> program to report on player substitutions,
-that fill in gaps in the DiamondWare tools.  As the library matures,
-it is an ideal candidate for inclusion in more elaborate programs to
-enter, edit, and analyze baseball games graphically, in scorebook and
-statistics reporting applications.</para>
-
-      <para>This is where <emphasis>you</emphasis> come
-in: the project is looking for individuals interested in helping to
-design and code such an application, using the library as a core.
-There are many scorekeeping applications available; I've tried a number
-of them, and found them all lacking.  I believe there's quite a 
-sizeable niche available for a well-designed Open Source scorekeeping
-application.</para>
-
-      <para>For now, welcome.  I hope you will find Chadwick useful
-in its current state, and encourage you to contribute to the project,
-by contributing code if you can, or at least by contributing bug reports and
-feature suggestions.</para>
-
-      </sect1>
+    <para>Chadwick is an Open Source Software project dedicated to making
+    available a quality suite of tools for use in baseball scorekeeping and
+    statistics collection.</para>
 
     <sect1 id="intro.objectives">
-      <title>Current objectives of the project</title>
+      <title>Objectives of the project</title>
 
-    <para>
-To operationalize the overall goal of Chadwick, the project has the
-following objectives:
-<orderedlist>
-	  <listitem>
-	    <para>To provide a portable library of Open Source code
-            which permits the
-	    representation of the events in a baseball game;</para>
-	  </listitem>
-	  <listitem>
-	    <para>To read, write, and manipulate events coded in the
-            Project Scoresheet / DiamondWare / Retrosheet notation;</para>
-	    </listitem>
-	  <listitem>
-	    <para>To implement Open Source alternatives to the DiamondWare
-            tools <application>bevent</application> and 
-            <application>bgame</application>
-            available on the Retrosheet website, matching their interface
-            and output as closely as possible</para>
-	    </listitem>
-</orderedlist>
-</para>
-</sect1>
+      <para>To operationalize the overall goal of Chadwick, the project has
+      the following objectives: <orderedlist>
+          <listitem>
+            <para>To provide a portable library of Open Source code to
+            represent, manipulate, and process event-level and pitch-level
+            data from baseball games;</para>
+          </listitem>
 
-<sect1 id="intro.contacting">
-<title>Contacting the developers</title>
-<para>
-Chadwick's homepage is hosted by SourceForge, and can be found at
-http://chadwick.sourceforge.net.
-</para>
-</sect1>
+          <listitem>
+            <para>To read, write, and manipulate events coded in the Project
+            Scoresheet / DiamondWare / Retrosheet notation;</para>
+          </listitem>
 
-<sect1 id="intro.about">
-<title>About this documentation</title>
-<para>
-This documentation is a work in progress, and is updated regularly
-on the Chadwick website.  Some sections are currently obviously
-missing or under construction.  We appreciate your patience while
-we get this together.
-</para>
-</sect1>
+          <listitem>
+            <para>To implement Open Source alternatives to the DiamondWare
+            tools BEVENT, BGAME, and BOX available on the Retrosheet website,
+            matching their interface and output as closely as possible</para>
+          </listitem>
+        </orderedlist></para>
+    </sect1>
 
-<sect1 id="intro.thanks">
-<title>Acknowledgements</title>
-<para>
-The Chadwick project does not have the endorsement of anyone but
-its authors.  However, we'd like to thank everyone involved in the
-creation of the scoring notation and file format.  In particular,
-we extend a special thanks to David Smith of Retrosheet, who in
-his always gracious manner quickly and thoroughly answered several
-questions regarding the notation and Retrosheet &quot;preferred
-style&quot;.
-</para>
+    <sect1 id="intro.contacting">
+      <title>Contacting the developers</title>
 
-<para>
-There are many places in this documentation which refer to bugs in
-other software tools.  These should in no way be construed as being
-derogatory to those tools or their authors.  In fact, the
-Chadwick project has a large advantage in being able to, as the saying
-goes, &quot;chase taillights&quot;, and we are most grateful for having
-such wonderful taillights to chase.  Almost every bug in those tools noted
-in this
-documentation is, in truth, trivial, and the vast majority are probably
-not of crucial interest to most people.
-</para>
-</sect1>
+      <para>Chadwick's homepage is hosted by SourceForge, and can be found at
+      http://chadwick.sourceforge.net.</para>
+    </sect1>
 
+    <sect1 id="intro.about">
+      <title>About this documentation</title>
+
+      <para>This documentation is a work in progress, and is updated regularly
+      on the Chadwick website. Some sections are currently obviously missing
+      or under construction. We appreciate your patience while we get this
+      together.</para>
+    </sect1>
+
+    <sect1 id="intro.thanks">
+      <title>Acknowledgements</title>
+
+      <para>The Chadwick project does not have the endorsement of anyone but
+      its authors. However, we'd like to thank everyone involved in the
+      creation of the scoring notation and file format. In particular, we
+      extend a special thanks to David Smith of Retrosheet, who in his always
+      gracious manner quickly and thoroughly answered several questions
+      regarding the notation and Retrosheet "preferred style".</para>
+    </sect1>
   </chapter>
 
-<chapter id="cwtools">
+  <chapter id="cwtools">
     <title>Command-line tools</title>
-    <para>Chadwick provides the following command-line programs for
-extracting information from Retrosheet play-by-play event files:
-<itemizedlist>
-	<listitem>
-	  <para><application>cwevent</application>, an expanded event
-          descriptor, which is intended to replace a similarly-named
-          program available from the Retrosheet website.</para>
+
+    <para>Chadwick provides the following command-line programs for extracting
+    information from Retrosheet play-by-play event files: <itemizedlist>
+        <listitem>
+          <para><application>cwevent</application>, an expanded event
+          descriptor, which replaces and extends the DiamondWare program
+          BEVENT.</para>
         </listitem>
-	<listitem>
-	  <para><application>cwgame</application>, a game information
-          extractor, which is intended to replace a similarly-named
-          program available from the Retrosheet website.</para>
-	</listitem>
-	<listitem>
-	  <para><application>cwsub</application>, which extracts information
-          about in-game player substitutions.  This program is unique
-          to Chadwick.</para>
-	</listitem>
-</itemizedlist>
-Each tool is documented separately in its own section below; the
-command-line options common to the tools are described in their
-own section afterwards.
-</para>
+
+        <listitem>
+          <para><application>cwgame</application>, a game information
+          extractor, which replaces and extends the DiamondWare program
+          BGAME.</para>
+        </listitem>
+
+        <listitem>
+          <para><application>cwbox</application>, a boxscore generator, which
+          replaces and extends the DiamondWare program BOX.</para>
+        </listitem>
+
+        <listitem>
+          <para><application>cwlog</application>, which extracts game-level
+          information in the same format as Retrosheets gamelogs. This program
+          is unique to Chadwick.</para>
+        </listitem>
+
+        <listitem>
+          <para><application>cwsub</application>, which extracts information
+          about in-game player substitutions. This program is unique to
+          Chadwick.</para>
+        </listitem>
+
+        <listitem>
+          <para><application>cwcomment</application>, which extracts comment
+          fields from event files. This program is unique to Chadwick.</para>
+        </listitem>
+      </itemizedlist> Each tool is documented separately in its own section
+    below; the command-line options common to the tools are described in their
+    own section afterwards.</para>
 
     <sect1 id="cwtools.cwevent">
       <title>cwevent: Expanded event descriptor</title>
 
-      <para><application>cwevent</application> is a command-line tool
-      which extracts detailed information about individual events (plays)
-      in the data file.  There are 97 possible fields which 
-      <application>cwevent</application> can output for each play; these
-      are listed below, and are specified using the -f flag.
-      </para>
+      <para><application>cwevent</application> is a command-line tool which
+      extracts detailed information about individual events (plays) in the
+      data file. These are grouped into two categories. First, there are 97
+      fields which are compatible with the Retrosheet event extractor tool.
+      These are listed in <xref linkend="cwevent.table.fields" />, and are
+      specified using the -f command-line flag. In addition, cwevent offers
+      over 50 "extended" fields which expand upon or give more detailed
+      information over and above the standard fields. These are listed in
+      <xref linkend="cwevent.table.extfields" /> , and are specified using the
+      -x command-line flag.</para>
 
-      <table>
-	<title>Field numbers for <application>cwevent</application></title>
-	<tgroup cols='2'>
-	  <thead>
-	    <row><entry>Field number</entry><entry>Description</entry></row>
-	    </thead>
+      <table id="cwevent.table.fields">
+        <title>Field numbers for <application>cwevent</application></title>
 
-	  <tbody>
-	    <row><entry>0</entry><entry>Game ID</entry></row>
-	    <row><entry>1</entry><entry>Visiting team</entry></row>
-	    <row><entry>2</entry><entry>Inning</entry></row>
-	    <row><entry>3</entry><entry>Batting team</entry></row>
-	    <row><entry>4</entry><entry>Outs</entry></row>
-	    <row><entry>5</entry><entry>Balls</entry></row>
-	    <row><entry>6</entry><entry>Strikes</entry></row>
-	    <row><entry>7</entry><entry>Pitch sequence</entry></row>
-	    <row><entry>8</entry><entry>Visitor score</entry></row>
-	    <row><entry>9</entry><entry>Home score</entry></row>
-	    <row><entry>10</entry><entry>Batter (see <xref linkend="cwtools.cwevent.resplayers">)</entry></row>
-	    <row><entry>11</entry><entry>Batter hand (see <xref linkend="cwtools.cwevent.resplayers">)</entry></row>
-	    <row><entry>12</entry><entry>Result batter (see <xref linkend="cwtools.cwevent.resplayers">)</entry></row>
-	    <row><entry>13</entry><entry>Result batter hand (see <xref linkend="cwtools.cwevent.resplayers">)</entry></row>
-	    <row><entry>14</entry><entry>Pitcher (see <xref linkend="cwtools.cwevent.resplayers">)</entry></row>
-	    <row><entry>15</entry><entry>Pitcher hand (see <xref linkend="cwtools.cwevent.resplayers">)</entry></row>
-	    <row><entry>16</entry><entry>Result pitcher (see <xref linkend="cwtools.cwevent.resplayers">)</entry></row>
-	    <row><entry>17</entry><entry>Result pitcher hand (see <xref linkend="cwtools.cwevent.resplayers">)</entry></row>
-	    <row><entry>18</entry><entry>Catcher</entry></row>
-	    <row><entry>19</entry><entry>First baseman</entry></row>
-	    <row><entry>20</entry><entry>Second baseman</entry></row>
-	    <row><entry>21</entry><entry>Third baseman</entry></row>
-	    <row><entry>22</entry><entry>Shortstop</entry></row>
-	    <row><entry>23</entry><entry>Left fielder</entry></row>
-	    <row><entry>24</entry><entry>Center fielder</entry></row>
-	    <row><entry>25</entry><entry>Right fielder</entry></row>
-	    <row><entry>26</entry><entry>Runner on first</entry></row>
-	    <row><entry>27</entry><entry>Runner on second</entry></row>
-	    <row><entry>28</entry><entry>Runner on third</entry></row>
-	    <row><entry>29</entry><entry>Event text</entry></row>
-	    <row><entry>30</entry><entry>Leadoff flag</entry></row>
-	    <row><entry>31</entry><entry>Pinch-hit flag (see <xref linkend="cwtools.cwevent.phflag">)</entry></row>
-	    <row><entry>32</entry><entry>Defensive position</entry></row>
-	    <row><entry>33</entry><entry>Lineup position</entry></row>
-	    <row><entry>34</entry><entry>Event type (see <xref linkend="cwtools.cwevent.eventtype">)</entry></row>
-	    <row><entry>35</entry><entry>Batter event flag</entry></row>
-	    <row><entry>36</entry><entry>Official time at bat flag (see <xref linkend="cwtools.cwevent.sacflags">)</entry></row>
-	    <row><entry>37</entry><entry>Hit value</entry></row>
-	    <row><entry>38</entry><entry>Sacrifice hit flag (see <xref linkend="cwtools.cwevent.sacflags">)</entry></row>
-	    <row><entry>39</entry><entry>Sacrifice fly flag (see <xref linkend="cwtools.cwevent.sacflags">)</entry></row>
-	    <row><entry>40</entry><entry>Outs on play</entry></row>
-	    <row><entry>41</entry><entry>Double play flag</entry></row>
-	    <row><entry>42</entry><entry>Triple play flag</entry></row>
-	    <row><entry>43</entry><entry>RBI on play</entry></row>
-	    <row><entry>44</entry><entry>Wild pitch flag</entry></row>
-	    <row><entry>45</entry><entry>Passed ball flag</entry></row>
-	    <row><entry>46</entry><entry>Fielded by</entry></row>
-	    <row><entry>47</entry><entry>Batted ball type</entry></row>
-	    <row><entry>48</entry><entry>Bunt flag</entry></row>
-	    <row><entry>49</entry><entry>Foul flag</entry></row>
-	    <row><entry>50</entry><entry>Hit location</entry></row>
-	    <row><entry>51</entry><entry>Number of errors (see <xref linkend="cwtools.cwevent.errors">)</entry></row>
-	    <row><entry>52</entry><entry>1st error player (see <xref linkend="cwtools.cwevent.errors">)</entry></row>
-	    <row><entry>53</entry><entry>1st error type (see <xref linkend="cwtools.cwevent.errors">)</entry></row>
-	    <row><entry>54</entry><entry>2nd error player (see <xref linkend="cwtools.cwevent.errors">)</entry></row>
-	    <row><entry>55</entry><entry>2nd error type (see <xref linkend="cwtools.cwevent.errors">)</entry></row>
-	    <row><entry>56</entry><entry>3rd error player (see <xref linkend="cwtools.cwevent.errors">)</entry></row>
-	    <row><entry>57</entry><entry>3rd error type (see <xref linkend="cwtools.cwevent.errors">)</entry></row>
-	    <row><entry>58</entry><entry>Batter destination (see <xref linkend="cwtools.cwevent.plays">)</entry></row>
-	    <row><entry>59</entry><entry>Runner on first destination (see <xref linkend="cwtools.cwevent.plays">)</entry></row>
-	    <row><entry>60</entry><entry>Runner on second destination (see <xref linkend="cwtools.cwevent.plays">)</entry></row>
-	    <row><entry>61</entry><entry>Runner on third destination (see <xref linkend="cwtools.cwevent.plays">)</entry></row>
-	    <row><entry>62</entry><entry>Play on batter (see <xref linkend="cwtools.cwevent.plays">)</entry></row>
-	    <row><entry>63</entry><entry>Play on runner on first (see <xref linkend="cwtools.cwevent.plays">)</entry></row>
-	    <row><entry>64</entry><entry>Play on runner on second (see <xref linkend="cwtools.cwevent.plays">)</entry></row>
-	    <row><entry>65</entry><entry>Play on runner on third (see <xref linkend="cwtools.cwevent.plays">)</entry></row>
-	    <row><entry>66</entry><entry>Stolen base for runner on first</entry></row>
-	    <row><entry>67</entry><entry>Stolen base for runner on second</entry></row>
-	    <row><entry>68</entry><entry>Stolen base for runner on third</entry></row>
-	    <row><entry>69</entry><entry>Caught stealing for runner on first</entry></row>
-	    <row><entry>70</entry><entry>Caught stealing for runner on second</entry></row>
-	    <row><entry>71</entry><entry>Caught stealing for runner on third</entry></row>
-	    <row><entry>72</entry><entry>Pickoff of runner on first</entry></row>
-	    <row><entry>73</entry><entry>Pickoff of runner on second</entry></row>
-	    <row><entry>74</entry><entry>Pickoff of runner on third</entry></row>
-	    <row><entry>75</entry><entry>Pitcher charged with runner on first</entry></row>
-	    <row><entry>76</entry><entry>Pitcher charged with runner on second</entry></row>
-	    <row><entry>77</entry><entry>Pitcher charged with runner on third</entry></row>
-	    <row><entry>78</entry><entry>New game flag</entry></row>
-	    <row><entry>79</entry><entry>End game flag</entry></row>
-	    <row><entry>80</entry><entry>Pinch-runner on first</entry></row>
-	    <row><entry>81</entry><entry>Pinch-runner on second</entry></row>
-	    <row><entry>82</entry><entry>Pinch-runner on third</entry></row>
-	    <row><entry>83</entry><entry>Runner removed for pinch-runner on first</entry></row>
-	    <row><entry>84</entry><entry>Runner removed for pinch-runner on second</entry></row>
-	    <row><entry>85</entry><entry>Runner removed for pinch-runner on third</entry></row>
-	    <row><entry>86</entry><entry>Batter removed for pinch-hitter</entry></row>
-	    <row><entry>87</entry><entry>Position of batter removed for pinch-hitter</entry></row>
-	    <row><entry>88</entry><entry>Fielder with first putout (see <xref linkend="cwtools.cwevent.fielding">)</entry></row>
-	    <row><entry>89</entry><entry>Fielder with second putout (see <xref linkend="cwtools.cwevent.fielding">)</entry></row>
-	    <row><entry>90</entry><entry>Fielder with third putout (see <xref linkend="cwtools.cwevent.fielding">)</entry></row>
-	    <row><entry>91</entry><entry>Fielder with first assist (see <xref linkend="cwtools.cwevent.fielding">)</entry></row>
-	    <row><entry>92</entry><entry>Fielder with second assist (see <xref linkend="cwtools.cwevent.fielding">)</entry></row>
-	    <row><entry>93</entry><entry>Fielder with third assist (see <xref linkend="cwtools.cwevent.fielding">)</entry></row>
-	    <row><entry>94</entry><entry>Fielder with fourth assist (see <xref linkend="cwtools.cwevent.fielding">)</entry></row>
-	    <row><entry>95</entry><entry>Fielder with fifth assist (see <xref linkend="cwtools.cwevent.fielding">)</entry></row>
-	    <row><entry>96</entry><entry>Event number</entry></row>
-	    </tbody>
-	  </tgroup>
-	</table>
+        <tgroup cols="3">
+          <thead>
+            <row>
+              <entry>Field number</entry>
+
+              <entry>Description</entry>
+
+              <entry>Header</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>0</entry>
+
+              <entry>Game ID</entry>
+
+              <entry><literal>GAME_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>1</entry>
+
+              <entry>Visiting team</entry>
+
+              <entry><literal>AWAY_TEAM_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>2</entry>
+
+              <entry>Inning</entry>
+
+              <entry><literal>INN_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>3</entry>
+
+              <entry>Batting team</entry>
+
+              <entry><literal>BAT_HOME_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>4</entry>
+
+              <entry>Outs</entry>
+
+              <entry><literal>OUTS_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>5</entry>
+
+              <entry>Balls</entry>
+
+              <entry><literal>BALLS_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>6</entry>
+
+              <entry>Strikes</entry>
+
+              <entry><literal>STRIKES_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>7</entry>
+
+              <entry>Pitch sequence</entry>
+
+              <entry><literal>PITCH_SEQ_TX</literal></entry>
+            </row>
+
+            <row>
+              <entry>8</entry>
+
+              <entry>Visitor score</entry>
+
+              <entry><literal>AWAY_SCORE_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>9</entry>
+
+              <entry>Home score</entry>
+
+              <entry><literal>HOME_SCORE_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>10</entry>
+
+              <entry>Batter (see <xref
+              linkend="cwtools.cwevent.resplayers" />)</entry>
+
+              <entry><literal>BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>11</entry>
+
+              <entry>Batter hand (see <xref
+              linkend="cwtools.cwevent.resplayers" />)</entry>
+
+              <entry><literal>BAT_HAND_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>12</entry>
+
+              <entry>Result batter (see <xref
+              linkend="cwtools.cwevent.resplayers" />)</entry>
+
+              <entry><literal>RESP_BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>13</entry>
+
+              <entry>Result batter hand (see <xref
+              linkend="cwtools.cwevent.resplayers" />)</entry>
+
+              <entry><literal>RESP_BAT_HAND_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>14</entry>
+
+              <entry>Pitcher (see <xref
+              linkend="cwtools.cwevent.resplayers" />)</entry>
+
+              <entry><literal>PIT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>15</entry>
+
+              <entry>Pitcher hand (see <xref
+              linkend="cwtools.cwevent.resplayers" />)</entry>
+
+              <entry><literal>PIT_HAND_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>16</entry>
+
+              <entry>Result pitcher (see <xref
+              linkend="cwtools.cwevent.resplayers" />)</entry>
+
+              <entry><literal>RESP_PIT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>17</entry>
+
+              <entry>Result pitcher hand (see <xref
+              linkend="cwtools.cwevent.resplayers" />)</entry>
+
+              <entry><literal>RESP_PIT_HAND_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>18</entry>
+
+              <entry>Catcher</entry>
+
+              <entry><literal>POS2_FLD_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>19</entry>
+
+              <entry>First baseman</entry>
+
+              <entry><literal>POS3_FLD_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>20</entry>
+
+              <entry>Second baseman</entry>
+
+              <entry><literal>POS4_FLD_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>21</entry>
+
+              <entry>Third baseman</entry>
+
+              <entry><literal>POS5_FLD_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>22</entry>
+
+              <entry>Shortstop</entry>
+
+              <entry><literal>POS6_FLD_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>23</entry>
+
+              <entry>Left fielder</entry>
+
+              <entry><literal>POS7_FLD_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>24</entry>
+
+              <entry>Center fielder</entry>
+
+              <entry><literal>POS8_FLD_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>25</entry>
+
+              <entry>Right fielder</entry>
+
+              <entry><literal>POS9_FLD_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>26</entry>
+
+              <entry>Runner on first</entry>
+
+              <entry><literal>BASE1_RUN_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>27</entry>
+
+              <entry>Runner on second</entry>
+
+              <entry><literal>BASE2_RUN_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>28</entry>
+
+              <entry>Runner on third</entry>
+
+              <entry><literal>BASE3_RUN_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>29</entry>
+
+              <entry>Event text</entry>
+
+              <entry><literal>EVENT_TX</literal></entry>
+            </row>
+
+            <row>
+              <entry>30</entry>
+
+              <entry>Leadoff flag</entry>
+
+              <entry><literal>LEADOFF_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>31</entry>
+
+              <entry>Pinch-hit flag (see <xref
+              linkend="cwtools.cwevent.phflag" />)</entry>
+
+              <entry><literal>PH_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>32</entry>
+
+              <entry>Defensive position</entry>
+
+              <entry><literal>BAT_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>33</entry>
+
+              <entry>Lineup position</entry>
+
+              <entry><literal>BAT_LINEUP_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>34</entry>
+
+              <entry>Event type (see <xref
+              linkend="cwtools.cwevent.eventtype" />)</entry>
+
+              <entry><literal>EVENT_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>35</entry>
+
+              <entry>Batter event flag</entry>
+
+              <entry><literal>BAT_EVENT_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>36</entry>
+
+              <entry>Official time at bat flag (see <xref
+              linkend="cwtools.cwevent.sacflags" />)</entry>
+
+              <entry><literal>AB_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>37</entry>
+
+              <entry>Hit value</entry>
+
+              <entry><literal>H_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>38</entry>
+
+              <entry>Sacrifice hit flag (see <xref
+              linkend="cwtools.cwevent.sacflags" />)</entry>
+
+              <entry><literal>SH_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>39</entry>
+
+              <entry>Sacrifice fly flag (see <xref
+              linkend="cwtools.cwevent.sacflags" />)</entry>
+
+              <entry><literal>SF_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>40</entry>
+
+              <entry>Outs on play</entry>
+
+              <entry><literal>EVENT_OUTS_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>41</entry>
+
+              <entry>Double play flag</entry>
+
+              <entry><literal>DP_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>42</entry>
+
+              <entry>Triple play flag</entry>
+
+              <entry><literal>TP_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>43</entry>
+
+              <entry>RBI on play</entry>
+
+              <entry><literal>RBI_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>44</entry>
+
+              <entry>Wild pitch flag</entry>
+
+              <entry><literal>WP_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>45</entry>
+
+              <entry>Passed ball flag</entry>
+
+              <entry><literal>PB_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>46</entry>
+
+              <entry>Fielded by</entry>
+
+              <entry><literal>FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>47</entry>
+
+              <entry>Batted ball type</entry>
+
+              <entry><literal>BATTEDBALL_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>48</entry>
+
+              <entry>Bunt flag</entry>
+
+              <entry><literal>BUNT_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>49</entry>
+
+              <entry>Foul flag</entry>
+
+              <entry><literal>FOUL_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>50</entry>
+
+              <entry>Hit location</entry>
+
+              <entry><literal>BATTEDBALL_LOC_TX</literal></entry>
+            </row>
+
+            <row>
+              <entry>51</entry>
+
+              <entry>Number of errors (see <xref
+              linkend="cwtools.cwevent.errors" />)</entry>
+
+              <entry><literal>ERR_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>52</entry>
+
+              <entry>1st error player (see <xref
+              linkend="cwtools.cwevent.errors" />)</entry>
+
+              <entry><literal>ERR1_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>53</entry>
+
+              <entry>1st error type (see <xref
+              linkend="cwtools.cwevent.errors" />)</entry>
+
+              <entry><literal>ERR1_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>54</entry>
+
+              <entry>2nd error player (see <xref
+              linkend="cwtools.cwevent.errors" />)</entry>
+
+              <entry><literal>ERR2_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>55</entry>
+
+              <entry>2nd error type (see <xref
+              linkend="cwtools.cwevent.errors" />)</entry>
+
+              <entry><literal>ERR2_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>56</entry>
+
+              <entry>3rd error player (see <xref
+              linkend="cwtools.cwevent.errors" />)</entry>
+
+              <entry><literal>ERR3_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>57</entry>
+
+              <entry>3rd error type (see <xref
+              linkend="cwtools.cwevent.errors" />)</entry>
+
+              <entry><literal>ERR3_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>58</entry>
+
+              <entry>Batter destination (see <xref
+              linkend="cwtools.cwevent.plays" />)</entry>
+
+              <entry><literal>BAT_DEST_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>59</entry>
+
+              <entry>Runner on first destination (see <xref
+              linkend="cwtools.cwevent.plays" />)</entry>
+
+              <entry><literal>RUN1_DEST_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>60</entry>
+
+              <entry>Runner on second destination (see <xref
+              linkend="cwtools.cwevent.plays" />)</entry>
+
+              <entry><literal>RUN2_DEST_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>61</entry>
+
+              <entry>Runner on third destination (see <xref
+              linkend="cwtools.cwevent.plays" />)</entry>
+
+              <entry><literal>RUN3_DEST_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>62</entry>
+
+              <entry>Play on batter (see <xref
+              linkend="cwtools.cwevent.plays" />)</entry>
+
+              <entry><literal>BAT_PLAY_TX</literal></entry>
+            </row>
+
+            <row>
+              <entry>63</entry>
+
+              <entry>Play on runner on first (see <xref
+              linkend="cwtools.cwevent.plays" />)</entry>
+
+              <entry><literal>RUN1_PLAY_TX</literal></entry>
+            </row>
+
+            <row>
+              <entry>64</entry>
+
+              <entry>Play on runner on second (see <xref
+              linkend="cwtools.cwevent.plays" />)</entry>
+
+              <entry><literal>RUN2_PLAY_TX</literal></entry>
+            </row>
+
+            <row>
+              <entry>65</entry>
+
+              <entry>Play on runner on third (see <xref
+              linkend="cwtools.cwevent.plays" />)</entry>
+
+              <entry><literal>RUN3_PLAY_TX</literal></entry>
+            </row>
+
+            <row>
+              <entry>66</entry>
+
+              <entry>Stolen base for runner on first</entry>
+
+              <entry><literal>RUN1_SB_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>67</entry>
+
+              <entry>Stolen base for runner on second</entry>
+
+              <entry><literal>RUN2_SB_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>68</entry>
+
+              <entry>Stolen base for runner on third</entry>
+
+              <entry><literal>RUN3_SB_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>69</entry>
+
+              <entry>Caught stealing for runner on first</entry>
+
+              <entry><literal>RUN1_CS_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>70</entry>
+
+              <entry>Caught stealing for runner on second</entry>
+
+              <entry><literal>RUN2_CS_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>71</entry>
+
+              <entry>Caught stealing for runner on third</entry>
+
+              <entry><literal>RUN3_CS_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>72</entry>
+
+              <entry>Pickoff of runner on first</entry>
+
+              <entry><literal>RUN1_PK_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>73</entry>
+
+              <entry>Pickoff of runner on second</entry>
+
+              <entry><literal>RUN2_PK_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>74</entry>
+
+              <entry>Pickoff of runner on third</entry>
+
+              <entry><literal>RUN3_PK_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>75</entry>
+
+              <entry>Pitcher charged with runner on first</entry>
+
+              <entry><literal>RUN1_RESP_PIT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>76</entry>
+
+              <entry>Pitcher charged with runner on second</entry>
+
+              <entry><literal>RUN2_RESP_PIT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>77</entry>
+
+              <entry>Pitcher charged with runner on third</entry>
+
+              <entry><literal>RUN3_RESP_PIT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>78</entry>
+
+              <entry>New game flag</entry>
+
+              <entry><literal>GAME_NEW_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>79</entry>
+
+              <entry>End game flag</entry>
+
+              <entry><literal>GAME_END_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>80</entry>
+
+              <entry>Pinch-runner on first</entry>
+
+              <entry><literal>PR_RUN1_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>81</entry>
+
+              <entry>Pinch-runner on second</entry>
+
+              <entry><literal>PR_RUN2_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>82</entry>
+
+              <entry>Pinch-runner on third</entry>
+
+              <entry><literal>PR_RUN3_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>83</entry>
+
+              <entry>Runner removed for pinch-runner on first</entry>
+
+              <entry><literal>REMOVED_FOR_PR_RUN1_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>84</entry>
+
+              <entry>Runner removed for pinch-runner on second</entry>
+
+              <entry><literal>REMOVED_FOR_PR_RUN2_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>85</entry>
+
+              <entry>Runner removed for pinch-runner on third</entry>
+
+              <entry><literal>REMOVED_FOR_PR_RUN3_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>86</entry>
+
+              <entry>Batter removed for pinch-hitter</entry>
+
+              <entry><literal>REMOVED_FOR_PH_BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>87</entry>
+
+              <entry>Position of batter removed for pinch-hitter</entry>
+
+              <entry><literal>REMOVED_FOR_PH_BAT_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>88</entry>
+
+              <entry>Fielder with first putout (see <xref
+              linkend="cwtools.cwevent.fielding" />)</entry>
+
+              <entry><literal>PO1_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>89</entry>
+
+              <entry>Fielder with second putout (see <xref
+              linkend="cwtools.cwevent.fielding" />)</entry>
+
+              <entry><literal>PO2_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>90</entry>
+
+              <entry>Fielder with third putout (see <xref
+              linkend="cwtools.cwevent.fielding" />)</entry>
+
+              <entry><literal>PO3_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>91</entry>
+
+              <entry>Fielder with first assist (see <xref
+              linkend="cwtools.cwevent.fielding" />)</entry>
+
+              <entry><literal>ASS1_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>92</entry>
+
+              <entry>Fielder with second assist (see <xref
+              linkend="cwtools.cwevent.fielding" />)</entry>
+
+              <entry><literal>ASS2_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>93</entry>
+
+              <entry>Fielder with third assist (see <xref
+              linkend="cwtools.cwevent.fielding" />)</entry>
+
+              <entry><literal>ASS3_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>94</entry>
+
+              <entry>Fielder with fourth assist (see <xref
+              linkend="cwtools.cwevent.fielding" />)</entry>
+
+              <entry><literal>ASS4_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>95</entry>
+
+              <entry>Fielder with fifth assist (see <xref
+              linkend="cwtools.cwevent.fielding" />)</entry>
+
+              <entry><literal>ASS5_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>96</entry>
+
+              <entry>Event number</entry>
+
+              <entry><literal>EVENT_ID</literal></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+
+      <table id="cwevent.table.extfields">
+        <title>Extended field numbers for
+        <application>cwevent</application></title>
+
+        <tgroup cols="3">
+          <thead>
+            <row>
+              <entry>Field Number</entry>
+
+              <entry>Description</entry>
+
+              <entry>Header</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>0</entry>
+
+              <entry>home team id</entry>
+
+              <entry><literal>HOME_TEAM_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>1</entry>
+
+              <entry>batting team id</entry>
+
+              <entry><literal>BAT_TEAM_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>2</entry>
+
+              <entry>fielding team id</entry>
+
+              <entry><literal>FLD_TEAM_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>3</entry>
+
+              <entry>half inning (differs from batting team if home team bats
+              first)</entry>
+
+              <entry><literal>BAT_LAST_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>4</entry>
+
+              <entry>start of half inning flag</entry>
+
+              <entry><literal>INN_NEW_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>5</entry>
+
+              <entry>end of half inning flag</entry>
+
+              <entry><literal>INN_END_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>6</entry>
+
+              <entry>score for team on offense</entry>
+
+              <entry><literal>START_BAT_SCORE_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>7</entry>
+
+              <entry>score for team on defense</entry>
+
+              <entry><literal>START_FLD_SCORE_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>8</entry>
+
+              <entry>runs scored in this half inning</entry>
+
+              <entry><literal>INN_RUNS_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>9</entry>
+
+              <entry>number of plate appearances in game for team on
+              offense</entry>
+
+              <entry><literal>GAME_PA_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>10</entry>
+
+              <entry>number of plate appearances in inning for team on
+              offense</entry>
+
+              <entry><literal>INN_PA_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>11</entry>
+
+              <entry>start of plate appearance flag</entry>
+
+              <entry><literal>PA_NEW_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>12</entry>
+
+              <entry>truncated plate appearance flag</entry>
+
+              <entry><literal>PA_TRUNC_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>13</entry>
+
+              <entry>base state at start of play</entry>
+
+              <entry><literal>START_BASES_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>14</entry>
+
+              <entry>base state at end of play</entry>
+
+              <entry><literal>END_BASES_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>15</entry>
+
+              <entry>batter is starter flag</entry>
+
+              <entry><literal>BAT_START_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>16</entry>
+
+              <entry>pitcher is starter flag</entry>
+
+              <entry><literal>PIT_START_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>17</entry>
+
+              <entry>defensive position of runner on first</entry>
+
+              <entry><literal>RUN1_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>18</entry>
+
+              <entry>lineup position of runner on first</entry>
+
+              <entry><literal>RUN1_LINEUP_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>19</entry>
+
+              <entry>event number on which runner on first reached
+              base</entry>
+
+              <entry><literal>RUN1_ORIGIN_EVENT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>20</entry>
+
+              <entry>defensive position of runner on second</entry>
+
+              <entry><literal>RUN2_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>21</entry>
+
+              <entry>lineup position of runner on second</entry>
+
+              <entry><literal>RUN2_LINEUP_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>22</entry>
+
+              <entry>event number on which runner on second reached
+              base</entry>
+
+              <entry><literal>RUN2_ORIGIN_EVENT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>23</entry>
+
+              <entry>defensive position of runner on third</entry>
+
+              <entry><literal>RUN3_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>24</entry>
+
+              <entry>lineup position of runner on third</entry>
+
+              <entry><literal>RUN3_LINEUP_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>25</entry>
+
+              <entry>event number on which runner on third reached
+              base</entry>
+
+              <entry><literal>RUN3_ORIGIN_EVENT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>26</entry>
+
+              <entry>number of balls in plate appearance</entry>
+
+              <entry><literal>PA_BALL_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>27</entry>
+
+              <entry>number of intentional balls in plate appearance</entry>
+
+              <entry><literal>PA_INTENT_BALL_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>28</entry>
+
+              <entry>number of pitchouts in plate appearance</entry>
+
+              <entry><literal>PA_PITCHOUT_BALL_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>29</entry>
+
+              <entry>number of other balls in plate appearance</entry>
+
+              <entry><literal>PA_OTHER_BALL_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>30</entry>
+
+              <entry>number of strikes in plate appearance</entry>
+
+              <entry><literal>PA_STRIKE_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>31</entry>
+
+              <entry>number of called strikes in plate appearance</entry>
+
+              <entry><literal>PA_CALLED_STRIKE_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>32</entry>
+
+              <entry>number of swinging strikes in plate appearance</entry>
+
+              <entry><literal>PA_SWINGMISS_STRIKE_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>33</entry>
+
+              <entry>number of foul balls in plate appearance</entry>
+
+              <entry><literal>PA_FOUL_STRIKE_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>34</entry>
+
+              <entry>number of other strikes in plate appearance</entry>
+
+              <entry><literal>PA_OTHER_STRIKE_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>35</entry>
+
+              <entry>number of runs on play</entry>
+
+              <entry><literal>EVENT_RUNS_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>36</entry>
+
+              <entry>id of player fielding batted ball</entry>
+
+              <entry><literal>FLD_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>37</entry>
+
+              <entry>force play at second flag</entry>
+
+              <entry><literal>BASE2_FORCE_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>38</entry>
+
+              <entry>force play at third flag</entry>
+
+              <entry><literal>BASE3_FORCE_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>39</entry>
+
+              <entry>force play at home flag</entry>
+
+              <entry><literal>BASE4_FORCE_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>40</entry>
+
+              <entry>batter safe on error flag</entry>
+
+              <entry><literal>BAT_SAFE_ERR_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>41</entry>
+
+              <entry>fate of batter (base ultimately advanced to)</entry>
+
+              <entry><literal>BAT_FATE_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>42</entry>
+
+              <entry>fate of runner on first</entry>
+
+              <entry><literal>RUN1_FATE_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>43</entry>
+
+              <entry>fate of runner on second</entry>
+
+              <entry><literal>RUN2_FATE_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>44</entry>
+
+              <entry>fate of runner on third</entry>
+
+              <entry><literal>RUN3_FATE_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>45</entry>
+
+              <entry>runs scored in half inning after this eveng</entry>
+
+              <entry><literal>FATE_RUNS_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>46</entry>
+
+              <entry>fielder with sixth assist</entry>
+
+              <entry><literal>ASS6_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>47</entry>
+
+              <entry>fielder with seventh assist</entry>
+
+              <entry><literal>ASS7_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>48</entry>
+
+              <entry>fielder with eighth assist</entry>
+
+              <entry><literal>ASS8_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>49</entry>
+
+              <entry>fielder with ninth assist</entry>
+
+              <entry><literal>ASS9_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>50</entry>
+
+              <entry>fielder with tenth assist</entry>
+
+              <entry><literal>ASS10_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>51</entry>
+
+              <entry>unknown fielding credit flag</entry>
+
+              <entry><literal>EXC_UNKNOWN_OUT_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>52</entry>
+
+              <entry>uncertain play flag</entry>
+
+              <entry><literal>EXC_UNCERTAIN_PLAY_FL</literal></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
 
       <sect2 id="cwtools.cwevent.resplayers">
-	<title>Result batters and pitchers (fields 10-17)</title>
+        <title>Result batters and pitchers (fields 10-17)</title>
 
-	<para>In most cases, the pitcher and batter charged or credited
-with the event (when a batter event) are the ones in the game when the
-event occurs.  However, Rules 10.17 and 10.18 have special clauses 
-discussing how to charge walks to pitchers when a relief pitcher enters
-in the middle of the plate appearance, and how to charge strikeouts
-to batters when a pinch hitter enters in the middle of the plate appearance.
-The <literal>batter</literal> and <literal>pitcher</literal> fields always
-give the identity of the batter and pitcher in the game at the time of the
-event; the <literal>result batter</literal> and <literal>result pitcher</literal> give the batter and pitcher credited or charged with the event.</para>
+        <para>In most cases, the pitcher and batter charged or credited with
+        the event (when a batter event) are the ones in the game when the
+        event occurs. However, Rules 10.17 and 10.18 have special clauses
+        discussing how to charge walks to pitchers when a relief pitcher
+        enters in the middle of the plate appearance, and how to charge
+        strikeouts to batters when a pinch hitter enters in the middle of the
+        plate appearance. The <literal>batter</literal> and
+        <literal>pitcher</literal> fields always give the identity of the
+        batter and pitcher in the game at the time of the event; the
+        <literal>result batter</literal> and <literal>result pitcher</literal>
+        give the batter and pitcher credited or charged with the event.</para>
 
-	<para>There is one known bug in the Retrosheet-provided tools
-regarding the result pitcher.  When a relief pitcher enters the game, and
-then the next batter is retired on a fielder's choice, the pitcher
-responsible for the runner put out is shown in the <literal>result
-pitcher</literal> field.  While it is correct that the batter reaching base
-in this case would be charged to the former pitcher should he score, the
-purpose of the <literal>result pitcher</literal> field is to indicate the
-pitcher charged with the outcome of this particular event.  In this case,
-for example, the relief pitcher is awarded one-third of an inning pitched;
-therefore, he should be the <literal>result pitcher</literal>, and then
-the previous pitcher should be (and is) listed in the <literal>responsible
-pitcher</literal> field for the batter in subsequent events.</para>
+        <para>There is one known bug in the Retrosheet-provided tools
+        regarding the result pitcher. When a relief pitcher enters the game,
+        and then the next batter is retired on a fielder's choice, the pitcher
+        responsible for the runner put out is shown in the <literal>result
+        pitcher</literal> field. While it is correct that the batter reaching
+        base in this case would be charged to the former pitcher should he
+        score, the purpose of the <literal>result pitcher</literal> field is
+        to indicate the pitcher charged with the outcome of this particular
+        event. In this case, for example, the relief pitcher is awarded
+        one-third of an inning pitched; therefore, he should be the
+        <literal>result pitcher</literal>, and then the previous pitcher
+        should be (and is) listed in the <literal>responsible
+        pitcher</literal> field for the batter in subsequent events.</para>
 
-	<para>In the case of switch-hitters, the <literal>batter hand</literal>
-and <literal>result batter hand</literal> fields are set to 
-<literal>L</literal> or <literal>R</literal>, as appropriate, based upon
-the hand with which the pitcher throws.  If the pitcher's throwing hand
-is unknown, or if the batter's batting hand is unknown, a question mark 
-appears in these fields.</para>
-
-	</sect2>
+        <para>In the case of switch-hitters, the <literal>batter
+        hand</literal> and <literal>result batter hand</literal> fields are
+        set to <literal>L</literal> or <literal>R</literal>, as appropriate,
+        based upon the hand with which the pitcher throws. If the pitcher's
+        throwing hand is unknown, or if the batter's batting hand is unknown,
+        a question mark appears in these fields.</para>
+      </sect2>
 
       <sect2 id="cwtools.cwevent.phflag">
-	<title>Pinch-hit flag (field 31)</title>
+        <title>Pinch-hit flag (field 31)</title>
 
-	<para>This field is <literal>T</literal> if the batter is a
-pinch-hitter, and <literal>F</literal> if he is not.  For the purposes
-of this field, Chadwick differs from the Retrosheet-provided tools
-in that, should a pinch-hitter bat a second time in an inning because
-his team has batted around, this field is <literal>F</literal> for his
-second and subsequent apperances at the plate.  Implementing this field
-this way makes sense, since those subsequent appearances are not
-technically considered &quot;pinch-hitting&quot; appearances in statistics.
-Furthermore, there is no real loss, since one can always check whether
-the <literal>defensive position</literal> field (field 32) is equal to 11.
-</para>
-
-	</sect2>
+        <para>This field is <literal>T</literal> if the batter is a
+        pinch-hitter, and <literal>F</literal> if he is not. Note that if a
+        player enters the game as a pinch-hitter, and then bats again in the
+        same inning because his team bats around, this field will be
+        <literal>F</literal> for the player's second plate appearance. To
+        identify the cases where this occurs, consult the <literal>defensive
+        position</literal> field (field 32), which will continue to be equal
+        to 11 (or 12 for a pinch-runner) until that player assumes a defensive
+        position.</para>
+      </sect2>
 
       <sect2 id="cwtools.cwevent.eventtype">
-	<title>Event type code (field 34)</title>
+        <title>Event type code (field 34)</title>
 
-	<para>All plays are categorized by their primary event type.
-Here is a list of all types and the corresponding codes used in this
-field.</para>
+        <para>All plays are categorized by their primary event type. Here is a
+        list of all types and the corresponding codes used in this
+        field.</para>
 
-      <table>
-	<title>Primary event type codes</title>
-	<tgroup cols='2'>
-	  <thead>
-	    <row><entry>Code</entry><entry>Primary event</entry></row>
-	    </thead>
+        <table>
+          <title>Primary event type codes</title>
 
-	  <tbody>
-	    <row><entry>0</entry><entry>Unknown (should not appear)</entry></row>
-	    <row><entry>1</entry><entry>None (should not appear)</entry></row>
-	    <row><entry>2</entry><entry>Generic out</entry></row>
-	    <row><entry>3</entry><entry>Strikeout</entry></row>
-	    <row><entry>4</entry><entry>Stolen base</entry></row>
-	    <row><entry>5</entry><entry>Defensive indifference</entry></row>
-	    <row><entry>6</entry><entry>Caught stealing</entry></row>
-	    <row><entry>7</entry><entry>Pickoff error</entry></row>
-	    <row><entry>8</entry><entry>Pickoff</entry></row>
-	    <row><entry>9</entry><entry>Wild pitch</entry></row>
-	    <row><entry>10</entry><entry>Passed ball</entry></row>
-	    <row><entry>11</entry><entry>Balk</entry></row>
-	    <row><entry>12</entry><entry>Other advance (out advancing)</entry></row>
-	    <row><entry>13</entry><entry>Foul error</entry></row>
-	    <row><entry>14</entry><entry>Walk</entry></row>
-	    <row><entry>15</entry><entry>Intentional walk</entry></row>
-	    <row><entry>16</entry><entry>Hit by pitch</entry></row>
-	    <row><entry>17</entry><entry>Interference</entry></row>
-	    <row><entry>18</entry><entry>Error</entry></row>
-	    <row><entry>19</entry><entry>Fielder's choice</entry></row>
-	    <row><entry>20</entry><entry>Single</entry></row>
-	    <row><entry>21</entry><entry>Double</entry></row>
-	    <row><entry>22</entry><entry>Triple</entry></row>
-	    <row><entry>23</entry><entry>Home run</entry></row>
-	    <row><entry>24</entry><entry>Missing play</entry></row>
-	    </tbody>
-	  </tgroup>
-	</table>
+          <tgroup cols="2">
+            <thead>
+              <row>
+                <entry>Code</entry>
 
+                <entry>Primary event</entry>
+              </row>
+            </thead>
 
-	</sect2>
+            <tbody>
+              <row>
+                <entry>0</entry>
+
+                <entry>Unknown (obsolete)</entry>
+              </row>
+
+              <row>
+                <entry>1</entry>
+
+                <entry>None (obsolete)</entry>
+              </row>
+
+              <row>
+                <entry>2</entry>
+
+                <entry>Generic out</entry>
+              </row>
+
+              <row>
+                <entry>3</entry>
+
+                <entry>Strikeout</entry>
+              </row>
+
+              <row>
+                <entry>4</entry>
+
+                <entry>Stolen base</entry>
+              </row>
+
+              <row>
+                <entry>5</entry>
+
+                <entry>Defensive indifference</entry>
+              </row>
+
+              <row>
+                <entry>6</entry>
+
+                <entry>Caught stealing</entry>
+              </row>
+
+              <row>
+                <entry>7</entry>
+
+                <entry>Pickoff error (obsolete)</entry>
+              </row>
+
+              <row>
+                <entry>8</entry>
+
+                <entry>Pickoff</entry>
+              </row>
+
+              <row>
+                <entry>9</entry>
+
+                <entry>Wild pitch</entry>
+              </row>
+
+              <row>
+                <entry>10</entry>
+
+                <entry>Passed ball</entry>
+              </row>
+
+              <row>
+                <entry>11</entry>
+
+                <entry>Balk</entry>
+              </row>
+
+              <row>
+                <entry>12</entry>
+
+                <entry>Other advance/out advancing</entry>
+              </row>
+
+              <row>
+                <entry>13</entry>
+
+                <entry>Foul error</entry>
+              </row>
+
+              <row>
+                <entry>14</entry>
+
+                <entry>Walk</entry>
+              </row>
+
+              <row>
+                <entry>15</entry>
+
+                <entry>Intentional walk</entry>
+              </row>
+
+              <row>
+                <entry>16</entry>
+
+                <entry>Hit by pitch</entry>
+              </row>
+
+              <row>
+                <entry>17</entry>
+
+                <entry>Interference</entry>
+              </row>
+
+              <row>
+                <entry>18</entry>
+
+                <entry>Error</entry>
+              </row>
+
+              <row>
+                <entry>19</entry>
+
+                <entry>Fielder's choice</entry>
+              </row>
+
+              <row>
+                <entry>20</entry>
+
+                <entry>Single</entry>
+              </row>
+
+              <row>
+                <entry>21</entry>
+
+                <entry>Double</entry>
+              </row>
+
+              <row>
+                <entry>22</entry>
+
+                <entry>Triple</entry>
+              </row>
+
+              <row>
+                <entry>23</entry>
+
+                <entry>Home run</entry>
+              </row>
+
+              <row>
+                <entry>24</entry>
+
+                <entry>Missing play</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+      </sect2>
 
       <sect2 id="cwtools.cwevent.sacflags">
-	<title>Sacrifice flags and eras (fields 36, 38, 39)</title>
+        <title>Sacrifice flags and eras (fields 36, 38, 39)</title>
 
-	<para>Chadwick in all cases applies the modern rules concerning
-the awarding of sacrifice hits, sacrifice flies, and official times at
-bat, regardless of the year indicated with the -y flag.</para>
-
-	</sect2>
+        <para>Chadwick in all cases applies the modern rules concerning the
+        awarding of sacrifice hits, sacrifice flies, and official times at
+        bat, regardless of the year indicated with the -y flag.</para>
+      </sect2>
 
       <sect2 id="cwtools.cwevent.plays">
-	<title>Plays on runners (fields 58-65)</title>
+        <title>Plays on runners (fields 58-65)</title>
 
-	<para>Fields 58 through 65 give the eventual destination of
-all runners, including the batter, as well as the fielding play made
-on them, if any.  For the purposes of the destination fields, a code
-of 5 indicates the runner scored, and is charged as unearned, and a code
-of 6 indicates the runner scored, and is charged as unearned to the team,
-but earned to the pitcher.  Note that these codes only appear when
-the <literal>(NR)</literal> or <literal>(TUR)</literal> modifiers are
-explicitly used on the advancement code; there is no internal logic in
-Chadwick to ferret out which runs should be earned or unearned, as in many
-cases there is insufficient information, or the situation requires the
-judgment of the official scorer.  Runners which are put out are reported
-as having an advancement of 0.</para>
+        <para>Fields 58 through 65 give the destination of all runners,
+        including the batter, as well as the fielding play made on them, if
+        any. For the purposes of the destination fields, a code of 5 indicates
+        the runner scored, and is charged as unearned, and a code of 6
+        indicates the runner scored, and is charged as unearned to the team,
+        but earned to the pitcher. Note that these codes only appear when the
+        <literal>(NR)</literal> or <literal>(TUR)</literal> modifiers are
+        explicitly used on the advancement code; there is no internal logic in
+        Chadwick to ferret out which runs should be earned or unearned, as in
+        many cases there is insufficient information, or the situation
+        requires the judgment of the official scorer. Runners which are put
+        out are reported as having an advancement of 0.</para>
 
-	<para>In most cases, the play on a runner indicates the fielding
-credits involved in putting him out.  Chadwick also reports a fielding
-play on a runner when the runner is safe on a dropped throw, such as
-<literal>3E1</literal> or <literal>FC6.1X2(6E4)</literal>.</para>
-	</sect2>
-      
+        <para>In most cases, the play on a runner indicates the fielding
+        credits involved in putting him out. Chadwick also reports a fielding
+        play on a runner when the runner is safe on a dropped throw, such as
+        <literal>3E1</literal> or <literal>FC6.1X2(6E4)</literal>.</para>
+      </sect2>
+
       <sect2 id="cwtools.cwevent.errors">
-	<title>Fielding errors (fields 51-57)</title>
+        <title>Fielding errors (fields 51-57)</title>
 
-	<para>Up to three errors can be indicated in <application>cwevent</application> output.  Supported error types are <literal>F</literal> for generic fielding errors, and <literal>T</literal> for throwing errors; no distinction
-is made between bobbled batted balls, muffed throws or fly balls, and so forth.</para>
-
-	<para>Known bugs in these fields corrected by Chadwick are:
-<itemizedlist>
-<listitem><para>On catcher's interference plays scored as 
-<literal>C</literal>, as opposed to the preferred
-<literal>C/E2</literal>, the Retrosheet-provided tools do not charge an
-error to the catcher.</para></listitem>
-<listitem><para>On some advancement plays, the Retrosheet-provided tools
-give a putout to a fielder who muffs a throw, rather than an assist.
-Example: For <literal>1X2(3E6)</literal>, in some cases, the Retrosheet-provided
-tools give the shortstop a putout and not an error.  Chadwick correctly 
-charges the shortstop with an error (and gives the first baseman an
-assist).</para></listitem>
-</itemizedlist>
-
-</para>
-</sect2>
+        <para>Up to three errors can be indicated in
+        <application>cwevent</application> output. Supported error types are
+        <literal>F</literal> for generic fielding errors, and
+        <literal>T</literal> for throwing errors; no distinction is made
+        between bobbled batted balls, muffed throws or fly balls, and so
+        forth.</para>
+      </sect2>
 
       <sect2 id="cwtools.cwevent.fielding">
-	<title>Fielding credits (fields 88-95)</title>
+        <title>Fielding credits (fields 88-95)</title>
 
-	<para>Most of the known bugs in the tools available on the
-Retrosheet website deal with correctly assigning fielding credits on plays. 
-These are irrelevant or trivial for most applications, but effort has been made to correctly implement the scoring rules for fielding credits in Chadwick.</para>
-
-<itemizedlist>
-<listitem><para>On strikeout plays with the play on the batter listed
-in the baserunning section, the Retrosheet-provided tools give a
-putout to the catcher, instead of assigning credit for the actual
-play.  Example: <literal>K.BX1(23)</literal>: Chadwick awards the
-catcher an assist and the first baseman a putout.  (Presumably,
-<literal>K23</literal> would be preferred for this, but there can be
-cases like <literal>K+WP.BX2(26)</literal> where the advancement is
-important.)
-</para>
-</listitem>
-
-<listitem><para>On long rundown plays, Chadwick awards all assists
-as appropriate; in some cases, the Retrosheet-provided tools only issue
-up to four assists.</para></listitem>
-
-<listitem><para>On rundown plays that end in an error, Chadwick does not
-give a putout to the player who made the error, as the Retrosheet-provided
-tools do.</para></listitem>
-
-<listitem><para>Chadwick gives assists to players on dropped-throw primary
-events.  Example: <literal>3E1</literal>: Chadwick gives an assist to the
-first baseman; the Retrosheet-provided tools do not.</para></listitem>
-
-<listitem><para>Chadwick treats the question mark (<literal>?</literal>) as
-a missing fielder placeholder.  This is, in fact, a deprecated usage,
-as the question mark now is used instead to indicate a questionable play,
-and preferred style is to invent fielding credit and leave a comment in
-the file.  Example: <literal>4?</literal>, in the new style, would indicate
-a pop fly caught by the second baseman, perhaps after some difficulty;
-in the old usage, this would indicate a play on which the second baseman
-got an assist, and an unknown player got the putout.  This is one instance
-where Chadwick implements the old style instead of the preferred new style,
-since almost all, if not all, plays with question marks in Retrosheet
-released files are of the old style.  Therefore, Chadwick gives the
-second baseman an assist (and nobody a putout) on <literal>4?</literal>,
-whereas the Retrosheet-provided tools give the second baseman a putout,
-reflecting the new-style convention.</para>
-<important>
-<para>It is likely that future versions of Chadwick will switch to the
-new-style convention, with the old-style convention available via a flag.
-</para>
-</important>
-</listitem>
-</itemizedlist>
-
-<para>Also worth noting is that in certain rare cases, the order in
-which Chadwick and the Retrosheet-provided tools list putouts and assists
-may vary.  The number of plays on which this occurs is quite few, and
-generally in cases where there is a putout in the primary event as well
-as one in the baserunning modifiers.  The words &quot;first&quot;,
-&quot;second&quot; and so on do not necessarily indicate chronological
-order of the credits, though in most cases they do.</para>
-
-	</sect2>
-
-      </sect1>
+        <note>
+          <para>The order in which Chadwick and the Retrosheet-provided tools
+          list putouts and assists may vary. The number of plays on which this
+          occurs is quite few, and generally in cases where there is a putout
+          in the primary event as well as one in the baserunning modifiers.
+          The words "first", "second" and so on do not necessarily indicate
+          chronological order of the credits, though in most cases they
+          do.</para>
+        </note>
+      </sect2>
+    </sect1>
 
     <sect1 id="cwtools.cwgame">
       <title>cwgame: Game information extractor</title>
-      
-      <para><application>cwgame</application> reports game-level information for each game.</para>
 
-      <para>There are only two known sources of discrepancies between
-<application>cwgame</application> and its counterpart application on
-the Retrosheet website:
-<itemizedlist>
-<listitem><para>Chadwick correctly handles catcher's intereference when it
-is coded as a bare <literal>C</literal>, instead of the preferred
-<literal>C/E2</literal>.  Therefore, in games where this occurs,
-<application>cwgame</application> reports the correct number of errors.
-</para></listitem>
-<listitem><para>The maximum field number for both programs is 81; however,
-the default behavor (when the -f flag is not specified) for the
-Retrosheet-provided program is to output only fields 0 through 80.
-<application>cwgame</application> prints all fields by default
-</para></listitem>
-</itemizedlist>
-</para>
+      <para><application>cwgame</application> reports game-level information
+      for each game.</para>
 
-      <para>The following table gives the contents of each of the 82 fields
-<application>cwgame</application> outputs.</para>
+      <para>The following table gives the contents of each of the 84 fields
+      <application>cwgame</application> outputs.</para>
 
       <table>
-	<title>Field numbers for <application>cwgame</application></title>
-	<tgroup cols='2'>
-	  <thead>
-	    <row><entry>Field number</entry><entry>Description</entry></row>
-	    </thead>
+        <title>Field numbers for <application>cwgame</application></title>
 
-	  <tbody>
-	    <row><entry>0</entry><entry>Game ID</entry></row>
-	    <row><entry>1</entry><entry>Date</entry></row>
-	    <row><entry>2</entry><entry>Game number</entry></row>
-	    <row><entry>3</entry><entry>Day of week</entry></row>
-	    <row><entry>4</entry><entry>Start time</entry></row>
-	    <row><entry>5</entry><entry>DH used flag</entry></row>
-	    <row><entry>6</entry><entry>Day/night flag</entry></row>
-	    <row><entry>7</entry><entry>Visiting team</entry></row>
-	    <row><entry>8</entry><entry>Home team</entry></row>
-	    <row><entry>9</entry><entry>Game site</entry></row>
-	    <row><entry>10</entry><entry>Visitors starting pitcher</entry></row>
-	    <row><entry>11</entry><entry>Home starting pitcher</entry></row>
-	    <row><entry>12</entry><entry>Home plate umpire</entry></row>
-	    <row><entry>13</entry><entry>First base umpire</entry></row>
-	    <row><entry>14</entry><entry>Second base umpire</entry></row>
-	    <row><entry>15</entry><entry>Third base umpire</entry></row>
-	    <row><entry>16</entry><entry>Left field umpire</entry></row>
-	    <row><entry>17</entry><entry>Right field umpire</entry></row>
-	    <row><entry>18</entry><entry>Attendance</entry></row>
-	    <row><entry>19</entry><entry>PS scorer</entry></row>
-	    <row><entry>20</entry><entry>Translator</entry></row>
-	    <row><entry>21</entry><entry>Inputter</entry></row>
-	    <row><entry>22</entry><entry>Input time</entry></row>
-	    <row><entry>23</entry><entry>Edit time</entry></row>
-	    <row><entry>24</entry><entry>How scored</entry></row>
-	    <row><entry>25</entry><entry>Pitches entered</entry></row>
-	    <row><entry>26</entry><entry>Temperature</entry></row>
-	    <row><entry>27</entry><entry>Wind direction</entry></row>
-	    <row><entry>28</entry><entry>Wind speed</entry></row>
-	    <row><entry>29</entry><entry>Field condition</entry></row>
-	    <row><entry>30</entry><entry>Precipitation</entry></row>
-	    <row><entry>31</entry><entry>Sky</entry></row>
-	    <row><entry>32</entry><entry>Time of game</entry></row>
-	    <row><entry>33</entry><entry>Number of innings</entry></row>
-	    <row><entry>34</entry><entry>Visitor final score</entry></row>
-	    <row><entry>35</entry><entry>Home final score</entry></row>
-	    <row><entry>36</entry><entry>Visitor hits</entry></row>
-	    <row><entry>37</entry><entry>Home hits</entry></row>
-	    <row><entry>38</entry><entry>Visitor errors</entry></row>
-	    <row><entry>39</entry><entry>Home errors</entry></row>
-	    <row><entry>40</entry><entry>Visitor left on base</entry></row>
-	    <row><entry>41</entry><entry>Home left on base</entry></row>
-	    <row><entry>42</entry><entry>Winning pitcher</entry></row>
-	    <row><entry>43</entry><entry>Losing pitcher</entry></row>
-	    <row><entry>44</entry><entry>Save</entry></row>
-	    <row><entry>45</entry><entry>Game-winning RBI</entry></row>
-	    <row><entry>46</entry><entry>Visitor batter 1</entry></row>
-	    <row><entry>47</entry><entry>Visitor batter 1 position</entry></row>
-	    <row><entry>48</entry><entry>Visitor batter 2</entry></row>
-	    <row><entry>49</entry><entry>Visitor batter 2 position</entry></row>
-	    <row><entry>50</entry><entry>Visitor batter 3</entry></row>
-	    <row><entry>51</entry><entry>Visitor batter 3 position</entry></row>
-	    <row><entry>52</entry><entry>Visitor batter 4</entry></row>
-	    <row><entry>53</entry><entry>Visitor batter 4 position</entry></row>
-	    <row><entry>54</entry><entry>Visitor batter 5</entry></row>
-	    <row><entry>55</entry><entry>Visitor batter 5 position</entry></row>
-	    <row><entry>56</entry><entry>Visitor batter 6</entry></row>
-	    <row><entry>57</entry><entry>Visitor batter 6 position</entry></row>
-	    <row><entry>58</entry><entry>Visitor batter 7</entry></row>
-	    <row><entry>59</entry><entry>Visitor batter 7 position</entry></row>
-	    <row><entry>60</entry><entry>Visitor batter 8</entry></row>
-	    <row><entry>61</entry><entry>Visitor batter 8 position</entry></row>
-	    <row><entry>62</entry><entry>Visitor batter 9</entry></row>
-	    <row><entry>63</entry><entry>Visitor batter 9 position</entry></row>
-	    <row><entry>64</entry><entry>Home batter 1</entry></row>
-	    <row><entry>65</entry><entry>Home batter 1 position</entry></row>
-	    <row><entry>66</entry><entry>Home batter 2</entry></row>
-	    <row><entry>67</entry><entry>Home batter 2 position</entry></row>
-	    <row><entry>68</entry><entry>Home batter 3</entry></row>
-	    <row><entry>69</entry><entry>Home batter 3 position</entry></row>
-	    <row><entry>70</entry><entry>Home batter 4</entry></row>
-	    <row><entry>71</entry><entry>Home batter 4 position</entry></row>
-	    <row><entry>72</entry><entry>Home batter 5</entry></row>
-	    <row><entry>73</entry><entry>Home batter 5 position</entry></row>
-	    <row><entry>74</entry><entry>Home batter 6</entry></row>
-	    <row><entry>75</entry><entry>Home batter 6 position</entry></row>
-	    <row><entry>76</entry><entry>Home batter 7</entry></row>
-	    <row><entry>77</entry><entry>Home batter 7 position</entry></row>
-	    <row><entry>78</entry><entry>Home batter 8</entry></row>
-	    <row><entry>79</entry><entry>Home batter 8 position</entry></row>
-	    <row><entry>80</entry><entry>Home batter 9</entry></row>
-	    <row><entry>81</entry><entry>Home batter 9 position</entry></row>
-	    <row><entry>82</entry><entry>Visitor finishing pitcher</entry></row>
-	    <row><entry>83</entry><entry>Home finishing pitcher</entry></row>
-	    </tbody>
-	  </tgroup>
-	</table>
+        <tgroup cols="3">
+          <thead>
+            <row>
+              <entry>Field number</entry>
 
-      </sect1>
+              <entry>Description</entry>
+
+              <entry>Header</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>0</entry>
+
+              <entry>Game ID</entry>
+
+              <entry><literal>GAME_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>1</entry>
+
+              <entry>Date</entry>
+
+              <entry><literal>GAME_DT</literal></entry>
+            </row>
+
+            <row>
+              <entry>2</entry>
+
+              <entry>Game number</entry>
+
+              <entry><literal>GAME_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>3</entry>
+
+              <entry>Day of week</entry>
+
+              <entry><literal>GAME_DY</literal></entry>
+            </row>
+
+            <row>
+              <entry>4</entry>
+
+              <entry>Start time</entry>
+
+              <entry><literal>START_GAME_TM</literal></entry>
+            </row>
+
+            <row>
+              <entry>5</entry>
+
+              <entry>DH used flag</entry>
+
+              <entry><literal>DH_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>6</entry>
+
+              <entry>Day/night flag</entry>
+
+              <entry><literal>DAYNIGHT_PARK_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>7</entry>
+
+              <entry>Visiting team</entry>
+
+              <entry><literal>AWAY_TEAM_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>8</entry>
+
+              <entry>Home team</entry>
+
+              <entry><literal>HOME_TEAM_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>9</entry>
+
+              <entry>Game site</entry>
+
+              <entry><literal>PARK_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>10</entry>
+
+              <entry>Visitors starting pitcher</entry>
+
+              <entry><literal>AWAY_START_PIT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>11</entry>
+
+              <entry>Home starting pitcher</entry>
+
+              <entry><literal>HOME_START_PIT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>12</entry>
+
+              <entry>Home plate umpire</entry>
+
+              <entry><literal>BASE4_UMP_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>13</entry>
+
+              <entry>First base umpire</entry>
+
+              <entry><literal>BASE1_UMP_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>14</entry>
+
+              <entry>Second base umpire</entry>
+
+              <entry><literal>BASE2_UMP_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>15</entry>
+
+              <entry>Third base umpire</entry>
+
+              <entry><literal>BASE3_UMP_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>16</entry>
+
+              <entry>Left field umpire</entry>
+
+              <entry><literal>LF_UMP_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>17</entry>
+
+              <entry>Right field umpire</entry>
+
+              <entry><literal>RF_UMP_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>18</entry>
+
+              <entry>Attendance</entry>
+
+              <entry><literal>ATTEND_PARK_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>19</entry>
+
+              <entry>PS scorer</entry>
+
+              <entry><literal>SCORER_RECORD_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>20</entry>
+
+              <entry>Translator</entry>
+
+              <entry><literal>TRANSLATOR_RECORD_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>21</entry>
+
+              <entry>Inputter</entry>
+
+              <entry><literal>INPUTTER_RECORD_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>22</entry>
+
+              <entry>Input time</entry>
+
+              <entry><literal>INPUT_RECORD_TS</literal></entry>
+            </row>
+
+            <row>
+              <entry>23</entry>
+
+              <entry>Edit time</entry>
+
+              <entry><literal>EDIT_RECORD_TS</literal></entry>
+            </row>
+
+            <row>
+              <entry>24</entry>
+
+              <entry>How scored (see <xref
+              linkend="cwtools.cwgame.howscored" />)</entry>
+
+              <entry><literal>METHOD_RECORD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>25</entry>
+
+              <entry>Pitches entered (see <xref
+              linkend="cwtools.cwgame.pitchesentered" />)</entry>
+
+              <entry><literal>PITCHES_RECORD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>26</entry>
+
+              <entry>Temperature</entry>
+
+              <entry><literal>TEMP_PARK_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>27</entry>
+
+              <entry>Wind direction (see <xref
+              linkend="cwtools.cwgame.winddirection" />)</entry>
+
+              <entry><literal>WIND_DIRECTION_PARK_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>28</entry>
+
+              <entry>Wind speed</entry>
+
+              <entry><literal>WIND_SPEED_PARK_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>29</entry>
+
+              <entry>Field condition (see <xref
+              linkend="cwtools.cwgame.fieldcondition" />)</entry>
+
+              <entry><literal>FIELD_PARK_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>30</entry>
+
+              <entry>Precipitation (see <xref
+              linkend="cwtools.cwgame.precipitation" />)</entry>
+
+              <entry><literal>PRECIP_PARK_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>31</entry>
+
+              <entry>Sky (see <xref linkend="cwtools.cwgame.sky" />)</entry>
+
+              <entry><literal>SKY_PARK_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>32</entry>
+
+              <entry>Time of game</entry>
+
+              <entry><literal>MINUTES_GAME_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>33</entry>
+
+              <entry>Number of innings</entry>
+
+              <entry><literal>INN_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>34</entry>
+
+              <entry>Visitor final score</entry>
+
+              <entry><literal>AWAY_SCORE_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>35</entry>
+
+              <entry>Home final score</entry>
+
+              <entry><literal>HOME_SCORE_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>36</entry>
+
+              <entry>Visitor hits</entry>
+
+              <entry><literal>AWAY_HITS_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>37</entry>
+
+              <entry>Home hits</entry>
+
+              <entry><literal>HOME_HITS_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>38</entry>
+
+              <entry>Visitor errors</entry>
+
+              <entry><literal>AWAY_ERR_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>39</entry>
+
+              <entry>Home errors</entry>
+
+              <entry><literal>HOME_ERR_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>40</entry>
+
+              <entry>Visitor left on base</entry>
+
+              <entry><literal>AWAY_LOB_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>41</entry>
+
+              <entry>Home left on base</entry>
+
+              <entry><literal>HOME_LOB_CT</literal></entry>
+            </row>
+
+            <row>
+              <entry>42</entry>
+
+              <entry>Winning pitcher</entry>
+
+              <entry><literal>WIN_PIT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>43</entry>
+
+              <entry>Losing pitcher</entry>
+
+              <entry><literal>LOSE_PIT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>44</entry>
+
+              <entry>Save</entry>
+
+              <entry><literal>SAVE_PIT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>45</entry>
+
+              <entry>Game-winning RBI</entry>
+
+              <entry><literal>GWRBI_BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>46</entry>
+
+              <entry>Visitor batter 1</entry>
+
+              <entry><literal>AWAY_LINEUP1_BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>47</entry>
+
+              <entry>Visitor batter 1 position</entry>
+
+              <entry><literal>AWAY_LINEUP1_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>48</entry>
+
+              <entry>Visitor batter 2</entry>
+
+              <entry><literal>AWAY_LINEUP2_BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>49</entry>
+
+              <entry>Visitor batter 2 position</entry>
+
+              <entry><literal>AWAY_LINEUP2_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>50</entry>
+
+              <entry>Visitor batter 3</entry>
+
+              <entry><literal>AWAY_LINEUP3_BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>51</entry>
+
+              <entry>Visitor batter 3 position</entry>
+
+              <entry><literal>AWAY_LINEUP3_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>52</entry>
+
+              <entry>Visitor batter 4</entry>
+
+              <entry><literal>AWAY_LINEUP4_BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>53</entry>
+
+              <entry>Visitor batter 4 position</entry>
+
+              <entry><literal>AWAY_LINEUP4_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>54</entry>
+
+              <entry>Visitor batter 5</entry>
+
+              <entry><literal>AWAY_LINEUP5_BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>55</entry>
+
+              <entry>Visitor batter 5 position</entry>
+
+              <entry><literal>AWAY_LINEUP5_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>56</entry>
+
+              <entry>Visitor batter 6</entry>
+
+              <entry><literal>AWAY_LINEUP6_BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>57</entry>
+
+              <entry>Visitor batter 6 position</entry>
+
+              <entry><literal>AWAY_LINEUP6_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>58</entry>
+
+              <entry>Visitor batter 7</entry>
+
+              <entry><literal>AWAY_LINEUP7_BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>59</entry>
+
+              <entry>Visitor batter 7 position</entry>
+
+              <entry><literal>AWAY_LINEUP7_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>60</entry>
+
+              <entry>Visitor batter 8</entry>
+
+              <entry><literal>AWAY_LINEUP8_BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>61</entry>
+
+              <entry>Visitor batter 8 position</entry>
+
+              <entry><literal>AWAY_LINEUP8_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>62</entry>
+
+              <entry>Visitor batter 9</entry>
+
+              <entry><literal>AWAY_LINEUP9_BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>63</entry>
+
+              <entry>Visitor batter 9 position</entry>
+
+              <entry><literal>AWAY_LINEUP9_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>64</entry>
+
+              <entry>Home batter 1</entry>
+
+              <entry><literal>HOME_LINEUP1_BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>65</entry>
+
+              <entry>Home batter 1 position</entry>
+
+              <entry><literal>HOME_LINEUP1_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>66</entry>
+
+              <entry>Home batter 2</entry>
+
+              <entry><literal>HOME_LINEUP2_BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>67</entry>
+
+              <entry>Home batter 2 position</entry>
+
+              <entry><literal>HOME_LINEUP2_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>68</entry>
+
+              <entry>Home batter 3</entry>
+
+              <entry><literal>HOME_LINEUP3_BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>69</entry>
+
+              <entry>Home batter 3 position</entry>
+
+              <entry><literal>HOME_LINEUP3_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>70</entry>
+
+              <entry>Home batter 4</entry>
+
+              <entry><literal>HOME_LINEUP4_BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>71</entry>
+
+              <entry>Home batter 4 position</entry>
+
+              <entry><literal>HOME_LINEUP4_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>72</entry>
+
+              <entry>Home batter 5</entry>
+
+              <entry><literal>HOME_LINEUP5_BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>73</entry>
+
+              <entry>Home batter 5 position</entry>
+
+              <entry><literal>HOME_LINEUP5_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>74</entry>
+
+              <entry>Home batter 6</entry>
+
+              <entry><literal>HOME_LINEUP6_BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>75</entry>
+
+              <entry>Home batter 6 position</entry>
+
+              <entry><literal>HOME_LINEUP6_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>76</entry>
+
+              <entry>Home batter 7</entry>
+
+              <entry><literal>HOME_LINEUP7_BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>77</entry>
+
+              <entry>Home batter 7 position</entry>
+
+              <entry><literal>HOME_LINEUP7_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>78</entry>
+
+              <entry>Home batter 8</entry>
+
+              <entry><literal>HOME_LINEUP8_BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>79</entry>
+
+              <entry>Home batter 8 position</entry>
+
+              <entry><literal>HOME_LINEUP8_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>80</entry>
+
+              <entry>Home batter 9</entry>
+
+              <entry><literal>HOME_LINEUP9_BAT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>81</entry>
+
+              <entry>Home batter 9 position</entry>
+
+              <entry><literal>HOME_LINEUP9_FLD_CD</literal></entry>
+            </row>
+
+            <row>
+              <entry>82</entry>
+
+              <entry>Visitor finishing pitcher</entry>
+
+              <entry><literal>AWAY_FINISH_PIT_ID</literal></entry>
+            </row>
+
+            <row>
+              <entry>83</entry>
+
+              <entry>Home finishing pitcher</entry>
+
+              <entry><literal>HOME_FINISH_PIT_ID</literal></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+
+      <sect2 id="cwtools.cwgame.howscored">
+        <title>How scored (field 24)</title>
+
+        <para>This field outputs a numeric code corresponding to the medium by
+        which the play-by-play account was recorded.</para>
+
+        <table>
+          <title>Numeric codes for how scored field.</title>
+
+          <tgroup cols="2">
+            <thead>
+              <row>
+                <entry>Code</entry>
+
+                <entry>Description</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry>0</entry>
+
+                <entry>unknown</entry>
+              </row>
+
+              <row>
+                <entry>1</entry>
+
+                <entry>park</entry>
+              </row>
+
+              <row>
+                <entry>2</entry>
+
+                <entry>tv</entry>
+              </row>
+
+              <row>
+                <entry>3</entry>
+
+                <entry>radio</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+      </sect2>
+
+      <sect2 id="cwtools.cwgame.pitchesentered">
+        <title>Pitches entered (field 25)</title>
+
+        <para>This field outputs a numeric code corresponding to the level of
+        pitch detail in the file.</para>
+
+        <table>
+          <title>Numeric codes for pitches entered field.</title>
+
+          <tgroup cols="2">
+            <thead>
+              <row>
+                <entry>Code</entry>
+
+                <entry>Description</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry>0</entry>
+
+                <entry>unknown</entry>
+              </row>
+
+              <row>
+                <entry>1</entry>
+
+                <entry>pitches</entry>
+              </row>
+
+              <row>
+                <entry>2</entry>
+
+                <entry>count</entry>
+              </row>
+
+              <row>
+                <entry>3</entry>
+
+                <entry>none</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+
+        <note>
+          <para>This field reports the contents of the
+          <literal>info,pitches</literal> field in the game file. Some games
+          with partial pitch information will have this field set to
+          <literal>none</literal> or <literal>count</literal>.</para>
+        </note>
+      </sect2>
+
+      <sect2 id="cwtools.cwgame.winddirection">
+        <title>Wind direction (field 27)</title>
+
+        <para>This field outputs a numeric code corresponding to the direction
+        of the wind.</para>
+
+        <table>
+          <title>Numeric codes for wind direction field.</title>
+
+          <tgroup cols="2">
+            <thead>
+              <row>
+                <entry>Code</entry>
+
+                <entry>Description</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry>0</entry>
+
+                <entry>unknown</entry>
+              </row>
+
+              <row>
+                <entry>1</entry>
+
+                <entry>tolf</entry>
+              </row>
+
+              <row>
+                <entry>2</entry>
+
+                <entry>tocf</entry>
+              </row>
+
+              <row>
+                <entry>3</entry>
+
+                <entry>torf</entry>
+              </row>
+
+              <row>
+                <entry>4</entry>
+
+                <entry>ltor</entry>
+              </row>
+
+              <row>
+                <entry>5</entry>
+
+                <entry>fromlf</entry>
+              </row>
+
+              <row>
+                <entry>6</entry>
+
+                <entry>fromcf</entry>
+              </row>
+
+              <row>
+                <entry>7</entry>
+
+                <entry>fromrf</entry>
+              </row>
+
+              <row>
+                <entry>8</entry>
+
+                <entry>rtol</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+      </sect2>
+
+      <sect2 id="cwtools.cwgame.fieldcondition">
+        <title>Field condition (field 29)</title>
+
+        <para>This field outputs a numeric code corresponding to the condition
+        of the field.</para>
+
+        <table>
+          <title>Numeric codes for field condition field.</title>
+
+          <tgroup cols="2">
+            <thead>
+              <row>
+                <entry>Code</entry>
+
+                <entry>Description</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry>0</entry>
+
+                <entry>unknown</entry>
+              </row>
+
+              <row>
+                <entry>1</entry>
+
+                <entry>soaked</entry>
+              </row>
+
+              <row>
+                <entry>2</entry>
+
+                <entry>wet</entry>
+              </row>
+
+              <row>
+                <entry>3</entry>
+
+                <entry>damp</entry>
+              </row>
+
+              <row>
+                <entry>4</entry>
+
+                <entry>dry</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+      </sect2>
+
+      <sect2 id="cwtools.cwgame.precipitation">
+        <title>Precipitation (field 30)</title>
+
+        <para>This field outputs a numeric code corresponding to the
+        precipitation level.</para>
+
+        <table>
+          <title>Numeric codes for precipitation field.</title>
+
+          <tgroup cols="2">
+            <thead>
+              <row>
+                <entry>Code</entry>
+
+                <entry>Description</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry>0</entry>
+
+                <entry>unknown</entry>
+              </row>
+
+              <row>
+                <entry>1</entry>
+
+                <entry>none</entry>
+              </row>
+
+              <row>
+                <entry>2</entry>
+
+                <entry>drizzle</entry>
+              </row>
+
+              <row>
+                <entry>3</entry>
+
+                <entry>showers</entry>
+              </row>
+
+              <row>
+                <entry>4</entry>
+
+                <entry>rain</entry>
+              </row>
+
+              <row>
+                <entry>5</entry>
+
+                <entry>snow</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+      </sect2>
+
+      <sect2 id="cwtools.cwgame.sky">
+        <title>Sky (field 31)</title>
+
+        <para>This field outputs a numeric code corresponding to the sky
+        conditions.</para>
+
+        <table>
+          <title>Numeric codes for sky field.</title>
+
+          <tgroup cols="2">
+            <thead>
+              <row>
+                <entry>Code</entry>
+
+                <entry>Description</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry>0</entry>
+
+                <entry>unknown</entry>
+              </row>
+
+              <row>
+                <entry>1</entry>
+
+                <entry>sunny</entry>
+              </row>
+
+              <row>
+                <entry>2</entry>
+
+                <entry>cloudy</entry>
+              </row>
+
+              <row>
+                <entry>3</entry>
+
+                <entry>overcast</entry>
+              </row>
+
+              <row>
+                <entry>4</entry>
+
+                <entry>night</entry>
+              </row>
+
+              <row>
+                <entry>5</entry>
+
+                <entry>dome</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+      </sect2>
+    </sect1>
 
     <sect1 id="cwtools.cwsub">
       <title>cwsub: Player substitution descriptor</title>
 
-      <para><application>cwsub</application> extracts information about in-game player substitutions.  It is designed to be used in conjunction with <application>cwevent</application> to mitigate a blind spot in the existing tools.
-Since there is no corresponding standard application, <application>cwsub</application> may still contain some bugs; please especially report any problems or questions you might have about how this program operates.</para>
+      <para><application>cwsub</application> extracts information about
+      in-game player substitutions. It is designed to be used in conjunction
+      with <application>cwevent</application> to mitigate a blind spot in the
+      existing tools. Since there is no corresponding standard application,
+      <application>cwsub</application> may still contain some bugs; please
+      especially report any problems or questions you might have about how
+      this program operates.</para>
 
-      <para><application>cwsub</application> outputs up to ten pieces of information about each substitution.  All are included by default; which ones are generated is controlled by the -f switch.</para>
+      <para><application>cwsub</application> outputs up to ten pieces of
+      information about each substitution. All are included by default; which
+      ones are generated is controlled by the -f switch.</para>
 
       <table>
-	<title>Field numbers for <application>cwsub</application></title>
-	<tgroup cols='2'>
-	  <thead>
-	    <row><entry>Field number</entry><entry>Description</entry></row>
-	    </thead>
+        <title>Field numbers for <application>cwsub</application></title>
 
-	  <tbody>
-	    <row><entry>0</entry><entry>Game ID</entry></row>
-	    <row><entry>1</entry><entry>Inning</entry></row>
-	    <row><entry>2</entry><entry>Batting team</entry></row>
-	    <row><entry>3</entry><entry>Substitute</entry></row>
-	    <row><entry>4</entry><entry>Team</entry></row>
-	    <row><entry>5</entry><entry>Lineup position</entry></row>
-	    <row><entry>6</entry><entry>Fielding position</entry></row>
-	    <row><entry>7</entry><entry>Removed player</entry></row>
-	    <row><entry>8</entry><entry>Position of removed player</entry></row>
-	    <row><entry>9</entry><entry>Event number</entry></row>
-	    </tbody>
-	  </tgroup>
-	</table>
+        <tgroup cols="2">
+          <thead>
+            <row>
+              <entry>Field number</entry>
 
-      </sect1>
+              <entry>Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>0</entry>
+
+              <entry>Game ID</entry>
+            </row>
+
+            <row>
+              <entry>1</entry>
+
+              <entry>Inning</entry>
+            </row>
+
+            <row>
+              <entry>2</entry>
+
+              <entry>Batting team</entry>
+            </row>
+
+            <row>
+              <entry>3</entry>
+
+              <entry>Substitute</entry>
+            </row>
+
+            <row>
+              <entry>4</entry>
+
+              <entry>Team</entry>
+            </row>
+
+            <row>
+              <entry>5</entry>
+
+              <entry>Lineup position</entry>
+            </row>
+
+            <row>
+              <entry>6</entry>
+
+              <entry>Fielding position</entry>
+            </row>
+
+            <row>
+              <entry>7</entry>
+
+              <entry>Removed player</entry>
+            </row>
+
+            <row>
+              <entry>8</entry>
+
+              <entry>Position of removed player</entry>
+            </row>
+
+            <row>
+              <entry>9</entry>
+
+              <entry>Event number</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </sect1>
 
     <sect1 id="cwtools.cmdline">
       <title>Command-line options</title>
-      <para>Each of the command-line tools shares a common set of
-options controlling their behavior.  These are detailed in the 
-following table.</para>
+
+      <para>Each of the command-line tools shares a common set of options
+      controlling their behavior. These are detailed in the following
+      table.</para>
 
       <table>
-	<title>Common command-line options and their effects</title>
-	<tgroup cols='2'>
-	  <thead>
-	    <row><entry>Switch</entry><entry>Description</entry></row>
-	    </thead>
+        <title>Common command-line options and their effects</title>
 
-	  <tbody>
-	    <row>
-	    <entry><option>-a</option></entry>
-            <entry>Generate ASCII comma-delimited files (default)</entry>
-            </row>
-	    <row>
-	    <entry><option>-d</option></entry>
-            <entry>Print a list of the available fields and descriptions (for use with <option>-f</option>.</entry>
-            </row>
-	    <row>
-	    <entry><option>-e</option> <parameter>mmdd</parameter></entry>
-            <entry>The latest date to process (inclusive).</entry>
-            </row>
-	    <row>
-	    <entry><option>-f</option> <parameter>flist</parameter></entry>
-            <entry>List of fields to output.  The default list can be
-viewed with <option>-h</option>; the list of available fields can be
-viewed with <option>-d</option>.</entry>
-            </row>
-	    <row>
-	    <entry><option>-ft</option></entry>
-            <entry>Generate FORTRAN format files.  (Note: this is less
-            tested in Chadwick than the ASCII version.  Please report any
-            problems you might encounter.)</entry>
-            </row>
-	    <row>
-	    <entry><option>-h</option></entry>
-	    <entry>Prints description and usage information for the tool.</entry>
-            </row>
+        <tgroup cols="2">
+          <thead>
             <row>
-            <entry><option>-i</option> <parameter>gameid</parameter></entry>
-            <entry>Only process the game with ID <parameter>gameid</parameter>.</entry>
-	    </row>
-	    <row>
-	      <entry><option>-n</option></entry>
-	      <entry>If in ASCII mode (the default), the first row of the output is a comma-separated list of column headers.</entry>
-	      </row>
-	    <row>
-	    <entry><option>-s</option> <parameter>mmdd</parameter></entry>
-            <entry>The earliest date to process (inclusive).</entry>
-            </row>
-	    <row>
-	    <entry><option>-y</option></entry>
-            <entry>Specifies the year to use (four digits).  This is currently required; hopefully future versions can intelligently discern the year from the input files.</entry>
-            </row>
-	    </tbody>
-	  </tgroup>
-	</table>
+              <entry>Switch</entry>
 
-      </sect1>
+              <entry>Description</entry>
+            </row>
+          </thead>
 
+          <tbody>
+            <row>
+              <entry><option>-a</option></entry>
+
+              <entry>Generate ASCII comma-delimited files (default)</entry>
+            </row>
+
+            <row>
+              <entry><option>-d</option></entry>
+
+              <entry>Print a list of the available fields and descriptions
+              (for use with <option>-f</option>.</entry>
+            </row>
+
+            <row>
+              <entry><option>-e</option> <parameter>mmdd</parameter></entry>
+
+              <entry>The latest date to process (inclusive).</entry>
+            </row>
+
+            <row>
+              <entry><option>-f</option> <parameter>flist</parameter></entry>
+
+              <entry>List of fields to output. The default list can be viewed
+              with <option>-h</option>; the list of available fields can be
+              viewed with <option>-d</option>.</entry>
+            </row>
+
+            <row>
+              <entry><option>-ft</option></entry>
+
+              <entry>Generate FORTRAN format files. (Note: this is less tested
+              in Chadwick than the ASCII version. Please report any problems
+              you might encounter.)</entry>
+            </row>
+
+            <row>
+              <entry><option>-h</option></entry>
+
+              <entry>Prints description and usage information for the
+              tool.</entry>
+            </row>
+
+            <row>
+              <entry><option>-i</option> <parameter>gameid</parameter></entry>
+
+              <entry>Only process the game with ID
+              <parameter>gameid</parameter>.</entry>
+            </row>
+
+            <row>
+              <entry><option>-n</option></entry>
+
+              <entry>If in ASCII mode (the default), the first row of the
+              output is a comma-separated list of column headers.</entry>
+            </row>
+
+            <row>
+              <entry><option>-s</option> <parameter>mmdd</parameter></entry>
+
+              <entry>The earliest date to process (inclusive).</entry>
+            </row>
+
+            <row>
+              <entry><option>-y</option></entry>
+
+              <entry>Specifies the year to use (four digits). This is
+              currently required; hopefully future versions can intelligently
+              discern the year from the input files.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </sect1>
   </chapter>
 
-<chapter id="api">
-<title>The Chadwick Library</title>
+  <chapter id="api">
+    <title>The Chadwick Library</title>
 
-<para>
-This chapter documents the API for the underlying library itself.
-This library can read, write, and manipulate files in the Retrosheet
-format.
-</para>
+    <para>This chapter documents the API for the underlying library itself.
+    This library can read, write, and manipulate files in the Retrosheet
+    format.</para>
 
-<para>
-The internals of the library are currently designed with the
-explicit purpose of reading and writing Retrosheet notation files.
-In the future, these may evolve to more general-purpose play-by-play
-representations.
-</para>
+    <para>The internals of the library are currently designed with the
+    explicit purpose of reading and writing Retrosheet notation files. In the
+    future, these may evolve to more general-purpose play-by-play
+    representations.</para>
 
     <sect1 id="api.book">
       <title><type>CWScorebook</type> -- A collection of games</title>
 
-<para>
-A <type>CWScorebook</type> is a collection of games.  In Retrosheet
-terms, a <type>CWScorebook</type> can be used to read, write, and
-manipulate an individual event file (generally
-<filename>*.EVA</filename> or <filename>*.EVN</filename> in released
-files).
-</para>
+      <para>A <type>CWScorebook</type> is a collection of games. In Retrosheet
+      terms, a <type>CWScorebook</type> can be used to read, write, and
+      manipulate an individual event file (generally
+      <filename>*.EVA</filename> or <filename>*.EVN</filename> in released
+      files).</para>
 
-<para>
-Internally, a <type>CWScorebook</type> contains two linked lists.
-A linked list of <type>CWComment</type> stores comment records that
-appear before the first game in the file.  These are used by
-Retrosheet for copyright and related information about the file.
-A linked list of <type>CWGame</type> stores the games themselves.
-</para>
+      <para>Internally, a <type>CWScorebook</type> contains two linked lists.
+      A linked list of <type>CWComment</type> stores comment records that
+      appear before the first game in the file. These are used by Retrosheet
+      for copyright and related information about the file. A linked list of
+      <type>CWGame</type> stores the games themselves.</para>
 
-<sect2 id="api.book.lifecycle">
-	<title>Creating and destroying</title>
+      <sect2 id="api.book.lifecycle">
+        <title>Creating and destroying</title>
 
-<funcsynopsis>
-<funcprototype><funcdef>CWScorebook *<function>cw_scorebook_create</function></funcdef>
-<paramdef>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Allocates an initializes a new empty scorebook.
-Caller is responsible for maintaining returned pointer.
-</para>
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>CWScorebook
+            *<function>cw_scorebook_create</function></funcdef>
 
-<funcsynopsis>
-<funcprototype><funcdef>void <function>cw_scorebook_cleanup</function></funcdef>
-<paramdef>
-<parameter>CWScorebook *scorebook</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Cleans up internal memory allocation associated with
-<parameter>scorebook</parameter>.
-Caller is responsible for freeing <parameter>scorebook</parameter>.
-</para>
+            <paramdef></paramdef>
+          </funcprototype>
+        </funcsynopsis>
 
-</sect2>
+        <para>Allocates an initializes a new empty scorebook. Caller is
+        responsible for maintaining returned pointer.</para>
+
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>void <function>cw_scorebook_cleanup</function></funcdef>
+
+            <paramdef><parameter>CWScorebook *scorebook</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
+
+        <para>Cleans up internal memory allocation associated with
+        <parameter>scorebook</parameter>. Caller is responsible for freeing
+        <parameter>scorebook</parameter>.</para>
+      </sect2>
 
       <sect2 id="api.book.io">
-	<title>Reading and writing</title>
+        <title>Reading and writing</title>
 
-<funcsynopsis>
-<funcprototype><funcdef>int <function>cw_scorebook_read</function></funcdef>
-<paramdef>
-<parameter>CWScorebook *scorebook</parameter>
-<parameter>char *path</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Reads the contents of the scorebook file in filename <parameter>path</parameter>
-into the scorebook <parameter>scorebook</parameter>  Returns the number
-of games successfully read, or -1 if the file could not be opened.
-</para>
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>int <function>cw_scorebook_read</function></funcdef>
 
-<funcsynopsis>
-<funcprototype><funcdef>void <function>cw_scorebook_write</function></funcdef>
-<paramdef>
-<parameter>CWScorebook *scorebook</parameter>
-<parameter>FILE *file</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Writes the contents of <parameter>scorebook</parameter> to
-<parameter>file</parameter>.
-</para>
+            <paramdef><parameter>CWScorebook *scorebook</parameter>
+            <parameter>char *path</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
 
-</sect2>
+        <para>Reads the contents of the scorebook file in filename
+        <parameter>path</parameter> into the scorebook
+        <parameter>scorebook</parameter> Returns the number of games
+        successfully read, or -1 if the file could not be opened.</para>
+
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>void <function>cw_scorebook_write</function></funcdef>
+
+            <paramdef><parameter>CWScorebook *scorebook</parameter>
+            <parameter>FILE *file</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
+
+        <para>Writes the contents of <parameter>scorebook</parameter> to
+        <parameter>file</parameter>.</para>
+      </sect2>
 
       <sect2 id="api.book.games">
-	<title>Manipulating games</title>
+        <title>Manipulating games</title>
 
-<funcsynopsis>
-<funcprototype><funcdef>int <function>cw_scorebook_append_game</function></funcdef>
-<paramdef>
-<parameter>CWScorebook *scorebook</parameter>
-<parameter>CWGame *game</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Appends <parameter>game</parameter> to <parameter>scorebook</parameter>.
-Returns nonzero if successful, 0 if unsuccessful.  (Failure occurs,
-for example, if <parameter>game</parameter> is null.)
-After a successful append, <parameter>scorebook</parameter> is responsible
-for the memory associated with <parameter>game</parameter>.
-</para>
-	
-<funcsynopsis>
-<funcprototype><funcdef>int <function>cw_scorebook_remove_game</function></funcdef>
-<paramdef>
-<parameter>CWScorebook *scorebook</parameter>
-<parameter>char *game_id</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Removes the game with game ID <parameter>game_id</parameter> from
-<parameter>scorebook</parameter>.  If no game with that ID is present,
-no action is taken.
-</para>
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>int
+            <function>cw_scorebook_append_game</function></funcdef>
 
-</sect2>
+            <paramdef><parameter>CWScorebook *scorebook</parameter>
+            <parameter>CWGame *game</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
 
+        <para>Appends <parameter>game</parameter> to
+        <parameter>scorebook</parameter>. Returns nonzero if successful, 0 if
+        unsuccessful. (Failure occurs, for example, if
+        <parameter>game</parameter> is null.) After a successful append,
+        <parameter>scorebook</parameter> is responsible for the memory
+        associated with <parameter>game</parameter>.</para>
 
-      </sect1>
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>int
+            <function>cw_scorebook_remove_game</function></funcdef>
+
+            <paramdef><parameter>CWScorebook *scorebook</parameter>
+            <parameter>char *game_id</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
+
+        <para>Removes the game with game ID <parameter>game_id</parameter>
+        from <parameter>scorebook</parameter>. If no game with that ID is
+        present, no action is taken.</para>
+      </sect2>
+    </sect1>
 
     <sect1 id="api.file">
       <title>file</title>
 
-      <para>
+      <para></para>
+    </sect1>
 
-      </para>
-      </sect1>
-    
     <sect1 id="api.game">
       <title><type>CWGame</type> -- Play-by-play for a game</title>
 
-      <para>
-      The <type>CWGame</type> datatype contains the play-by-play and other
-information for a game.  Lists of <type>CWGame</type>s are often kept in a
-<type>CWScorebook</type>.
-      </para>
+      <para>The <type>CWGame</type> datatype contains the play-by-play and
+      other information for a game. Lists of <type>CWGame</type>s are often
+      kept in a <type>CWScorebook</type>.</para>
 
-<sect2 id="api.game.lifecycle">
-	<title>Creating and destroying</title>
+      <sect2 id="api.game.lifecycle">
+        <title>Creating and destroying</title>
 
-<funcsynopsis>
-<funcprototype><funcdef>CWGame *<function>cw_game_create</function></funcdef>
-<paramdef>
-<parameter>char *game_id</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Allocates an initializes a new game with id <parameter>game_id</parameter>.
-Caller is responsible for maintaining returned pointer.
-</para>
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>CWGame *<function>cw_game_create</function></funcdef>
 
-<funcsynopsis>
-<funcprototype><funcdef>void <function>cw_game_cleanup</function></funcdef>
-<paramdef>
-<parameter>CWGame *game</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Cleans up internal memory allocation associated with 
-<parameter>game</parameter>.  Caller is responsible for freeing the
-<type>CWGame</type> itself.
-</para>
+            <paramdef><parameter>char *game_id</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
 
-</sect2>
+        <para>Allocates an initializes a new game with id
+        <parameter>game_id</parameter>. Caller is responsible for maintaining
+        returned pointer.</para>
+
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>void <function>cw_game_cleanup</function></funcdef>
+
+            <paramdef><parameter>CWGame *game</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
+
+        <para>Cleans up internal memory allocation associated with
+        <parameter>game</parameter>. Caller is responsible for freeing the
+        <type>CWGame</type> itself.</para>
+      </sect2>
 
       <sect2 id="api.game.io">
-	<title>Reading and writing</title>
+        <title>Reading and writing</title>
 
-<funcsynopsis>
-<funcprototype><funcdef>CWGame *<function>cw_game_read</function></funcdef>
-<paramdef>
-<parameter>FILE *file</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Creates a game by reading from a file; returns a null pointer if
-read is unsuccessful.  (This function is useful primarily for the
-<type>CWScorebook</type> implementation and is probably not generally
-useful for user code.)
-</para>
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>CWGame *<function>cw_game_read</function></funcdef>
 
-<funcsynopsis>
-<funcprototype><funcdef>void <function>cw_game_write</function></funcdef>
-<paramdef>
-<parameter>CWGame *game</parameter>
-<parameter>FILE *file</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Writes the <parameter>game</parameter> to <parameter>file</parameter>
-in Retrosheet format.
-</para>
-</sect2>
+            <paramdef><parameter>FILE *file</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
+
+        <para>Creates a game by reading from a file; returns a null pointer if
+        read is unsuccessful. (This function is useful primarily for the
+        <type>CWScorebook</type> implementation and is probably not generally
+        useful for user code.)</para>
+
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>void <function>cw_game_write</function></funcdef>
+
+            <paramdef><parameter>CWGame *game</parameter> <parameter>FILE
+            *file</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
+
+        <para>Writes the <parameter>game</parameter> to
+        <parameter>file</parameter> in Retrosheet format.</para>
+      </sect2>
 
       <sect2 id="api.game.info">
-	<title>General game information</title>
+        <title>General game information</title>
 
-<funcsynopsis>
-<funcprototype><funcdef>void <function>cw_game_set_version</function></funcdef>
-<paramdef>
-<parameter>CWGame *game</parameter>
-<parameter>char *version</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Sets the version number (for file format and game notation)
-</para>
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>void <function>cw_game_set_version</function></funcdef>
 
-<funcsynopsis>
-<funcprototype><funcdef>void <function>cw_game_info_append</function></funcdef>
-<paramdef>
-<parameter>CWGame *game</parameter>
-<parameter>char *label</parameter>
-<parameter>char *data</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Add an info record to the game.
-</para>
+            <paramdef><parameter>CWGame *game</parameter> <parameter>char
+            *version</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
 
-<funcsynopsis>
-<funcprototype><funcdef>void <function>cw_game_info_set</function></funcdef>
-<paramdef>
-<parameter>CWGame *game</parameter>
-<parameter>char *label</parameter>
-<parameter>char *data</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Modify an existing info record in the game.
-</para>
+        <para>Sets the version number (for file format and game
+        notation)</para>
 
-<funcsynopsis>
-<funcprototype><funcdef>void <function>cw_game_info_lookup</function></funcdef>
-<paramdef>
-<parameter>CWGame *game</parameter>
-<parameter>char *label</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Scans the info records for <parameter>label</parameter>
-and returns the associated data.
-The pointer returned is internal to the <type>CWGame</type> structure, so it
-should not be deleted, nor its contents changed.
-The list is scanned from the tail first, to return the last seen
-record in the case of multiple records; this is particularly useful in
-the case of multiple edit date records.
-</para>
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>void <function>cw_game_info_append</function></funcdef>
 
-</sect2>
+            <paramdef><parameter>CWGame *game</parameter> <parameter>char
+            *label</parameter> <parameter>char *data</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
+
+        <para>Add an info record to the game.</para>
+
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>void <function>cw_game_info_set</function></funcdef>
+
+            <paramdef><parameter>CWGame *game</parameter> <parameter>char
+            *label</parameter> <parameter>char *data</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
+
+        <para>Modify an existing info record in the game.</para>
+
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>void <function>cw_game_info_lookup</function></funcdef>
+
+            <paramdef><parameter>CWGame *game</parameter> <parameter>char
+            *label</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
+
+        <para>Scans the info records for <parameter>label</parameter> and
+        returns the associated data. The pointer returned is internal to the
+        <type>CWGame</type> structure, so it should not be deleted, nor its
+        contents changed. The list is scanned from the tail first, to return
+        the last seen record in the case of multiple records; this is
+        particularly useful in the case of multiple edit date records.</para>
+      </sect2>
 
       <sect2 id="api.game.starters">
-	<title>The starting lineup</title>
+        <title>The starting lineup</title>
 
-<funcsynopsis>
-<funcprototype><funcdef>void <function>cw_game_starter_append</function></funcdef>
-<paramdef>
-<parameter>CWGame *game</parameter>
-<parameter>char *player_id</parameter>
-<parameter>char *name</parameter>
-<parameter>int team</parameter>
-<parameter>int slot</parameter>
-<parameter>int pos</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Adds a new start record to the game.
-</para>
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>void
+            <function>cw_game_starter_append</function></funcdef>
 
-<funcsynopsis>
-<funcprototype><funcdef>CWAppearance *<function>cw_game_starter_find</function></funcdef>
-<paramdef>
-<parameter>CWGame *game</parameter>
-<parameter>int team</parameter>
-<parameter>int slot</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Returns the appearance record for the starter for <parameter>team</parameter>
-in batting order position <parameter>slot</parameter>.
-</para>
+            <paramdef><parameter>CWGame *game</parameter> <parameter>char
+            *player_id</parameter> <parameter>char *name</parameter>
+            <parameter>int team</parameter> <parameter>int slot</parameter>
+            <parameter>int pos</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
 
-<funcsynopsis>
-<funcprototype><funcdef>CWAppearance *<function>cw_game_starter_find_by_position</function></funcdef>
-<paramdef>
-<parameter>CWGame *game</parameter>
-<parameter>int team</parameter>
-<parameter>int pos</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Returns the appearance record for the starter for <parameter>team</parameter>
-at position <parameter>pos</parameter>.
-</para>
+        <para>Adds a new start record to the game.</para>
 
-</sect2>
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>CWAppearance
+            *<function>cw_game_starter_find</function></funcdef>
+
+            <paramdef><parameter>CWGame *game</parameter> <parameter>int
+            team</parameter> <parameter>int slot</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
+
+        <para>Returns the appearance record for the starter for
+        <parameter>team</parameter> in batting order position
+        <parameter>slot</parameter>.</para>
+
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>CWAppearance
+            *<function>cw_game_starter_find_by_position</function></funcdef>
+
+            <paramdef><parameter>CWGame *game</parameter> <parameter>int
+            team</parameter> <parameter>int pos</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
+
+        <para>Returns the appearance record for the starter for
+        <parameter>team</parameter> at position
+        <parameter>pos</parameter>.</para>
+      </sect2>
 
       <sect2 id="api.game.event">
-	<title>Play-by-play events</title>
+        <title>Play-by-play events</title>
 
-<funcsynopsis>
-<funcprototype><funcdef>void <function>cw_game_event_append</function></funcdef>
-<paramdef>
-<parameter>CWGame *game</parameter>
-<parameter>int inning</parameter>
-<parameter>int halfInning</parameter>
-<parameter>char *batter</parameter>
-<parameter>char *count</parameter>
-<parameter>char *pitches</parameter>
-<parameter>char *event_text</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Adds an event record to the game.
-</para>
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>void <function>cw_game_event_append</function></funcdef>
 
-<funcsynopsis>
-<funcprototype><funcdef>void <function>cw_game_truncate</function></funcdef>
-<paramdef>
-<parameter>CWGame *game</parameter>
-<parameter>CWEvent *event</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Truncate a game, by deleting event records beginning with 
-<parameter>event</parameter>.
-</para>
+            <paramdef><parameter>CWGame *game</parameter> <parameter>int
+            inning</parameter> <parameter>int halfInning</parameter>
+            <parameter>char *batter</parameter> <parameter>char
+            *count</parameter> <parameter>char *pitches</parameter>
+            <parameter>char *event_text</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
 
-</sect2>
+        <para>Adds an event record to the game.</para>
+
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>void <function>cw_game_truncate</function></funcdef>
+
+            <paramdef><parameter>CWGame *game</parameter> <parameter>CWEvent
+            *event</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
+
+        <para>Truncate a game, by deleting event records beginning with
+        <parameter>event</parameter>.</para>
+      </sect2>
 
       <sect2 id="api.game.sub">
-	<title>Substitutions</title>
+        <title>Substitutions</title>
 
-<funcsynopsis>
-<funcprototype><funcdef>void <function>cw_game_substitute_append</function></funcdef>
-<paramdef>
-<parameter>CWGame *game</parameter>
-<parameter>char *playerID</parameter>
-<parameter>char *name</parameter>
-<parameter>int team</parameter>
-<parameter>int slot</parameter>
-<parameter>int pos</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Add a substitute record to the game
-</para>
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>void
+            <function>cw_game_substitute_append</function></funcdef>
 
-</sect2>
+            <paramdef><parameter>CWGame *game</parameter> <parameter>char
+            *playerID</parameter> <parameter>char *name</parameter>
+            <parameter>int team</parameter> <parameter>int slot</parameter>
+            <parameter>int pos</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
+
+        <para>Add a substitute record to the game</para>
+      </sect2>
 
       <sect2 id="api.game.data">
-	<title>Data lines</title>
+        <title>Data lines</title>
 
-<funcsynopsis>
-<funcprototype><funcdef>void <function>cw_game_data_append</function></funcdef>
-<paramdef>
-<parameter>CWGame *game</parameter>
-<parameter>int num_data</parameter>
-<parameter>char **data</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Add a data record to the game.
-</para>
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>void <function>cw_game_data_append</function></funcdef>
 
-</sect2>
+            <paramdef><parameter>CWGame *game</parameter> <parameter>int
+            num_data</parameter> <parameter>char **data</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
+
+        <para>Add a data record to the game.</para>
+      </sect2>
 
       <sect2 id="api.game.comment">
-	<title>Comment lines</title>
+        <title>Comment lines</title>
 
-<funcsynopsis>
-<funcprototype><funcdef>void <function>cw_game_comment_append</function></funcdef>
-<paramdef>
-<parameter>CWGame *game</parameter>
-<parameter>char *comment</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Add a comment record to the game.
-</para>
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>void
+            <function>cw_game_comment_append</function></funcdef>
 
-</sect2>
-      </sect1>
+            <paramdef><parameter>CWGame *game</parameter> <parameter>char
+            *comment</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
+
+        <para>Add a comment record to the game.</para>
+      </sect2>
+    </sect1>
 
     <sect1 id="api.gameiter">
-      <title><type>CWGameIterator</type> -- Keeping track of the state of a game</title>
+      <title><type>CWGameIterator</type> -- Keeping track of the state of a
+      game</title>
 
-      <para>
-
-      </para>
-      </sect1>
+      <para></para>
+    </sect1>
 
     <sect1 id="api.league">
       <title><type>CWLeague</type> -- League definition file</title>
 
-      <para>
-      A <type>CWLeague</type> represents a collection of <type>CWRoster</type>, mapping roughly to the files named <filename>TEAMyyyy</filename> in Retrosheet data.
-      </para>
+      <para>A <type>CWLeague</type> represents a collection of
+      <type>CWRoster</type>, mapping roughly to the files named
+      <filename>TEAMyyyy</filename> in Retrosheet data.</para>
 
-      <para>
-      Internally, a <type>CWLeague</type> is just a linked list of 
-      <type>CWRoster</type>s.
-      </para>
+      <para>Internally, a <type>CWLeague</type> is just a linked list of
+      <type>CWRoster</type>s.</para>
 
       <sect2 id="api.league.lifecycle">
-	<title>Creating and destroying</title>
+        <title>Creating and destroying</title>
 
-<funcsynopsis>
-<funcprototype><funcdef>CWLeague *<function>cw_league_create</function></funcdef>
-<paramdef>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Allocates and initializes a new <type>CWLeague</type> structure.
-Caller is responsible for memory management of the created pointer.
-</para>
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>CWLeague *<function>cw_league_create</function></funcdef>
 
-<funcsynopsis>
-<funcprototype><funcdef>void <function>cw_league_cleanup</function></funcdef>
-<paramdef>
-<parameter>CWLeague *league</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Cleans up internal memory associated with <parameter>league</parameter>.
-Caller is responsible for freeing the <parameter>league</parameter> 
-pointer itself.
-</para>
+            <paramdef></paramdef>
+          </funcprototype>
+        </funcsynopsis>
 
-</sect2>	
+        <para>Allocates and initializes a new <type>CWLeague</type> structure.
+        Caller is responsible for memory management of the created
+        pointer.</para>
+
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>void <function>cw_league_cleanup</function></funcdef>
+
+            <paramdef><parameter>CWLeague *league</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
+
+        <para>Cleans up internal memory associated with
+        <parameter>league</parameter>. Caller is responsible for freeing the
+        <parameter>league</parameter> pointer itself.</para>
+      </sect2>
 
       <sect2 id="api.league.io">
-	<title>Reading and writing</title>
+        <title>Reading and writing</title>
 
-<funcsynopsis>
-<funcprototype><funcdef>void <function>cw_league_read</function></funcdef>
-<paramdef>
-<parameter>CWLeague *league</parameter>
-<parameter>FILE *file</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Read a leaguefile (in Retrosheet convention, <filename>TEAMyyyy</filename>)
-from the stream <parameter>file</parameter>.  Rosters are created for
-each team, but are left empty.
-</para>
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>void <function>cw_league_read</function></funcdef>
 
-<funcsynopsis>
-<funcprototype><funcdef>void <function>cw_league_write</function></funcdef>
-<paramdef>
-<parameter>CWLeague *league</parameter>
-<parameter>FILE *file</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Write a leaguefile (in Retrosheet convention, <filename>TEAMyyyy</filename>)
-to the stream <parameter>file</parameter>.
-</para>
+            <paramdef><parameter>CWLeague *league</parameter> <parameter>FILE
+            *file</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
 
-</sect2>
+        <para>Read a leaguefile (in Retrosheet convention,
+        <filename>TEAMyyyy</filename>) from the stream
+        <parameter>file</parameter>. Rosters are created for each team, but
+        are left empty.</para>
+
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>void <function>cw_league_write</function></funcdef>
+
+            <paramdef><parameter>CWLeague *league</parameter> <parameter>FILE
+            *file</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
+
+        <para>Write a leaguefile (in Retrosheet convention,
+        <filename>TEAMyyyy</filename>) to the stream
+        <parameter>file</parameter>.</para>
+      </sect2>
 
       <sect2 id="api.league.rosters">
-	<title>Roster manipulation</title>
+        <title>Roster manipulation</title>
 
-<funcsynopsis>
-<funcprototype><funcdef>void <function>cw_league_roster_append</function></funcdef>
-<paramdef>
-<parameter>CWLeague *league</parameter>
-<parameter>CWRoster *roster</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Append <parameter>roster</parameter> to the league.  The 
-<parameter>league</parameter> takes responsibility for the memory
-allocated to pointer <parameter>roster</parameter>.
-</para>
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>void
+            <function>cw_league_roster_append</function></funcdef>
 
-<funcsynopsis>
-<funcprototype><funcdef>CWRoster *<function>cw_league_roster_find</function></funcdef>
-<paramdef>
-<parameter>CWLeague *league</parameter>
-<parameter>char *team</parameter>
-</paramdef>
-</funcprototype>
-</funcsynopsis>
-<para>
-Returns a pointer to the roster of the team with ID
-<parameter>team</parameter>.  The Retrosheet convention is for
-<parameter>team</parameter> to be three characters long, but
-longer or shorter IDs are accepted by the library.
-</para>
+            <paramdef><parameter>CWLeague *league</parameter>
+            <parameter>CWRoster *roster</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
 
-</sect2>
+        <para>Append <parameter>roster</parameter> to the league. The
+        <parameter>league</parameter> takes responsibility for the memory
+        allocated to pointer <parameter>roster</parameter>.</para>
 
-      </sect1>
+        <funcsynopsis>
+          <funcprototype>
+            <funcdef>CWRoster
+            *<function>cw_league_roster_find</function></funcdef>
+
+            <paramdef><parameter>CWLeague *league</parameter> <parameter>char
+            *team</parameter></paramdef>
+          </funcprototype>
+        </funcsynopsis>
+
+        <para>Returns a pointer to the roster of the team with ID
+        <parameter>team</parameter>. The Retrosheet convention is for
+        <parameter>team</parameter> to be three characters long, but longer or
+        shorter IDs are accepted by the library.</para>
+      </sect2>
+    </sect1>
 
     <sect1 id="api.parse">
       <title>parse</title>
 
-      <para>
-
-      </para>
-      </sect1>
+      <para></para>
+    </sect1>
 
     <sect1 id="api.roster">
       <title><type>CWRoster</type> -- Team rosters</title>
 
-      <para>
-
-      </para>
-      </sect1>
-
-    </chapter>
-
+      <para></para>
+    </sect1>
+  </chapter>
 </book>
