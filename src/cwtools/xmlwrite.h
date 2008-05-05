@@ -113,6 +113,15 @@ xml_node_attribute(XMLNode *node, char *attr, char *value);
 void
 xml_node_attribute_int(XMLNode *node, char *attr, int value);
 
+/*
+ * Adds the attribute 'attr' with value 'value' to the open node 'node'.
+ * If 'value' is negative, the attribute is not added; therefore,
+ * this treats negative values as NULLs or 'missing data.'
+ * The pointer to 'attr' is not stored, so it may
+ * be deallocated or modified after the call completes.
+ */
+void
+xml_node_attribute_posint(XMLNode *node, char *attr, int value);
 
 /*
  * Adds the attribute 'attr' by formatting the va_args using format string

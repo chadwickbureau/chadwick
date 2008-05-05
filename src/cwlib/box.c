@@ -1133,19 +1133,21 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
   int i;
   CWData *stat;
 
+  /* Assume games ended with the conclusion of an inning... */
+  boxscore->outs_at_end = 3;
+
+
   for (stat = game->first_stat; stat; stat = stat->next) {
     if (!strcmp(stat->data[0], "bline")) {
       CWBoxPlayer *player;
+      int slot = atoi(stat->data[3]);
+      int team = atoi(stat->data[2]);
 
       if (atoi(stat->data[4]) == 1) {
 	/* Record for starter */
-	player = cw_box_get_starter(boxscore,
-				    atoi(stat->data[2]),
-				    atoi(stat->data[3]));
+	player = cw_box_get_starter(boxscore, team, slot);
       }
       else {
-	int slot = atoi(stat->data[3]);
-	int team = atoi(stat->data[2]);
 	player = cw_box_player_create(stat->data[1]);
 	player->batting->g = 1; 
 	boxscore->slots[slot][team]->next = player;
@@ -1153,9 +1155,12 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
 	boxscore->slots[slot][team] = player;
       }
 
+      player->batting->pa = -1;
       player->batting->ab = atoi(stat->data[5]);
       player->batting->r = atoi(stat->data[6]);
+      boxscore->score[team] += player->batting->r;
       player->batting->h = atoi(stat->data[7]);
+      boxscore->hits[team] += player->batting->h;
       player->batting->b2 = atoi(stat->data[8]);
       for (i = 1; i <= player->batting->b2; i++) {
 	cw_box_add_event(&(boxscore->b2_list), -1, -1, 2,
@@ -1171,7 +1176,9 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
 	cw_box_add_event(&(boxscore->hr_list), -1, -1, 2,
 			 player->player_id, "");
       }
+      player->batting->hrslam = -1;
       player->batting->bi = atoi(stat->data[11]);
+      player->batting->bi2out = -1;
       player->batting->sh = atoi(stat->data[12]);
       for (i = 1; i <= player->batting->sh; i++) {
 	cw_box_add_event(&(boxscore->sh_list), -1, -1, 2,
@@ -1197,20 +1204,66 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
 			 player->player_id, "");
       }
       player->batting->gdp = atoi(stat->data[20]);
-      /* Data field 21 is reach on interference, which we don't yet track */
+      player->batting->xi = atoi(stat->data[21]);
+      player->batting->lisp = -1;
+      player->batting->movedup = -1;
     }
     else if (!strcmp(stat->data[0], "pline")) {
+      CWBoxPitcher *pitcher;
+      int team = atoi(stat->data[2]);
+      int seq = atoi(stat->data[3]);
 
+      if (seq == 1) {
+	/* Record for starter */
+	pitcher = cw_box_get_starting_pitcher(boxscore, team);
+	pitcher->pitching->gs = 1;
+      }
+      else {
+	pitcher = cw_box_pitcher_create(stat->data[1]);
+	boxscore->pitchers[team]->next = pitcher;
+	pitcher->prev = boxscore->pitchers[team];
+	boxscore->pitchers[team] = pitcher;
+      }
+      pitcher->pitching->g = 1; 
+      pitcher->pitching->outs = atoi(stat->data[4]);
+      pitcher->pitching->xb = atoi(stat->data[5]);
+      pitcher->pitching->bf = atoi(stat->data[6]);
+      pitcher->pitching->h = atoi(stat->data[7]);
+      pitcher->pitching->b2 = atoi(stat->data[8]);
+      pitcher->pitching->b3 = atoi(stat->data[9]);
+      pitcher->pitching->hr = atoi(stat->data[10]);
+      pitcher->pitching->r = atoi(stat->data[11]);
+      pitcher->pitching->er = atoi(stat->data[12]);
+      pitcher->pitching->bb = atoi(stat->data[13]);
+      pitcher->pitching->ibb = atoi(stat->data[14]);
+      pitcher->pitching->so = atoi(stat->data[15]);
+      pitcher->pitching->hb = atoi(stat->data[16]);
+      pitcher->pitching->wp = atoi(stat->data[17]);
+      pitcher->pitching->bk = atoi(stat->data[18]);
+      pitcher->pitching->sh = atoi(stat->data[19]);
+      pitcher->pitching->sf = atoi(stat->data[20]);
+      pitcher->pitching->pk = -1;
+      pitcher->pitching->inr = -1;
+      pitcher->pitching->inrs = -1;
+      pitcher->pitching->gb = -1;
+      pitcher->pitching->fb = -1;
     }
     else if (!strcmp(stat->data[0], "dline")) {
 
     }
-    else if (!strcmp(stat->data[0], "line")) {
+    else if (!strcmp(stat->data[0], "tline")) {
       int team = atoi(stat->data[1]);
-      for (i = 2; i < stat->num_data; i++) {
-	printf("%s\n", atoi(stat->data[i]));
-	boxscore->linescore[i-2][team] = atoi(stat->data[i]);
-      }
+      boxscore->lob[team] = atoi(stat->data[2]);
+      boxscore->er[team] = atoi(stat->data[3]);
+      boxscore->dp[team] = atoi(stat->data[4]);
+      boxscore->tp[team] = atoi(stat->data[5]);
+    }
+  }
+
+  for (stat = game->first_line; stat; stat = stat->next) {
+    int team = atoi(stat->data[0]);
+    for (i = 1; i < stat->num_data; i++) {
+      boxscore->linescore[i][team] = atoi(stat->data[i]);
     }
   }
 }

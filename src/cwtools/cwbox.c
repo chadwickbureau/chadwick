@@ -280,10 +280,18 @@ cwbox_print_pitcher(CWGame *game,
     strcat(name, markers[(*note_count)++]);
   }
 
-  printf("%-20s %2d.%1d %2d %2d %2d %2d %2d\n",
-	 name, pitcher->pitching->outs / 3, pitcher->pitching->outs % 3,
-	 pitcher->pitching->h, pitcher->pitching->r,
-	 pitcher->pitching->er, pitcher->pitching->bb, pitcher->pitching->so);
+  if (pitcher->pitching->er != -1) {
+    printf("%-20s %2d.%1d %2d %2d %2d %2d %2d\n",
+	   name, pitcher->pitching->outs / 3, pitcher->pitching->outs % 3,
+	   pitcher->pitching->h, pitcher->pitching->r,
+	   pitcher->pitching->er, pitcher->pitching->bb, pitcher->pitching->so);
+  }
+  else {
+    printf("%-20s %2d.%1d %2d %2d    %2d %2d\n",
+	   name, pitcher->pitching->outs / 3, pitcher->pitching->outs % 3,
+	   pitcher->pitching->h, pitcher->pitching->r,
+	   pitcher->pitching->bb, pitcher->pitching->so);
+  }
 
 }
 

@@ -85,38 +85,40 @@ cwbox_player_stats_offensive(XMLNode *parent, CWBoxPlayer *player)
   
   node = xml_node_open(parent, "stats-baseball-offensive");
   
-  xml_node_attribute_int(node, "plate-appearances", player->batting->pa);
-  xml_node_attribute_int(node, "at-bats", player->batting->ab);
-  xml_node_attribute_int(node, "runs-scored", player->batting->r);
-  xml_node_attribute_int(node, "hits", player->batting->h);
-  xml_node_attribute_int(node, "total-bases",
-			 player->batting->h + player->batting->b2 +
-			 2*player->batting->b3 + 3*player->batting->hr);
-  xml_node_attribute_int(node, "hits-extra-base",
-			 player->batting->b2 + player->batting->b3 +
-			 player->batting->hr);
-  xml_node_attribute_int(node, "singles",
-		player->batting->h - player->batting->b2 -
-		player->batting->b3 - player->batting->hr);
-  xml_node_attribute_int(node, "doubles", player->batting->b2);
-  xml_node_attribute_int(node, "triples", player->batting->b3);
-  xml_node_attribute_int(node, "home-runs", player->batting->hr);
-  xml_node_attribute_int(node, "grand-slams", player->batting->hrslam);
-  xml_node_attribute_int(node, "rbi", player->batting->bi);
-  xml_node_attribute_int(node, "bases-on-balls", player->batting->bb);
-  xml_node_attribute_int(node, "bases-on-balls-intentional", player->batting->ibb);
-  xml_node_attribute_int(node, "strikeouts", player->batting->so);
-  xml_node_attribute_int(node, "grounded-into-double-play", player->batting->gdp);
-  xml_node_attribute_int(node, "hit-by-pitch", player->batting->hp);
-  xml_node_attribute_int(node, "sac-bunts", player->batting->sh);
-  xml_node_attribute_int(node, "sac-flies", player->batting->sf);
-  xml_node_attribute_int(node, "stolen-bases", player->batting->sb);
-  xml_node_attribute_int(node, "stolen-bases-caught", player->batting->cs);
-  xml_node_attribute_int(node, "reached-base-defensive-interference",
-			 player->batting->xi);
-  xml_node_attribute_int(node, "left-in-scoring-position",
-			 player->batting->lisp);
-  xml_node_attribute_int(node, "moved-up", player->batting->movedup);
+  xml_node_attribute_posint(node, "plate-appearances", player->batting->pa);
+  xml_node_attribute_posint(node, "at-bats", player->batting->ab);
+  xml_node_attribute_posint(node, "runs-scored", player->batting->r);
+  xml_node_attribute_posint(node, "hits", player->batting->h);
+  xml_node_attribute_posint(node, "total-bases",
+			    player->batting->h + player->batting->b2 +
+			    2*player->batting->b3 + 3*player->batting->hr);
+  xml_node_attribute_posint(node, "hits-extra-base",
+			    player->batting->b2 + player->batting->b3 +
+			    player->batting->hr);
+  xml_node_attribute_posint(node, "singles",
+			    player->batting->h - player->batting->b2 -
+			    player->batting->b3 - player->batting->hr);
+  xml_node_attribute_posint(node, "doubles", player->batting->b2);
+  xml_node_attribute_posint(node, "triples", player->batting->b3);
+  xml_node_attribute_posint(node, "home-runs", player->batting->hr);
+  xml_node_attribute_posint(node, "grand-slams", player->batting->hrslam);
+  xml_node_attribute_posint(node, "rbi", player->batting->bi);
+  xml_node_attribute_posint(node, "bases-on-balls", player->batting->bb);
+  xml_node_attribute_posint(node, "bases-on-balls-intentional", 
+			    player->batting->ibb);
+  xml_node_attribute_posint(node, "strikeouts", player->batting->so);
+  xml_node_attribute_posint(node, "grounded-into-double-play",
+			    player->batting->gdp);
+  xml_node_attribute_posint(node, "hit-by-pitch", player->batting->hp);
+  xml_node_attribute_posint(node, "sac-bunts", player->batting->sh);
+  xml_node_attribute_posint(node, "sac-flies", player->batting->sf);
+  xml_node_attribute_posint(node, "stolen-bases", player->batting->sb);
+  xml_node_attribute_posint(node, "stolen-bases-caught", player->batting->cs);
+  xml_node_attribute_posint(node, "reached-base-defensive-interference",
+			    player->batting->xi);
+  xml_node_attribute_posint(node, "left-in-scoring-position",
+			    player->batting->lisp);
+  xml_node_attribute_posint(node, "moved-up", player->batting->movedup);
 }
 
 /*
@@ -147,16 +149,18 @@ cwbox_player_stats_defensive(XMLNode *parent, CWBoxPlayer *player)
       xi += player->fielding[pos]->xi;
     }
   }
-  
-  xml_node_attribute_fmt(node, "innings-played", "%d.%d",
-			 outs / 3, outs % 3);
-  xml_node_attribute_int(node, "putouts", po);
-  xml_node_attribute_int(node, "assists", a);
-  xml_node_attribute_int(node, "errors", e);
-  xml_node_attribute_int(node, "double-plays", dp);
-  xml_node_attribute_int(node, "triple-plays", tp);
-  xml_node_attribute_int(node, "errors-passed-ball", pb);
-  xml_node_attribute_int(node, "errors-catchers-interference", xi);
+ 
+  if (outs > 0) {
+    xml_node_attribute_fmt(node, "innings-played", "%d.%d",
+			   outs / 3, outs % 3);
+  }
+  xml_node_attribute_posint(node, "putouts", po);
+  xml_node_attribute_posint(node, "assists", a);
+  xml_node_attribute_posint(node, "errors", e);
+  xml_node_attribute_posint(node, "double-plays", dp);
+  xml_node_attribute_posint(node, "triple-plays", tp);
+  xml_node_attribute_posint(node, "errors-passed-ball", pb);
+  xml_node_attribute_posint(node, "errors-catchers-interference", xi);
 }
 
 /*
@@ -178,31 +182,34 @@ cwbox_player_stats_pitching(XMLNode *parent,
 			   pitcher->pitching->outs % 3);
 
   }
-  xml_node_attribute_int(node, "hits", pitcher->pitching->h);
-  xml_node_attribute_int(node, "runs-allowed", pitcher->pitching->r);
-  xml_node_attribute_int(node, "earned-runs", pitcher->pitching->er);
-  xml_node_attribute_int(node, "unearned-runs",
-			 pitcher->pitching->r - pitcher->pitching->er);
-  xml_node_attribute_int(node, "home-runs-allowed", pitcher->pitching->hr);
-  xml_node_attribute_int(node, "singles-allowed",
-			 pitcher->pitching->h - pitcher->pitching->b2 -
-			 pitcher->pitching->b3 - pitcher->pitching->hr);
-  xml_node_attribute_int(node, "doubles-allowed", pitcher->pitching->b2);
-  xml_node_attribute_int(node, "triples-allowed", pitcher->pitching->b3);
-  xml_node_attribute_int(node, "sacrifice-bunts-allowed", pitcher->pitching->sh);
-  xml_node_attribute_int(node, "sacrifice-flies-allowed", pitcher->pitching->sf);
-  xml_node_attribute_int(node, "bases-on-balls", pitcher->pitching->bb);
-  xml_node_attribute_int(node, "bases-on-balls-intentional",
-			 pitcher->pitching->ibb);
-  xml_node_attribute_int(node, "strikeouts", pitcher->pitching->so);
-  xml_node_attribute_int(node, "errors-hit-with-pitch", pitcher->pitching->hb);
-  xml_node_attribute_int(node, "errors-wild-pitch", pitcher->pitching->wp);
-  xml_node_attribute_int(node, "balks", pitcher->pitching->bk);
-  xml_node_attribute_int(node, "pick-offs", pitcher->pitching->pk);
-  xml_node_attribute_int(node, "inherited-runners-total",
-			 pitcher->pitching->inr);
-  xml_node_attribute_int(node, "inherited-runners-scored",
-			 pitcher->pitching->inrs);
+  xml_node_attribute_posint(node, "hits", pitcher->pitching->h);
+  xml_node_attribute_posint(node, "runs-allowed", pitcher->pitching->r);
+  xml_node_attribute_posint(node, "earned-runs", pitcher->pitching->er);
+  xml_node_attribute_posint(node, "unearned-runs",
+			    pitcher->pitching->r - pitcher->pitching->er);
+  xml_node_attribute_posint(node, "home-runs-allowed", pitcher->pitching->hr);
+  xml_node_attribute_posint(node, "singles-allowed",
+			    pitcher->pitching->h - pitcher->pitching->b2 -
+			    pitcher->pitching->b3 - pitcher->pitching->hr);
+  xml_node_attribute_posint(node, "doubles-allowed", pitcher->pitching->b2);
+  xml_node_attribute_posint(node, "triples-allowed", pitcher->pitching->b3);
+  xml_node_attribute_posint(node, "sacrifice-bunts-allowed", 
+			    pitcher->pitching->sh);
+  xml_node_attribute_posint(node, "sacrifice-flies-allowed",
+			    pitcher->pitching->sf);
+  xml_node_attribute_posint(node, "bases-on-balls", pitcher->pitching->bb);
+  xml_node_attribute_posint(node, "bases-on-balls-intentional",
+			    pitcher->pitching->ibb);
+  xml_node_attribute_posint(node, "strikeouts", pitcher->pitching->so);
+  xml_node_attribute_posint(node, "errors-hit-with-pitch",
+			    pitcher->pitching->hb);
+  xml_node_attribute_posint(node, "errors-wild-pitch", pitcher->pitching->wp);
+  xml_node_attribute_posint(node, "balks", pitcher->pitching->bk);
+  xml_node_attribute_posint(node, "pick-offs", pitcher->pitching->pk);
+  xml_node_attribute_posint(node, "inherited-runners-total",
+			    pitcher->pitching->inr);
+  xml_node_attribute_posint(node, "inherited-runners-scored",
+			    pitcher->pitching->inrs);
   
 
   /* FIXME: A pitcher gets a shutout if he records all outs for a team,
@@ -326,40 +333,40 @@ cwbox_team_stats_baseball(XMLNode *parent,
   statsNode = xml_node_open(parent, "team-stats-baseball");
 
   node = xml_node_open(statsNode, "stats-baseball-offensive");
-  xml_node_attribute_int(node, "plate-appearances", pa);
-  xml_node_attribute_int(node, "at-bats", ab);
-  xml_node_attribute_int(node, "runs-scored", r);
-  xml_node_attribute_int(node, "hits", h);
-  xml_node_attribute_int(node, "total-bases", h+b2+2*b3+3*hr);
-  xml_node_attribute_int(node, "hits-extra-base", b2+b3+hr);
-  xml_node_attribute_int(node, "singles", h-b2-b3-hr);
-  xml_node_attribute_int(node, "doubles", b2);
-  xml_node_attribute_int(node, "triples", b3);
-  xml_node_attribute_int(node, "home-runs", hr);
-  xml_node_attribute_int(node, "grand-slams", hrslam);
-  xml_node_attribute_int(node, "rbi", bi);
-  xml_node_attribute_int(node, "bases-on-balls", bb);
-  xml_node_attribute_int(node, "bases-on-balls-intentional", ibb);
-  xml_node_attribute_int(node, "strikeouts", so);
-  xml_node_attribute_int(node, "grounded-into-double-play", gdp);
-  xml_node_attribute_int(node, "hit-by-pitch", hp);
-  xml_node_attribute_int(node, "sac-bunts", sh);
-  xml_node_attribute_int(node, "sac-flies", sf);
-  xml_node_attribute_int(node, "stolen-bases", sb);
-  xml_node_attribute_int(node, "stolen-bases-caught", cs);
-  xml_node_attribute_int(node, "reached-base-defensive-interferences", xi);
-  xml_node_attribute_int(node, "left-on-base", boxscore->lob[t]);
-  xml_node_attribute_int(node, "left-in-scoring-position", lisp);
-  xml_node_attribute_int(node, "moved-up", movedup);
+  xml_node_attribute_posint(node, "plate-appearances", pa);
+  xml_node_attribute_posint(node, "at-bats", ab);
+  xml_node_attribute_posint(node, "runs-scored", r);
+  xml_node_attribute_posint(node, "hits", h);
+  xml_node_attribute_posint(node, "total-bases", h+b2+2*b3+3*hr);
+  xml_node_attribute_posint(node, "hits-extra-base", b2+b3+hr);
+  xml_node_attribute_posint(node, "singles", h-b2-b3-hr);
+  xml_node_attribute_posint(node, "doubles", b2);
+  xml_node_attribute_posint(node, "triples", b3);
+  xml_node_attribute_posint(node, "home-runs", hr);
+  xml_node_attribute_posint(node, "grand-slams", hrslam);
+  xml_node_attribute_posint(node, "rbi", bi);
+  xml_node_attribute_posint(node, "bases-on-balls", bb);
+  xml_node_attribute_posint(node, "bases-on-balls-intentional", ibb);
+  xml_node_attribute_posint(node, "strikeouts", so);
+  xml_node_attribute_posint(node, "grounded-into-double-play", gdp);
+  xml_node_attribute_posint(node, "hit-by-pitch", hp);
+  xml_node_attribute_posint(node, "sac-bunts", sh);
+  xml_node_attribute_posint(node, "sac-flies", sf);
+  xml_node_attribute_posint(node, "stolen-bases", sb);
+  xml_node_attribute_posint(node, "stolen-bases-caught", cs);
+  xml_node_attribute_posint(node, "reached-base-defensive-interferences", xi);
+  xml_node_attribute_posint(node, "left-on-base", boxscore->lob[t]);
+  xml_node_attribute_posint(node, "left-in-scoring-position", lisp);
+  xml_node_attribute_posint(node, "moved-up", movedup);
 
   node = xml_node_open(statsNode, "stats-baseball-defensive");
-  xml_node_attribute_int(node, "putouts", po);
-  xml_node_attribute_int(node, "assists", a);
-  xml_node_attribute_int(node, "errors", e);
-  xml_node_attribute_int(node, "double-plays", boxscore->dp[t]);
-  xml_node_attribute_int(node, "triple-plays", boxscore->tp[t]);
-  xml_node_attribute_int(node, "errors-passed-ball", pb);
-  xml_node_attribute_int(node, "errors-defensive-interference", dxi);
+  xml_node_attribute_posint(node, "putouts", po);
+  xml_node_attribute_posint(node, "assists", a);
+  xml_node_attribute_posint(node, "errors", e);
+  xml_node_attribute_posint(node, "double-plays", boxscore->dp[t]);
+  xml_node_attribute_posint(node, "triple-plays", boxscore->tp[t]);
+  xml_node_attribute_posint(node, "errors-passed-ball", pb);
+  xml_node_attribute_posint(node, "errors-defensive-interference", dxi);
 
   pitcher = cw_box_get_starting_pitcher(boxscore, t);
   while (pitcher != NULL) {
@@ -391,21 +398,21 @@ cwbox_team_stats_baseball(XMLNode *parent,
     xml_node_attribute_fmt(node, "innings-pitched", "%d.%d",
 			   outs / 3, outs % 3);
   }
-  xml_node_attribute_int(node, "runs-allowed", ra);
-  xml_node_attribute_int(node, "earned-runs", er);
-  xml_node_attribute_int(node, "hits", ha);
-  xml_node_attribute_int(node, "home-runs-allowed", hra);
-  xml_node_attribute_int(node, "bases-on-balls", bba);
-  xml_node_attribute_int(node, "bases-on-balls-intentional", ibba);
-  xml_node_attribute_int(node, "strikeouts", soa);
-  xml_node_attribute_int(node, "sacrifice-bunts-allowed", sha);
-  xml_node_attribute_int(node, "sacrifice-flies-allowed", sfa);
-  xml_node_attribute_int(node, "errors-hit-with-pitch", hb);
-  xml_node_attribute_int(node, "errors-wild-pitch", wp);
-  xml_node_attribute_int(node, "balks", bk);
-  xml_node_attribute_int(node, "pick-offs", pk);
-  xml_node_attribute_int(node, "inherited-runners-total", inr);
-  xml_node_attribute_int(node, "inherited-runners-scored", inrs);
+  xml_node_attribute_posint(node, "runs-allowed", ra);
+  xml_node_attribute_posint(node, "earned-runs", er);
+  xml_node_attribute_posint(node, "hits", ha);
+  xml_node_attribute_posint(node, "home-runs-allowed", hra);
+  xml_node_attribute_posint(node, "bases-on-balls", bba);
+  xml_node_attribute_posint(node, "bases-on-balls-intentional", ibba);
+  xml_node_attribute_posint(node, "strikeouts", soa);
+  xml_node_attribute_posint(node, "sacrifice-bunts-allowed", sha);
+  xml_node_attribute_posint(node, "sacrifice-flies-allowed", sfa);
+  xml_node_attribute_posint(node, "errors-hit-with-pitch", hb);
+  xml_node_attribute_posint(node, "errors-wild-pitch", wp);
+  xml_node_attribute_posint(node, "balks", bk);
+  xml_node_attribute_posint(node, "pick-offs", pk);
+  xml_node_attribute_posint(node, "inherited-runners-total", inr);
+  xml_node_attribute_posint(node, "inherited-runners-scored", inrs);
 
   if (cw_box_get_starting_pitcher(boxscore, t)->next == NULL) {
     xml_node_attribute_int(node, "games-complete", 1);
@@ -415,7 +422,7 @@ cwbox_team_stats_baseball(XMLNode *parent,
     xml_node_attribute_int(node, "games-complete", 0);
     xml_node_attribute_int(node, "games-finished", 1);
   }
-  xml_node_attribute(node, "shutouts", ((ra == 0) ? "1" : "0"));
+  xml_node_attribute_int(node, "shutouts", ((ra == 0) ? 1 : 0));
 }
 
 

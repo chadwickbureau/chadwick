@@ -152,3 +152,11 @@ xml_node_attribute_int(XMLNode *node, char *attr, int value)
   if (!node->open) return;
   fprintf(node->f, " %s=\"%d\"", attr, value);
 }
+
+void
+xml_node_attribute_posint(XMLNode *node, char *attr, int value)
+{
+  if (!node->open || value < 0) return;
+  fprintf(node->f, " %s=\"%d\"", attr, value);
+}
+

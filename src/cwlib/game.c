@@ -49,6 +49,8 @@ CWGame *cw_game_create(char *game_id)
   game->last_data = NULL;
   game->first_stat = NULL;
   game->last_stat = NULL;
+  game->first_line = NULL;
+  game->last_line = NULL;
   game->first_comment = NULL;
   game->last_comment = NULL;
   game->prev = NULL;
@@ -173,6 +175,25 @@ static void cw_game_cleanup_stat(CWGame *game)
   game->last_stat = NULL;
 }
 
+/*
+ * Private auxiliary function to cleanup memory from data list
+ */
+static void cw_game_cleanup_line(CWGame *game)
+{
+  CWData *data = game->first_line;
+  while (data != NULL) {
+    int i;
+    CWData *next_data = data->next;
+
+    for (i = 0; i < data->num_data; free(data->data[i++]));
+    free(data->data);
+    data = next_data;
+  }
+
+  game->first_line = NULL;
+  game->last_line = NULL;
+}
+
 void cw_game_cleanup(CWGame *game)
 {
   cw_game_cleanup_tags(game);
@@ -183,7 +204,8 @@ void cw_game_cleanup(CWGame *game)
   }
   cw_game_cleanup_data(game);
   cw_game_cleanup_stat(game);
-  
+  cw_game_cleanup_line(game);
+   
   free(game->version);
   game->version = NULL;
   free(game->game_id);
@@ -416,6 +438,30 @@ void cw_game_stat_append(CWGame *game, int num_data, char **data)
   game->last_stat = d;
 }
 
+void cw_game_line_append(CWGame *game, int num_data, char **data)
+{
+  int i;
+  CWData *d = (CWData *) malloc(sizeof(CWData));
+
+  d->num_data = num_data;
+  d->data = (char **) malloc(sizeof(char *) * num_data);
+  d->next = NULL;
+  
+  for (i = 0; i < num_data; i++) {
+    d->data[i] = (char *) malloc(sizeof(char) * (strlen(data[i]) + 1));
+    strcpy(d->data[i], data[i]);
+  }
+
+  if (game->first_line) {
+    game->last_line->next = d;
+  }
+  else {
+    game->first_line = d;
+  }
+  d->prev = game->last_line;
+  game->last_line = d;
+}
+
 void cw_game_comment_append(CWGame *game, char *text)
 {
   CWComment *comment = (CWComment *) malloc(sizeof(CWComment));
@@ -572,8 +618,20 @@ cw_game_read(FILE *file)
 
       for (i = 0; i < 256; i++) {
 	data[i] = cw_strtok(NULL);
-	if (!data[i]) {
+	if (!data[i] || isspace(data[i][0])) {
 	  cw_game_stat_append(game, i, data);
+	  break;
+	}
+      }
+    }
+    else if (!strcmp(tok, "line")) {
+      char *data[256];
+      int i;
+
+      for (i = 0; i < 256; i++) {
+	data[i] = cw_strtok(NULL);
+	if (!data[i] || data[i][0] == '\0') {
+	  cw_game_line_append(game, i, data);
 	  break;
 	}
       }
@@ -707,6 +765,23 @@ cw_game_write_stat(CWGame *game, FILE *file)
 }
 
 static void
+cw_game_write_line(CWGame *game, FILE *file)
+{
+  CWData *data = game->first_data;
+  
+  while (data != NULL) {
+    int i;
+
+    fprintf(file, "line");
+    for (i = 0; i < data->num_data; i++) {
+      fprintf(file, ",%s", data->data[i]);
+    }
+    fprintf(file, "\n");
+    data = data->next;
+  }
+}
+
+static void
 cw_game_write_data(CWGame *game, FILE *file)
 {
   CWData *data = game->first_data;
@@ -731,6 +806,7 @@ cw_game_write(CWGame *game, FILE *file)
   cw_game_write_comments(game, file);
   cw_game_write_events(game, file);
   cw_game_write_stat(game, file);
+  cw_game_write_line(game, file);
   cw_game_write_data(game, file);
 }
 

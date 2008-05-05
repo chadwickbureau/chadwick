@@ -87,6 +87,7 @@ typedef struct cw_game_struct {
   CWAppearance *first_starter, *last_starter;
   CWEvent *first_event, *last_event;
   CWData *first_data, *last_data, *first_stat, *last_stat;
+  CWData *first_line, *last_line;  /* linescores, for boxscore event files */
   CWComment *first_comment, *last_comment; /* for comments before first evt */
   struct cw_game_struct *prev, *next;
 } CWGame;
