@@ -178,7 +178,7 @@ class FieldingStatline:
     def __init__(self):
         self.stats = { "games": [ ],
                        "gs":0, "outs":0, "bip":0, "bf":0,
-                       "po":0, "a":0, "e":0, "dp":0, "tp":0 }
+                       "po":0, "a":0, "e":0, "dp":0, "tp":0, "pb":0 }
 
     def ProcessFielding(self, eventData, pos):
         self.stats["outs"] += eventData.GetOuts()
@@ -200,6 +200,9 @@ class FieldingStatline:
                                      cw.EVENT_DOUBLE,
                                      cw.EVENT_TRIPLE]):
             self.stats["bip"] += 1
+
+        if eventData.pb_flag:
+            self.stats["pb"] += 1
         
     def __add__(self, x):
         y = FieldingStatline()
@@ -218,7 +221,7 @@ class TeamFieldingStatline:
     def __init__(self):
         self.stats = { "games": [ ],
                        "gs":0, "outs":0, "bip":0, "bf":0,
-                       "po":0, "a":0, "e":0, "dp":0, "tp":0 }
+                       "po":0, "a":0, "e":0, "dp":0, "tp":0, "pb":0 }
 
     def ProcessFielding(self, eventData):
         self.stats["po"] += eventData.GetOuts()
@@ -235,6 +238,9 @@ class TeamFieldingStatline:
                                      cw.EVENT_DOUBLE,
                                      cw.EVENT_TRIPLE]):
             self.stats["bip"] += 1
+
+        if eventData.pb_flag:
+            self.stats["pb"] += 1
 
     def __add__(self, x):
         y = TeamFieldingStatline()
@@ -573,10 +579,10 @@ class TeamBattingTotals:
             team = self.book.GetTeam(key)
             
             if i % 20 == 0:
-                s += "\nClub            AVG   SLG   OBP   G   AB   R    H  2B 3B  HR RBI  BB IW   SO  DP HP SH SF  SB CS  LOB\n"
+                s += "\nClub              AVG   SLG   OBP   G   AB   R    H  2B 3B  HR RBI  BB IW   SO  DP HP SH SF  SB CS  LOB\n"
 
             
-            s += ("%-13s %s %s %s %3d %4d %3d %4d %3d %2d %3d %3d %3d %2d %4d %3d %2d %2d %2d %3d %2d %4d\n" %
+            s += ("%-15s %s %s %s %3d %4d %3d %4d %3d %2d %3d %3d %3d %2d %4d %3d %2d %2d %2d %3d %2d %4d\n" %
                 (team.GetCity(),
                  FormatAverage(stat["h"], stat["ab"]),
                  FormatAverage(stat["h"] + stat["2b"] +
@@ -594,7 +600,7 @@ class TeamBattingTotals:
                  stat["sb"], stat["cs"], stat["lob"]))
 
         stat = reduce(lambda x,y: x+y, [self.stats[key] for key in self.stats])
-        s += ("%-13s %s %s %s %3d %4d %3d %4d %3d %2d %3d %3d %3d %2d %4d %3d %2d %2d %2d %3d %2d %4d\n" %
+        s += ("%-15s %s %s %s %3d %4d %3d %4d %3d %2d %3d %3d %3d %2d %4d %3d %2d %2d %2d %3d %2d %4d\n" %
               ("Totals",
                FormatAverage(stat["h"], stat["ab"]),
                FormatAverage(stat["h"] + stat["2b"] +
@@ -918,8 +924,8 @@ class TeamPitchingTotals:
             else:
                 era = "%5.2f" % (float(stat["er"]) / float(stat["outs"]) * 27)
             if i % 20 == 0:
-                s += "\nClub            ERA   G CG SH   W-  L SV     IP   R  ER    H  HR  BB IW   SO BK WP HB\n"
-            s += ("%-13s %s %3d %2d %2d %3d-%3d %2d %4d.%1d %3d %3d %4d %3d %3d %2d %4d %2d %2d %2d\n" %
+                s += "\nClub              ERA   G CG SH   W-  L SV     IP   R  ER    H  HR  BB IW   SO BK WP HB\n"
+            s += ("%-15s %s %3d %2d %2d %3d-%3d %2d %4d.%1d %3d %3d %4d %3d %3d %2d %4d %2d %2d %2d\n" %
                 (team.GetCity(), era,
                  len(stat["games"]),
                  stat["cg"], stat["sho"],
@@ -937,7 +943,7 @@ class TeamPitchingTotals:
         else:
             era = "%5.2f" % (float(stat["er"]) / float(stat["outs"]) * 27)
 
-        s += ("%-13s %s %3d %2d %2d %3d-%3d %2d %4d.%1d %3d %3d %4d %3d %3d %2d %4d %2d %2d %2d\n" %
+        s += ("%-15s %s %3d %2d %2d %3d-%3d %2d %4d.%1d %3d %3d %4d %3d %3d %2d %4d %2d %2d %2d\n" %
               ("Totals", era,
                len(stat["games"])/2,
                stat["cg"], stat["sho"],
@@ -1020,18 +1026,31 @@ class FieldingRegister:
             player = self.book.GetPlayer(key)
             
             if i % 20 == 0:
-                s += "\n%-20s   PCT   G  GS    INN   PO   A  E  DP TP  BIP  BF\n" % posStr
-            
-            s += ("%-20s %s %3d %3d %4d.%1d %4d %3d %2d %3d %2d %4d %3d\n" %
-                (player.GetSortName(),
-                 FormatAverage(stat["po"] + stat["a"],
-                               stat["po"] + stat["a"] + stat["e"]),
-                 len(stat["games"]), stat["gs"],
-                 stat["outs"] / 3, stat["outs"] % 3,
-                 stat["po"], stat["a"], stat["e"],
-                 stat["dp"], stat["tp"],
-                 stat["bip"], stat["bf"]))
+                if self.pos == 2:
+                    s += "\n%-20s   PCT   G  GS    INN   PO   A  E  DP TP  BIP  BF PB\n" % posStr
+                else:
+                    s += "\n%-20s   PCT   G  GS    INN   PO   A  E  DP TP  BIP  BF\n" % posStr
 
+            if self.pos == 2:
+                s += ("%-20s %s %3d %3d %4d.%1d %4d %3d %2d %3d %2d %4d %3d %2d\n" %
+                      (player.GetSortName(),
+                       FormatAverage(stat["po"] + stat["a"],
+                                     stat["po"] + stat["a"] + stat["e"]),
+                       len(stat["games"]), stat["gs"],
+                       stat["outs"] / 3, stat["outs"] % 3,
+                       stat["po"], stat["a"], stat["e"],
+                       stat["dp"], stat["tp"],
+                       stat["bip"], stat["bf"], stat["pb"]))
+            else:
+                s += ("%-20s %s %3d %3d %4d.%1d %4d %3d %2d %3d %2d %4d %3d\n" %
+                      (player.GetSortName(),
+                       FormatAverage(stat["po"] + stat["a"],
+                                     stat["po"] + stat["a"] + stat["e"]),
+                       len(stat["games"]), stat["gs"],
+                       stat["outs"] / 3, stat["outs"] % 3,
+                       stat["po"], stat["a"], stat["e"],
+                       stat["dp"], stat["tp"],
+                       stat["bip"], stat["bf"]))
         return s
 
 class TeamFieldingTotals:
@@ -1067,27 +1086,27 @@ class TeamFieldingTotals:
             team = self.book.GetTeam(key)
             
             if i % 20 == 0:
-                s += "\nClub            PCT   G   PO    A   E  DP TP  BIP   BF\n"
+                s += "\nClub              PCT   G   PO    A   E  DP TP  BIP   BF PB\n"
             
-            s += ("%-13s %s %3d %4d %4d %3d %3d %2d %4d %4d\n" %
+            s += ("%-15s %s %3d %4d %4d %3d %3d %2d %4d %4d %2d\n" %
                 (team.GetCity(),
                  FormatAverage(stat["po"] + stat["a"],
                                stat["po"] + stat["a"] + stat["e"]),
                  len(stat["games"]),
                  stat["po"], stat["a"], stat["e"],
                  stat["dp"], stat["tp"],
-                 stat["bip"], stat["bf"]))
+                 stat["bip"], stat["bf"], stat["pb"]))
 
 
         stat = reduce(lambda x,y: x+y, [self.stats[key] for key in self.stats])
-        s += ("%-13s %s %3d %4d %4d %3d %3d %2d %4d %4d\n" %
+        s += ("%-15s %s %3d %4d %4d %3d %3d %2d %4d %4d %2d\n" %
               ("Totals",
                FormatAverage(stat["po"] + stat["a"],
                              stat["po"] + stat["a"] + stat["e"]),
                len(stat["games"])/2,
                stat["po"], stat["a"], stat["e"],
                stat["dp"], stat["tp"],
-               stat["bip"], stat["bf"]))
+               stat["bip"], stat["bf"], stat["pb"]))
 
         return s
 

@@ -1404,7 +1404,7 @@
 
               <entry>unknown fielding credit flag</entry>
 
-              <entry><literal>EXC_UNKNOWN_OUT_FL</literal></entry>
+              <entry><literal>UNKNOWN_OUT_EXC_FL</literal></entry>
             </row>
 
             <row>
@@ -1412,7 +1412,7 @@
 
               <entry>uncertain play flag</entry>
 
-              <entry><literal>EXC_UNCERTAIN_PLAY_FL</literal></entry>
+              <entry><literal>UNCERTAIN_PLAY_EXC_FL</literal></entry>
             </row>
           </tbody>
         </tgroup>

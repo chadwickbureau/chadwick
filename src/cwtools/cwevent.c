@@ -1769,9 +1769,9 @@ static field_struct ext_field_data[] = {
   /* 48 */ { cwevent_assist8, "ASS8_FLD_CD", "fielder with eighth assist" },
   /* 49 */ { cwevent_assist9, "ASS9_FLD_CD", "fielder with ninth assist" },
   /* 50 */ { cwevent_assist10, "ASS10_FLD_CD", "fielder with tenth assist" },
-  /* 51 */ { cwevent_unknown_out_flag, "EXC_UNKNOWN_OUT_FL",
+  /* 51 */ { cwevent_unknown_out_flag, "UNKNOWN_OUT_EXC_FL",
              "unknown fielding credit flag" },
-  /* 52 */ { cwevent_uncertain_play_flag, "EXC_UNCERTAIN_PLAY_FL",
+  /* 52 */ { cwevent_uncertain_play_flag, "UNCERTAIN_PLAY_EXC_FL",
              "uncertain play flag" }
 };
 
