@@ -1936,7 +1936,7 @@
             <row>
               <entry>26</entry>
 
-              <entry>Temperature</entry>
+              <entry>Temperature (see <xref linkend="cwtools.cwgame.temperature"/>)</entry>
 
               <entry><literal>TEMP_PARK_CT</literal></entry>
             </row>
@@ -1953,7 +1953,7 @@
             <row>
               <entry>28</entry>
 
-              <entry>Wind speed</entry>
+              <entry>Wind speed (see <xref linkend="cwtools.cwgame.windspeed"/>)</entry>
 
               <entry><literal>WIND_SPEED_PARK_CT</literal></entry>
             </row>
@@ -2504,6 +2504,13 @@
         </note>
       </sect2>
 
+      <sect2 id="cwtools.cwgame.temperature">
+        <title>Temperature (field 26)</title>
+        <para>The game-time temperature, in degrees Fahrenheit.
+              The value <literal>0</literal> is used when the temperature
+              is unknown.</para>
+      </sect2>
+
       <sect2 id="cwtools.cwgame.winddirection">
         <title>Wind direction (field 27)</title>
 
@@ -2579,6 +2586,13 @@
             </tbody>
           </tgroup>
         </table>
+      </sect2>
+
+      <sect2 id="cwtools.cwgame.windspeed">
+        <title>Wind speed (field 28)</title>
+        <para>The game time wind speed, in miles per hour.
+              The value <literal>-1</literal> is used when the wind speed
+              is unknown.</para>
       </sect2>
 
       <sect2 id="cwtools.cwgame.fieldcondition">
