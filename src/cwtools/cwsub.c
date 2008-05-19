@@ -46,6 +46,8 @@ int max_field = 9;
 
 char program_name[20] = "cwsub";
 
+int print_header = 0;
+
 /*************************************************************************
  * Functions to output fields
  *************************************************************************/
@@ -54,6 +56,16 @@ char program_name[20] = "cwsub";
  * typedef to declare the pointer-to-function type
  */
 typedef int (*field_func)(char *, CWGameIterator *, CWAppearance *);
+
+/*
+ * convenient structure to hold all information relating to a field
+ * together in one place
+ */
+typedef struct field_struct {
+  field_func f;
+  char *header, *description;
+} field_struct;
+
 
 /*
  * preprocessor directive for conveniently declaring function signature
@@ -128,17 +140,17 @@ DECLARE_FIELDFUNC(cwsub_event_number)
 		 gameiter->state->event_count : gameiter->state->event_count + 1);
 }
 
-static field_func function_ptrs[] = {
-  cwsub_game_id,                 /* 0 */
-  cwsub_inning,                  /* 1 */
-  cwsub_batting_team,            /* 2 */
-  cwsub_player,                  /* 3 */
-  cwsub_team,                    /* 4 */
-  cwsub_slot,                    /* 5 */
-  cwsub_position,                /* 6 */
-  cwsub_removed_player,          /* 7 */
-  cwsub_removed_position,        /* 8 */
-  cwsub_event_number             /* 9 */
+static field_struct field_data[] = {
+  { cwsub_game_id, "GAME_ID", "game id" },
+  { cwsub_inning, "INN_CT", "inning" },
+  { cwsub_batting_team, "BAT_HOME_ID", "batting team" },
+  { cwsub_player, "SUB_ID", "substitute" },
+  { cwsub_team, "SUB_HOME_ID", "team" },
+  { cwsub_slot, "SUB_LINEUP_ID", "lineup position" },
+  { cwsub_position, "SUB_FLD_CD", "fielding position" },
+  { cwsub_removed_player, "REMOVED_ID", "removed player" },
+  { cwsub_removed_position, "REMOVED_FLD_CD", "position of removed player" },
+  { cwsub_event_number, "EVENT_ID", "event number" }
 };
 
 void
@@ -163,7 +175,7 @@ cwsub_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 	  else {
 	    comma = 1;
 	  }
-	  buf += (*function_ptrs[i])(buf, gameiter, sub);
+	  buf += (*field_data[i].f)(buf, gameiter, sub);
 	}
       }
 
@@ -198,8 +210,9 @@ cwsub_print_help(void)
   fprintf(stderr, "  -m        use master player file instead of local roster files\n");
   fprintf(stderr, "  -f flist  give list of fields to output\n");
   fprintf(stderr, "              Default is 0-9.\n");
-  fprintf(stderr, "  -d        print list of field numbers and descriptions\n\n");
+  fprintf(stderr, "  -d        print list of field numbers and descriptions\n");
   fprintf(stderr, "  -q        operate quietly; do not output progress messages\n");
+  fprintf(stderr, "  -n        print field names in first row of output\n\n");
 
   exit(0);
 }
@@ -209,21 +222,16 @@ void (*cwtools_print_help)(void) = cwsub_print_help;
 void
 cwsub_print_field_list(void)
 {
+  int i;
+
   fprintf(stderr, "\nThese are the available fields and the numbers to use with the -f option\n");
   fprintf(stderr, "to name them.  All are included by default.\n");
   fprintf(stderr, "\n");
   fprintf(stderr, "number  field\n");
   fprintf(stderr, "------  -----\n");
-  fprintf(stderr, "0       game id\n");
-  fprintf(stderr, "1       inning\n");
-  fprintf(stderr, "2       batting team\n");
-  fprintf(stderr, "3       substitute\n");
-  fprintf(stderr, "4       team\n");
-  fprintf(stderr, "5       lineup position\n");
-  fprintf(stderr, "6       fielding position\n");
-  fprintf(stderr, "7       removed player\n");
-  fprintf(stderr, "8       position of removed player\n");
-  fprintf(stderr, "9       event number\n");
+  for (i = 0; i <= max_field; i++) {
+    fprintf(stderr, "%-2d      %s\n", i, field_data[i].description);
+  }
   exit(0);
 }
 
@@ -244,6 +252,31 @@ void (*cwtools_print_welcome_message)(char *) = cwsub_print_welcome_message;
 void
 cwsub_initialize(void)
 {
+  int i, comma = 0;
+  char output_line[4096];
+  char *buf;
+
+  if (!ascii || !print_header) {
+    return;
+  }
+
+  strcpy(output_line, "");
+  buf = output_line;
+
+  for (i = 0; i <= max_field; i++) {
+    if (fields[i]) {
+      if (ascii && comma) {
+	*(buf++) = ',';
+      }
+      else {
+	comma = 1;
+      }
+      buf += sprintf(buf, "\"%s\"", field_data[i].header);
+    }
+  }
+
+  printf(output_line);
+  printf("\n");
 }
 
 void (*cwtools_initialize)(void) = cwsub_initialize;
@@ -256,5 +289,78 @@ cwsub_cleanup(void)
 void (*cwtools_cleanup)(void) = cwsub_cleanup;
 
 
-extern int cwtools_default_parse_command_line(int, char *argv[]);
-int (*cwtools_parse_command_line)(int, char *argv[]) = cwtools_default_parse_command_line;
+extern char year[5];
+extern char first_date[5];
+extern char last_date[5];
+extern char game_id[20];
+extern int ascii;
+extern int quiet;
+
+extern void
+cwtools_parse_field_list(char *text, int max_field, int *fields);
+
+int
+cwsub_parse_command_line(int argc, char *argv[])
+{
+  int i;
+  strcpy(year, "");
+
+  for (i = 1; i < argc; i++) {
+    if (!strcmp(argv[i], "-a")) {
+      ascii = 1;
+    }
+    else if (!strcmp(argv[i], "-d")) {
+      (*cwtools_print_welcome_message)(argv[0]);
+      (*cwtools_print_field_list)();
+    }
+    else if (!strcmp(argv[i], "-e")) {
+      if (++i < argc) {
+	strncpy(last_date, argv[i], 4);
+      }
+    }
+    else if (!strcmp(argv[i], "-h")) {
+      (*cwtools_print_welcome_message)(argv[0]);
+      (*cwtools_print_help)();
+    }
+    else if (!strcmp(argv[i], "-q")) {
+      quiet = 1;
+    }
+    else if (!strcmp(argv[i], "-i")) {
+      if (++i < argc) {
+	strncpy(game_id, argv[i], 19);
+      }
+    }
+    else if (!strcmp(argv[i], "-f")) {
+      if (++i < argc) {
+	cwtools_parse_field_list(argv[i], max_field, fields);
+      }
+    }
+    else if (!strcmp(argv[i], "-n")) {
+      print_header = 1;
+    }
+    else if (!strcmp(argv[i], "-ft")) {
+      ascii = 0;
+    }
+    else if (!strcmp(argv[i], "-s")) {
+      if (++i < argc) {
+	strncpy(first_date, argv[i], 4);
+      }
+    }
+    else if (!strcmp(argv[i], "-y")) {
+      if (++i < argc) {
+	strncpy(year, argv[i], 5);
+      }
+    }
+    else if (argv[i][0] == '-') {
+      fprintf(stderr, "*** Invalid option '%s'.\n", argv[i]);
+      exit(1);
+    }
+    else {
+      break;
+    }
+  }
+
+  return i;
+}
+
+int (*cwtools_parse_command_line)(int, char *argv[]) = cwsub_parse_command_line;

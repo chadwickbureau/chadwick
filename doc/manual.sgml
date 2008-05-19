@@ -1936,7 +1936,8 @@
             <row>
               <entry>26</entry>
 
-              <entry>Temperature (see <xref linkend="cwtools.cwgame.temperature"/>)</entry>
+              <entry>Temperature (see <xref
+              linkend="cwtools.cwgame.temperature" />)</entry>
 
               <entry><literal>TEMP_PARK_CT</literal></entry>
             </row>
@@ -1953,7 +1954,8 @@
             <row>
               <entry>28</entry>
 
-              <entry>Wind speed (see <xref linkend="cwtools.cwgame.windspeed"/>)</entry>
+              <entry>Wind speed (see <xref
+              linkend="cwtools.cwgame.windspeed" />)</entry>
 
               <entry><literal>WIND_SPEED_PARK_CT</literal></entry>
             </row>
@@ -2506,9 +2508,9 @@
 
       <sect2 id="cwtools.cwgame.temperature">
         <title>Temperature (field 26)</title>
-        <para>The game-time temperature, in degrees Fahrenheit.
-              The value <literal>0</literal> is used when the temperature
-              is unknown.</para>
+
+        <para>The game-time temperature, in degrees Fahrenheit. The value
+        <literal>0</literal> is used when the temperature is unknown.</para>
       </sect2>
 
       <sect2 id="cwtools.cwgame.winddirection">
@@ -2590,9 +2592,9 @@
 
       <sect2 id="cwtools.cwgame.windspeed">
         <title>Wind speed (field 28)</title>
-        <para>The game time wind speed, in miles per hour.
-              The value <literal>-1</literal> is used when the wind speed
-              is unknown.</para>
+
+        <para>The game time wind speed, in miles per hour. The value
+        <literal>-1</literal> is used when the wind speed is unknown.</para>
       </sect2>
 
       <sect2 id="cwtools.cwgame.fieldcondition">
@@ -2785,12 +2787,14 @@
       <table>
         <title>Field numbers for <application>cwsub</application></title>
 
-        <tgroup cols="2">
+        <tgroup cols="3">
           <thead>
             <row>
               <entry>Field number</entry>
 
               <entry>Description</entry>
+
+              <entry>Header</entry>
             </row>
           </thead>
 
@@ -2799,60 +2803,80 @@
               <entry>0</entry>
 
               <entry>Game ID</entry>
+
+              <entry><literal>GAME_ID</literal></entry>
             </row>
 
             <row>
               <entry>1</entry>
 
               <entry>Inning</entry>
+
+              <entry><literal>INN_CT</literal></entry>
             </row>
 
             <row>
               <entry>2</entry>
 
               <entry>Batting team</entry>
+
+              <entry><literal>BAT_HOME_ID</literal></entry>
             </row>
 
             <row>
               <entry>3</entry>
 
               <entry>Substitute</entry>
+
+              <entry><literal>SUB_ID</literal></entry>
             </row>
 
             <row>
               <entry>4</entry>
 
               <entry>Team</entry>
+
+              <entry><literal>SUB_HOME_ID</literal></entry>
             </row>
 
             <row>
               <entry>5</entry>
 
               <entry>Lineup position</entry>
+
+              <entry><literal>SUB_LINEUP_ID</literal></entry>
             </row>
 
             <row>
               <entry>6</entry>
 
               <entry>Fielding position</entry>
+
+              <entry><literal>SUB_FLD_CD</literal></entry>
             </row>
 
             <row>
               <entry>7</entry>
 
               <entry>Removed player</entry>
+
+              <entry><literal>REMOVED_ID</literal></entry>
             </row>
 
             <row>
               <entry>8</entry>
 
               <entry>Position of removed player</entry>
+
+              <entry><literal>REMOVED_FLD_CD</literal></entry>
             </row>
 
             <row>
               <entry>9</entry>
 
               <entry>Event number</entry>
+
+              <entry><literal>EVENT_ID</literal></entry>
             </row>
           </tbody>
         </tgroup>
