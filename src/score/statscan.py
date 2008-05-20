@@ -1513,11 +1513,9 @@ def ProcessFile(book, acclist, f=lambda x: True, monitor=None):
 if __name__ == "__main__":
     import sys
     import scorebook
+    import dw
 
-    fn = sys.argv[1]
-
-    book = scorebook.Scorebook()
-    book.Read(fn)
+    book = dw.Reader(sys.argv[1])
 
     #x = [ PitchingRegister(book) ]
     #for team in book.Teams():
@@ -1528,10 +1526,10 @@ if __name__ == "__main__":
     #      TeamFieldingTotals(book) ]
     #x = [ MultiHRLog(book), MultiHitLog(book), MultiStrikeoutLog(book) ]
     #x = [ BattingDailies(book, "bondb001") ]
-    x = [ BattingRegister(book) ]
-    ProcessFile(book, x)
 
-    for acc in x:
-        print repr(acc)
+    reports = [ BattingRegister(book) ]
+    ProcessFile(book, reports)
+
+    for report in reports:
+        print str(report)
         print "\n"
-        print len(repr(acc))
