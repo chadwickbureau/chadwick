@@ -208,37 +208,41 @@ class Pitching(object):
 
 
 class Fielding(object):
-    def __init__(self):
-        self.stats = { "games": [ ],
+    def __init__(self, player=None, team=None):
+        self.stats = { "player": player, "team": team, "games": set(),
                        "gs":0, "outs":0, "bip":0, "bf":0,
-                       "po":0, "a":0, "e":0, "dp":0, "tp":0, "pb":0 }
+                       "po":0, "a":0, "e":0, "dp":0, "tp":0, "pb":0,
+                       "sb":0, "cs":0 }
 
     def ProcessFielding(self, eventData, pos):
-        self.stats["outs"] += eventData.GetOuts()
+        self.outs += eventData.GetOuts()
         po = eventData.GetPutouts(pos)
-        self.stats["po"] += po
+        self.po += po
         a = eventData.GetAssists(pos)
-        self.stats["a"] += a
-        self.stats["e"] += eventData.GetErrors(pos)
+        self.a += a
+        self.e += eventData.GetErrors(pos)
 
         if eventData.dp_flag and po + a > 0:
-            self.stats["dp"] += 1
+            self.dp += 1
         elif eventData.tp_flag and po + a > 0:
-            self.stats["tp"] += 1
+            self.tp += 1
 
         if eventData.fielded_by == pos and eventData.GetOuts() > 0:
-            self.stats["bf"] += 1
+            self.bf += 1
         if (eventData.fielded_by > 0 or
             eventData.event_type in [cw.EVENT_SINGLE,
                                      cw.EVENT_DOUBLE,
                                      cw.EVENT_TRIPLE]):
-            self.stats["bip"] += 1
+            self.bip += 1
 
-        if eventData.pb_flag:
-            self.stats["pb"] += 1
+        if eventData.pb_flag:    self.pb += 1
+        for base in [1, 2, 3]:
+            if eventData.GetSBFlag(base):  self.sb += 1
+            if eventData.GetCSFlag(base):  self.cs += 1
+
         
     def __add__(self, x):
-        y = FieldingStatline()
+        y = Fielding(self.player, self.team)
         for key in self.stats:
             y.stats[key] = self.stats[key] + x.stats[key]
         return y
@@ -250,30 +254,64 @@ class Fielding(object):
     def __getitem__(self, attr):  return self.stats[attr]
     def __setitem__(self, attr, value):  self.stats[attr] = value
 
+    def __getattr__(self, attr):
+        if attr == "stats":
+            raise AttributeError
+        elif attr == "pct":
+            try:
+                return 1.0*(self.po+self.a)/(self.po+self.a+self.e)
+            except ZeroDivisionError:
+                return None
+        elif attr == "rf":
+            try:
+                return 27.0*self.bf/self.outs
+            except ZeroDivisionError:
+                return None
+        elif attr == "sbpct":
+            try:
+                return 1.0*self.sb/(self.sb+self.cs)
+            except ZeroDivisionError:
+                return None
+        else:
+            return self.stats[attr.lower()]
+
+    def __setattr__(self, attr, value):
+        if attr == "stats":
+            object.__setattr__(self, attr, value)
+        else:
+            self.stats[attr.lower()] = value
+
+
 class TeamFielding(object):
     def __init__(self, team):
         self.stats = { "team": team, "games": set(),
                        "gs":0, "outs":0, "bip":0, "bf":0,
-                       "po":0, "a":0, "e":0, "dp":0, "tp":0, "pb":0 }
+                       "po":0, "a":0, "e":0, "dp":0, "tp":0, "pb":0,
+                       "sb":0, "cs":0 }
 
     def ProcessFielding(self, eventData):
-        self.stats["po"] += eventData.GetOuts()
-        self.stats["a"] += eventData.num_assists
-        self.stats["e"] += eventData.num_errors
+        self.po += eventData.GetOuts()
+        self.a += eventData.num_assists
+        self.e += eventData.num_errors
 
-        if eventData.dp_flag:    self.stats["dp"] += 1
-        elif eventData.tp_flag:  self.stats["tp"] += 1
+        if eventData.dp_flag:    self.dp += 1
+        elif eventData.tp_flag:  self.tp += 1
 
         if eventData.fielded_by > 0 and eventData.GetOuts() > 0:
-            self.stats["bf"] += 1
+            self.bf += 1
         if (eventData.fielded_by > 0 or
             eventData.event_type in [cw.EVENT_SINGLE,
                                      cw.EVENT_DOUBLE,
                                      cw.EVENT_TRIPLE]):
-            self.stats["bip"] += 1
+            self.bip += 1
 
-        if eventData.pb_flag:
-            self.stats["pb"] += 1
+        if eventData.pb_flag:  self.pb += 1
+
+        for base in [1, 2, 3]:
+            if eventData.GetSBFlag(base):  self.sb += 1
+            if eventData.GetCSFlag(base):  self.cs += 1
+
+
 
     def __add__(self, x):
         y = TeamFielding()
@@ -299,6 +337,11 @@ class TeamFielding(object):
         elif attr == "der":
             try:
                 return 1.0*self.bf/self.bip
+            except ZeroDivisionError:
+                return None
+        elif attr == "sbpct":
+            try:
+                return 1.0*self.sb/(self.sb+self.cs)
             except ZeroDivisionError:
                 return None
         else:

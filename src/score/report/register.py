@@ -237,6 +237,10 @@ class Fielding:
         self.stats = { }
         self.book = book
         self.pos = pos
+        self.sorter = lambda x, y: cmp([ x.player.GetLastName(),
+                                         x.player.GetFirstName() ],
+                                       [ y.player.GetLastName(),
+                                         y.player.GetFirstName() ])
 
     def OnBeginGame(self, game, gameiter):
         for t in [0, 1]:
@@ -244,31 +248,35 @@ class Fielding:
                 player = game.GetStarter(t, slot+1)
 
                 if player.pos == self.pos:
-                    if player.player_id not in self.stats:
-                        self.stats[player.player_id] = FieldingStatline()
+                    key = (player.player_id, game.GetTeam(t))
+                    if key not in self.stats:
+                        self.stats[key] = statline.Fielding(self.book.GetPlayer(key[0]),
+                                                            self.book.GetTeam(key[1]))
                     
-                    if game.GetGameID() not in self.stats[player.player_id]["games"]:
-                        self.stats[player.player_id]["games"].append(game.GetGameID())
-                    self.stats[player.player_id]["gs"] += 1
+                    
+                    self.stats[key].games.add(game.GetGameID())
+                    self.stats[key].gs += 1
 
-            if self.pos == 1 and game.GetStarter(t, 0) != None:
+            if self.pos == 1 and game.GetStarter(t, 0) is not None:
                 player = game.GetStarter(t, 0)
                 
-                if player.player_id not in self.stats:
-                    self.stats[player.player_id] = FieldingStatline()
-                    if game.GetGameID() not in self.stats[player.player_id]["games"]:
-                        self.stats[player.player_id]["games"].append(game.GetGameID())
-                    self.stats[player.player_id]["gs"] += 1
+                key = (player.player_id, game.GetTeam(t))
+                if key not in self.stats:
+                    self.stats[key] = statline.Fielding(self.book.GetPlayer(key[0]),
+                                                        self.book.GetTeam(key[1]))
+                self.stats[key].games.add(game.GetGameID())
+                self.stats[key].gs += 1
 
     def OnSubstitution(self, game, gameiter):
         rec = gameiter.event.first_sub
 
         while rec != None:
             if rec.pos == self.pos:
-                if rec.player_id not in self.stats:
-                    self.stats[rec.player_id] = FieldingStatline()
-                if game.GetGameID() not in self.stats[rec.player_id]["games"]:
-                    self.stats[rec.player_id]["games"].append(game.GetGameID())
+                key = (rec.player_id, game.GetTeam(rec.team))
+                if key not in self.stats:
+                    self.stats[key] = statline.Fielding(self.book.GetPlayer(key[0]),
+                                                        self.book.GetTeam(key[1]))
+                self.stats[key].games.add(game.GetGameID())
 
             rec = rec.next
 
@@ -278,7 +286,7 @@ class Fielding:
         team = gameiter.GetHalfInning()
 
         fielderId = gameiter.GetFielder(1-team, self.pos)
-        fielder = self.stats[fielderId]
+        fielder = self.stats[(fielderId, game.GetTeam(1-team))]
 
         fielder.ProcessFielding(eventData, self.pos)
 
@@ -286,43 +294,68 @@ class Fielding:
         pass
 
     def __str__(self):
-        keys = self.stats.keys()
-        keys.sort()
+        stats = self.stats.values()
+        stats.sort(self.sorter)
 
-        posStr = [ "Pitcher", "Catcher", "First base",
-                   "Second base", "Third base",
-                   "Shortstop", "Left field", "Center field",
-                   "Right field" ][self.pos - 1]
+        posStr = [ "Pitchers", "Catchers", "First basemen",
+                   "Second basemen", "Third basemen",
+                   "Shortstops", "Left fielders", "Center fielders",
+                   "Right fielders" ][self.pos - 1]
                    
         s = ""
-        for (i,key) in enumerate(keys):
-            stat = self.stats[key]
-            player = self.book.GetPlayer(key)
-            
-            if i % 20 == 0:
-                if self.pos == 2:
-                    s += "\n%-20s   PCT   G  GS    INN   PO   A  E  DP TP  BIP  BF PB\n" % posStr
-                else:
-                    s += "\n%-20s   PCT   G  GS    INN   PO   A  E  DP TP  BIP  BF\n" % posStr
-
-            if self.pos == 2:
-                s += ("%-20s %s %3d %3d %4d.%1d %4d %3d %2d %3d %2d %4d %3d %2d\n" %
-                      (player.GetSortName(),
-                       FormatAverage(stat["po"] + stat["a"],
-                                     stat["po"] + stat["a"] + stat["e"]),
-                       len(stat["games"]), stat["gs"],
-                       stat["outs"] / 3, stat["outs"] % 3,
-                       stat["po"], stat["a"], stat["e"],
-                       stat["dp"], stat["tp"],
-                       stat["bip"], stat["bf"], stat["pb"]))
+        for (i, stat) in enumerate(stats):
+            if stat.player.GetThrows() == "R":
+                throws = " "
+            elif stat.player.GetThrows() == "L":
+                throws = "*"
             else:
-                s += ("%-20s %s %3d %3d %4d.%1d %4d %3d %2d %3d %2d %4d %3d\n" %
-                      (player.GetSortName(),
-                       FormatAverage(stat["po"] + stat["a"],
-                                     stat["po"] + stat["a"] + stat["e"]),
-                       len(stat["games"]), stat["gs"],
-                       stat["outs"] / 3, stat["outs"] % 3,
-                       stat["po"], stat["a"], stat["e"],
-                       stat["dp"], stat["tp"],
-                       stat["bip"], stat["bf"]))
+                throws = " "
+
+            if i % 20 == 0:
+                if self.pos == 1:
+                    s += "\n%-20s Club    PCT   G  GS    INN   PO   A  E  DP TP  BIP  BF  BF/9  SB  CS   SB%%\n" % posStr
+                elif self.pos == 2:
+                    s += "\n%-20s Club    PCT   G  GS    INN   PO   A  E  DP TP  BIP  BF  BF/9  SB  CS   SB%% PB\n" % posStr
+                else:
+                    s += "\n%-20s Club    PCT   G  GS    INN   PO   A  E  DP TP  BIP  BF  BF/9\n" % posStr
+
+            if self.pos == 1:
+                s += ("%s%-20s %s  %s %3d %3d %4d.%1d %4d %3d %2d %3d %2d %4d %3d %s %3d %3d %s\n" %
+                      (throws, stat.player.GetSortName(), stat.team.GetID(),
+                       ("%5.3f" % stat.pct).replace("0.", " .")
+                       if stat.pct is not None else "   - ",
+                       len(stat.games), stat.gs,
+                       stat.outs / 3, stat.outs % 3,
+                       stat.po, stat.a, stat.e,
+                       stat.dp, stat.tp,
+                       stat.bip, stat.bf,
+                       ("%5.2f" % stat.rf) if stat.rf is not None else "   - ",
+                       stat.sb, stat.cs,
+                       ("%5.3f" % stat.sbpct).replace("0.", " .") if stat.sbpct is not None else "   - "))
+            elif self.pos == 2:
+                s += ("%s%-20s %s  %s %3d %3d %4d.%1d %4d %3d %2d %3d %2d %4d %3d %s %3d %3d %s %2d\n" %
+                      (throws, stat.player.GetSortName(), stat.team.GetID(),
+                       ("%5.3f" % stat.pct).replace("0.", " .")
+                       if stat.pct is not None else "   - ",
+                       len(stat.games), stat.gs,
+                       stat.outs / 3, stat.outs % 3,
+                       stat.po, stat.a, stat.e,
+                       stat.dp, stat.tp,
+                       stat.bip, stat.bf,
+                       ("%5.2f" % stat.rf) if stat.rf is not None else "   - ",
+                       stat.sb, stat.cs,
+                       ("%5.3f" % stat.sbpct).replace("0.", " .") if stat.sbpct is not None else "   - ",
+                       stat.pb))
+            else:
+                s += ("%s%-20s %s  %s %3d %3d %4d.%1d %4d %3d %2d %3d %2d %4d %3d %s\n" %
+                      (throws, stat.player.GetSortName(), stat.team.GetID(),
+                       ("%5.3f" % stat.pct).replace("0.", " .")
+                       if stat.pct is not None else "   - ",
+                       len(stat.games), stat.gs,
+                       stat.outs / 3, stat.outs % 3,
+                       stat.po, stat.a, stat.e,
+                       stat.dp, stat.tp,
+                       stat.bip, stat.bf,
+                       ("%5.2f" % stat.rf) if stat.rf is not None else "   - "
+                       ))
         return s

@@ -22,7 +22,7 @@ class TeamRecord(object):
             try:
                 return 1.0*self.w/(self.w+self.l)
             except ZeroDivisionError:
-                return ""
+                return None
         elif attr == "full_name":
             return " ".join([self.city, self.nickname])
         else:
@@ -82,7 +82,8 @@ class Standings:
 
     def __str__(self):
         teams = self.stats.values()
-        teams.sort(lambda x, y: cmp(y.pct, x.pct))
+        teams.sort(lambda x, y: cmp(y.pct if y.pct is not None else 0.5,
+                                    x.pct if x.pct is not None else 0.5))
 
         s = "\nClub                             G   W-  L    PCT   GB  HOME  AWAY  1RUN  XINN\n";
         for (i, stat) in enumerate(teams):
@@ -95,7 +96,8 @@ class Standings:
             s += ("%-30s %3d %3d-%3d  %s %s %2d-%2d %2d-%2d %2d-%2d %2d-%2d\n" %
                 (stat.full_name,
                  stat.g, stat.w, stat.l,
-                 ("%5.3f" % stat.pct).replace("0.", " ."), GB,
+                 ("%5.3f" % stat.pct).replace("0.", " .") if stat.pct is not None else "   - ",
+                 GB,
                  stat.hw, stat.hl,
                  stat.rw, stat.rl,
                  stat.ow, stat.ol,
@@ -146,9 +148,9 @@ class TeamBattingTotals:
             
             s += ("%-15s %s %s %s %3d %4d %3d %4d %3d %2d %3d %3d %3d %2d %4d %3d %2d %2d %2d %3d %2d %4d\n" %
                 (stat.team.GetCity(),
-                 ("%5.3f" % stat.avg).replace("0.", " ."),
-                 ("%5.3f" % stat.slg).replace("0.", " ."),
-                 ("%5.3f" % stat.obp).replace("0.", " ."),
+                 ("%5.3f" % stat.avg).replace("0.", " .") if stat.avg is not None else "   - ",
+                 ("%5.3f" % stat.slg).replace("0.", " .") if stat.slg is not None else "   - ",
+                 ("%5.3f" % stat.obp).replace("0.", " .") if stat.obp is not None else "   - ",
                  len(stat.games),
                  stat.ab, stat.r, stat.h,
                  stat.h2b, stat.h3b, stat.hr, stat.bi,
@@ -209,21 +211,18 @@ class TeamPitchingTotals:
 
     def __str__(self):
         teams = self.stats.values()
-        teams.sort(lambda x, y: cmp(x.era, y.era))
+        teams.sort(lambda x, y: cmp(x.era if x.era is not None else 9999.99,
+                                    y.era if y.era is not None else 9999.99))
 
         s = ""
 
         for (i, stat) in enumerate(teams):
-            if stat["outs"] == 0:
-                era = "-----"
-            else:
-                era = "%5.2f" % (float(stat["er"]) / float(stat["outs"]) * 27)
             if i % 20 == 0:
                 s += "\nClub              W-  L   PCT   ERA   G CG SHO SV     IP  TBF   AB   H   R  ER  HR SH SF  BB IW   SO BK WP HB\n"
-            s += ("%-15s %3d-%3d %s %5.2f %3d %2d %3d %2d %4d.%1d %4d %4d %3d %3d %3d %3d %2d %2d %2d %2d %4d %2d %2d %2d\n" %
+            s += ("%-15s %3d-%3d %s %s %3d %2d %3d %2d %4d.%1d %4d %4d %3d %3d %3d %3d %2d %2d %3d %2d %4d %2d %2d %2d\n" %
                  (stat.team.GetCity(), stat.w, stat.l,
-                  ("%5.3f" % stat.pct).replace("0.", " ."),
-                  stat.era,
+                  ("%5.3f" % stat.pct).replace("0.", " .") if stat.pct is not None else "   - ",
+                  ("%5.2f" % stat.era) if stat.era is not None else "   - ",
                   len(stat.games),
                   stat.cg, stat.sho, stat.sv,
                   stat.outs / 3, stat.outs % 3, stat.bf, stat.ab,
@@ -265,14 +264,17 @@ class TeamFieldingTotals:
         s = ""
         for (i, stat) in enumerate(teams):
             if i % 20 == 0:
-                s += "\nClub              PCT   G   PO    A   E  DP TP  BIP   BF   DER PB\n"
+                s += "\nClub              PCT   G   PO    A   E  DP TP  BIP   BF   DER  SB  CS   SB% PB\n"
             
-            s += ("%-15s %s %3d %4d %4d %3d %3d %2d %4d %4d %s %2d\n" %
+            s += ("%-15s %s %3d %4d %4d %3d %3d %2d %4d %4d %s %3d %3d %s %2d\n" %
                 (stat.team.GetCity(),
-                 ("%5.3f" % stat.pct).replace("0.", " ."), 
+                 ("%5.3f" % stat.pct).replace("0.", " .") if stat.pct is not None else "   - ", 
                  len(stat.games), stat.po, stat.a, stat.e,
                  stat.dp, stat.tp, stat.bip, stat.bf,
-                 ("%5.3f" % stat.der).replace("0.", " ."), stat.pb))
+                 ("%5.3f" % stat.der).replace("0.", " .") if stat.der is not None else "   - ",
+                 stat.sb, stat.cs,
+                 ("%5.3f" % stat.sbpct).replace("0.", " .") if stat.sbpct is not None else "   - ",
+                 stat.pb))
 
         return s
 

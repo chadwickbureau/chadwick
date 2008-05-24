@@ -216,10 +216,10 @@ if __name__ == "__main__":
 
 
     print "CONTINENTAL BASEBALL LEAGUE OFFICIAL STATISTICS"
-    print "COORDINATOR OF STATISTICAL SERVICES, THEODORE L. TUROCY, COLLEGE STATION TX -- (979) 997-0666 -- drarbiter@gmail.com"
+    print "COORDINATOR OF STATISTICAL SERVICES, THEODORE L. TUROCY, COLLEGE STATION TX -- (979) 997-0666 -- cblstatistics@gmail.com"
     print
 
-    print "COMPOSITE STANDING OF CLUBS THROUGH GAMES OF XXX"
+    print "STANDING OF CLUBS THROUGH GAMES OF %s" % sys.argv[2]
 
     standings = report.team.Standings(book)
     process_file(book, [standings])
@@ -262,4 +262,17 @@ if __name__ == "__main__":
     print "ALL PITCHERS, ALPHABETICALLY"
     print str(pitching)
     
+
+    print "INDIVIDUAL FIELDING BY POSITION"
+    print
+    print "KEY TO EXPANDED FIELDING STATISTICS:"
+    print "BIP: BATTED BALLS IN PLAY"
+    print "BF:  BALLS FIELDED AND TURNED INTO OUTS"
+    print "BF/9:  NUMBER OF BALLS TURNED INTO OUTS PER NINE INNINGS AT THE POSITION"
     
+    for pos in xrange(1, 10):
+        fielding = report.register.Fielding(book, pos)
+        process_file(book, [ fielding ])
+        print str(fielding)
+
+

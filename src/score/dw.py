@@ -88,9 +88,13 @@ def ReadTeam(zf, book, team):
 
         f = file(name, "r")
         for player in csv.reader(f):
-            book.SetPlayer(player[0], player[2], player[1],
-                           player[3], player[4])
-            book.SetPlayerTeam(player[0], team.GetID())
+            try:
+                book.SetPlayer(player[0], player[2], player[1],
+                               player[3], player[4])
+                book.SetPlayerTeam(player[0], team.GetID())
+            except:
+                # Just silently ignore bad entries
+                pass
         f.close()
 
         os.remove(name)
