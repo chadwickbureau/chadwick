@@ -1119,13 +1119,29 @@
             <row>
               <entry>16</entry>
 
+              <entry>result batter is starter flag</entry>
+
+              <entry><literal>RESP_BAT_START_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>17</entry>
+
               <entry>pitcher is starter flag</entry>
 
               <entry><literal>PIT_START_FL</literal></entry>
             </row>
 
             <row>
-              <entry>17</entry>
+              <entry>18</entry>
+
+              <entry>result pitcher is starter flag</entry>
+
+              <entry><literal>RESP_PIT_START_FL</literal></entry>
+            </row>
+
+            <row>
+              <entry>19</entry>
 
               <entry>defensive position of runner on first</entry>
 
@@ -1133,7 +1149,7 @@
             </row>
 
             <row>
-              <entry>18</entry>
+              <entry>20</entry>
 
               <entry>lineup position of runner on first</entry>
 
@@ -1141,7 +1157,7 @@
             </row>
 
             <row>
-              <entry>19</entry>
+              <entry>21</entry>
 
               <entry>event number on which runner on first reached
               base</entry>
@@ -1150,7 +1166,7 @@
             </row>
 
             <row>
-              <entry>20</entry>
+              <entry>22</entry>
 
               <entry>defensive position of runner on second</entry>
 
@@ -1158,7 +1174,7 @@
             </row>
 
             <row>
-              <entry>21</entry>
+              <entry>23</entry>
 
               <entry>lineup position of runner on second</entry>
 
@@ -1166,7 +1182,7 @@
             </row>
 
             <row>
-              <entry>22</entry>
+              <entry>24</entry>
 
               <entry>event number on which runner on second reached
               base</entry>
@@ -1175,7 +1191,7 @@
             </row>
 
             <row>
-              <entry>23</entry>
+              <entry>25</entry>
 
               <entry>defensive position of runner on third</entry>
 
@@ -1183,7 +1199,7 @@
             </row>
 
             <row>
-              <entry>24</entry>
+              <entry>26</entry>
 
               <entry>lineup position of runner on third</entry>
 
@@ -1191,7 +1207,7 @@
             </row>
 
             <row>
-              <entry>25</entry>
+              <entry>27</entry>
 
               <entry>event number on which runner on third reached
               base</entry>
@@ -1200,7 +1216,7 @@
             </row>
 
             <row>
-              <entry>26</entry>
+              <entry>28</entry>
 
               <entry>number of balls in plate appearance</entry>
 
@@ -1208,7 +1224,7 @@
             </row>
 
             <row>
-              <entry>27</entry>
+              <entry>29</entry>
 
               <entry>number of intentional balls in plate appearance</entry>
 
@@ -1216,7 +1232,7 @@
             </row>
 
             <row>
-              <entry>28</entry>
+              <entry>30</entry>
 
               <entry>number of pitchouts in plate appearance</entry>
 
@@ -1224,7 +1240,7 @@
             </row>
 
             <row>
-              <entry>29</entry>
+              <entry>31</entry>
 
               <entry>number of other balls in plate appearance</entry>
 
@@ -1232,7 +1248,7 @@
             </row>
 
             <row>
-              <entry>30</entry>
+              <entry>32</entry>
 
               <entry>number of strikes in plate appearance</entry>
 
@@ -1240,7 +1256,7 @@
             </row>
 
             <row>
-              <entry>31</entry>
+              <entry>33</entry>
 
               <entry>number of called strikes in plate appearance</entry>
 
@@ -1248,7 +1264,7 @@
             </row>
 
             <row>
-              <entry>32</entry>
+              <entry>34</entry>
 
               <entry>number of swinging strikes in plate appearance</entry>
 
@@ -1256,7 +1272,7 @@
             </row>
 
             <row>
-              <entry>33</entry>
+              <entry>35</entry>
 
               <entry>number of foul balls in plate appearance</entry>
 
@@ -1264,7 +1280,7 @@
             </row>
 
             <row>
-              <entry>34</entry>
+              <entry>36</entry>
 
               <entry>number of other strikes in plate appearance</entry>
 
@@ -1272,7 +1288,7 @@
             </row>
 
             <row>
-              <entry>35</entry>
+              <entry>37</entry>
 
               <entry>number of runs on play</entry>
 
@@ -1280,7 +1296,7 @@
             </row>
 
             <row>
-              <entry>36</entry>
+              <entry>38</entry>
 
               <entry>id of player fielding batted ball</entry>
 
@@ -1288,7 +1304,7 @@
             </row>
 
             <row>
-              <entry>37</entry>
+              <entry>39</entry>
 
               <entry>force play at second flag</entry>
 
@@ -1296,7 +1312,7 @@
             </row>
 
             <row>
-              <entry>38</entry>
+              <entry>40</entry>
 
               <entry>force play at third flag</entry>
 
@@ -1304,7 +1320,7 @@
             </row>
 
             <row>
-              <entry>39</entry>
+              <entry>41</entry>
 
               <entry>force play at home flag</entry>
 
@@ -1312,7 +1328,7 @@
             </row>
 
             <row>
-              <entry>40</entry>
+              <entry>42</entry>
 
               <entry>batter safe on error flag</entry>
 
@@ -1320,7 +1336,7 @@
             </row>
 
             <row>
-              <entry>41</entry>
+              <entry>43</entry>
 
               <entry>fate of batter (base ultimately advanced to)</entry>
 
@@ -1328,7 +1344,7 @@
             </row>
 
             <row>
-              <entry>42</entry>
+              <entry>44</entry>
 
               <entry>fate of runner on first</entry>
 
@@ -1336,7 +1352,7 @@
             </row>
 
             <row>
-              <entry>43</entry>
+              <entry>45</entry>
 
               <entry>fate of runner on second</entry>
 
@@ -1344,7 +1360,7 @@
             </row>
 
             <row>
-              <entry>44</entry>
+              <entry>46</entry>
 
               <entry>fate of runner on third</entry>
 
@@ -1352,7 +1368,7 @@
             </row>
 
             <row>
-              <entry>45</entry>
+              <entry>47</entry>
 
               <entry>runs scored in half inning after this eveng</entry>
 
@@ -1360,7 +1376,7 @@
             </row>
 
             <row>
-              <entry>46</entry>
+              <entry>48</entry>
 
               <entry>fielder with sixth assist</entry>
 
@@ -1368,7 +1384,7 @@
             </row>
 
             <row>
-              <entry>47</entry>
+              <entry>49</entry>
 
               <entry>fielder with seventh assist</entry>
 
@@ -1376,7 +1392,7 @@
             </row>
 
             <row>
-              <entry>48</entry>
+              <entry>50</entry>
 
               <entry>fielder with eighth assist</entry>
 
@@ -1384,7 +1400,7 @@
             </row>
 
             <row>
-              <entry>49</entry>
+              <entry>51</entry>
 
               <entry>fielder with ninth assist</entry>
 
@@ -1392,7 +1408,7 @@
             </row>
 
             <row>
-              <entry>50</entry>
+              <entry>52</entry>
 
               <entry>fielder with tenth assist</entry>
 
@@ -1400,7 +1416,7 @@
             </row>
 
             <row>
-              <entry>51</entry>
+              <entry>53</entry>
 
               <entry>unknown fielding credit flag</entry>
 
@@ -1408,7 +1424,7 @@
             </row>
 
             <row>
-              <entry>52</entry>
+              <entry>54</entry>
 
               <entry>uncertain play flag</entry>
 
