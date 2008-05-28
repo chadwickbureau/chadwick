@@ -188,7 +188,7 @@ def process_file(book, acclist, f=lambda x: True, monitor=None):
     for (i,game) in enumerate(book.Games()):
         if f(game):
             process_game(game, acclist)
-            if monitor != None:
+            if monitor is not None:
                 if not monitor.Update(round(float(i)/float(numGames)*100)):
                     return False
     return True
@@ -241,6 +241,7 @@ if __name__ == "__main__":
     print "LEADING BATTERS (MINIMUM 3.1 PLATE APPEARANCES PER TEAM GAME PLAYED)"
     subrep = batting.filter(lambda x: x.pa>=3.1*standings.stats[x.team.GetID()].g)
     subrep.sorter = lambda x,y: cmp(y.avg, x.avg)
+    subrep.limit = 10
     print str(subrep)
 
     print "ALL BATTERS, ALPHABETICALLY"
@@ -257,6 +258,7 @@ if __name__ == "__main__":
 
     subrep = pitching.filter(lambda x: x.outs>=3*standings.stats[x.team.GetID()].g)
     subrep.sorter = lambda x,y: cmp(x.era, y.era)
+    subrep.limit = 10
     print str(subrep)
 
     print "ALL PITCHERS, ALPHABETICALLY"

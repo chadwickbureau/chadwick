@@ -9,6 +9,8 @@ class Batting:
                                          x.player.GetFirstName() ],
                                        [ y.player.GetLastName(),
                                          y.player.GetFirstName() ])
+        self.limit = None
+        self.page_break = 25
 
     def GetName(self):  return "batting-register"
 
@@ -66,7 +68,10 @@ class Batting:
 
         s = ""
         for (i, stat) in enumerate(stats):
-            if i % 20 == 0:
+            if self.limit is not None and i >= self.limit:
+                break
+            
+            if i % self.page_break == 0:
                 s += "\nPlayer                Club    AVG   SLG   OBP   G  AB   R   H  TB 2B 3B HR RBI  BB IW  SO DP HP SH SF SB CS\n"
             
 
@@ -113,6 +118,8 @@ class Pitching:
                                          x.player.GetFirstName() ],
                                        [ y.player.GetLastName(),
                                          y.player.GetFirstName() ])
+        self.limit = None
+        self.page_break = 25
 
     def OnBeginGame(self, game, gameiter):
         for t in [0, 1]:
@@ -208,6 +215,9 @@ class Pitching:
 
         s = ""
         for (i, stat) in enumerate(stats):
+            if self.limit is not None and i >= self.limit:
+                break
+
             if stat.player.GetThrows() == "R":
                 throws = " "
             elif stat.player.GetThrows() == "L":
@@ -215,7 +225,7 @@ class Pitching:
             else:
                 throws = " "
 
-            if i % 20 == 0:
+            if i % self.page_break == 0:
                 s += "\nPlayer                Club   W- L   PCT    ERA  G GS CG SHO GF SV    IP TBF  AB   H HR SH SF HB  BB IW  SO WP BK\n"
             s += ("%s%-20s  %3s  %2d-%2d %s %s %2d %2d %2d  %2d %2d %2d %3d.%1d %3d %3d %3d %2d %2d %2d %2d %3d %2d %3d %2d %2d\n" % 
                 (throws, stat.player.GetSortName(), stat.team.GetID(),
@@ -241,6 +251,7 @@ class Fielding:
                                          x.player.GetFirstName() ],
                                        [ y.player.GetLastName(),
                                          y.player.GetFirstName() ])
+        self.page_break = 25
 
     def OnBeginGame(self, game, gameiter):
         for t in [0, 1]:
@@ -311,7 +322,7 @@ class Fielding:
             else:
                 throws = " "
 
-            if i % 20 == 0:
+            if i % self.page_break == 0:
                 if self.pos == 1:
                     s += "\n%-20s Club    PCT   G  GS    INN   PO   A  E  DP TP  BIP  BF  BF/9  SB  CS   SB%%\n" % posStr
                 elif self.pos == 2:

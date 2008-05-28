@@ -103,6 +103,9 @@ class PlayerListCtrl(wx.grid.Grid):
         to produce custom behaviors (e.g., creating a new blank row when
         pressing the down arrow on the last row.)
         """
+        print "Ping!"
+        print event.GetKeyCode()
+        
         if event.GetKeyCode() == wx.WXK_DOWN and \
            self.GetGridCursorRow() == self.GetNumberRows() - 1 and \
            not self.IsRowBlank(self.GetGridCursorRow()):
@@ -215,6 +218,10 @@ class RosterDialog(wx.Dialog):
         okButton = wx.Button(self, wx.ID_OK, "OK")
         buttonSizer.Add(okButton)
         buttonSizer.Add(wx.Button(self, wx.ID_CANCEL, "Cancel"))
+
+        button = wx.Button(self, wx.ID_ANY, "Add player")
+        buttonSizer.Add(button)
+        self.Bind(wx.EVT_BUTTON, self.OnAddPlayer, button)
         buttonSizer.Realize()
 
         sizer.Add(buttonSizer, 0, wx.ALL | wx.EXPAND, 5)
@@ -224,6 +231,10 @@ class RosterDialog(wx.Dialog):
         sizer.SetSizeHints(self)
 
         self.Bind(wx.EVT_BUTTON, self.OnOK, okButton)
+
+    def OnAddPlayer(self, event):
+        self.playerList.AddBlankRow()
+        self.playerList.UpdateFeedback()
 
     def OnOK(self, event):
         for row in xrange(self.playerList.GetNumberRows()):
