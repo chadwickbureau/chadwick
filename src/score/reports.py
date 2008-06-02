@@ -190,7 +190,7 @@ def process_file(book, acclist, f=lambda x: True, monitor=None):
             process_game(game, acclist)
             if monitor is not None:
                 if not monitor.Update(round(float(i)/float(numGames)*100)):
-                    return False
+                    return Fanlse
     return True
 
 def print_report(book, report):

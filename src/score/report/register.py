@@ -25,6 +25,15 @@ class Batting:
             
                 self.stats[key].games.add(game.GetGameID())
 
+            if game.GetStarter(t, 0) is not None:
+                player = game.GetStarter(t, 0)
+                key = (player.player_id, game.GetTeam(t))
+                
+                if key not in self.stats:
+                    self.stats[key] = statline.Batting(self.book.GetPlayer(key[0]),
+                                                        self.book.GetTeam(key[1]))
+                self.stats[key].games.add(game.GetGameID())
+
     def OnSubstitution(self, game, gameiter):
         rec = gameiter.event.first_sub
 
@@ -226,8 +235,8 @@ class Pitching:
                 throws = " "
 
             if i % self.page_break == 0:
-                s += "\nPlayer                Club   W- L   PCT    ERA  G GS CG SHO GF SV    IP TBF  AB   H HR SH SF HB  BB IW  SO WP BK\n"
-            s += ("%s%-20s  %3s  %2d-%2d %s %s %2d %2d %2d  %2d %2d %2d %3d.%1d %3d %3d %3d %2d %2d %2d %2d %3d %2d %3d %2d %2d\n" % 
+                s += "\nPlayer                Club   W- L   PCT    ERA  G GS CG SHO GF SV    IP TBF  AB   H   R  ER HR SH SF HB  BB IW  SO WP BK\n"
+            s += ("%s%-20s  %3s  %2d-%2d %s %s %2d %2d %2d  %2d %2d %2d %3d.%1d %3d %3d %3d %3d %3d %2d %2d %2d %2d %3d %2d %3d %2d %2d\n" % 
                 (throws, stat.player.GetSortName(), stat.team.GetID(),
                  stat.w, stat.l,
                  ("%.3f" % stat.pct).replace("0.", " .")
@@ -236,6 +245,7 @@ class Pitching:
                  len(stat.games),
                  stat.gs, stat.cg, stat.sho, stat.gf, stat.sv,
                  stat.outs / 3, stat.outs % 3, stat.bf, stat.ab, stat.h,
+                 stat.r, stat.er,
                  stat.hr, stat.sh, stat.sf, stat.hb, stat.bb, stat.ibb,
                  stat.so, stat.wp, stat.bk))
 
