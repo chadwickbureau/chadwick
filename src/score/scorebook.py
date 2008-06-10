@@ -74,12 +74,14 @@ class Team:
 
 
 class Player:
-    def __init__(self, playerID, nameLast, nameFirst, bats, throws):
+    def __init__(self, playerID, nameLast, nameFirst, bats, throws,
+                 uniform=None):
         self.playerID = playerID
         self.nameLast = nameLast
         self.nameFirst = nameFirst
         self.bats = bats
         self.throws = throws
+        self.uniform = uniform
 
     def GetID(self):               return self.playerID
 
@@ -97,7 +99,9 @@ class Player:
 
     def GetThrows(self):           return self.throws
     def SetThrows(self, side):     self.throws = side
-    
+
+    def GetUniform(self):          return self.uniform
+    def SetUniform(self, uni):     self.uniform = uni
 
 class Scorebook:
     def __init__(self, year=2007):
@@ -135,16 +139,18 @@ class Scorebook:
     def Players(self):     return self.players.itervalues()
     def GetPlayer(self, playerID):   return self.players[playerID]
 
-    def SetPlayer(self, playerID, firstName, lastName, bats, throws):
+    def SetPlayer(self, playerID, firstName, lastName, bats, throws,
+                  uniform=None):
         if playerID in self.players:
             p = self.players[playerID]
             p.SetFirstName(firstName)
             p.SetLastName(lastName)
             p.SetBats(bats)
             p.SetThrows(throws)
+            p.SetUniform(uniform)
         else:
             self.players[playerID] = Player(playerID, lastName, firstName,
-                                            bats, throws)
+                                            bats, throws, uniform)
         self.modified = True
 
     def SetPlayerTeam(self, playerID, teamID):

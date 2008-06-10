@@ -143,7 +143,7 @@ class TeamBattingTotals:
         s = ""
         for (i, stat) in enumerate(teams):
             if i % 20 == 0:
-                s += "\nClub              AVG   SLG   OBP   G   AB   R    H  2B 3B  HR RBI  BB IW   SO  DP HP SH SF  SB CS  LOB\n"
+                s += "\nClub              AVG   SLG   OBP   G   AB   R    H  2B 3B  HR RBI  BB IW   SO GDP HP SH SF  SB CS  LOB\n"
 
             
             s += ("%-15s %s %s %s %3d %4d %3d %4d %3d %2d %3d %3d %3d %2d %4d %3d %2d %2d %2d %3d %2d %4d\n" %

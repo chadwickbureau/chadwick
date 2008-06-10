@@ -4,6 +4,8 @@ class Batting(object):
     def __init__(self, player=None, team=None):
         self.stats = { "player": player, "team": team,
                        "games": set(),
+                       "gamesbatting": set(),
+                       "gamespos": [ set() for i in xrange(13) ],
                        "ab":0, "r":0, "h":0,
                        "h2b":0, "h3b":0, "hr":0, "bi":0,
                        "bb":0, "ibb":0, "so":0,
@@ -52,9 +54,17 @@ class Batting(object):
         if eventData.GetCSFlag(base) > 0: self.stats["cs"] += 1
 
     def __add__(self, x):
-        y = BattingStatline()
+        y = Batting() 
         for key in self.stats:
-            y.stats[key] = self.stats[key] + x.stats[key]
+            if key in [ "team", "player" ]:
+                continue
+            elif key in [ "games", "gamesbatting" ]:
+                y.stats[key] = self.stats[key] | x.stats[key]
+            elif key == "gamespos":
+                y.stats[key] = [ self.stats[key][i] | x.stats[key][i]
+                                 for i in xrange(13) ]
+            else:
+                y.stats[key] = self.stats[key] + x.stats[key]
         return y
 
     def __iadd__(self, x):
@@ -171,9 +181,14 @@ class Pitching(object):
             self.stats["tur"] += 1
         
     def __add__(self, x):
-        y = PitchingStatline()
+        y = Pitching()
         for key in self.stats:
-            y.stats[key] = self.stats[key] + x.stats[key]
+            if key in [ "team", "player" ]:
+                continue
+            elif key in [ "games" ]:
+                y.stats[key] = self.stats[key] | x.stats[key]
+            else:
+                y.stats[key] = self.stats[key] + x.stats[key]
         return y
 
     def __iadd__(self, x):
@@ -186,6 +201,8 @@ class Pitching(object):
     def __getattr__(self, attr):
         if attr == "stats":
             raise AttributeError
+        elif attr == "g":
+            return len(self.games)
         elif attr == "era":
             try:
                 return 27.0*self.er/self.outs

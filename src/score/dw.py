@@ -89,8 +89,12 @@ def ReadTeam(zf, book, team):
         f = file(name, "r")
         for player in csv.reader(f):
             try:
-                book.SetPlayer(player[0], player[2], player[1],
-                               player[3], player[4])
+                if len(player) >= 6:
+                    book.SetPlayer(player[0], player[2], player[1],
+                                   player[3], player[4], player[5])
+                else:
+                    book.SetPlayer(player[0], player[2], player[1],
+                                   player[3], player[4])
                 book.SetPlayerTeam(player[0], team.GetID())
             except:
                 # Just silently ignore bad entries
@@ -171,9 +175,15 @@ def WriteTeam(book, zf, team):
     f = file(name, "w")
     writer = csv.writer(f)
     for player in team.Players():
-        writer.writerow([ player.GetID(), player.GetLastName(),
-                          player.GetFirstName(),
-                          player.GetBats(), player.GetThrows() ])
+        if player.GetUniform() is not None:
+            writer.writerow([ player.GetID(), player.GetLastName(),
+                              player.GetFirstName(),
+                              player.GetBats(), player.GetThrows(),
+                              player.GetUniform() ])
+        else:
+            writer.writerow([ player.GetID(), player.GetLastName(),
+                              player.GetFirstName(),
+                              player.GetBats(), player.GetThrows() ])
     f.close()
 
     f = file(name, "r")

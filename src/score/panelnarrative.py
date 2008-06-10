@@ -86,7 +86,7 @@ class NarrativePanel(wx.html.HtmlWindow):
             for t in [ 0, 1 ]:
                 text += '<td width="5%%" align="center">%d</td>' % (slot+1)
                 text += '<td width="35%%">%s</td>' % self.doc.GetRoster(t).GetPlayer(starters[t][slot].player_id).GetName()
-                text += '<td width="10%%" align="center">%s</td>' % positions[starters[0][slot].pos]
+                text += '<td width="10%%" align="center">%s</td>' % positions[starters[t][slot].pos]
             text += '</tr>'
 
         pitchers = [ self.doc.GetGame().GetStarter(t, 0) for t in [0, 1] ]

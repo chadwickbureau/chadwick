@@ -24,6 +24,8 @@ class Batting:
                                                        team=self.book.GetTeam(key[1]))
             
                 self.stats[key].games.add(game.GetGameID())
+                self.stats[key].gamesbatting.add(game.GetGameID())
+                self.stats[key].gamespos[int(player.pos)].add(game.GetGameID())
 
             if game.GetStarter(t, 0) is not None:
                 player = game.GetStarter(t, 0)
@@ -33,6 +35,7 @@ class Batting:
                     self.stats[key] = statline.Batting(self.book.GetPlayer(key[0]),
                                                         self.book.GetTeam(key[1]))
                 self.stats[key].games.add(game.GetGameID())
+                self.stats[key].gamespos[int(player.pos)].add(game.GetGameID())
 
     def OnSubstitution(self, game, gameiter):
         rec = gameiter.event.first_sub
@@ -44,6 +47,9 @@ class Batting:
                                                    team=self.book.GetTeam(key[1]))
                 
             self.stats[key].games.add(game.GetGameID())
+            if rec.slot > 0:
+                self.stats[key].gamesbatting.add(game.GetGameID())
+            self.stats[key].gamespos[int(rec.pos)].add(game.GetGameID())
             rec = rec.next
 
 
@@ -81,7 +87,7 @@ class Batting:
                 break
             
             if i % self.page_break == 0:
-                s += "\nPlayer                Club    AVG   SLG   OBP   G  AB   R   H  TB 2B 3B HR RBI  BB IW  SO DP HP SH SF SB CS\n"
+                s += "\nPlayer                Club    AVG   SLG   OBP   G  AB   R   H  TB 2B 3B HR RBI  BB IW  SO GDP HP SH SF SB CS\n"
             
 
             if stat.player.GetBats() == "R":
@@ -93,7 +99,7 @@ class Batting:
             else:
                 bats = " "
                 
-            s += ("%s%-19s   %3s  %s %s %s %3d %3d %3d %3d %3d %2d %2d %2d %3d %3d %2d %3d %2d %2d %2d %2d %2d %2d\n" %
+            s += ("%s%-19s   %3s  %s %s %s %3d %3d %3d %3d %3d %2d %2d %2d %3d %3d %2d %3d  %2d %2d %2d %2d %2d %2d\n" %
                 (bats, stat.player.GetSortName(), stat.team.GetID(),
                  ("%5.3f" % stat.avg).replace("0.", " .")
                   if stat.avg is not None else "   - ",
