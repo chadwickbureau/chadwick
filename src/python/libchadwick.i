@@ -347,11 +347,27 @@ int IsValidPlay(char *play)
 %rename(Appearance) CWAppearance;
 %extend CWAppearance {
   char *GetPlayerID(void) const { return self->player_id; }
-  char *GetName(void) const  { return self->name; }
-  int GetTeam(void) const  { return self->team; }
-  int GetSlot(void) const  { return self->slot; }
-  int GetPosition(void) const  { return self->pos; }
+  void SetPlayerID(char *id) {
+    free(self->player_id);
+    self->player_id = (char *) malloc(sizeof(char) * (strlen(id)+1));
+    strcpy(self->player_id, id);
+  }
 
+  char *GetName(void) const  { return self->name; }
+  void SetName(char *name) {
+     free(self->name);
+     self->name = (char *) malloc(sizeof(char) * (strlen(name)+1));
+     strcpy(self->name, name);
+  }
+
+  int GetTeam(void) const  { return self->team; }
+  void SetTeam(int t)  { self->team = t; }
+
+  int GetSlot(void) const  { return self->slot; }
+  void SetSlot(int s)  { self->slot = s; }
+
+  int GetPosition(void) const  { return self->pos; }
+  void SetPosition(int pos)  { self->pos = pos; }
 };
 
 //==========================================================================
@@ -360,10 +376,28 @@ int IsValidPlay(char *play)
 
 %rename(Event) CWEvent;
 %extend CWEvent {
+  void SetBatterID(char *id) {
+    free(self->batter);
+    self->batter = (char *) malloc(sizeof(char) * (strlen(id)+1));
+    strcpy(self->batter, id);
+  }
+
+  void SetPitches(char *pitches) {
+    free(self->pitches);
+    self->pitches = (char *) malloc(sizeof(char) * (strlen(pitches)+1));
+    strcpy(self->pitches, pitches);
+  }
+
+  void SetEventText(char *event_text) {
+     free(self->event_text);
+     self->event_text = (char *) malloc(sizeof(char) * (strlen(event_text)+1));
+     strcpy(self->event_text, event_text);
+  }
+
 %pythoncode %{
   def Substitutes(self):
     x = self.first_sub
-    while x != None:
+    while x is not None:
       yield x
       x = x.next
     raise StopIteration
