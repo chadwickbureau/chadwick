@@ -198,30 +198,39 @@ def print_report(book, report):
     print str(report)
 
 class Leaderboard:
-    def __init__(self, category, header, limit=3):
+    def __init__(self, category, header, limit=3, sorter=None, fmt="%5d"):
         self.category = category
         self.header = header
         self.limit = limit
-        self.sorter = lambda x,y: cmp(getattr(y, self.category),
-                                      getattr(x, self.category))
-        
+        if sorter is None:
+            self.sorter = lambda x,y: cmp(getattr(y, self.category),
+                                          getattr(x, self.category))
+        else:
+            self.sorter = sorter
+        self.fmt = fmt
+
     def format(self, report):
         stats = report.stats.values()
         stats.sort(self.sorter)
-        stats = filter(lambda x: getattr(x, self.category) >=
-                                 getattr(stats[self.limit-1], self.category),
-                       stats)
+        if getattr(stats[0], self.category) >= getattr(stats[-1], self.category):
+            stats = filter(lambda x: getattr(x, self.category) >=
+                           getattr(stats[self.limit-1], self.category),
+                           stats)
+        else:
+            stats = filter(lambda x: getattr(x, self.category) <=
+                           getattr(stats[self.limit-1], self.category),
+                           stats)
 
         s = "%s\n\n" % self.header
         for (i, stat) in enumerate(stats):
-            s += "%-30s %3d\n" % (stat.player.GetSortName() + " (" +
-                                  stat.team.GetID() + ")",
-                                  getattr(stat, self.category))
+            s += "%-30s " % (stat.player.GetSortName() + " (" +
+                             stat.team.GetID() + ")")
+            s += (self.fmt + "\n") % getattr(stat, self.category)
 
         return s
     
-def print_leaders(report, category, header, limit=3):
-    board = Leaderboard(category, header, limit)
+def print_leaders(report, category, header, limit=3, sorter=None, fmt="%5d"):
+    board = Leaderboard(category, header, limit, sorter, fmt)
     print board.format(report)
 
 # This is a hack to add statistics for the two missing games
@@ -668,7 +677,6 @@ if __name__ == "__main__":
     print_leaders(batting, "bb", "BASES ON BALLS")
     print_leaders(batting, "so", "STRIKEOUTS")
     print_leaders(batting, "sb", "STOLEN BASES")
-    print_leaders(batting, "cs", "CAUGHT STEALING")
     
     print "ALL BATTERS, ALPHABETICALLY"
     print str(batting)
@@ -689,10 +697,30 @@ if __name__ == "__main__":
 
     print_leaders(pitching, "w", "WINS")
     print_leaders(pitching, "sv", "SAVES")
-    print_leaders(pitching, "bb", "BASES ON BALLS")
     print_leaders(pitching, "so", "STRIKEOUTS")
+
+    print_leaders(pitching, "so9", "STRIKEOUTS PER 9 INNINGS",
+                  sorter = lambda x,y: cmp(getattr(y, "so9"),
+                                           getattr(x, "so9")),
+                  fmt = "%5.2f")
+    
+    print_leaders(pitching, "br9", "FEWEST RUNNERS PER 9 INNINGS",
+                  sorter = lambda x,y: cmp(getattr(x, "br9"),
+                                           getattr(y, "br9")),
+                  fmt = "%5.2f")
+
+    print_leaders(pitching, "bb9", "FEWEST WALKS PER 9 INNINGS",
+                  sorter = lambda x,y: cmp(getattr(x, "bb9"),
+                                           getattr(y, "bb9")),
+                  fmt = "%5.2f")
+
+    print_leaders(pitching, "h9", "FEWEST HITS PER 9 INNINGS",
+                  sorter = lambda x,y: cmp(getattr(x, "h9"),
+                                           getattr(y, "h9")),
+                  fmt = "%5.2f")
+
+
     print_leaders(pitching, "g", "GAMES PITCHED")
-    print_leaders(pitching, "hr", "HOME RUNS ALLOWED")
     
 
     print "ALL PITCHERS, ALPHABETICALLY"

@@ -213,6 +213,27 @@ class Pitching(object):
                 return 1.0*self.w/(self.w+self.l)
             except ZeroDivisionError:
                 return None
+        elif attr == "bb9":
+            try:
+                return 27.0*self.bb/self.outs
+            except ZeroDivisionError:
+                return None
+        elif attr == "so9":
+            try:
+                return 27.0*self.so/self.outs
+            except ZeroDivisionError:
+                return None
+        elif attr == "h9":
+            try:
+                return 27.0*self.h/self.outs
+            except ZeroDivisionError:
+                return None
+        elif attr == "br9":
+            try:
+                return 27.0*(self.bb+self.h+self.hb)/self.outs
+            except ZeroDivisionError:
+                return None
+
         else:
             return self.stats[attr.lower()]
 
