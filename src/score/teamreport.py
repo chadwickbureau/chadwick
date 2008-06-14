@@ -132,8 +132,6 @@ if __name__ == "__main__":
 
     standings = report.team.Standings(book)
     reports.process_file(book, [standings])
-
-    reports.standings_hack(standings)
     print str(standings)
 
 
@@ -152,8 +150,6 @@ if __name__ == "__main__":
     pitching = report.register.Pitching(book)
     
     reports.process_file(book, [batting, pitching])
-    reports.batting_hack(batting)
-    reports.pitching_hack(pitching, book)
 
     teams = [ x for x in book.Teams() ]
     teams.sort(lambda x, y: cmp(x.GetCity(), y.GetCity()))

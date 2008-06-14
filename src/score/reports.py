@@ -233,400 +233,6 @@ def print_leaders(report, category, header, limit=3, sorter=None, fmt="%5d"):
     board = Leaderboard(category, header, limit, sorter, fmt)
     print board.format(report)
 
-# This is a hack to add statistics for the two missing games
-def batting_hack(report):
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Elliot" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200805281")
-    player.games.add("MCK200805282")
-    player.ab += 5+3
-    player.h += 2+1
-    player.bb += 1
-    player.bi += 1+1
-    player.sb += 2
-    
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Wilkerson" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200805281")
-    player.games.add("MCK200805282")
-    player.ab += 4+2
-    player.r += 1
-    player.h += 1+1
-    player.bb += 1
-    player.bi += 1
-
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Forsythe" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200805281")
-    player.games.add("MCK200805282")
-    player.ab += 3+4
-    player.r += 2
-    player.h += 2
-    player.sb += 1
-
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Pagan" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200805281")
-    player.games.add("MCK200805282")
-    player.ab += 3+4
-    
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Filyaw" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200805281")
-    player.games.add("MCK200805282")
-    player.ab += 2+3
-    player.r += 1
-    player.h += 2
-    player.bi += 3
-    player.sb += 1
-    
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Wilson" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200805281")
-    player.ab += 4
-    player.h += 2
-    player.bi += 1
-    
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Bourgeois" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200805282")
-    player.ab += 3
-    player.r += 1
-    
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Anderson" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200805282")
-    player.ab += 1+4
-    player.r += 1
-    player.h += 1
-    player.bb += 2
-    
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Bird" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200805282")
-    player.ab += 2
-    player.h += 1
-    
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Revis" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200805282")
-    player.r += 1
-
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Rugowski" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200805282")
-    player.ab += 2
-
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Revis" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200805281")
-    player.ab += 2+4
-
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Betourne" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200805281")
-    player.games.add("MCK200805282")
-    player.ab += 1+2
-    player.r += 1
-    player.h += 1
-    player.bi += 1
-    player.bb += 2
-    
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Leger" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200805282")
-
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Kennedy" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200805282")
-
-    # Also 1 G for Foeman
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Milton" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200805281")
-
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Hastings" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200805281")
-
-# Batting hack for games of June 7 only.
-def batting_hack(report):
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Mayer" and
-                  x.team.GetID() == "BAY" ][0]
-    player.games.add("MCK200806070")
-    player.ab += 5
-    player.h += 1
-    player.bi += 1
-
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Wade" and
-                  x.team.GetID() == "BAY" ][0]
-    player.games.add("MCK200806070")
-    player.ab += 3
-    player.h += 2
-    player.cs += 1
-    player.bb += 1
-
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Perri" and
-                  x.team.GetID() == "BAY" ][0]
-    player.games.add("MCK200806070")
-    player.ab += 3
-    player.h += 0
-    player.hp += 1
-    player.sb += 1
-    player.so += 1
-    
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Toland" and
-                  x.team.GetID() == "BAY" ][0]
-    player.games.add("MCK200806070")
-    player.ab += 4
-    player.r += 1
-    player.h += 1
-    player.so += 1
-
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Brown" and x.player.GetFirstName() == "Eric" and
-                  x.team.GetID() == "BAY" ][0]
-    player.games.add("MCK200806070")
-    player.ab += 4
-    player.r += 1
-    player.h += 1
-    player.sb += 1
-    player.so += 1
-    
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Massie" and
-                  x.team.GetID() == "BAY" ][0]
-    player.games.add("MCK200806070")
-    player.ab += 4
-    player.r += 1
-    player.h += 2
-    player.bi += 1
-    player.so += 1
-
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Czekaj" and
-                  x.team.GetID() == "BAY" ][0]
-    player.games.add("MCK200806070")
-    player.ab += 4
-    player.r += 1
-    player.h += 1
-    player.bi += 1
-    player.sb += 1
-    
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Suncar" and
-                  x.team.GetID() == "BAY" ][0]
-    player.games.add("MCK200806070")
-    player.ab += 4
-
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Wells" and
-                  x.team.GetID() == "BAY" ][0]
-    player.games.add("MCK200806070")
-    player.ab += 4
-    player.h += 1
-
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Elliot" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200806070")
-    player.ab += 4
-    player.h += 1
-
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Wilkerson" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200806070")
-    player.ab += 4
-    player.r += 1
-    player.h += 2
-
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Forsythe" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200806070")
-    player.ab += 4
-    player.r += 1
-    player.h += 1
-
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Pagan" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200806070")
-    player.ab += 4
-    player.r += 0
-    player.h += 1
-
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Filyaw" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200806070")
-    player.ab += 3
-    player.r += 0
-    player.h += 0
-    player.bi += 1
-
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Wilson" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200806070")
-    player.ab += 3
-    player.r += 0
-    player.h += 1
-    player.bi += 1
-    player.so += 1
-
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Betourne" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200806070")
-    player.ab += 3
-    player.r += 0
-    player.h += 0
-    player.bi += 0
-    player.so += 1
-
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Bourgeois" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200806070")
-    player.ab += 3
-    player.r += 0
-    player.h += 1
-    player.bi += 0
-    player.so += 1
-
-    player = [ x for x in report.stats.values()
-               if x.player.GetLastName() == "Revis" and
-                  x.team.GetID() == "MCK" ][0]
-    player.games.add("MCK200806070")
-    player.ab += 3
-    player.r += 0
-    player.h += 0
-    player.bi += 0
-
-# Pitching hack for games of June 7 only.
-def pitching_hack(rep, book):
-    import report.statline
-    try:
-        player = [ x for x in report.stats.values()
-                   if x.player.GetLastName() == "Revere" and
-                   x.team.GetID() == "BAY" ][0]
-    except:
-        player = report.statline.Pitching(book.GetPlayer("2009"),
-                                          book.GetTeam("BAY"))
-        rep.stats[("2009", "BAY")] = player
-    player.games.add("MCK200806070")
-    player.w += 1
-    player.gs += 1
-    player.cg += 1
-    player.outs += 27
-    player.h += 7
-    player.r += 2
-    player.er += 2
-    player.so += 3
-    player.bf += 31
-    player.ab += 31
-
-    try:
-        player = [ x for x in report.stats.values()
-                   if x.player.GetLastName() == "Milton" and
-                   x.team.GetID() == "MCK" ][0]
-    except:
-        player = report.statline.Pitching(book.GetPlayer("2138"),
-                                          book.GetTeam("MCK"))
-        rep.stats[("2138", "MCK")] = player
-
-    player.games.add("MCK200806070")
-    player.gs += 1
-    player.l += 1
-    player.outs += 20
-    player.h += 8
-    player.r += 4
-    player.er += 4
-    player.so += 2
-    player.wp += 1
-    player.bf += 28
-    player.ab += 27
-    player.hb += 1
-
-    try:
-        player = [ x for x in report.stats.values()
-                   if x.player.GetLastName() == "Foeman" and
-                   x.team.GetID() == "MCK" ][0]
-    except:
-        player = report.statline.Pitching(book.GetPlayer("1838"),
-                                          book.GetTeam("MCK"))
-        rep.stats[("1838", "MCK")] = player
-    player.games.add("MCK200806070")
-    player.outs += 4
-    player.bb += 1
-    player.so += 2
-    player.bf += 5
-    player.ab += 4
-    
-    try:
-        player = [ x for x in report.stats.values()
-                   if x.player.GetLastName() == "Brown" and
-                   x.team.GetID() == "MCK" ][0]
-    except:
-        player = report.statline.Pitching(book.GetPlayer("4985"),
-                                          book.GetTeam("MCK"))
-        rep.stats[("4985", "MCK")] = player
-    player.games.add("MCK200806070")
-    player.outs += 3
-    player.h += 1
-    player.bf += 4
-    player.ab += 4
-
-def standings_hack(report):
-    report.stats["MCK"].g += 2
-    report.stats["MCK"].w += 1
-    report.stats["MCK"].l += 1
-    report.stats["MCK"].ow += 1
-    report.stats["MCK"].ol += 1
-    report.stats["MCK"].hw += 1
-    report.stats["MCK"].hl += 1
-
-    report.stats["COR"].g += 2
-    report.stats["COR"].w += 1
-    report.stats["COR"].l += 1
-    report.stats["COR"].ow += 1
-    report.stats["COR"].ol += 1
-    report.stats["COR"].rw += 1
-    report.stats["COR"].rl += 1
-
-    # for game of 6-7
-    report.stats["MCK"].g += 1
-    report.stats["MCK"].l += 1
-    report.stats["MCK"].hl += 1
-
-    report.stats["BAY"].g += 1
-    report.stats["BAY"].w += 1
-    report.stats["BAY"].rw += 1
-    
-
 
 if __name__ == "__main__":
     import sys
@@ -643,8 +249,6 @@ if __name__ == "__main__":
 
     standings = report.team.Standings(book)
     process_file(book, [standings])
-
-    standings_hack(standings)
     print str(standings)
 
 
@@ -660,22 +264,26 @@ if __name__ == "__main__":
     batting = report.register.Batting(book)
     process_file(book, [ batting ])
 
-    #batting_hack(batting)
-
     print "LEADING BATTERS (MINIMUM 3.1 PLATE APPEARANCES PER TEAM GAME PLAYED)"
     subrep = batting.filter(lambda x: x.pa>=3.1*standings.stats[x.team.GetID()].g)
     subrep.sorter = lambda x,y: cmp(y.avg, x.avg)
     subrep.limit = 10
     print str(subrep)
 
+    print_leaders(batting, "hr", "HOME RUNS")
+    print_leaders(batting, "bi", "RUNS BATTED IN")
+
+    print_leaders(subrep, "slg", "SLUGGING PERCENTAGE",
+                  fmt = "%.3f")
+    print_leaders(subrep, "obp", "ON-BASE PERCENTAGE",
+                  fmt = "%.3f")
+
     print_leaders(batting, "r", "RUNS")
     print_leaders(batting, "h", "HITS")
-    print_leaders(batting, "hr", "HOME RUNS")
     print_leaders(batting, "h2b", "DOUBLES")
     print_leaders(batting, "h3b", "TRIPLES")
     print_leaders(batting, "tb", "TOTAL BASES")
     print_leaders(batting, "bb", "BASES ON BALLS")
-    print_leaders(batting, "so", "STRIKEOUTS")
     print_leaders(batting, "sb", "STOLEN BASES")
     
     print "ALL BATTERS, ALPHABETICALLY"
@@ -699,22 +307,22 @@ if __name__ == "__main__":
     print_leaders(pitching, "sv", "SAVES")
     print_leaders(pitching, "so", "STRIKEOUTS")
 
-    print_leaders(pitching, "so9", "STRIKEOUTS PER 9 INNINGS",
+    print_leaders(subrep, "so9", "STRIKEOUTS PER 9 INNINGS",
                   sorter = lambda x,y: cmp(getattr(y, "so9"),
                                            getattr(x, "so9")),
                   fmt = "%5.2f")
     
-    print_leaders(pitching, "br9", "FEWEST RUNNERS PER 9 INNINGS",
+    print_leaders(subrep, "br9", "FEWEST RUNNERS PER 9 INNINGS",
                   sorter = lambda x,y: cmp(getattr(x, "br9"),
                                            getattr(y, "br9")),
                   fmt = "%5.2f")
 
-    print_leaders(pitching, "bb9", "FEWEST WALKS PER 9 INNINGS",
+    print_leaders(subrep, "bb9", "FEWEST WALKS PER 9 INNINGS",
                   sorter = lambda x,y: cmp(getattr(x, "bb9"),
                                            getattr(y, "bb9")),
                   fmt = "%5.2f")
 
-    print_leaders(pitching, "h9", "FEWEST HITS PER 9 INNINGS",
+    print_leaders(subrep, "h9", "FEWEST HITS PER 9 INNINGS",
                   sorter = lambda x,y: cmp(getattr(x, "h9"),
                                            getattr(y, "h9")),
                   fmt = "%5.2f")
