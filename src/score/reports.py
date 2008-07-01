@@ -234,6 +234,20 @@ def print_leaders(report, category, header, limit=3, sorter=None, fmt="%5d"):
     print board.format(report)
 
 
+def standings_hack(rep):
+    return
+    rep.stats["MCK"]["g"] += 1
+    rep.stats["MCK"]["l"] += 1
+    rep.stats["MCK"]["hl"] += 1
+    rep.stats["MCK"]["ol"] += 1
+
+    rep.stats["COR"]["g"] += 1
+    rep.stats["COR"]["w"] += 1
+    rep.stats["COR"]["ow"] += 1
+    rep.stats["COR"]["rw"] += 1
+    
+
+
 if __name__ == "__main__":
     import sys
     import scorebook
@@ -249,6 +263,7 @@ if __name__ == "__main__":
 
     standings = report.team.Standings(book)
     process_file(book, [standings])
+    standings_hack(standings)
     print str(standings)
 
 

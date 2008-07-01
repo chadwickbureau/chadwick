@@ -15,8 +15,7 @@ if __name__ == "__main__":
 
     batting = report.register.Batting(book)
     reports.process_file(book, [batting],
-                        f = lambda x: x.GetDate()>="2008/06/02")
-    reports.batting_hack(batting)
+                        f = lambda x: x.GetDate()>="2008/06/23")
 
     subrep = batting.filter(lambda x: x.pa>=10)
     subrep.sorter = lambda x,y: cmp(y.avg, x.avg)
@@ -25,8 +24,7 @@ if __name__ == "__main__":
 
     pitching = report.register.Pitching(book)
     reports.process_file(book, [pitching],
-                        f = lambda x: x.GetDate()>="2008/06/02")
-    reports.pitching_hack(pitching, book)
+                        f = lambda x: x.GetDate()>="2008/06/23")
     
     subrep = pitching.filter(lambda x: x.outs>=9)
     subrep.sorter = lambda x,y: cmp(x.era, y.era)

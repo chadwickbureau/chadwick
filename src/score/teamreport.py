@@ -12,7 +12,7 @@ def team_batting_report(rep, sorter=None, limit=None, page_break=None):
             break
             
         if page_break is not None and i % page_break == 0:
-            s += "\n #  Player                   AVG   SLG   OBP   G  AB   R   H  TB 2B 3B HR RBI  BB IW  SO GDP HP SH SF SB CS  1B 2B SS 3B OF  C\n"
+            s += "\n #  Player                   AVG   SLG   OBP   G   AB   R   H  TB 2B 3B HR RBI  BB IW  SO GDP HP SH SF SB CS  1B 2B SS 3B OF  C\n"
             
 
         if stat.player.GetBats() == "R":
@@ -24,7 +24,7 @@ def team_batting_report(rep, sorter=None, limit=None, page_break=None):
         else:
             bats = " "
                 
-        s += ("%2s %s%-19s    %s %s %s %3d %3d %3d %3d %3d %2d %2d %2d %3d %3d %2d %3d  %2d %2d %2d %2d %2d %2d  %2d %2d %2d %2d %2d %2d\n" %
+        s += ("%2s %s%-19s    %s %s %s %3d %4d %3d %3d %3d %2d %2d %2d %3d %3d %2d %3d  %2d %2d %2d %2d %2d %2d  %2d %2d %2d %2d %2d %2d\n" %
               (stat.player.GetUniform() if stat.player.GetUniform() is not None else "",
                bats,
                stat.player.GetSortName(),
@@ -48,7 +48,7 @@ def team_batting_report(rep, sorter=None, limit=None, page_break=None):
 
     stat = sum(stats, report.statline.Batting())
     
-    s += ("%2s %s%-19s    %s %s %s %3d %3d %3d %3d %3d %2d %2d %2d %3d %3d %2d %3d  %2d %2d %2d %2d %2d %2d\n" %
+    s += ("%2s %s%-19s    %s %s %s %3d %4d %3d %3d %3d %2d %2d %2d %3d %3d %2d %3d  %2d %2d %2d %2d %2d %2d\n" %
               ("", " ", "TOTALS",
                ("%5.3f" % stat.avg).replace("0.", " .")
                if stat.avg is not None else "   - ",
@@ -82,9 +82,9 @@ def team_pitching_report(rep, sorter=None, limit=None, page_break=None):
             throws = " "
 
         if page_break is not None and i % page_break == 0:
-            s += "\n #  Player                  W- L   PCT    ERA  G GS CG SHO GF SV    IP TBF  AB   H   R  ER HR SH SF HB  BB IW  SO WP BK\n"
+            s += "\n #  Player                  W- L   PCT    ERA  G GS CG SHO GF SV    IP  TBF   AB   H   R  ER HR SH SF HB  BB IW  SO WP BK\n"
 
-        s += ("%2s %s%-20s   %2d-%2d %s %s %2d %2d %2d  %2d %2d %2d %3d.%1d %3d %3d %3d %3d %3d %2d %2d %2d %2d %3d %2d %3d %2d %2d\n" % 
+        s += ("%2s %s%-20s   %2d-%2d %s %s %2d %2d %2d  %2d %2d %2d %3d.%1d %4d %4d %3d %3d %3d %2d %2d %2d %2d %3d %2d %3d %2d %2d\n" % 
                 (stat.player.GetUniform() if stat.player.GetUniform() is not None else "",
                  throws, stat.player.GetSortName(),
                  stat.w, stat.l,
@@ -122,16 +122,37 @@ if __name__ == "__main__":
     import report.register
     import reports
 
-    book = dw.Reader(sys.argv[1])
+    if len(sys.argv) >= 2:
+        filename = sys.argv[1]
+    else:
+        filename = "/users/arbiter/Documents/CBL2008/2008CBL.chw"
+
+    book = dw.Reader(filename)
+
+    if len(sys.argv) >= 3:
+        lastdate = sys.argv[2]
+    else:
+        lastdate = max([ x.GetDate() for x in book.Games() ])
 
     print "CONTINENTAL BASEBALL LEAGUE OFFICIAL STATISTICS"
     print "COORDINATOR OF STATISTICAL SERVICES, THEODORE L. TUROCY, COLLEGE STATION TX -- (979) 997-0666 -- cblstatistics@gmail.com"
     print
 
-    print "STANDING OF CLUBS THROUGH GAMES OF %s" % sys.argv[2]
+    print "SECOND-HALF STANDING OF CLUBS THROUGH GAMES OF %s" % lastdate
 
     standings = report.team.Standings(book)
-    reports.process_file(book, [standings])
+    reports.process_file(book, [standings],
+                         f=lambda x: x.GetDate() >= "2008/07/01")
+    reports.standings_hack(standings)
+    print str(standings)
+
+
+    print "FINAL FIRST-HALF STANDING OF CLUBS"
+
+    standings = report.team.Standings(book)
+    reports.process_file(book, [standings],
+                         f=lambda x: x.GetDate() < "2008/07/01")
+    reports.standings_hack(standings)
     print str(standings)
 
 
@@ -161,7 +182,7 @@ if __name__ == "__main__":
 
         print "%s %s TEAM STATISTICS THROUGH GAMES OF %s" % \
               (team.GetCity().upper(), team.GetNickname().upper(),
-               sys.argv[2])
+               lastdate)
 
         teambatting = batting.filter(lambda x: x.team is team and
                                                len(x.gamesbatting) > 0)
