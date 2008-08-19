@@ -236,6 +236,7 @@ def print_leaders(report, category, header, limit=3, sorter=None, fmt="%5d"):
 
 def standings_hack(rep):
     return
+
     rep.stats["MCK"]["g"] += 1
     rep.stats["MCK"]["l"] += 1
     rep.stats["MCK"]["hl"] += 1
@@ -253,13 +254,24 @@ if __name__ == "__main__":
     import scorebook
     import dw
 
-    book = dw.Reader(sys.argv[1])
+    if len(sys.argv) >= 2:
+        filename = sys.argv[1]
+    else:
+        filename = "/users/arbiter/Documents/CBL2008/2008CBL.chw"
+
+    book = dw.Reader(filename)
+
+    if len(sys.argv) >= 3:
+        lastdate = sys.argv[2]
+    else:
+        lastdate = max([ x.GetDate() for x in book.Games() ])
+
 
     print "CONTINENTAL BASEBALL LEAGUE OFFICIAL STATISTICS"
     print "COORDINATOR OF STATISTICAL SERVICES, THEODORE L. TUROCY, COLLEGE STATION TX -- (979) 997-0666 -- cblstatistics@gmail.com"
     print
 
-    print "STANDING OF CLUBS THROUGH GAMES OF %s" % sys.argv[2]
+    print "STANDING OF CLUBS THROUGH GAMES OF %s" % lastdate
 
     standings = report.team.Standings(book)
     process_file(book, [standings])

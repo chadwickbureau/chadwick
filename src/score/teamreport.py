@@ -138,11 +138,10 @@ if __name__ == "__main__":
     print "COORDINATOR OF STATISTICAL SERVICES, THEODORE L. TUROCY, COLLEGE STATION TX -- (979) 997-0666 -- cblstatistics@gmail.com"
     print
 
-    print "SECOND-HALF STANDING OF CLUBS THROUGH GAMES OF %s" % lastdate
+    print "STANDING OF CLUBS THROUGH GAMES OF %s" % lastdate
 
     standings = report.team.Standings(book)
-    reports.process_file(book, [standings],
-                         f=lambda x: x.GetDate() >= "2008/07/01")
+    reports.process_file(book, [standings])
     reports.standings_hack(standings)
     print str(standings)
 
@@ -190,6 +189,16 @@ if __name__ == "__main__":
         print team_batting_report(teambatting,
                                   page_break=100,
                                   sorter=lambda x, y: cmp(y.avg, x.avg))
+
+        print "\f";
+        
+        print "CONTINENTAL BASEBALL LEAGUE OFFICIAL STATISTICS"
+        print "COORDINATOR OF STATISTICAL SERVICES, THEODORE L. TUROCY, COLLEGE STATION TX -- (979) 997-0666 -- cblstatistics@gmail.com"
+        print
+
+        print "%s %s TEAM STATISTICS THROUGH GAMES OF %s" % \
+              (team.GetCity().upper(), team.GetNickname().upper(),
+               lastdate)
 
         teampitching = pitching.filter(lambda x: x.team is team)
         teampitching.page_break = 100
