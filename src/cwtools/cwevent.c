@@ -1208,7 +1208,7 @@ DECLARE_FIELDFUNC(cwevent_truncated_pa_flag)
 
   cw_gameiter_cleanup(gi);
   free(gi);
-  return sprintf(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
+  return sprintf(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
 }
 
 /* Extended Field 13 */
