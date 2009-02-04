@@ -193,8 +193,8 @@ def process_file(book, acclist, f=lambda x: True, monitor=None):
                     return Fanlse
     return True
 
-def print_report(book, report):
-    process_file(book, [ report ])
+def print_report(book, report, f=lambda x: True):
+    process_file(book, [ report ], f)
     print str(report)
 
 class Leaderboard:
