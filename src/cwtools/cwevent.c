@@ -1628,7 +1628,7 @@ DECLARE_FIELDFUNC(cwevent_pitches_strikes_swinging)
   char *pitch = gameiter->event->pitches;
 
   while (*pitch != '\0') {
-    if (*pitch == 'M' || *pitch == 'S') {
+    if (*pitch == 'S' || *pitch == 'M' || *pitch == 'Q') {
       strikes++;
     }
     pitch++;
@@ -1644,7 +1644,8 @@ DECLARE_FIELDFUNC(cwevent_pitches_strikes_foul)
   char *pitch = gameiter->event->pitches;
 
   while (*pitch != '\0') {
-    if (*pitch == 'F' || *pitch == 'L' || *pitch == 'O' || *pitch == 'T') {
+    if (*pitch == 'F' || *pitch == 'L' || *pitch == 'O' || 
+	*pitch == 'T' || *pitch == 'R') {
       strikes++;
     }
     pitch++;
