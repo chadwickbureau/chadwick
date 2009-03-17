@@ -859,21 +859,34 @@ cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       fielding->bf++;
     }
 
-    for (i = 0; i <= 2; i++) {
-      if (gameiter->event_data->putouts[i] == pos) {
-	fielding->po++;
-	accepted = 1;
+    if (!strcmp(gameiter->event_data->play[0], "99") &&
+	!strcmp(gameiter->event_data->play[1], "99") &&
+	!strcmp(gameiter->event_data->play[2], "99") &&
+	!strcmp(gameiter->event_data->play[3], "99")) {
+      /* If there are any unknown fielding credits, do not record
+	 putouts or assists for any fielder.  May be overly conservative
+	 if fielding credit for one part of a DP is known, but I don't know
+	 if there is any instance where that occurs in Retrosheet.
+      */
+      for (i = 0; i <= 2; i++) {
+	if (gameiter->event_data->putouts[i] == pos) {
+	  fielding->po++;
+	  accepted = 1;
+	}
+      }
+
+      for (i = 0; i < 10; i++) {
+	if (gameiter->event_data->assists[i] == pos) {
+	  fielding->a++;
+	  accepted = 1;
+	}
       }
     }
 
     for (i = 0; i < 10; i++) {
-      if (gameiter->event_data->assists[i] == pos) {
-	fielding->a++;
-	accepted = 1;
-      }
       if (gameiter->event_data->errors[i] == pos) {
 	fielding->e++;
-	cw_box_add_event(&(boxscore->err_list), 
+	cw_box_add_evennt(&(boxscore->err_list), 
 			 gameiter->state->inning, gameiter->state->batting_team,
 			 1, player_id);
       }
