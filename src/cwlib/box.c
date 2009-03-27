@@ -859,10 +859,10 @@ cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       fielding->bf++;
     }
 
-    if (!strcmp(gameiter->event_data->play[0], "99") &&
-	!strcmp(gameiter->event_data->play[1], "99") &&
-	!strcmp(gameiter->event_data->play[2], "99") &&
-	!strcmp(gameiter->event_data->play[3], "99")) {
+    if (strcmp(gameiter->event_data->play[0], "99") &&
+	strcmp(gameiter->event_data->play[1], "99") &&
+	strcmp(gameiter->event_data->play[2], "99") &&
+	strcmp(gameiter->event_data->play[3], "99")) {
       /* If there are any unknown fielding credits, do not record
 	 putouts or assists for any fielder.  May be overly conservative
 	 if fielding credit for one part of a DP is known, but I don't know
