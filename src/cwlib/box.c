@@ -886,7 +886,7 @@ cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
     for (i = 0; i < 10; i++) {
       if (gameiter->event_data->errors[i] == pos) {
 	fielding->e++;
-	cw_box_add_evennt(&(boxscore->err_list), 
+	cw_box_add_event(&(boxscore->err_list), 
 			 gameiter->state->inning, gameiter->state->batting_team,
 			 1, player_id);
       }
