@@ -17,7 +17,7 @@ statistics collection.
 Authors
 -------
 
-Chadwick is written, maintained, and Copyright (c) 2002-2009 by Ted Turocy (ted.turocy <aht> gmail <daht> com).
+Chadwick is written, maintained, and Copyright © 2002-2009 by Ted Turocy (ted.turocy <aht> gmail <daht> com).
 
 License
 -------
@@ -49,9 +49,12 @@ mailing lists:
 Acknowledgments
 ---------------
 
-The author thanks sports-reference.com, the Society for American Baseball
-Research, and XMLTeam, Inc. for support in the development of portions of
-Chadwick. The author also thanks David Smith of Retrosheet for his
+The author thanks `Sports Reference, LLC <http://www.sports-reference.com>`_,
+the `Society for American Baseball Research <http://www.sabr.org>`_,
+and `XMLTeam, Inc. <http://www.xmlteam.com>`_
+for support in the development of portions of
+Chadwick. The author also thanks David Smith of 
+`Retrosheet <http://www.retrosheet.org>`_ for his
 always-gracious assistance and guidance.
 
 
@@ -64,10 +67,10 @@ Documentation
     chapter1.rst
 
 
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. Indices and tables
+.. ------------------
+.. 
+.. * :ref:`genindex`
+.. * :ref:`modindex`
+.. * :ref:`search`
 
