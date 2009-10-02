@@ -418,12 +418,24 @@ cwbox_print_xml(CWGame *game, CWBoxscore *boxscore,
 	 cw_game_info_lookup(game, "timeofgame"),
 	 cw_game_info_lookup(game, "attendance"));
 
-  printf("umpire_hp=\"%s\" umpire_1b=\"%s\" "
-	 "umpire_2b=\"%s\" umpire_3b=\"%s\" ",
-	 cw_game_info_lookup(game, "umphome"),
-	 cw_game_info_lookup(game, "ump1b"),
-	 cw_game_info_lookup(game, "ump2b"),
-	 cw_game_info_lookup(game, "ump3b"));
+  if (cw_game_info_lookup(game, "umphome")) {
+    printf("umpire_hp=\"%s\" ", cw_game_info_lookup(game, "umphome"));
+  }
+  if (cw_game_info_lookup(game, "ump1b")) {
+    printf("umpire_1b=\"%s\" ", cw_game_info_lookup(game, "ump1b"));
+  }
+  if (cw_game_info_lookup(game, "ump2b")) {
+    printf("umpire_2b=\"%s\" ", cw_game_info_lookup(game, "ump2b"));
+  }
+  if (cw_game_info_lookup(game, "ump3b")) {
+    printf("umpire_3b=\"%s\" ", cw_game_info_lookup(game, "ump3b"));
+  }
+  if (cw_game_info_lookup(game, "umplf")) {
+    printf("umpire_lf=\"%s\" ", cw_game_info_lookup(game, "umplf"));
+  }
+  if (cw_game_info_lookup(game, "umprf")) {
+    printf("umpire_rf=\"%s\" ", cw_game_info_lookup(game, "umprf"));
+  }
 
   if (boxscore->outs_at_end != 3) {
     printf("walk_off=\"%d\" outs_at_end=\"%d\" ",
