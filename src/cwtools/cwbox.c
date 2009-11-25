@@ -205,7 +205,7 @@ cwbox_print_player(CWBoxPlayer *player, CWRoster *roster)
     sprintf(name, "%s %c", bio->last_name, bio->first_name[0]);
   }
   else {
-    sprintf(name, player->player_id);
+    sprintf(name, "%s", player->player_id);
   }
 
   strcpy(posstr, "");
@@ -263,7 +263,7 @@ cwbox_print_pitcher(CWGame *game,
     sprintf(name, "%s %c", bio->last_name, bio->first_name[0]);
   }
   else {
-    sprintf(name, pitcher->player_id);
+    sprintf(name, "%s", pitcher->player_id);
   }
 
   if (!strcmp(cw_game_info_lookup(game, "wp"), pitcher->player_id)) {
@@ -496,7 +496,7 @@ cwbox_print_player_apparatus(CWBoxEvent *list, int index, char *label,
 	printf("%s %c", bio->last_name, bio->first_name[0]); 
       }
       else {
-	printf(event->players[index]);
+	printf("%s", event->players[index]);
       }
     } 
     else { 

@@ -179,7 +179,7 @@ cwsub_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 	}
       }
 
-      printf(output_line);
+      printf("%s", output_line);
       printf("\n");
       sub = sub->next;
     }
@@ -275,7 +275,7 @@ cwsub_initialize(void)
     }
   }
 
-  printf(output_line);
+  printf("%s", output_line);
   printf("\n");
 }
 

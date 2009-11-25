@@ -104,7 +104,7 @@ DECLARE_FIELDFUNC(cwcomment_comment)
       buffer += 1;
     }
 
-    chars += sprintf(buffer, comment->text);
+    chars += sprintf(buffer, "%s", comment->text);
     buffer += strlen(comment->text);
   }
 
@@ -146,7 +146,7 @@ cwcomment_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
       }
     }
 
-    printf(output_line);
+    printf("%s", output_line);
     printf("\n");
   }
 
@@ -171,7 +171,7 @@ cwcomment_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
       }
     }
 
-    printf(output_line);
+    printf("%s", output_line);
     printf("\n");
 
     cw_gameiter_next(gameiter);

@@ -1277,7 +1277,7 @@ DECLARE_FIELDFUNC(cwevent_batter_on_deck)
   /* remember that lineups are 1-based, not 0-based */
   int next_batter = lineup_slot % 9 + 1;
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s", 
-		 gameiter->state->lineups[gameiter->state->batting_team][next_batter]);
+		 gameiter->state->lineups[gameiter->state->batting_team][next_batter].player_id);
 }
 
 /* Dickson's encyclopedia is somewhat on the fence as to whether 
@@ -1292,7 +1292,7 @@ DECLARE_FIELDFUNC(cwevent_batter_in_the_hold)
   /* remember that lineups are 1-based, not 0-based */
   int next_batter = (lineup_slot + 1) % 9 + 1;
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s", 
-		 gameiter->state->lineups[gameiter->state->batting_team][next_batter]);
+		 gameiter->state->lineups[gameiter->state->batting_team][next_batter].player_id);
 }
 
 /* Extended Field 19 */
@@ -1988,7 +1988,7 @@ cwevent_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
       }
     };
 
-    printf(output_line);
+    printf("%s", output_line);
     printf("\n");
 
     cw_gameiter_next(gameiter);
@@ -2109,7 +2109,7 @@ cwevent_initialize(void)
     }
   }
 
-  printf(output_line);
+  printf("%s", output_line);
   printf("\n");
 }
 
