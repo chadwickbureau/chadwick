@@ -121,8 +121,9 @@ int cw_roster_player_count(CWRoster *roster);
 
 /*
  * Read in a roster (in Retrosheet format) from file 'file'.
+ * Returns nonzero on success, zero on failure.
  */
-void cw_roster_read(CWRoster *roster, FILE *file);
+int cw_roster_read(CWRoster *roster, FILE *file);
 
 /*
  * Write a roster (in Retrosheet format) to file 'file'.

@@ -238,7 +238,7 @@ cw_roster_player_count(CWRoster *roster)
   return count;
 }
 
-void
+int
 cw_roster_read(CWRoster *roster, FILE *file)
 {
   char buf[256], *player_id, *last_name, *first_name, *bats, *throws;
@@ -247,7 +247,9 @@ cw_roster_read(CWRoster *roster, FILE *file)
 
   while (!feof(file)) {
     strcpy(buf, "");
-    fgets(buf, 256, file);
+    if (fgets(buf, 256, file) == NULL) {
+      return 0;
+    }
     player_id = cw_strtok(buf);
     last_name = cw_strtok(NULL);
     first_name = cw_strtok(NULL);
@@ -266,6 +268,7 @@ cw_roster_read(CWRoster *roster, FILE *file)
 					     last_name, first_name,
 					     bats[0], throws[0]));
   }
+  return 1;
 }
 
 void

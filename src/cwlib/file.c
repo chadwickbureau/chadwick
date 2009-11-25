@@ -139,7 +139,9 @@ int cw_file_find_game(char *game_id, FILE *file)
 
   while (!feof(file)) {
     fgetpos(file, &filepos);
-    fgets(buf, 1023, file);
+    if (fgets(buf, 1023, file) == NULL) {
+      return 0;
+    }
     tok = cw_strtok(buf);
     game = cw_strtok(NULL);
     if (tok && !strcmp(tok, "id") && game && !strcmp(game, game_id)) {
@@ -163,7 +165,9 @@ int cw_file_find_first_game(FILE *file)
 
   while (!feof(file)) {
     fgetpos(file, &filepos);
-    fgets(buf, 256, file);
+    if (fgets(buf, 256, file) == NULL) {
+      return 0;
+    }
     tok = cw_strtok(buf);
     if (tok && !strcmp(tok, "id")) {
       fsetpos(file, &filepos);

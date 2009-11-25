@@ -62,9 +62,9 @@ CWRoster *cw_league_roster_find(CWLeague *league, char *team);
 /*
  * Read a leaguefile (in Retrosheet convention, TEAMyyyy) from the
  * stream 'file'.  Rosters are created for each team, but are left
- * empty
+ * empty.  Returns nonzero on success, zero on failure.
  */
-void cw_league_read(CWLeague *league, FILE *file);
+int cw_league_read(CWLeague *league, FILE *file);
 
 /*
  * Write a leaguefile (in Retrosheet convention, TEAMyyyy) to the

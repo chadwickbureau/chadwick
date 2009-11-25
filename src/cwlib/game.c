@@ -499,7 +499,9 @@ cw_game_read(FILE *file)
   char batHand = ' ', batHandBatter[256], pitHand = ' ';
   CWGame *game;
 
-  fgets(buf, 256, file);
+  if (fgets(buf, 256, file) == NULL) {
+    return NULL;
+  }
   tok = cw_strtok(buf);
   if (tok && !strcmp(tok, "id")) {
     char *game_id = cw_strtok(NULL);
@@ -516,7 +518,9 @@ cw_game_read(FILE *file)
 
   while (!feof(file)) {
     fgetpos(file, &filepos);
-    fgets(buf, 256, file);
+    if (fgets(buf, 256, file) == NULL) {
+      return NULL;
+    }
     if (feof(file)) {
       break;
     }

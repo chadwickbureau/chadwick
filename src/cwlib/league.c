@@ -83,7 +83,7 @@ cw_league_roster_find(CWLeague *league, char *team)
   return roster;
 }
 
-void
+int
 cw_league_read(CWLeague *rosterList, FILE *file)
 {
   char buf[256], *team_id, *league, *city, *nickname;
@@ -92,7 +92,9 @@ cw_league_read(CWLeague *rosterList, FILE *file)
 
   while (!feof(file)) {
     strcpy(buf, "");
-    fgets(buf, 256, file);
+    if (fgets(buf, 256, file) == NULL) {
+      return 0;
+    }
     team_id = cw_strtok(buf);
     league = cw_strtok(NULL);
     city = cw_strtok(NULL);
@@ -105,6 +107,7 @@ cw_league_read(CWLeague *rosterList, FILE *file)
 			    cw_roster_create(team_id, 0, league,
 					     city, nickname));
   }
+  return 1;
 }
 
 void
