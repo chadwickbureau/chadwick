@@ -519,7 +519,16 @@ cw_game_read(FILE *file)
   while (!feof(file)) {
     fgetpos(file, &filepos);
     if (fgets(buf, 256, file) == NULL) {
-      return NULL;
+      if (feof(file)) {
+	break;
+      }
+      else {
+	if (game) {
+	  cw_game_cleanup(game);
+	  free(game);
+	}
+	return NULL;
+      }
     }
     if (feof(file)) {
       break;
