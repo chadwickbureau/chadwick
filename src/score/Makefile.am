@@ -24,32 +24,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 # 
 
-EXTRA_DIST = \
-	__init__.py \
-	boxscore.py \
-	chadwick.py \
-	dialogabout.py \
-	dialogdecision.py \
-	dialoggame.py \
-	dialogimport.py \
-	dialoglineup.py \
-	dialognewgame.py \
-	dialogreport.py \
-	frameentry.py \
-	gridlineup.py \
-	icons.py \
-	panelboxscore.py \
-	panelgamelist.py \
-	panellinescore.py \
-	panelnarrative.py \
-	panelrunners.py \
-	panelstate.py \
-	panelteamlist.py \
-	scorebook.py \
-	setup.py \
-	statscan.py \
-	wxutils.py 
-
+EXTRA_DIST = 
 
 #all-local:
 #	python setup.py build
