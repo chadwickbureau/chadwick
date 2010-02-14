@@ -1301,6 +1301,8 @@ cw_box_create(CWGame *game)
     }
 
     boxscore->score[t] = 0;
+    boxscore->hits[t] = 0;
+    boxscore->errors[t] = 0;
     boxscore->dp[t] = 0;
     boxscore->tp[t] = 0;
     boxscore->lob[t] = 0;
@@ -1308,6 +1310,9 @@ cw_box_create(CWGame *game)
     boxscore->risp_ab[t] = 0;
     boxscore->risp_h[t] = 0;
   }
+
+  boxscore->outs_at_end = 0;
+  boxscore->walk_off = 0;
 
   boxscore->b2_list = NULL;
   boxscore->b3_list = NULL;
