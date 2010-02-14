@@ -1277,7 +1277,7 @@ DECLARE_FIELDFUNC(cwevent_batter_on_deck)
   /* remember that lineups are 1-based, not 0-based */
   int next_batter = lineup_slot % 9 + 1;
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s", 
-		 gameiter->state->lineups[gameiter->state->batting_team][next_batter].player_id);
+		 gameiter->state->lineups[next_batter][gameiter->state->batting_team].player_id);
 }
 
 /* Dickson's encyclopedia is somewhat on the fence as to whether 
@@ -1292,7 +1292,7 @@ DECLARE_FIELDFUNC(cwevent_batter_in_the_hold)
   /* remember that lineups are 1-based, not 0-based */
   int next_batter = (lineup_slot + 1) % 9 + 1;
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s", 
-		 gameiter->state->lineups[gameiter->state->batting_team][next_batter].player_id);
+		 gameiter->state->lineups[next_batter][gameiter->state->batting_team].player_id);
 }
 
 /* Extended Field 19 */
