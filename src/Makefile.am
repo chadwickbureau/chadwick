@@ -24,7 +24,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-SUBDIRS = cwlib cwtools python score
+SUBDIRS = cwlib cwtools
 
 EXTRA_DIST = chadwick
 
