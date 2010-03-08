@@ -1145,6 +1145,7 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
 {
   int i;
   CWData *stat;
+  CWBoxEvent *event;
 
   /* Assume games ended with the conclusion of an inning... */
   boxscore->outs_at_end = 3;
@@ -1208,13 +1209,17 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
       player->batting->so = atoi(stat->data[17]);
       player->batting->sb = atoi(stat->data[18]);
       for (i = 1; i <= player->batting->sb; i++) {
-	cw_box_add_event(&(boxscore->sb_list), -1, -1, 2,
-			 player->player_id, "");
+	event = cw_box_add_event(&(boxscore->sb_list), -1, -1, 2,
+				 player->player_id, "", "");
+	event->runners = -1;
+	event->pickoff = -1;
       }
       player->batting->cs = atoi(stat->data[19]);
       for (i = 1; i <= player->batting->cs; i++) {
-	cw_box_add_event(&(boxscore->cs_list), -1, -1, 2,
-			 player->player_id, "");
+	event = cw_box_add_event(&(boxscore->cs_list), -1, -1, 2,
+				 player->player_id, "", "");
+	event->runners = -1;
+	event->pickoff = -1;
       }
       player->batting->gdp = atoi(stat->data[20]);
       player->batting->xi = atoi(stat->data[21]);

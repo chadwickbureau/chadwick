@@ -288,8 +288,10 @@ cwbox_xml_steal_events(CWBoxEvent *list, char *mainlabel, char *itemlabel)
     printf("    <%s runner=\"%s\" pitcher=\"%s\" catcher=\"%s\" "
 	   "inning=\"%d\" half=\"%d\" base=\"%d\" pickoff=\"%d\"/>\n", 
 	   itemlabel, event->players[0], event->players[1], 
-	   event->players[2], event->inning, event->half_inning,
-	   event->runners + 1, event->pickoff);
+	   (event->players[2]) ? event->players[2] : "", 
+	   event->inning, event->half_inning,
+	   (event->runners >= 0) ? (event->runners + 1) : -1, 
+	   event->pickoff);
     event = event->next;
   }
   printf("  </%s>\n", mainlabel);
