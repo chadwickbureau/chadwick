@@ -181,6 +181,11 @@ void cw_game_substitute_append(CWGame *game, char *playerID, char *name,
 void cw_game_data_append(CWGame *game, int num_data, char **data);
 
 /*
+ * Set pitcher's earned run data record
+ */
+void cw_game_data_set_er(CWGame *game, char *playerID, int er);
+
+/*
  * Add a stat record to the game
  */
 void cw_game_stat_append(CWGame *game, int num_data, char **data);

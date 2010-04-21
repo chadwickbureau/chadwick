@@ -449,6 +449,32 @@ void cw_game_data_append(CWGame *game, int num_data, char **data)
   game->last_data = d;
 }
 
+void cw_game_data_set_er(CWGame *game, char *playerID, int er)
+{
+  char *foo[3];
+  char buffer[10];
+  CWData *data = game->first_data;
+
+  while (data != NULL) {
+    if (data->num_data >= 3 &&
+	!strcmp(data->data[0], "er") &&
+	!strcmp(data->data[1], playerID)) {
+      free(data->data[2]);
+      data->data[2] = (char *) malloc(10 * sizeof(char));
+      sprintf(data->data[2], "%d", er);
+      return;
+    }
+    data = data->next;
+  }
+
+  foo[0] = "er";
+  foo[1] = playerID;
+  foo[2] = buffer;
+  sprintf(foo[2], "%d", er);
+  cw_game_data_append(game, 3, foo);
+}
+
+
 void cw_game_stat_append(CWGame *game, int num_data, char **data)
 {
   int i;

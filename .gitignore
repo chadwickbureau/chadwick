@@ -23,3 +23,9 @@ cwsub
 *.a
 *.la
 pychadwick
+*.egg-info
+*.pyc
+*.pyx
+*.so
+build/
+.DS_Store

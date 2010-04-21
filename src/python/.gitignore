@@ -1,0 +1,3 @@
+dist
+chadwick/libchadwick.py
+chadwick/libchadwick_wrap.c
