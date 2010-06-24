@@ -639,7 +639,7 @@ cwbox_print_apparatus(CWGame *game, CWBoxscore *boxscore,
   cwbox_print_hbp_apparatus(boxscore->hp_list, visitors, home);
   cwbox_print_player_apparatus(boxscore->wp_list, 0, "WP", visitors, home);
   cwbox_print_player_apparatus(boxscore->bk_list, 0, "Balk", visitors, home);
-  cwbox_print_player_apparatus(boxscore->pb_list, 0, "PB", visitors, home);
+  cwbox_print_player_apparatus(boxscore->pb_list, 1, "PB", visitors, home);
   cwbox_print_timeofgame(game);
   cwbox_print_attendance(game);
 }
