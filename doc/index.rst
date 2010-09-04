@@ -17,7 +17,7 @@ statistics collection.
 Authors
 -------
 
-Chadwick is written, maintained, and Copyright © 2002-2009 by Ted Turocy (ted.turocy <aht> gmail <daht> com).
+Chadwick is written, maintained, and Copyright © 2002-2010 by Ted Turocy (ted.turocy <aht> gmail <daht> com).
 
 License
 -------
@@ -29,7 +29,7 @@ possibilities.
 Downloading
 -----------
 
-The current version of Chadwick is version 0.5.2.
+The current version of Chadwick is version 0.5.3.
 You can download the latest releases of Chadwick from Sourceforge:
 http://sourceforge.net/projects/chadwick/files
 
@@ -62,9 +62,9 @@ Documentation
 =============
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
-    chapter1.rst
+    cwtools
 
 
 .. Indices and tables

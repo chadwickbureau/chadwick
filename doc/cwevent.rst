@@ -1,59 +1,29 @@
-.. _documentation
-
-Command-line tools
-##################
-
-Chadwick provides the following command-line programs for extracting
-information from Retrosheet play-by-play event files:
-
-- :ref:`cwevent <cwtools.cwevent>`, an expanded event
-  descriptor, which replaces and extends the DiamondWare program
-  BEVENT.
-
-- :ref:`cwgame <cwtools.cwgame>`, a game information
-  extractor, which replaces and extends the DiamondWare program
-  BGAME.
-
-- :program:`cwbox`, a boxscore generator, which
-  replaces and extends the DiamondWare program BOX.
-
-- :ref:`cwsub <cwtools.cwsub>`, which extracts information
-  about in-game player substitutions. This program is unique to
-  Chadwick.
-
-- :program:`cwcomment`, which extracts comment
-  fields from event files. This program is unique to Chadwick.
-
-
-Before reading the documentation specific to each tool, you may want to
-consult:
-
-- The summary of :ref:`command-line options <cwtools.commandline>` which
-  control the operation of each program.
-
-- The documentation at Retrosheet summarizing the contents of
-  play-by-play files, and documenting the DiamondWare versions of
-  these tools.
-
-
-The Chadwick documentation focuses on filling in the gaps in the
-Retrosheet documentation, and documenting Chadwick-specific extensions to
-the toolset.
-
-
 .. _cwtools.cwevent:
 
 cwevent: Expanded event descriptor
 ==================================
 
-:program:`cwevent` is a command-line tool which
-extracts detailed information about individual events (plays) in the
-data file. These are grouped into two categories. There are 97
-fields which are compatible with the Retrosheet BEVENT event extractor tool.
-These are specified using the ``-f`` command-line flag. In addition, cwevent offers
-over 50 "extended" fields which expand upon or give more detailed
-information not easily accessed via the standard fields. These are 
-are specified using the ``-x`` command-line flag.
+:program:`cwevent` is a command-line tool which extracts detailed
+information about individual events (plays) in the data file. These
+are grouped into two categories. There are 97 fields which are
+compatible with the Retrosheet BEVENT event descriptor tool.  These
+are specified using the ``-f`` command-line flag. In addition, cwevent
+offers a number "extended" fields which expand upon or give more
+detailed information not easily accessed via the standard
+fields. These are are specified using the ``-x`` command-line flag.
+
+.. note::
+   :program:`cwevent` guarantees that the standard field numbers will
+   match those used by BEVENT.  Standard field numbers therefore can
+   be treated as stable, and it should be safe to write scripts
+   referring to them.  Extended fields are provisional, and extended
+   fields may be added or withdrawn in future versions.  Extended
+   fields are assigned numbers to maintain a logical cohesion, with
+   related fields being grouped.  Therefore, extended field numbers
+   are not promised to be stable.  It is recommended to use the field
+   labels instead in writing scripts to process the output of
+   :program:`cwevent` extended fields.
+
 
 .. list-table:: cwevent standard field numbers
    :header-rows: 1
@@ -414,117 +384,141 @@ are specified using the ``-x`` command-line flag.
      - result batter is starter flag
      - ``RESP_BAT_START_FL``
    * - 17
+     - ID of the batter on deck
+     - ``BAT_ON_DECK_ID``
+   * - 18
+     - ID of the batter in the hold
+     - ``BAT_IN_HOLD_ID``
+   * - 19
      - pitcher is starter flag
      - ``PIT_START_FL``
-   * - 18
+   * - 20
      - result pitcher is starter flag
      - ``RESP_PIT_START_FL``
-   * - 19
+   * - 21
      - defensive position of runner on first
      - ``RUN1_FLD_CD``
-   * - 20
+   * - 22
      - lineup position of runner on first
      - ``RUN1_LINEUP_CD``
-   * - 21
+   * - 23
      - event number on which runner on first reached base
      - ``RUN1_ORIGIN_EVENT_ID``
-   * - 22
+   * - 24
      - defensive position of runner on second
      - ``RUN2_FLD_CD``
-   * - 23
+   * - 25
      - lineup position of runner on second
      - ``RUN2_LINEUP_CD``
-   * - 24
+   * - 26
      - event number on which runner on second reached base
      - ``RUN2_ORIGIN_EVENT_ID``
-   * - 25
+   * - 27
      - defensive position of runner on third
      - ``RUN3_FLD_CD``
-   * - 26
+   * - 28
      - lineup position of runner on third
      - ``RUN3_LINEUP_CD``
-   * - 27
+   * - 29
      - event number on which runner on third reached base
      - ``RUN3_ORIGIN_EVENT_ID``
-   * - 28
+   * - 30
+     - responsible catcher for runner on first
+     - ``RUN1_RESP_CAT_ID``
+   * - 31
+     - responsible catcher for runner on second
+     - ``RUN2_RESP_CAT_ID``
+   * - 32
+     - responsible catcher for runner on third
+     - ``RUN3_RESP_CAT_ID``
+   * - 33
      - number of balls in plate appearance
      - ``PA_BALL_CT``
-   * - 29
+   * - 34
+     - number of called balls in plate appearance
+     - ``PA_CALLED_BALL_CT``
+   * - 35
      - number of intentional balls in plate appearance
      - ``PA_INTENT_BALL_CT``
-   * - 30
+   * - 36
      - number of pitchouts in plate appearance
      - ``PA_PITCHOUT_BALL_CT``
-   * - 31
+   * - 37
+     - number of pitches hitting batter in plate appearance
+     - ``PA_HITBATTER_BALL_CT``
+   * - 38
      - number of other balls in plate appearance
      - ``PA_OTHER_BALL_CT``
-   * - 32
+   * - 39
      - number of strikes in plate appearance
      - ``PA_STRIKE_CT``
-   * - 33
+   * - 40
      - number of called strikes in plate appearance
      - ``PA_CALLED_STRIKE_CT``
-   * - 34
+   * - 41
      - number of swinging strikes in plate appearance
      - ``PA_SWINGMISS_STRIKE_CT``
-   * - 35
+   * - 42
      - number of foul balls in plate appearance
      - ``PA_FOUL_STRIKE_CT``
-   * - 36
+   * - 43
+     - number of balls in play in plate appearance
+     - ``PA_INPLAY_STRIKE_CT``
+   * - 44
      - number of other strikes in plate appearance
      - ``PA_OTHER_STRIKE_CT``
-   * - 37
+   * - 45
      - number of runs on play
      - ``EVENT_RUNS_CT``
-   * - 38
+   * - 46
      - id of player fielding batted ball
      - ``FLD_ID``
-   * - 39
+   * - 47
      - force play at second flag
      - ``BASE2_FORCE_FL``
-   * - 40
+   * - 48
      - force play at third flag
      - ``BASE3_FORCE_FL``
-   * - 41
+   * - 49
      - force play at home flag
      - ``BASE4_FORCE_FL``
-   * - 42
+   * - 50
      - batter safe on error flag
      - ``BAT_SAFE_ERR_FL``
-   * - 43
+   * - 51
      - fate of batter (base ultimately advanced to)
      - ``BAT_FATE_ID``
-   * - 44
+   * - 52
      - fate of runner on first
      - ``RUN1_FATE_ID``
-   * - 45
+   * - 53
      - fate of runner on second
      - ``RUN2_FATE_ID``
-   * - 46
+   * - 54
      - fate of runner on third
      - ``RUN3_FATE_ID``
-   * - 47
+   * - 55
      - runs scored in half inning after this eveng
      - ``FATE_RUNS_CT``
-   * - 48
+   * - 56
      - fielder with sixth assist
      - ``ASS6_FLD_CD``
-   * - 49
+   * - 57
      - fielder with seventh assist
      - ``ASS7_FLD_CD``
-   * - 50
+   * - 58
      - fielder with eighth assist
      - ``ASS8_FLD_CD``
-   * - 51
+   * - 59
      - fielder with ninth assist
      - ``ASS9_FLD_CD``
-   * - 52
+   * - 60
      - fielder with tenth assist
      - ``ASS10_FLD_CD``
-   * - 53
+   * - 61
      - unknown fielding credit flag
      - ``UNKNOWN_OUT_EXC_FL``
-   * - 54
+   * - 62
      - uncertain play flag
      - ``UNCERTAIN_PLAY_EXC_FL``
 
@@ -705,551 +699,3 @@ in the primary event as well as one in the baserunning modifiers.
 The words "first", "second" and so on do not necessarily indicate
 chronological order of the credits, though in most cases they
 do.
-
-.. _cwtools.cwgame:
-
-cwgame: Game information extractor
-==================================
-
-:program:`cwgame` reports game-level information
-for each game.
-
-The following table gives the contents of each of the 84 fields
-:program:`cwgame` outputs.
-
-.. list-table:: cwgame standard field numbers
-   :header-rows: 1
-   :widths: 5,20,10
-
-   * - Field number
-     - Description
-     - Header
-   * - 0
-     - Game ID
-     - ``GAME_ID``
-   * - 1
-     - Date
-     - ``GAME_DT``
-   * - 2
-     - Game number
-     - ``GAME_CT``
-   * - 3
-     - Day of week
-     - ``GAME_DY``
-   * - 4
-     - Start time
-     - ``START_GAME_TM``
-   * - 5
-     - DH used flag
-     - ``DH_FL``
-   * - 6
-     - Day/night flag
-     - ``DAYNIGHT_PARK_CD``
-   * - 7
-     - Visiting team
-     - ``AWAY_TEAM_ID``
-   * - 8
-     - Home team
-     - ``HOME_TEAM_ID``
-   * - 9
-     - Game site
-     - ``PARK_ID``
-   * - 10
-     - Visitors starting pitcher
-     - ``AWAY_START_PIT_ID``
-   * - 11
-     - Home starting pitcher
-     - ``HOME_START_PIT_ID``
-   * - 12
-     - Home plate umpire
-     - ``BASE4_UMP_ID``
-   * - 13
-     - First base umpire
-     - ``BASE1_UMP_ID``
-   * - 14
-     - Second base umpire
-     - ``BASE2_UMP_ID``
-   * - 15
-     - Third base umpire
-     - ``BASE3_UMP_ID``
-   * - 16
-     - Left field umpire
-     - ``LF_UMP_ID``
-   * - 17
-     - Right field umpire
-     - ``RF_UMP_ID``
-   * - 18
-     - Attendance
-     - ``ATTEND_PARK_CT``
-   * - 19
-     - PS scorer
-     - ``SCORER_RECORD_ID``
-   * - 20
-     - Translator
-     - ``TRANSLATOR_RECORD_ID``
-   * - 21
-     - Inputter
-     - ``INPUTTER_RECORD_ID``
-   * - 22
-     - Input time
-     - ``INPUT_RECORD_TS``
-   * - 23
-     - Edit time
-     - ``EDIT_RECORD_TS``
-   * - 24
-     - :ref:`How scored <cwtools.cwgame.howscored>`
-     - ``METHOD_RECORD_CD``
-   * - 25
-     - :ref:`Pitches entered <cwtools.cwgame.pitchesentered>`
-     - ``PITCHES_RECORD_CD``
-   * - 26
-     - :ref:`Temperature <cwtools.cwgame.temperature>`
-     - ``TEMP_PARK_CT``
-   * - 27
-     - :ref:`Wind direction <cwtools.cwgame.winddirection>`
-     - ``WIND_DIRECTION_PARK_CD``
-   * - 28
-     - :ref:`Wind speed <cwtools.cwgame.windspeed>`
-     - ``WIND_SPEED_PARK_CT``
-   * - 29
-     - :ref:`Field condition <cwtools.cwgame.fieldcondition>`
-     - ``FIELD_PARK_CD``
-   * - 30
-     - :ref:`Precipitation <cwtools.cwgame.precipitation>`
-     - ``PRECIP_PARK_CD``
-   * - 31
-     - :ref:`Sky <cwtools.cwgame.sky>`
-     - ``SKY_PARK_CD``
-   * - 32
-     - Time of game
-     - ``MINUTES_GAME_CT``
-   * - 33
-     - Number of innings
-     - ``INN_CT``
-   * - 34
-     - Visitor final score
-     - ``AWAY_SCORE_CT``
-   * - 35
-     - Home final score
-     - ``HOME_SCORE_CT``
-   * - 36
-     - Visitor hits
-     - ``AWAY_HITS_CT``
-   * - 37
-     - Home hits
-     - ``HOME_HITS_CT``
-   * - 38
-     - Visitor errors
-     - ``AWAY_ERR_CT``
-   * - 39
-     - Home errors
-     - ``HOME_ERR_CT``
-   * - 40
-     - Visitor left on base
-     - ``AWAY_LOB_CT``
-   * - 41
-     - Home left on base
-     - ``HOME_LOB_CT``
-   * - 42
-     - Winning pitcher
-     - ``WIN_PIT_ID``
-   * - 43
-     - Losing pitcher
-     - ``LOSE_PIT_ID``
-   * - 44
-     - Save
-     - ``SAVE_PIT_ID``
-   * - 45
-     - Game-winning RBI
-     - ``GWRBI_BAT_ID``
-   * - 46
-     - Visitor batter 1
-     - ``AWAY_LINEUP1_BAT_ID``
-   * - 47
-     - Visitor batter 1 position
-     - ``AWAY_LINEUP1_FLD_CD``
-   * - 48
-     - Visitor batter 2
-     - ``AWAY_LINEUP2_BAT_ID``
-   * - 49
-     - Visitor batter 2 position
-     - ``AWAY_LINEUP2_FLD_CD``
-   * - 50
-     - Visitor batter 3
-     - ``AWAY_LINEUP3_BAT_ID``
-   * - 51
-     - Visitor batter 3 position
-     - ``AWAY_LINEUP3_FLD_CD``
-   * - 52
-     - Visitor batter 4
-     - ``AWAY_LINEUP4_BAT_ID``
-   * - 53
-     - Visitor batter 4 position
-     - ``AWAY_LINEUP4_FLD_CD``
-   * - 54
-     - Visitor batter 5
-     - ``AWAY_LINEUP5_BAT_ID``
-   * - 55
-     - Visitor batter 5 position
-     - ``AWAY_LINEUP5_FLD_CD``
-   * - 56
-     - Visitor batter 6
-     - ``AWAY_LINEUP6_BAT_ID``
-   * - 57
-     - Visitor batter 6 position
-     - ``AWAY_LINEUP6_FLD_CD``
-   * - 58
-     - Visitor batter 7
-     - ``AWAY_LINEUP7_BAT_ID``
-   * - 59
-     - Visitor batter 7 position
-     - ``AWAY_LINEUP7_FLD_CD``
-   * - 60
-     - Visitor batter 8
-     - ``AWAY_LINEUP8_BAT_ID``
-   * - 61
-     - Visitor batter 8 position
-     - ``AWAY_LINEUP8_FLD_CD``
-   * - 62
-     - Visitor batter 9
-     - ``AWAY_LINEUP9_BAT_ID``
-   * - 63
-     - Visitor batter 9 position
-     - ``AWAY_LINEUP9_FLD_CD``
-   * - 64
-     - Home batter 1
-     - ``HOME_LINEUP1_BAT_ID``
-   * - 65
-     - Home batter 1 position
-     - ``HOME_LINEUP1_FLD_CD``
-   * - 66
-     - Home batter 2
-     - ``HOME_LINEUP2_BAT_ID``
-   * - 67
-     - Home batter 2 position
-     - ``HOME_LINEUP2_FLD_CD``
-   * - 68
-     - Home batter 3
-     - ``HOME_LINEUP3_BAT_ID``
-   * - 69
-     - Home batter 3 position
-     - ``HOME_LINEUP3_FLD_CD``
-   * - 70
-     - Home batter 4
-     - ``HOME_LINEUP4_BAT_ID``
-   * - 71
-     - Home batter 4 position
-     - ``HOME_LINEUP4_FLD_CD``
-   * - 72
-     - Home batter 5
-     - ``HOME_LINEUP5_BAT_ID``
-   * - 73
-     - Home batter 5 position
-     - ``HOME_LINEUP5_FLD_CD``
-   * - 74
-     - Home batter 6
-     - ``HOME_LINEUP6_BAT_ID``
-   * - 75
-     - Home batter 6 position
-     - ``HOME_LINEUP6_FLD_CD``
-   * - 76
-     - Home batter 7
-     - ``HOME_LINEUP7_BAT_ID``
-   * - 77
-     - Home batter 7 position
-     - ``HOME_LINEUP7_FLD_CD``
-   * - 78
-     - Home batter 8
-     - ``HOME_LINEUP8_BAT_ID``
-   * - 79
-     - Home batter 8 position
-     - ``HOME_LINEUP8_FLD_CD``
-   * - 80
-     - Home batter 9
-     - ``HOME_LINEUP9_BAT_ID``
-   * - 81
-     - Home batter 9 position
-     - ``HOME_LINEUP9_FLD_CD``
-   * - 82
-     - Visitor finishing pitcher
-     - ``AWAY_FINISH_PIT_ID``
-   * - 83
-     - Home finishing pitcher
-     - ``HOME_FINISH_PIT_ID``
-
-.. _cwtools.cwgame.howscored:
-
-How scored (field 24)
----------------------
-
-This field outputs a numeric code corresponding to the medium by
-which the play-by-play account was recorded.
-
-.. list-table:: Numeric codes for how scored field
-   :header-rows: 1
-   :widths: 5,20
-
-   * - Code
-     - Description
-   * - 0
-     - unknown
-   * - 1
-     - park
-   * - 2
-     - tv
-   * - 3
-     - radio
-
-
-
-.. _cwtools.cwgame.pitchesentered:
-
-Pitches entered (field 25)
---------------------------
-
-This field outputs a numeric code corresponding to the level of
-pitch detail in the file.
-
-.. list-table:: Numeric codes for pitches entered field
-   :header-rows: 1
-   :widths: 5,20
-
-   * - Code
-     - Description
-   * - 0
-     - unknown
-   * - 1
-     - pitches
-   * - 2
-     - count
-   * - 3
-     - none
-
-.. note:: This field reports the contents of the
-   info,pitches field in the game file. Some games
-   with partial pitch information will have this field set to
-   none or count.
-
-.. _cwtools.cwgame.temperature:
-
-Temperature (field 26)
-----------------------
-
-The game-time temperature, in degrees Fahrenheit. The value
-0 is used when the temperature is unknown.
-
-.. _cwtools.cwgame.winddirection:
-
-Wind direction (field 27)
--------------------------
-
-This field outputs a numeric code corresponding to the direction
-of the wind.
-
-.. list-table:: Numeric codes for wind direction field
-   :header-rows: 1
-   :widths: 5,20
-
-   * - Code
-     - Description
-   * - 0
-     - unknown
-   * - 1
-     - tolf
-   * - 2
-     - tocf
-   * - 3
-     - torf
-   * - 4
-     - ltor
-   * - 5
-     - fromlf
-   * - 6
-     - fromcf
-   * - 7 
-     - fromrf
-   * - 8 
-     - rtol 
-
-
-.. _cwtools.cwgame.windspeed:
-
-Wind speed (field 28)
----------------------
-
-The game time wind speed, in miles per hour. The value
--1 is used when the wind speed is unknown.
-
-.. _cwtools.cwgame.fieldcondition:
-
-Field condition (field 29)
---------------------------
-
-This field outputs a numeric code corresponding to the condition
-of the field.
-
-.. list-table:: Numeric codes for field condition field
-   :header-rows: 1
-   :widths: 5,20
-
-   * - Code
-     - Description
-   * - 0
-     - unknown
-   * - 1
-     - soaked
-   * - 2
-     - wet
-   * - 3
-     - damp
-   * - 4
-     - dry
-
-.. _cwtools.cwgame.precipitation:
-
-Precipitation (field 30)
-------------------------
-
-This field outputs a numeric code corresponding to the
-precipitation level.
-
-.. list-table:: Numeric codes for precipitation field
-   :header-rows: 1
-   :widths: 5,20
-  
-   * - Code
-     - Description
-   * - 0
-     - unknown
-   * - 1
-     - none
-   * - 2
-     - drizzle
-   * - 3
-     - showers
-   * - 4
-     - rain
-   * - 5
-     - snow
-
-.. _cwtools.cwgame.sky:
-
-Sky (field 31)
---------------
-
-This field outputs a numeric code corresponding to the sky
-conditions.
-
-Numeric codes for sky field.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. list-table:: Numeric codes for sky field
-   :header-rows: 1
-   :widths: 5,20
-  
-   * - Code
-     - Description
-   * - 0
-     - unknown
-   * - 1
-     - sunny
-   * - 2 
-     - cloudy
-   * - 3
-     - overcast
-   * - 4
-     - night
-   * - 5
-     - dome
-
-
-.. _cwtools.cwsub:
-
-cwsub: Player substitution descriptor
-=====================================
-
-:program:`cwsub` extracts information about
-in-game player substitutions. It is designed to be used in conjunction
-with :program:`cwevent` to mitigate a blind spot in the
-existing tools. 
-
-:program:`cwsub` outputs up to ten pieces of
-information about each substitution. All are included by default; which
-ones are generated is controlled by the -f switch.
-
-.. list-table:: cwevent standard field numbers
-   :header-rows: 1
-   :widths: 5,20,10
-
-   * - Field number
-     - Description
-     - Header
-   * - 0
-     - Game ID
-     - ``GAME_ID``
-   * - 1
-     - Inning
-     - ``INN_CT``
-   * - 2
-     - Batting team
-     - ``BAT_HOME_ID``
-   * - 3
-     - Substitute
-     - ``SUB_ID``
-   * - 4
-     - Team
-     - ``SUB_HOME_ID``
-   * - 5
-     - Lineup position
-     - ``SUB_LINEUP_ID``
-   * - 6
-     - Fielding position
-     - ``SUB_FLD_CD``
-   * - 7
-     - Removed player
-     - ``REMOVED_ID``
-   * - 8
-     - Position of removed player
-     - ``REMOVED_FLD_CD``
-   * - 9
-     - Event number
-     - ``EVENT_ID``
-
-
-.. _cwtools.commandline:
-
-Command-line options
-====================
-
-Each of the command-line tools shares a common set of options
-controlling their behavior. These are detailed in the following
-table.
-
-.. list-table:: Common command-line options and their effects
-   :header-rows: 1
-   :widths: 10,40
-
-   * - Switch
-     - Description
-   * - ``-a``
-     - Generate ASCII comma-delimited files (default)
-   * - ``-d``
-     - Print a list of the available fields and descriptions (for use with ``-f``)
-   * - ``-e mmdd``
-     - The latest date to process (inclusive)
-   * - ``-f flist``
-     - List of fields to output. The default list can be viewed with ``-h``; the list of available fields can be viewed with ``-d``
-   * - ``-ft``
-     - Generate FORTRAN format files.
-   * - ``-h``
-     - Prints description and usage information for the tool.
-   * - ``-i *gameid*``
-     - Only process the game with ID ``gameid``
-   * - ``-n``
-     - If in ASCII mode (the default), the first row of the output is a comma-separated list of column headers.
-   * - ``-s mmdd``
-     - The earliest date to process (inclusive)
-   * - ``-y``
-     - Specifies the year to use (four digits)
-
-
