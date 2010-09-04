@@ -1,10 +1,12 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(src/cwlib/chadwick.h)
+AC_INIT
+AC_CONFIG_SRCDIR([src/cwlib/chadwick.h])
+AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE(chadwick, 0.5.2.20091002)
 
 dnl Checks for programs.
 AC_PROG_CC
-AM_PROG_LIBTOOL
+LT_INIT
 
 dnl Checks for libraries.
 
@@ -24,9 +26,10 @@ AC_CHECK_DECL([_timezone],
 
 dnl Checks for library functions.
 
-AC_OUTPUT(src/cwlib/Makefile \
+AC_CONFIG_FILES([src/cwlib/Makefile \
           src/cwtools/Makefile \
 	  src/python/Makefile \
 	  src/score/Makefile \
           src/Makefile \
-  	  Makefile)
+  	  Makefile])
+AC_OUTPUT
