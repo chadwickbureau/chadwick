@@ -154,6 +154,16 @@ cw_event_rbi_on_play(CWEventData *event)
 	  ((event->rbi_flag[3] > 0) ? 1 : 0));
 }
 
+void
+cw_event_set_play(CWEventData *event, int base, char *play)
+{
+  strncpy(event->play[base], play, 20);
+  if (!strcmp(event->play[base], "99")) {
+    event->putouts[--event->num_putouts] = 0;
+    event->assists[--event->num_assists] = 0;
+  }
+}
+
 /*
  * CWParserState holds the state of the parser as it proceeds through
  * the event string.
@@ -547,7 +557,7 @@ static int cw_parse_advance_modifier(CWParserState *state,
     }
     
     if (state->token[0] != 'E') {
-      strncpy(event->play[baseFrom], state->token, 20);
+      cw_event_set_play(event, baseFrom, state->token);
     }
     else {
       for (i = baseFrom; i >= 0; i--) {
@@ -949,7 +959,7 @@ static int cw_parse_caught_stealing(CWParserState *state, CWEventData *event,
       if (cw_parse_fielding_credit(state, event, ' ')) {
 	event->advance[runner] = runner + 1;
 	event->muff_flag[runner] = 1;
-	strncpy(event->play[runner], state->token, 20);
+	cw_event_set_play(event, runner, state->token);
 
 	if (state->sym == '/') {
 	  cw_parse_flag(state);
@@ -969,14 +979,14 @@ static int cw_parse_caught_stealing(CWParserState *state, CWEventData *event,
 	}
       }
       else {
-	strncpy(event->play[runner], state->token, 20);
+	cw_event_set_play(event, runner, state->token);
       }
     }
     else if (state->sym == 'E') {
       cw_parse_fielding_credit(state, event, ' ');
       event->advance[runner] = runner + 1;
       event->muff_flag[runner] = 1;
-      strncpy(event->play[runner], state->token, 20);
+      cw_event_set_play(event, runner, state->token);
 
       if (state->sym == '/') {
 	cw_parse_flag(state);
@@ -1234,7 +1244,7 @@ static int cw_parse_generic_out(CWParserState *state, CWEventData *event,
 	}
       }
 	 
-      strncpy(event->play[base], state->token, 19);
+      cw_event_set_play(event, base, state->token);
       lastFielder = state->token[strlen(state->token) - 1];
     }
     else {
@@ -1247,7 +1257,7 @@ static int cw_parse_generic_out(CWParserState *state, CWEventData *event,
 	event->batted_ball_type = 'F';
       }
 
-      strcpy(event->play[0], state->token);
+      cw_event_set_play(event, 0, state->token);
       event->advance[0] = (safe) ? 1 : 0;
       if (safe) {
 	event->muff_flag[0] = 1;
@@ -1522,13 +1532,11 @@ static int cw_parse_pickoff(CWParserState *state, CWEventData *event,
   cw_parse_nextsym(state);
   if (isfielder(state->sym)) {
     cw_parse_fielding_credit(state, event, ' ');
-    strncpy(event->play[runner], state->token, 20);
+    cw_event_set_play(event, runner, state->token);
   }
   else if (state->sym == 'E') {
-    /* going to leave this commented to match hevent output for now */
-    /*    event->event_type = CW_EVENT_PICKOFFERROR;  */
     cw_parse_fielding_credit(state, event, ' ' );
-    strncpy(event->play[runner], state->token, 20);
+    cw_event_set_play(event, runner, state->token);
 
     if (state->sym == '/') {
       cw_parse_flag(state);
@@ -1622,11 +1630,11 @@ static int cw_parse_strikeout(CWParserState *state, CWEventData *event,
     int safe = cw_parse_fielding_credit(state, event, ' ');
     event->advance[0] = (safe) ? 1 : 0;
     event->muff_flag[0] = (safe) ? 1 : 0;
-    strcpy(event->play[0], state->token);
+    cw_event_set_play(event, 0, state->token);
   } 
   else {
     /* just a bare strikeout */
-    strcpy(event->play[0], "2");
+    cw_event_set_play(event, 0, "2");
     event->putouts[event->num_putouts++] = 2;
     event->touches[event->num_touches++] = 2;
   }
