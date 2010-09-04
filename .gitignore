@@ -1,0 +1,11 @@
+*.in
+Makefile
+*.pyc
+.DS_Store
+aclocal.m4
+autom4te.cache
+config.*
+configure
+_build
+libtool
+.deps
