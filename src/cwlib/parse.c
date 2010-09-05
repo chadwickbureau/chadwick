@@ -158,10 +158,6 @@ void
 cw_event_set_play(CWEventData *event, int base, char *play)
 {
   strncpy(event->play[base], play, 20);
-  if (!strcmp(event->play[base], "99")) {
-    event->putouts[--event->num_putouts] = 0;
-    event->assists[--event->num_assists] = 0;
-  }
 }
 
 /*
@@ -1927,7 +1923,7 @@ static int cw_parse_advancement(CWParserState *state, CWEventData *event)
  */
 void cw_parse_sanity_check(CWEventData *event)
 {
-  int base;
+  int base, i;
 
   if (event->event_type == CW_EVENT_SINGLE &&
       event->advance[0] == 0 && 
@@ -1999,6 +1995,16 @@ void cw_parse_sanity_check(CWEventData *event)
 	!strstr(event->play[base], "E")) {
       /* This patches up instances like BXH(832)(E8) */
       event->advance[base] = 0;
+    }
+
+    if (!strcmp(event->play[base], "99")) {
+      /* If fielding credits on any play are listed as unknown, then
+       * no fielding credits should be awarded.
+       */
+      for (i = 0; i < event->num_putouts; event->putouts[i++] = 0);
+      for (i = 0; i < event->num_assists; event->assists[i++] = 0);
+      event->num_putouts = 0;
+      event->num_assists = 0;
     }
   }
 
