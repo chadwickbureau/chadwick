@@ -29,27 +29,6 @@ standard from autotools.
 The makefiles build and install the underlying C library and the
 command-line tools.
 
-To build the Python API and the graphical interface, do the following,
-starting in the root source directory:
-
-cd src/python
-cp ../cwlib/*.c ../cwlib/*.h .
-python setup.py build
-python setup.py install
-cd ../score
-python setup.py build
-python setup.py install
-
-If you are installing to a system directory, you'll need to run
-the install steps as the superuser (via su or sudo).
-
-The graphical interface requires wxPython 2.5.3 or higher to be
-installed.
-
-A convenience script 'chadwick' is installed (by default to /usr/local/bin)
-which launches the graphical interface.
-
-
 
 What follows are the generic autoconf installation instructions.
 
