@@ -599,24 +599,11 @@ DECLARE_FIELDFUNC(cwgame_gwrbi)
 }
 
 int
-cwgame_final_pitcher(char *buffer, CWGame *game, int team)
+cwgame_final_pitcher(char *buffer, CWGame *game, CWBoxscore *box, int team)
 {
-  char *last = "";
-
-  CWEvent *event = game->first_event;
-  while (event != NULL) {
-    if (event->first_sub != NULL) {
-      CWAppearance *sub = event->first_sub;
-      while (sub != NULL) {
-        if (sub->team == team && sub->pos == 1) {
-          last = sub->player_id;
-        }
-        sub = sub->next;
-      }
-    }
-    event = event->next;
-  }
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s", last); 
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+		 (box->pitchers[team]->prev != NULL) ?
+		 box->pitchers[team]->player_id : "");
 }
 
 /* Fields for starting lineups */
@@ -2123,7 +2110,7 @@ void cwgame_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
       else {
         comma = 1;
       }
-      buf += cwgame_final_pitcher(buf, game, t);
+      buf += cwgame_final_pitcher(buf, game, box, t);
     }
     t++;
   }

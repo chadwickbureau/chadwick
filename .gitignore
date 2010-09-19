@@ -9,3 +9,15 @@ configure
 _build
 libtool
 .deps
+*.o
+*.lo
+*~
+.libs
+m4
+cwbox
+cwcomment
+cwevent
+cwgame
+cwsub
+*.a
+*.la

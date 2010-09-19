@@ -438,6 +438,21 @@ cw_gamestate_substitute(CWGameState *state,
       strncpy(state->runners[3], player_id, 49);
     }
   }
+
+  if (slot > 0 && state->lineups[0][team].player_id != NULL &&
+      !strcmp(state->lineups[0][team].player_id, player_id)) {
+      /* Substituting a pitcher into the batting order, eliminating
+       * the DH.  Clear out slot zero.
+       * This circumstance ought to be illegal, but has happened
+       * on at least one occasion, on 1976/9/5 when Catfish Hunter
+       * came in as a pinch-hitter for a player other than the DH.
+       */
+    free(state->lineups[0][team].player_id);
+    state->lineups[0][team].player_id = NULL;
+    free(state->lineups[0][team].name);
+    state->lineups[0][team].name = NULL;
+    state->dh_slot[team] = 0;
+  }
 }
 
 static void
