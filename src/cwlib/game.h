@@ -1,29 +1,25 @@
 /*
- * $Source$
- * $Date$
- * $Revision$
+ * This file is part of Chadwick
+ * Copyright (c) 2002-2010, Theodore Turocy (ted.turocy@gmail.com)
  *
- * DESCRIPTION:
- * Declaration of game storage classes, and interface to manipulation
+ * FILE: src/cwlib/game.h
+ * Declaration of game storage structures, and interface to manipulation
  * functions.
- * 
- * This file is part of Chadwick, a library for baseball play-by-play and stats
- * Copyright (C) 2002-2007, Ted Turocy (drarbiter@gmail.com)
  *
- * This program is free software; you can redistribute it and/or modify 
- * it under the terms of the GNU General Public License as published by 
- * the Free Software Foundation; either version 2 of the License, or (at 
- * your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but 
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
- * for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along 
- * with this program; if not, write to the Free Software Foundation, Inc., 
- * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- */ 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
 
 #ifndef CW_GAME_H
 #define CW_GAME_H

@@ -3,6 +3,7 @@ Makefile
 *.pyc
 .DS_Store
 aclocal.m4
+ltmain.sh
 autom4te.cache
 config.*
 configure
@@ -21,3 +22,4 @@ cwgame
 cwsub
 *.a
 *.la
+pychadwick
