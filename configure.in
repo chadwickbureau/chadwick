@@ -24,12 +24,11 @@
 AC_INIT
 AC_CONFIG_SRCDIR([src/cwlib/chadwick.h])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE(chadwick, 0.5.2.20091002)
+AM_INIT_AUTOMAKE(chadwick, 0.5.3)
 
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_LIBTOOL
-LT_INIT
 
 dnl Checks for libraries.
 
@@ -49,8 +48,6 @@ dnl Checks for library functions.
 
 AC_CONFIG_FILES([src/cwlib/Makefile \
           src/cwtools/Makefile \
-	  src/python/Makefile \
-	  src/score/Makefile \
           src/Makefile \
   	  Makefile])
 AC_OUTPUT
