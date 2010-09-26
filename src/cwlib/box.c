@@ -432,7 +432,11 @@ cw_box_add_event(CWBoxEvent **list, int inning, int half, int count, ...)
     }
     (*list)->inning = inning;
     (*list)->half_inning = half;
+    (*list)->runners = -1;
+    (*list)->pickoff = -1;
+    (*list)->outs = -1;
     (*list)->mark = 0;
+    strcpy((*list)->location, "");
     (*list)->prev = NULL;
     (*list)->next = NULL;
     return *list;
@@ -451,7 +455,11 @@ cw_box_add_event(CWBoxEvent **list, int inning, int half, int count, ...)
     }
     event->next->inning = inning;
     event->next->half_inning = half;
+    event->next->runners = -1;
+    event->next->pickoff = -1;
+    event->next->outs = -1;
     event->next->mark = 0;
+    strcpy(event->next->location, "");
     event->next->prev = event;
     event->next->next = NULL;
     return event->next;
