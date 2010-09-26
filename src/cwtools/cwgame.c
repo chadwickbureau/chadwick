@@ -139,7 +139,7 @@ int cwgame_find_player_name(char *buffer, char *player_id,
     return sprintf(buffer, "\"%s %s\"", bio->first_name, bio->last_name);
   }
   else {
-    return sprintf(buffer, "");
+    return sprintf(buffer, "%s", "");
   }
 }
 
@@ -741,13 +741,13 @@ DECLARE_FIELDFUNC(cwgame_home_league)
 /* Extended Field 2 */
 DECLARE_FIELDFUNC(cwgame_visitors_game)
 {
-  return sprintf(buffer, "");
+  return sprintf(buffer, "%s", "");
 }
 
 /* Extended Field 3 */
 DECLARE_FIELDFUNC(cwgame_home_game)
 {
-  return sprintf(buffer, "");
+  return sprintf(buffer, "%s", "");
 }
 
 /* Extended Field 4 */
@@ -770,19 +770,19 @@ DECLARE_FIELDFUNC(cwgame_length_outs)
 /* Extended Field 5 */
 DECLARE_FIELDFUNC(cwgame_completion_info)
 {
-  return sprintf(buffer, "");
+  return sprintf(buffer, "%s", "");
 }
 
 /* Extended Field 6 */
 DECLARE_FIELDFUNC(cwgame_forfeit_info)
 {
-  return sprintf(buffer, "");
+  return sprintf(buffer, "%s", "");
 }
 
 /* Extended Field 7 */
 DECLARE_FIELDFUNC(cwgame_protest_info)
 {
-  return sprintf(buffer, "");
+  return sprintf(buffer, "%s", "");
 }
 
 /* Extended Field 8 */
@@ -1612,61 +1612,61 @@ DECLARE_FIELDFUNC(cwgame_home_tp)
 /* Field 78 */
 DECLARE_FIELDFUNC(cwgame_umpire_home_name)
 {
-  return sprintf(buffer, "");
+  return sprintf(buffer, "%s", "");
 }
 
 /* Field 78 */
 DECLARE_FIELDFUNC(cwgame_umpire_1b_name)
 {
-  return sprintf(buffer, "");
+  return sprintf(buffer, "%s", "");
 }
 
 /* Field 78 */
 DECLARE_FIELDFUNC(cwgame_umpire_2b_name)
 {
-  return sprintf(buffer, "");
+  return sprintf(buffer, "%s", "");
 }
 
 /* Field 78 */
 DECLARE_FIELDFUNC(cwgame_umpire_3b_name)
 {
-  return sprintf(buffer, "");
+  return sprintf(buffer, "%s", "");
 }
 
 /* Field 78 */
 DECLARE_FIELDFUNC(cwgame_umpire_lf_name)
 {
-  return sprintf(buffer, "");
+  return sprintf(buffer, "%s", "");
 }
 
 /* Field 78 */
 DECLARE_FIELDFUNC(cwgame_umpire_rf_name)
 {
-  return sprintf(buffer, "");
+  return sprintf(buffer, "%s", "");
 }
 
 /* Field 89 */
 DECLARE_FIELDFUNC(cwgame_visitors_manager_id)
 {
-  return sprintf(buffer, "");
+  return sprintf(buffer, "%s", "");
 }
 
 /* Field 90 */
 DECLARE_FIELDFUNC(cwgame_visitors_manager_name)
 {
-  return sprintf(buffer, "");
+  return sprintf(buffer, "%s", "");
 }
 
 /* Field 91 */
 DECLARE_FIELDFUNC(cwgame_home_manager_id)
 {
-  return sprintf(buffer, "");
+  return sprintf(buffer, "%s", "");
 }
 
 /* Field 92 */
 DECLARE_FIELDFUNC(cwgame_home_manager_name)
 {
-  return sprintf(buffer, "");
+  return sprintf(buffer, "%s", "");
 }
 
 /* Field 94 */
@@ -1945,17 +1945,17 @@ DECLARE_FIELDFUNC(cwgame_additional_info)
 {
   if (cw_game_info_lookup(gameiter->game, "htbf") &&
       !strcmp(cw_game_info_lookup(gameiter->game, "htbf"), "true")) {
-    return sprintf(buffer, "HTBF");
+    return sprintf(buffer, "%s", "HTBF");
   }
   else {
-    return sprintf(buffer, "");
+    return sprintf(buffer, "%s", "");
   }
 }
 
 /* Field 160 */
 DECLARE_FIELDFUNC(cwgame_acquisition_info)
 {
-  return sprintf(buffer, "");
+  return sprintf(buffer, "%s", "");
 }
 
 static field_struct ext_field_data[] = {

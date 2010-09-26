@@ -647,7 +647,6 @@ cw_gameiter_lineup_setup(CWGameIterator *gameiter)
 void
 cw_gameiter_reset(CWGameIterator *gameiter)
 {
-  int i;
   gameiter->event = gameiter->game->first_event;
 
   cw_gamestate_cleanup(gameiter->state);

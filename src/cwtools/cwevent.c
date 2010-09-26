@@ -1343,8 +1343,6 @@ DECLARE_FIELDFUNC(cwevent_runner1_defensive_position)
 /* Extended Field 22 */
 DECLARE_FIELDFUNC(cwevent_runner1_lineup_position)
 {
-  int lineupSlot;
-
   if (!strcmp(gameiter->state->runners[1], "")) {
     return sprintf(buffer, "0");
   }
@@ -1379,8 +1377,6 @@ DECLARE_FIELDFUNC(cwevent_runner2_defensive_position)
 /* Extended Field 25 */
 DECLARE_FIELDFUNC(cwevent_runner2_lineup_position)
 {
-  int lineupSlot;
-
   if (!strcmp(gameiter->state->runners[2], "")) {
     return sprintf(buffer, "0");
   }
@@ -1415,8 +1411,6 @@ DECLARE_FIELDFUNC(cwevent_runner3_defensive_position)
 /* Extended Field 28 */
 DECLARE_FIELDFUNC(cwevent_runner3_lineup_position)
 {
-  int lineupSlot;
-
   if (!strcmp(gameiter->state->runners[3], "")) {
     return sprintf(buffer, "0");
   }

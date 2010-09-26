@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #include "xmlwrite.h"
 
@@ -162,3 +163,14 @@ xml_node_attribute_posint(XMLNode *node, char *attr, int value)
   fprintf(node->f, " %s=\"%d\"", attr, value);
 }
 
+void
+xml_node_attribute_fmt(XMLNode *node, char *attr, char *format, ...) 
+{
+  va_list argp;
+  char value[1024];
+
+  va_start(argp, format);
+  vsprintf(value, format, argp);
+  va_end(argp);
+  fprintf(node->f, " %s=\"%s\"", attr, value);
+}

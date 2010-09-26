@@ -128,8 +128,8 @@ xml_node_attribute_posint(XMLNode *node, char *attr, int value);
  * 'format'. The pointer to 'attr' is not stored, so it may
  * be deallocated or modified after the call completes.
  */
-#define xml_node_attribute_fmt(node, attr, format, ...) \
-  fprintf((node)->f, " %s=\"" format "\"", (attr), __VA_ARGS__); 
+void
+xml_node_attribute_fmt(XMLNode *node, char *attr, char *format, ...);
 
 
 

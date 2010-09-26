@@ -493,7 +493,7 @@ cwbox_team(XMLNode *parent,
 	   CWGame *game, CWBoxscore *boxscore,
 	   int t, CWRoster *roster)
 {
-  int i, slot;
+  int slot;
   XMLNode *node = NULL;
 
   node = xml_node_open(parent, "team");
@@ -1059,6 +1059,7 @@ cwbox_action_baseball_play(XMLNode *parent, CWGameIterator *gameiter,
    * event file has.
    */
   {
+    XMLNode *pitch;
     char *pitches = gameiter->event->pitches;
     char *c;
 
@@ -1073,7 +1074,7 @@ cwbox_action_baseball_play(XMLNode *parent, CWGameIterator *gameiter,
 	continue;
       }
 
-      XMLNode *pitch = xml_node_open(node, "action-baseball-pitch");
+      pitch = xml_node_open(node, "action-baseball-pitch");
 
       switch (*c) {
       case 'B':

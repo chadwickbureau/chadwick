@@ -245,6 +245,7 @@ static void
 cw_box_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
 {
   CWAppearance *sub = gameiter->event->first_sub;
+  CWBoxPitcher *pitcher;
 
   while (sub != NULL) {
     if (sub->slot < 0 || sub->slot > 9) {
@@ -342,7 +343,7 @@ cw_box_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
 	cur_pitcher->xbinn = gameiter->state->inning;
       }
 
-      CWBoxPitcher *pitcher = cw_box_pitcher_create(sub->player_id);
+      pitcher = cw_box_pitcher_create(sub->player_id);
       pitcher->pitching->g = 1;
       boxscore->pitchers[sub->team]->next = pitcher;
       pitcher->prev = boxscore->pitchers[sub->team];
@@ -418,9 +419,9 @@ cw_box_find_pitcher(CWBoxscore *boxscore, char *player_id)
 static CWBoxEvent *
 cw_box_add_event(CWBoxEvent **list, int inning, int half, int count, ...)
 {
+  int i = 0;
   va_list arg_list;
   va_start(arg_list, count); 
-  int i = 0;
 
   if (*list == NULL) {
     *list = (CWBoxEvent *) malloc(sizeof(CWBoxEvent));
