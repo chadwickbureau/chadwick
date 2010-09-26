@@ -64,12 +64,15 @@ char *cw_strtok(char *strToken)
   }
 
   /* Skip leading whitespace before next token */
-  /* while (	(*strToken == ' ') || (*strToken == '\t')
-   *		|| (*strToken == '\n') ) {
-   *
-   *  ++strToken;
-   *  }
-   */
+  while ((*strToken != 0) &&
+	 ((*strToken == ' ') || (*strToken == '\t') || (*strToken == '\n'))) {
+    ++strToken;
+  }
+
+  if (*strToken == 0) {
+    pNext = NULL;
+    return NULL;
+  }
 
   /* It's a quoted literal - skip the first quote char */
   if (*strToken == '\"') {
