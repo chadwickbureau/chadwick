@@ -370,7 +370,7 @@ cw_box_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
 /*
  * Find the boxscore entry for player with ID player_id
  */
-static CWBoxPlayer *
+CWBoxPlayer *
 cw_box_find_player(CWBoxscore *boxscore, char *player_id)
 {
   int i, t;
@@ -1142,9 +1142,11 @@ cw_box_iterate_game(CWBoxscore *boxscore, CWGame *game)
 void
 cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
 {
-  int i;
+  int i, slot, team, seq, pos;
   CWData *stat;
   CWBoxEvent *event;
+  CWBoxPlayer *player;
+  CWBoxPitcher *pitcher;
 
   /* Assume games ended with the conclusion of an inning... */
   boxscore->outs_at_end = 3;
@@ -1152,9 +1154,8 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
 
   for (stat = game->first_stat; stat; stat = stat->next) {
     if (!strcmp(stat->data[0], "bline")) {
-      CWBoxPlayer *player;
-      int slot = atoi(stat->data[3]);
-      int team = atoi(stat->data[2]);
+      slot = atoi(stat->data[3]);
+      team = atoi(stat->data[2]);
 
       if (atoi(stat->data[4]) == 1) {
 	/* Record for starter */
@@ -1226,9 +1227,8 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
       player->batting->movedup = -1;
     }
     else if (!strcmp(stat->data[0], "pline")) {
-      CWBoxPitcher *pitcher;
-      int team = atoi(stat->data[2]);
-      int seq = atoi(stat->data[3]);
+      team = atoi(stat->data[2]);
+      seq = atoi(stat->data[3]);
 
       if (seq == 1) {
 	/* Record for starter */
@@ -1266,7 +1266,28 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
       pitcher->pitching->fb = -1;
     }
     else if (!strcmp(stat->data[0], "dline")) {
-
+      team = atoi(stat->data[2]);
+      seq = atoi(stat->data[3]);
+      pos = atoi(stat->data[4]);
+      player = cw_box_find_player(boxscore, stat->data[1]);
+      if (player->num_positions < seq) {
+	player->num_positions = seq;
+      }
+      player->positions[seq-1] = pos;
+      if (player->fielding[pos] == NULL) {
+	player->fielding[pos] = cw_box_fielding_create();
+      }
+      player->fielding[pos]->g = 1;
+      player->fielding[pos]->outs = atoi(stat->data[5]);
+      player->fielding[pos]->po = atoi(stat->data[6]);
+      player->fielding[pos]->a = atoi(stat->data[7]);
+      player->fielding[pos]->e = atoi(stat->data[8]);
+      player->fielding[pos]->dp = atoi(stat->data[9]);
+      player->fielding[pos]->tp = atoi(stat->data[10]);
+      player->fielding[pos]->pb = atoi(stat->data[11]);
+      player->fielding[pos]->bip = - 1;
+      player->fielding[pos]->bf = -1;
+      player->fielding[pos]->xi = -1;
     }
     else if (!strcmp(stat->data[0], "tline")) {
       int team = atoi(stat->data[1]);

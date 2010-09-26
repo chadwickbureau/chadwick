@@ -138,6 +138,11 @@ CWBoxPlayer *cw_box_get_starter(CWBoxscore *boxscore, int team, int slot);
 CWBoxPitcher *cw_box_get_starting_pitcher(CWBoxscore *boxscore, int team);
 
 /*
+ * Find the player entry for player with ID player_id
+ */
+CWBoxPlayer *cw_box_find_player(CWBoxscore *boxscore, char *player_id);
+
+/*
  * Find the pitching entry for player with ID player_id
  */
 CWBoxPitcher *cw_box_find_pitcher(CWBoxscore *boxscore, char *player_id);
