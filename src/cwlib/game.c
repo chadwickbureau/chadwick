@@ -47,6 +47,8 @@ CWGame *cw_game_create(char *game_id)
   game->last_stat = NULL;
   game->first_line = NULL;
   game->last_line = NULL;
+  game->first_evdata = NULL;
+  game->last_evdata = NULL;
   game->first_comment = NULL;
   game->last_comment = NULL;
   game->prev = NULL;
@@ -171,6 +173,27 @@ static void cw_game_cleanup_stat(CWGame *game)
   game->last_stat = NULL;
 }
 
+
+/*
+ * Private auxiliary function to cleanup memory from evdata list
+ */
+static void cw_game_cleanup_evdata(CWGame *game)
+{
+  CWData *data = game->first_evdata;
+  while (data != NULL) {
+    int i;
+    CWData *next_data = data->next;
+
+    for (i = 0; i < data->num_data; free(data->data[i++]));
+    free(data->data);
+    data = next_data;
+  }
+
+  game->first_evdata = NULL;
+  game->last_evdata = NULL;
+}
+
+
 /*
  * Private auxiliary function to cleanup memory from data list
  */
@@ -201,6 +224,7 @@ void cw_game_cleanup(CWGame *game)
   cw_game_cleanup_data(game);
   cw_game_cleanup_stat(game);
   cw_game_cleanup_line(game);
+  cw_game_cleanup_evdata(game);
    
   free(game->version);
   game->version = NULL;
@@ -434,6 +458,30 @@ void cw_game_stat_append(CWGame *game, int num_data, char **data)
   game->last_stat = d;
 }
 
+void cw_game_evdata_append(CWGame *game, int num_data, char **data)
+{
+  int i;
+  CWData *d = (CWData *) malloc(sizeof(CWData));
+
+  d->num_data = num_data;
+  d->data = (char **) malloc(sizeof(char *) * num_data);
+  d->next = NULL;
+  
+  for (i = 0; i < num_data; i++) {
+    d->data[i] = (char *) malloc(sizeof(char) * (strlen(data[i]) + 1));
+    strcpy(d->data[i], data[i]);
+  }
+
+  if (game->first_evdata) {
+    game->last_evdata->next = d;
+  }
+  else {
+    game->first_evdata = d;
+  }
+  d->prev = game->last_evdata;
+  game->last_evdata = d;
+}
+
 void cw_game_line_append(CWGame *game, int num_data, char **data)
 {
   int i;
@@ -629,6 +677,18 @@ cw_game_read(FILE *file)
 	data[i] = cw_strtok(NULL);
 	if (!data[i] || isspace(data[i][0])) {
 	  cw_game_stat_append(game, i, data);
+	  break;
+	}
+      }
+    }
+    else if (!strcmp(tok, "event")) {
+      char *data[256];
+      int i;
+
+      for (i = 0; i < 256; i++) {
+	data[i] = cw_strtok(NULL);
+	if (!data[i] || isspace(data[i][0])) {
+	  cw_game_evdata_append(game, i, data);
 	  break;
 	}
       }

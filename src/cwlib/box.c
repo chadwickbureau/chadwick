@@ -1313,6 +1313,23 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
       boxscore->linescore[i][team] = atoi(stat->data[i]);
     }
   }
+
+  for (stat = game->first_evdata; stat; stat = stat->next) {
+    if (!strcmp(stat->data[0], "dpline")) {
+      event = cw_box_add_event(&(boxscore->dp_list), -1,
+			       1-atoi(stat->data[1]), 0);
+      for (i = 2; i < stat->num_data; i++) {
+	event->players[i-2] = stat->data[i];
+      }
+    }
+    else if (!strcmp(stat->data[0], "tpline")) {
+      event = cw_box_add_event(&(boxscore->tp_list), -1,
+			       1-atoi(stat->data[1]), 0);
+      for (i = 2; i < stat->num_data; i++) {
+	event->players[i-2] = stat->data[i];
+      }
+    }
+  }
 }
 
 /*

@@ -84,6 +84,7 @@ typedef struct cw_game_struct {
   CWEvent *first_event, *last_event;
   CWData *first_data, *last_data, *first_stat, *last_stat;
   CWData *first_line, *last_line;  /* linescores, for boxscore event files */
+  CWData *first_evdata, *last_evdata;  /* event detail, for boxscore event files */
   CWComment *first_comment, *last_comment; /* for comments before first evt */
   struct cw_game_struct *prev, *next;
 } CWGame;
@@ -180,6 +181,11 @@ void cw_game_data_append(CWGame *game, int num_data, char **data);
  * Add a stat record to the game
  */
 void cw_game_stat_append(CWGame *game, int num_data, char **data);
+
+/*
+ * Add a event detail record to the game
+ */
+void cw_game_evdata_append(CWGame *game, int num_data, char **data);
 
 /*
  * Add a comment to the game
