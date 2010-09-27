@@ -1279,6 +1279,12 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
       seq = atoi(stat->data[3]);
       pos = atoi(stat->data[4]);
       player = cw_box_find_player(boxscore, stat->data[1]);
+      if (player == NULL) {
+	fprintf(stderr,
+		"ERROR: In %s, cannot find entry for player '%s' listed in dline.\n",
+		game->game_id, stat->data[1]);
+	exit(1);
+      }
       if (player->num_positions < seq) {
 	player->num_positions = seq;
       }
