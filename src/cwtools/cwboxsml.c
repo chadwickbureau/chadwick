@@ -1344,6 +1344,7 @@ cwbox_event_metadata(XMLNode *parent, CWGame *game)
 {
   XMLNode *node = NULL;
   char season[5];
+  int timeofgame;
 
   strncpy(season, cw_game_info_lookup(game, "date"), 4); 
   season[4] = '\0';
@@ -1371,9 +1372,12 @@ cwbox_event_metadata(XMLNode *parent, CWGame *game)
 
   xml_node_attribute(node, "event-status", "post-event");
   
-  xml_node_attribute_fmt(node, "duration", "%d:%02d",
-			 atoi(cw_game_info_lookup(game, "timeofgame")) / 60,
-			 atoi(cw_game_info_lookup(game, "timeofgame")) % 60);
+  if (cw_game_info_lookup(game, "timeofgame") &&
+      sscanf(cw_game_info_lookup(game, "timeofgame"), "%d", &timeofgame) &&
+      timeofgame > 0) {
+    xml_node_attribute_fmt(node, "duration", "%d:%02d",
+			   timeofgame / 60, timeofgame % 60);
+  }
 
   xml_node_attribute_int(node, "game-of-day",
 			 (atoi(cw_game_info_lookup(game, "number")) == 0) ? 1 :
