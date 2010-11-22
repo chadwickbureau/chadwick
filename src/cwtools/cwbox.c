@@ -265,13 +265,16 @@ cwbox_print_pitcher(CWGame *game,
     sprintf(name, "%s", pitcher->player_id);
   }
 
-  if (!strcmp(cw_game_info_lookup(game, "wp"), pitcher->player_id)) {
+  if (cw_game_info_lookup(game, "wp") &&
+      !strcmp(cw_game_info_lookup(game, "wp"), pitcher->player_id)) {
     strcat(name, " (W)");
   }
-  else if (!strcmp(cw_game_info_lookup(game, "lp"), pitcher->player_id)) {
+  else if (cw_game_info_lookup(game, "lp") &&
+	   !strcmp(cw_game_info_lookup(game, "lp"), pitcher->player_id)) {
     strcat(name, " (L)");
   }
-  else if (!strcmp(cw_game_info_lookup(game, "save"), pitcher->player_id)) {
+  else if (cw_game_info_lookup(game, "save") &&
+	   !strcmp(cw_game_info_lookup(game, "save"), pitcher->player_id)) {
     strcat(name, " (S)");
   }
 
@@ -279,19 +282,30 @@ cwbox_print_pitcher(CWGame *game,
     strcat(name, markers[(*note_count)++]);
   }
 
+  printf("%-20s %2d.%1d %2d %2d",
+	 name, pitcher->pitching->outs / 3, pitcher->pitching->outs % 3,
+	 pitcher->pitching->h, pitcher->pitching->r);
+
   if (pitcher->pitching->er != -1) {
-    printf("%-20s %2d.%1d %2d %2d %2d %2d %2d\n",
-	   name, pitcher->pitching->outs / 3, pitcher->pitching->outs % 3,
-	   pitcher->pitching->h, pitcher->pitching->r,
-	   pitcher->pitching->er, pitcher->pitching->bb, pitcher->pitching->so);
+    printf(" %2d", pitcher->pitching->er);
   }
   else {
-    printf("%-20s %2d.%1d %2d %2d    %2d %2d\n",
-	   name, pitcher->pitching->outs / 3, pitcher->pitching->outs % 3,
-	   pitcher->pitching->h, pitcher->pitching->r,
-	   pitcher->pitching->bb, pitcher->pitching->so);
+    printf("   ");
   }
 
+  if (pitcher->pitching->bb != -1) {
+    printf(" %2d", pitcher->pitching->bb);
+  }
+  else {
+    printf("   ");
+  }
+  
+  if (pitcher->pitching->so != -1) {
+    printf(" %2d\n", pitcher->pitching->so);
+  }
+  else {
+    printf("   \n");
+  }
 }
 
 /*
@@ -603,8 +617,12 @@ cwbox_print_hbp_apparatus(CWBoxEvent *list,
 void
 cwbox_print_timeofgame(CWGame *game)
 {
-  int tog = atoi(cw_game_info_lookup(game, "timeofgame"));
-  printf("T -- %d:%02d\n", tog / 60, tog % 60);
+  int timeofgame;
+  if (cw_game_info_lookup(game, "timeofgame") &&
+      sscanf(cw_game_info_lookup(game, "timeofgame"), "%d", &timeofgame) &&
+      timeofgame > 0) {
+    printf("T -- %d:%02d\n", timeofgame / 60, timeofgame % 60);
+  }
 }
 
 /*
@@ -679,9 +697,15 @@ cwbox_print_text(CWGame *game, CWBoxscore *boxscore,
 	}
 	players[t] = players[t]->next;
 	if (players[t] == NULL) {
-	  slots[t]++;
-	  if (slots[t] <= 9) {
-	    players[t] = cw_box_get_starter(boxscore, t, slots[t]);
+	  /* In some National Association games, teams played with 8
+	   * players.  This generalization allows for printing
+	   * boxscores when some batting slots are empty.
+	   */
+	  while (slots[t] <= 9 && players[t] == NULL) {
+	    slots[t]++;
+	    if (slots[t] <= 9) {
+	      players[t] = cw_box_get_starter(boxscore, t, slots[t]);
+	    }
 	  }
 	}
       }
