@@ -2229,6 +2229,18 @@ cwgame_initialize(void)
     }
   }
 
+  for (i = 0; i <= max_ext_field; i++) {
+    if (ext_fields[i]) {
+      if (ascii && comma) {
+	*(buf++) = ',';
+      }
+      else {
+	comma = 1;
+      }
+      buf += sprintf(buf, "\"%s\"", ext_field_data[i].header);
+    }
+  }
+
   printf("%s", output_line);
   printf("\n");
 }
