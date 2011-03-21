@@ -184,6 +184,16 @@ cwbox_xml_pitching(CWGame *game, CWBoxscore *boxscore, int t, CWRoster *roster)
     printf("    <pitcher id=\"%s\" lname=\"%s\" fname=\"%s\" ",
 	   pitcher->player_id, (bio) ? bio->last_name : "", 
 	   (bio) ? bio->first_name : "");
+    /* FIXME: A pitcher gets a shutout if he records all outs for a team,
+     * even if not the starting pitcher! */
+    printf("gs=\"%d\" cg=\"%d\" sho=\"%d\" gf=\"%d\" ",
+	   (pitcher->prev == NULL) ? 1 : 0,
+	   (pitcher->prev == NULL && 
+	    pitcher->next == NULL) ? 1 : 0,
+	   (pitcher->prev == NULL && pitcher->next == NULL &&
+	    pitcher->pitching->r == 0) ? 1 : 0,
+	   (pitcher->prev != NULL && 
+	    pitcher->next == NULL) ? 1 : 0);
     printf("outs=\"%d\" bf=\"%d\" h=\"%d\" r=\"%d\" "
 	   "er=\"%d\" hr=\"%d\" ",
 	   pitcher->pitching->outs, pitcher->pitching->bf,
