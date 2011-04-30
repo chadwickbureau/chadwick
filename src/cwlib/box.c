@@ -1297,6 +1297,7 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
       player->fielding[pos]->po = atoi(stat->data[6]);
       player->fielding[pos]->a = atoi(stat->data[7]);
       player->fielding[pos]->e = atoi(stat->data[8]);
+      boxscore->errors[team] += player->fielding[pos]->e;
       player->fielding[pos]->dp = atoi(stat->data[9]);
       player->fielding[pos]->tp = atoi(stat->data[10]);
       player->fielding[pos]->pb = atoi(stat->data[11]);
