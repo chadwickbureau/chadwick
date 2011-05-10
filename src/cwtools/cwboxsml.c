@@ -49,10 +49,10 @@ cwbox_player_metadata(XMLNode *parent,
   if (player->positions[0] == 10) {
     xml_node_attribute(node, "position-event", "dh");
   }
-  else if (player->positions[0] == 11) {
+  else if (player->positions[0] == 11 || player->ph_inn > 0) {
     xml_node_attribute(node, "position-event", "ph");
   }
-  else if (player->positions[0] == 12) {
+  else if (player->positions[0] == 12 || player->pr_inn > 0) {
     xml_node_attribute(node, "position-event", "pr");
   }
   else {

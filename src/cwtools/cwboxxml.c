@@ -75,6 +75,12 @@ cwbox_xml_player(CWGame *game,
 	 (bio) ? bio->last_name : "", (bio) ? bio->first_name: "", slot, seq);
   
   printf("pos=\"");
+  if (player->ph_inn > 0 && player->positions[0] != 11) {
+    printf("h");
+  }
+  else if (player->pr_inn > 0 && player->positions[0] != 12) {
+    printf("r");
+  }
   for (pos = 0; pos < player->num_positions; pos++) {
     if (player->positions[pos] == 10) {
       printf("d");

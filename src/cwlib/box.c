@@ -1305,6 +1305,28 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
       player->fielding[pos]->bf = -1;
       player->fielding[pos]->xi = -1;
     }
+    else if (!strcmp(stat->data[0], "phline")) {
+      team = atoi(stat->data[3]);
+      player = cw_box_find_player(boxscore, stat->data[1]);
+      if (player == NULL) {
+	fprintf(stderr,
+		"ERROR: In %s, cannot find entry for player '%s' listed in phline.\n",
+		game->game_id, stat->data[1]);
+	exit(1);
+      }
+      player->ph_inn = atoi(stat->data[2]);
+    }
+    else if (!strcmp(stat->data[0], "prline")) {
+      team = atoi(stat->data[3]);
+      player = cw_box_find_player(boxscore, stat->data[1]);
+      if (player == NULL) {
+	fprintf(stderr,
+		"ERROR: In %s, cannot find entry for player '%s' listed in prline.\n",
+		game->game_id, stat->data[1]);
+	exit(1);
+      }
+      player->pr_inn = atoi(stat->data[2]);
+    }
     else if (!strcmp(stat->data[0], "tline")) {
       int team = atoi(stat->data[1]);
       boxscore->lob[team] = atoi(stat->data[2]);
