@@ -836,7 +836,7 @@ cw_game_write_stat(CWGame *game, FILE *file)
 static void
 cw_game_write_line(CWGame *game, FILE *file)
 {
-  CWData *data = game->first_data;
+  CWData *data = game->first_line;
   
   while (data != NULL) {
     int i;
