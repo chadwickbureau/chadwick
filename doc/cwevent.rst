@@ -13,6 +13,7 @@ detailed information not easily accessed via the standard
 fields. These are are specified using the ``-x`` command-line flag.
 
 .. note::
+
    :program:`cwevent` guarantees that the standard field numbers will
    match those used by BEVENT.  Standard field numbers therefore can
    be treated as stable, and it should be safe to write scripts
