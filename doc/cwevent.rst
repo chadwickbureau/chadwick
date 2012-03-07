@@ -258,13 +258,13 @@ fields. These are are specified using the ``-x`` command-line flag.
      - Pickoff of runner on third
      - ``RUN3_PK_FL``
    * - 75
-     - Pitcher charged with runner on first
+     - :ref:`Pitcher charged with runner on first <cwtools.cwevent.responsibility>`
      - ``RUN1_RESP_PIT_ID``
    * - 76
-     - Pitcher charged with runner on second
+     - :ref:`Pitcher charged with runner on second <cwtools.cwevent.responsibility>`
      - ``RUN2_RESP_PIT_ID``
    * - 77
-     - Pitcher charged with runner on third
+     - :ref:`Pitcher charged with runner on third <cwtools.cwevent.responsibility>`
      - ``RUN3_RESP_PIT_ID``
    * - 78
      - New game flag
@@ -686,6 +686,56 @@ F for generic fielding errors, and
 T for throwing errors; no distinction is made
 between bobbled batted balls, muffed throws or fly balls, and so
 forth.
+
+.. _cwtools.cwevent.responsibility:
+
+Pitcher responsibility for runs (fields 75-77)
+----------------------------------------------
+
+The Official Rules for charging runs to pitchers stipulate that if a
+pitcher is relieved in the middle of an inning with runners left on
+base, he is charged with runs if those runners (or the ones who
+replace them in the event of fielder's choices) subsequently score in
+the inning.  The current rule is Rule 10.16(g), the comment on which
+in the rules states:
+
+   It is the intent of Rule 10.16(g) to charge each pitcher with the
+   number of runners he put on base, rather than with the individual
+   runners. When a pitcher puts runners on base and is relieved, such
+   pitcher  shall be charged with all runs subsequently scored up to
+   and including the number of runners such pitcher left on base when
+   such pitcher left the game, unless such runners are put 
+   out without action by the batter.
+
+Chadwick implements this by assigning "responsibility"
+for runners, and shifting those runners after fielder's choices as
+appropriate to implement the rule.  Fields 75 through 77 report the
+pitcher currently "charged" with runners on base using this method.
+
+There is one special case to note in reporting these fields.  As
+noted, a fielder's choice does not absolve a departed pitcher for
+responsibility for a potential run. Ordinarily it is good enough to
+report the shift in responsibility at the start of the next play.
+However, consider the following scenario: The bases are loaded, with
+the runner on third (R3) the responsibility of Pitcher A and runners
+on second and first (R2 and R1) the responsibility of Pitcher B. The
+batter hits a ground ball and R3 is forced at home. Then, the catcher
+throws wildly trying to complete the double play, and as a result R2
+scores.  In this case, the run scored by R2 is charged to Pitcher A,
+not Pitcher B, i.e., the responsibility shifts in the middle of the
+play. In order to facilitate calculation of runs and earned runs
+allowed correctly from cwevent output, in this case, the record for
+the play will report R2 as being the responsibility of Pitcher A,
+i.e., it will report the responsibility after the mid-play shift. 
+
+This convention will not affect most applications.  Indeed, the
+Official Rules technically do not have a concept of assigning
+responsibility to particular runners, and the contents of fields 75-77
+only have meaning on plays in which the corresponding runners
+score. This convention may confuse certain calculations, however,
+including those which try to track what happens to inherited runners,
+if one does not take appropriate care to handle this very unusual case.
+
 
 .. _cwtools.cwevent.fielding:
 
