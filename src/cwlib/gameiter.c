@@ -661,10 +661,16 @@ cw_gameiter_reset(CWGameIterator *gameiter)
     gameiter->state->batting_team = 0;
   }
 
-  if (gameiter->event && strcmp(gameiter->event->event_text, "NP")) {
-    gameiter->state->batter_hand = gameiter->event->batter_hand;
-    gameiter->parse_ok = cw_parse_event(gameiter->event->event_text, 
-					gameiter->event_data);
+  if (gameiter->event) {
+    if (strcmp(gameiter->event->event_text, "NP")) {
+      gameiter->state->batter_hand = gameiter->event->batter_hand;
+      gameiter->parse_ok = cw_parse_event(gameiter->event->event_text, 
+					  gameiter->event_data);
+    }
+    else {
+      /* There are some very rare instances with an NP as the first play */
+      gameiter->parse_ok = 1;
+    }
   }
 }
 
