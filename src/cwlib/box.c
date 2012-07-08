@@ -126,13 +126,15 @@ cw_box_pitching_create(void)
  ************************************************************************/
 
 static CWBoxPlayer *
-cw_box_player_create(char *player_id)
+cw_box_player_create(char *player_id, char *name)
 {
   int i;
 
   CWBoxPlayer *player = (CWBoxPlayer *) malloc(sizeof(CWBoxPlayer));
   player->player_id = (char *) malloc(sizeof(char) * (strlen(player_id) + 1));
   strcpy(player->player_id, player_id);
+  player->name = (char *) malloc(sizeof(char) * (strlen(name) + 1));
+  strcpy(player->name, name);
   player->batting = cw_box_batting_create();
   player->num_positions = player->ph_inn = player->pr_inn = 0;
   for (i = 0; i <= 9; i++) {
@@ -153,15 +155,18 @@ cw_box_player_cleanup(CWBoxPlayer *player)
     }
   }
   free(player->batting);
+  free(player->name);
   free(player->player_id);
 }
 
 static CWBoxPitcher *
-cw_box_pitcher_create(char *player_id)
+cw_box_pitcher_create(char *player_id, char *name)
 {
   CWBoxPitcher *pitcher = (CWBoxPitcher *) malloc(sizeof(CWBoxPitcher));
   pitcher->player_id = (char *) malloc(sizeof(char) * (strlen(player_id) + 1));
   strcpy(pitcher->player_id, player_id);
+  pitcher->name = (char *) malloc(sizeof(char) * (strlen(name) + 1));
+  strcpy(pitcher->name, name);
   pitcher->pitching = cw_box_pitching_create();
   pitcher->prev = NULL;
   pitcher->next = NULL;
@@ -172,6 +177,7 @@ static void
 cw_box_pitcher_cleanup(CWBoxPitcher *pitcher)
 {
   free(pitcher->pitching);
+  free(pitcher->name);
   free(pitcher->player_id);
 }
 
@@ -212,7 +218,7 @@ cw_box_enter_starters(CWBoxscore *boxscore, CWGame *game)
       CWAppearance *app = cw_game_starter_find(game, t, i);
       if (!app) continue;
 
-      boxscore->slots[i][t] = cw_box_player_create(app->player_id);
+      boxscore->slots[i][t] = cw_box_player_create(app->player_id, app->name);
       boxscore->slots[i][t]->batting->g = 1;
       boxscore->slots[i][t]->num_positions++;
       boxscore->slots[i][t]->positions[0] = app->pos;
@@ -221,7 +227,7 @@ cw_box_enter_starters(CWBoxscore *boxscore, CWGame *game)
 	boxscore->slots[i][t]->fielding[app->pos]->g = 1;
       }
       if (app->pos == 1) {
-	boxscore->pitchers[t] = cw_box_pitcher_create(app->player_id);
+	boxscore->pitchers[t] = cw_box_pitcher_create(app->player_id, app->name);
 	boxscore->pitchers[t]->pitching->g = 1;
 	boxscore->pitchers[t]->pitching->gs = 1;
       }
@@ -230,7 +236,7 @@ cw_box_enter_starters(CWBoxscore *boxscore, CWGame *game)
     /*
     if (!strcmp(cw_game_info_lookup(game, "usedh"), "true")) {
       CWAppearance *app = cw_game_starter_find(game, t, 0);
-      boxscore->pitchers[t] = cw_box_pitcher_create(app->player_id);
+      boxscore->pitchers[t] = cw_box_pitcher_create(app->player_id, app->name);
       boxscore->pitchers[t]->pitching->g = 1;
       boxscore->pitchers[t]->pitching->gs = 1;
     }
@@ -273,7 +279,7 @@ cw_box_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
        * sub players into the 0 slot even though the DH is not in use.
        * Try to do something reasonable here. 
        */
-      CWBoxPlayer *player = cw_box_player_create(sub->player_id);
+      CWBoxPlayer *player = cw_box_player_create(sub->player_id, sub->name);
       player->batting->g = 1; 
       boxscore->slots[sub->slot][sub->team] = player;
     }
@@ -302,7 +308,7 @@ cw_box_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
 	       
     else if (strcmp(sub->player_id, 
 		    boxscore->slots[sub->slot][sub->team]->player_id)) {
-      CWBoxPlayer *player = cw_box_player_create(sub->player_id);
+      CWBoxPlayer *player = cw_box_player_create(sub->player_id, sub->name);
       player->batting->g = 1; 
       boxscore->slots[sub->slot][sub->team]->next = player;
       player->prev = boxscore->slots[sub->slot][sub->team];
@@ -343,7 +349,7 @@ cw_box_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
 	cur_pitcher->xbinn = gameiter->state->inning;
       }
 
-      pitcher = cw_box_pitcher_create(sub->player_id);
+      pitcher = cw_box_pitcher_create(sub->player_id, sub->name);
       pitcher->pitching->g = 1;
       boxscore->pitchers[sub->team]->next = pitcher;
       pitcher->prev = boxscore->pitchers[sub->team];
@@ -1171,7 +1177,7 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
 	player = cw_box_get_starter(boxscore, team, slot);
       }
       else {
-	player = cw_box_player_create(stat->data[1]);
+	player = cw_box_player_create(stat->data[1], "");
 	player->batting->g = 1; 
 	boxscore->slots[slot][team]->next = player;
 	player->prev = boxscore->slots[slot][team];
@@ -1245,7 +1251,7 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
 	pitcher->pitching->gs = 1;
       }
       else {
-	pitcher = cw_box_pitcher_create(stat->data[1]);
+	pitcher = cw_box_pitcher_create(stat->data[1], "");
 	boxscore->pitchers[team]->next = pitcher;
 	pitcher->prev = boxscore->pitchers[team];
 	boxscore->pitchers[team] = pitcher;

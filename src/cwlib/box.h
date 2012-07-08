@@ -40,7 +40,7 @@ typedef struct cw_box_fielding_struct {
  * The main data structure for a player's entry in the boxscore.
  */
 typedef struct cw_box_player_struct {
-  char *player_id;
+  char *player_id, *name;
   CWBoxBatting *batting;
   int ph_inn, pr_inn, num_positions;
   /* The list of positions the player played. */
@@ -71,7 +71,7 @@ typedef struct cw_box_pitching_struct {
  * The main data structure for a pitcher's entry in the boxscore.
  */
 typedef struct cw_box_pitcher_struct {
-  char *player_id;
+  char *player_id, *name;
   CWBoxPitching *pitching;
   struct cw_box_pitcher_struct *prev, *next;
 } CWBoxPitcher;

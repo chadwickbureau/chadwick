@@ -196,15 +196,18 @@ char positions[][3] = {
 void
 cwbox_print_player(CWBoxPlayer *player, CWRoster *roster)
 {
-  CWPlayer *bio = cw_roster_player_find(roster, player->player_id);
+  CWPlayer *bio = NULL;
   char name[256], posstr[256], outstr[256];
   int pos;
 
+  if (roster) {
+    bio = cw_roster_player_find(roster, player->player_id);
+  }
   if (bio) {
     sprintf(name, "%s %c", bio->last_name, bio->first_name[0]);
   }
   else {
-    sprintf(name, "%s", player->player_id);
+    sprintf(name, "%s", player->name);
   }
 
   if (player->ph_inn > 0 && player->positions[0] != 11) {
@@ -265,14 +268,17 @@ cwbox_print_pitcher(CWGame *game,
 		    int *note_count)
 {
   char *markers[] = { "*", "+", "#", "**", "++", "##" };
-  CWPlayer *bio = cw_roster_player_find(roster, pitcher->player_id);
+  CWPlayer *bio = NULL;
   char name[256];
 
+  if (roster) {
+    bio = cw_roster_player_find(roster, pitcher->player_id);
+  }
   if (bio) {
     sprintf(name, "%s %c", bio->last_name, bio->first_name[0]);
   }
   else {
-    sprintf(name, "%s", pitcher->player_id);
+    sprintf(name, "%s", pitcher->name);
   }
 
   if (cw_game_info_lookup(game, "wp") &&
@@ -319,6 +325,32 @@ cwbox_print_pitcher(CWGame *game,
 }
 
 /*
+ * Derive a player name from an appearance record in a game.
+ * Used when roster file is not available.
+ */
+char *
+cwbox_game_find_name(CWGame *game, char *player_id)
+{
+  CWAppearance *app;
+  CWEvent *event;
+
+  for (app = game->first_starter; app != NULL; app = app->next) {
+    if (!strcmp(app->player_id, player_id)) {
+      return app->name;
+    }
+  }
+
+  for (event = game->first_event; event != NULL; event = event->next) {
+    for (app = event->first_sub; app != NULL; app = app->next) {
+      if (!strcmp(app->player_id, player_id)) {
+	return app->name;
+      }
+    }
+  }
+  return NULL;
+}
+
+/*
  * Output the pitching apparatus (listing pitchers who do not record an
  * out in an inning).
  */
@@ -362,14 +394,20 @@ cwbox_print_pitcher_apparatus(CWBoxscore *boxscore)
  * Output the linescore and total runs for both teams
  */
 void
-cwbox_print_linescore(CWBoxscore *boxscore,
+cwbox_print_linescore(CWGame *game, CWBoxscore *boxscore,
 		      CWRoster *visitors, CWRoster *home)
 {
   int i, t;
 
   for (t = 0; t <= 1; t++) {
     int runs = 0;
-    printf("%-17s", ((t == 0) ? visitors : home)->city);
+    
+    if (t == 0)  {
+      printf("%-17s", (visitors) ? visitors->city : cw_game_info_lookup(game, "visteam"));
+    }
+    else {
+      printf("%-17s", (home) ? home->city : cw_game_info_lookup(game, "hometeam"));
+    }
     for (i = 1; i < 50; i++) {
       if (boxscore->linescore[i][0] < 0 &&
 	  boxscore->linescore[i][1] < 0) {
@@ -416,7 +454,7 @@ cwbox_print_linescore(CWBoxscore *boxscore,
  * Output the count of double plays by team
  */
 void
-cwbox_print_double_play(CWBoxscore *boxscore, 
+cwbox_print_double_play(CWGame *game, CWBoxscore *boxscore, 
 			CWRoster *visitors, CWRoster *home)
 {
   if (boxscore->dp[0] == 0 && boxscore->dp[1] == 0) {
@@ -425,15 +463,21 @@ cwbox_print_double_play(CWBoxscore *boxscore,
 
   printf("DP -- ");
   if (boxscore->dp[0] > 0 && boxscore->dp[1] == 0) {
-    printf("%s %d\n", visitors->city, boxscore->dp[0]);
+    printf("%s %d\n", 
+	   (visitors) ? visitors->city : cw_game_info_lookup(game, "visteam"),
+	   boxscore->dp[0]);
   }
   else if (boxscore->dp[0] == 0 && boxscore->dp[1] > 0) {
-    printf("%s %d\n", home->city, boxscore->dp[1]);
+    printf("%s %d\n",
+	   (home) ? home->city : cw_game_info_lookup(game, "hometeam"),
+	   boxscore->dp[1]);
   }
   else {
     printf("%s %d, %s %d\n",
-	   visitors->city, boxscore->dp[0],
-	   home->city, boxscore->dp[1]);
+	   (visitors) ? visitors->city : cw_game_info_lookup(game, "visteam"),
+	   boxscore->dp[0],
+	   (home) ? home->city : cw_game_info_lookup(game, "hometeam"),
+	   boxscore->dp[1]);
   }
 }
 
@@ -441,7 +485,7 @@ cwbox_print_double_play(CWBoxscore *boxscore,
  * Output the count of triple plays by team
  */
 void
-cwbox_print_triple_play(CWBoxscore *boxscore, 
+cwbox_print_triple_play(CWGame *game, CWBoxscore *boxscore, 
 			CWRoster *visitors, CWRoster *home)
 {
   if (boxscore->tp[0] == 0 && boxscore->tp[1] == 0) {
@@ -450,15 +494,21 @@ cwbox_print_triple_play(CWBoxscore *boxscore,
 
   printf("TP -- ");
   if (boxscore->tp[0] > 0 && boxscore->tp[1] == 0) {
-    printf("%s %d\n", visitors->city, boxscore->tp[0]);
+    printf("%s %d\n", 
+	   (visitors) ? visitors->city : cw_game_info_lookup(game, "visteam"),
+	   boxscore->tp[0]);
   }
   else if (boxscore->tp[0] == 0 && boxscore->tp[1] > 0) {
-    printf("%s %d\n", home->city, boxscore->tp[1]);
+    printf("%s %d\n",
+	   (home) ? home->city : cw_game_info_lookup(game, "hometeam"),
+	   boxscore->tp[1]);
   }
   else {
     printf("%s %d, %s %d\n",
-	   visitors->city, boxscore->tp[0],
-	   home->city, boxscore->tp[1]);
+	   (visitors) ? visitors->city : cw_game_info_lookup(game, "visteam"),
+	   boxscore->tp[0],
+	   (home) ? home->city : cw_game_info_lookup(game, "hometeam"),
+	   boxscore->tp[1]);
   }
 }
 
@@ -466,7 +516,7 @@ cwbox_print_triple_play(CWBoxscore *boxscore,
  * Output the number of runners left on base
  */
 void
-cwbox_print_lob(CWBoxscore *boxscore, 
+cwbox_print_lob(CWGame *game, CWBoxscore *boxscore, 
 		CWRoster *visitors, CWRoster *home)
 {
   if (boxscore->lob[0] == 0 && boxscore->lob[1] == 0) {
@@ -474,8 +524,10 @@ cwbox_print_lob(CWBoxscore *boxscore,
   }
 
   printf("LOB -- %s %d, %s %d\n",
-	 visitors->city, boxscore->lob[0],
-	 home->city, boxscore->lob[1]);
+	 (visitors) ? visitors->city : cw_game_info_lookup(game, "visteam"),
+	 boxscore->lob[0],
+	 (home) ? home->city : cw_game_info_lookup(game, "hometeam"),
+	 boxscore->lob[1]);
 }
 
 
@@ -483,7 +535,7 @@ cwbox_print_lob(CWBoxscore *boxscore,
  * Generic output for list of events (2B, 3B, WP, etc.)
  */
 void 
-cwbox_print_player_apparatus(CWBoxEvent *list, int index, char *label, 
+cwbox_print_player_apparatus(CWGame *game, CWBoxEvent *list, int index, char *label, 
 			     CWRoster *visitors, CWRoster *home) 
 { 
   CWBoxEvent *event = list; 
@@ -494,7 +546,8 @@ cwbox_print_player_apparatus(CWBoxEvent *list, int index, char *label,
   printf("%s -- ", label); 
   while (event != NULL) { 
     CWBoxEvent *search_event = event; 
-    CWPlayer *bio; 
+    CWPlayer *bio = NULL; 
+    char *name = NULL;
     int count = 0; 
     if (event->mark > 0) { 
       event = event->next; 
@@ -507,16 +560,24 @@ cwbox_print_player_apparatus(CWBoxEvent *list, int index, char *label,
       } 
       search_event = search_event->next; 
     } 
-    bio = cw_roster_player_find(visitors, event->players[index]); 
-    if (!bio) { 
+    if (visitors) {
+      bio = cw_roster_player_find(visitors, event->players[index]); 
+    }
+    if (!bio && home) { 
       bio = cw_roster_player_find(home, event->players[index]); 
     } 
+    if (!bio) {
+      name = cwbox_game_find_name(game, event->players[index]);
+    }      
     if (comma) { 
       printf(", "); 
     } 
     if (count == 1) { 
       if (bio) {
 	printf("%s %c", bio->last_name, bio->first_name[0]); 
+      }
+      else if (name) {
+	printf("%s", name);
       }
       else {
 	printf("%s", event->players[index]);
@@ -525,6 +586,9 @@ cwbox_print_player_apparatus(CWBoxEvent *list, int index, char *label,
     else { 
       if (bio) {
 	printf("%s %c %d", bio->last_name, bio->first_name[0], count); 
+      }
+      else if (name) {
+	printf("%s %d", name, count);
       }
       else {
 	printf("%s %d", event->players[index], count);
@@ -544,7 +608,7 @@ cwbox_print_player_apparatus(CWBoxEvent *list, int index, char *label,
  * Output HBP apparatus
  */
 void 
-cwbox_print_hbp_apparatus(CWBoxEvent *list,  
+cwbox_print_hbp_apparatus(CWGame *game, CWBoxEvent *list,  
 			  CWRoster *visitors, CWRoster *home) 
 { 
   CWBoxEvent *event = list; 
@@ -555,7 +619,8 @@ cwbox_print_hbp_apparatus(CWBoxEvent *list,
   printf("HBP -- ");
   while (event != NULL) { 
     CWBoxEvent *search_event = event; 
-    CWPlayer *batter, *pitcher; 
+    CWPlayer *batter = NULL, *pitcher = NULL; 
+    char *batter_name, *pitcher_name;
     int count = 0; 
     if (event->mark > 0) { 
       event = event->next; 
@@ -569,15 +634,25 @@ cwbox_print_hbp_apparatus(CWBoxEvent *list,
       } 
       search_event = search_event->next; 
     } 
-    batter = cw_roster_player_find(visitors, event->players[0]); 
-    if (!batter) { 
+    if (visitors) {
+      batter = cw_roster_player_find(visitors, event->players[0]); 
+    }
+    if (!batter && home) { 
       batter = cw_roster_player_find(home, event->players[0]); 
     } 
-
-    pitcher = cw_roster_player_find(visitors, event->players[1]); 
-    if (!pitcher) { 
+    if (!batter) {
+      batter_name = cwbox_game_find_name(game, event->players[0]);
+    }
+    
+    if (visitors) {
+      pitcher = cw_roster_player_find(visitors, event->players[1]); 
+    }
+    if (!pitcher && home) { 
       pitcher = cw_roster_player_find(home, event->players[1]); 
     } 
+    if (!pitcher) {
+      pitcher_name = cwbox_game_find_name(game, event->players[1]);
+    }
 
     if (comma) { 
       printf(", "); 
@@ -586,11 +661,17 @@ cwbox_print_hbp_apparatus(CWBoxEvent *list,
       if (pitcher) {
 	printf("by %s %c ", pitcher->last_name, pitcher->first_name[0]);
       }
+      else if (pitcher_name) {
+	printf("by %s ", pitcher_name);
+      }
       else {
 	printf("by %s ", event->players[1]);
       }
       if (batter) {
 	printf("(%s %c)", batter->last_name, batter->first_name[0]);
+      }
+      else if (batter_name) {
+	printf("(%s)", batter_name);
       }
       else {
 	printf("(%s)", event->players[0]);
@@ -600,11 +681,17 @@ cwbox_print_hbp_apparatus(CWBoxEvent *list,
       if (pitcher) {
 	printf("by %s %c ", pitcher->last_name, pitcher->first_name[0]);
       }
+      else if (pitcher_name) {
+	printf("by %s ", pitcher_name);
+      }
       else {
 	printf("by %s ", event->players[1]);
       }
       if (batter) {
 	printf("(%s %c)", batter->last_name, batter->first_name[0]);
+      }
+      else if (batter_name) {
+	printf("(%s)", batter_name);
       }
       else {
 	printf("(%s)", event->players[0]);
@@ -652,21 +739,21 @@ void
 cwbox_print_apparatus(CWGame *game, CWBoxscore *boxscore, 
 		      CWRoster *visitors, CWRoster *home)
 {
-  cwbox_print_player_apparatus(boxscore->err_list, 0, "E", visitors, home);
-  cwbox_print_double_play(boxscore, visitors, home);
-  cwbox_print_triple_play(boxscore, visitors, home);
-  cwbox_print_lob(boxscore, visitors, home);
-  cwbox_print_player_apparatus(boxscore->b2_list, 0, "2B", visitors, home);
-  cwbox_print_player_apparatus(boxscore->b3_list, 0, "3B", visitors, home);
-  cwbox_print_player_apparatus(boxscore->hr_list, 0, "HR", visitors, home);
-  cwbox_print_player_apparatus(boxscore->sb_list, 0, "SB", visitors, home);
-  cwbox_print_player_apparatus(boxscore->cs_list, 0, "CS", visitors, home);
-  cwbox_print_player_apparatus(boxscore->sh_list, 0, "SH", visitors, home);
-  cwbox_print_player_apparatus(boxscore->sf_list, 0, "SF", visitors, home);
-  cwbox_print_hbp_apparatus(boxscore->hp_list, visitors, home);
-  cwbox_print_player_apparatus(boxscore->wp_list, 0, "WP", visitors, home);
-  cwbox_print_player_apparatus(boxscore->bk_list, 0, "Balk", visitors, home);
-  cwbox_print_player_apparatus(boxscore->pb_list, 1, "PB", visitors, home);
+  cwbox_print_player_apparatus(game, boxscore->err_list, 0, "E", visitors, home);
+  cwbox_print_double_play(game, boxscore, visitors, home);
+  cwbox_print_triple_play(game, boxscore, visitors, home);
+  cwbox_print_lob(game, boxscore, visitors, home);
+  cwbox_print_player_apparatus(game, boxscore->b2_list, 0, "2B", visitors, home);
+  cwbox_print_player_apparatus(game, boxscore->b3_list, 0, "3B", visitors, home);
+  cwbox_print_player_apparatus(game, boxscore->hr_list, 0, "HR", visitors, home);
+  cwbox_print_player_apparatus(game, boxscore->sb_list, 0, "SB", visitors, home);
+  cwbox_print_player_apparatus(game, boxscore->cs_list, 0, "CS", visitors, home);
+  cwbox_print_player_apparatus(game, boxscore->sh_list, 0, "SH", visitors, home);
+  cwbox_print_player_apparatus(game, boxscore->sf_list, 0, "SF", visitors, home);
+  cwbox_print_hbp_apparatus(game, boxscore->hp_list, visitors, home);
+  cwbox_print_player_apparatus(game, boxscore->wp_list, 0, "WP", visitors, home);
+  cwbox_print_player_apparatus(game, boxscore->bk_list, 0, "Balk", visitors, home);
+  cwbox_print_player_apparatus(game, boxscore->pb_list, 1, "PB", visitors, home);
   cwbox_print_timeofgame(game);
   cwbox_print_attendance(game);
 }
@@ -740,14 +827,20 @@ cwbox_print_text(CWGame *game, CWBoxscore *boxscore,
   }
   printf("\n");
 
-  cwbox_print_linescore(boxscore, visitors, home);
+  cwbox_print_linescore(game, boxscore, visitors, home);
 
   printf("\n");
 
   for (t = 0; t <= 1; t++) {
     CWBoxPitcher *pitcher = cw_box_get_starting_pitcher(boxscore, t);
-    printf("  %-18s   IP  H  R ER BB SO\n",
-	   ((t == 0) ? visitors : home)->city);
+    if (t == 0) {
+      printf("  %-18s   IP  H  R ER BB SO\n",
+	     (visitors) ? visitors->city : cw_game_info_lookup(game, "visteam"));
+    }
+    else {
+      printf("  %-18s   IP  H  R ER BB SO\n",
+	     (home) ? home->city : cw_game_info_lookup(game, "hometeam"));
+    }
     while (pitcher != NULL) {
       cwbox_print_pitcher(game, pitcher, (t == 0) ? visitors : home,
 			  &note_count);
@@ -775,19 +868,22 @@ void cwbox_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
   CWBoxscore *boxscore = cw_box_create(game);
 
   if (!visitors) {
-    fprintf(stderr, "In game %s, could not find roster for visiting team.\n",
+    fprintf(stderr, "WARNING: In game %s, could not find roster for visiting team.\n",
 	    game->game_id);
-    cw_box_cleanup(boxscore);
+    /* cw_box_cleanup(boxscore);
     free(boxscore);
     return;
+    */
   }
 
   if (!home) {
-    fprintf(stderr, "In game %s, could not find roster for home team.\n",
+    fprintf(stderr, "WARNING: In game %s, could not find roster for home team.\n",
 	    game->game_id);
+    /*
     cw_box_cleanup(boxscore);
     free(boxscore);
     return;
+    */
   }
 
   if (use_xml) {
