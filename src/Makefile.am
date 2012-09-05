@@ -22,7 +22,5 @@
 
 SUBDIRS = cwlib cwtools
 
-EXTRA_DIST = chadwick
-
 install-exec-hook:
 	$(INSTALL) chadwick $(bindir)/chadwick
