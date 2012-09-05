@@ -1,6 +1,6 @@
 #
 # This file is part of Chadwick
-# Copyright (c) 2002-2010, Theodore Turocy (ted.turocy@gmail.com)
+# Copyright (c) 2002-2012, T. L. Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)
 #
 # FILE: configure.in
 # Top-level build configuration script
@@ -24,7 +24,7 @@
 AC_INIT
 AC_CONFIG_SRCDIR([src/cwlib/chadwick.h])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE(chadwick, 0.5.3)
+AM_INIT_AUTOMAKE(chadwick, 0.6.0-pre1)
 
 dnl Checks for programs.
 AC_PROG_CC

@@ -1,6 +1,6 @@
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2010, Theodore Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2012, T. L. Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)
  *
  * FILE: src/cwtools/xmlwrite.h
  * Utility API for efficiently generating XML output

@@ -1,6 +1,6 @@
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2010, Theodore Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2012, T. L. Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)
  *
  * FILE: src/cwlib/league.h
  * Interface to module for storing and manipulating leagues

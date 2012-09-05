@@ -3,9 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-===================================================
-Chadwick: Software Tools for Scoring Baseball Games
-===================================================
+=====================================================
+ Chadwick: Software Tools for Game-Level Baseball Data
+=====================================================
 
 Introduction
 ============
@@ -17,7 +17,8 @@ statistics collection.
 Authors
 -------
 
-Chadwick is written, maintained, and Copyright © 2002-2010 by Ted Turocy (ted.turocy <aht> gmail <daht> com).
+Chadwick is written, maintained, and Copyright © 2002-2012 by
+T. L. Turocy (ted.turocy <aht> gmail <daht> com) at Chadwick Baseball Bureau.
 
 License
 -------
@@ -29,7 +30,7 @@ possibilities.
 Downloading
 -----------
 
-The current version of Chadwick is version 0.5.3.
+The current version of Chadwick is version 0.6.0.
 You can download the latest releases of Chadwick from Sourceforge:
 http://sourceforge.net/projects/chadwick/files
 
