@@ -192,6 +192,12 @@ void cw_game_evdata_append(CWGame *game, int num_data, char **data);
  */
 void cw_game_comment_append(CWGame *game, char *comment);
 
+/*
+ * Safely extract an integer value from a CWData object.  Returns -1 (interpreted as
+ * a null value) if the requested index is invalid
+ */
+int cw_data_get_item_int(CWData *data, unsigned int index);
+
 #endif  /* CW_GAME_H */
 
 

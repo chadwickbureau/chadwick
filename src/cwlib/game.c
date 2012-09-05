@@ -28,6 +28,14 @@
 #include "game.h"
 #include "file.h"
 
+int cw_data_get_item_int(CWData *data, unsigned int index)
+{
+  if (index >= data->num_data) {
+    return -1;
+  }
+  return atoi(data->data[index]);
+}
+
 CWGame *cw_game_create(char *game_id)
 {
   CWGame *game = (CWGame *) malloc(sizeof(CWGame));
