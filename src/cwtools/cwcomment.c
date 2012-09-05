@@ -122,7 +122,7 @@ void
 cwcomment_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 {
   char *buf;
-  char output_line[1024];
+  char output_line[4096];
   int i, comma;
   CWGameIterator *gameiter = cw_gameiter_create(game);
 
