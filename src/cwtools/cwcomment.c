@@ -38,7 +38,7 @@ int fields[3] = {
   1, 1, 1,
 };
 
-int max_field = 9;
+int max_field = 2;
 
 char program_name[20] = "cwcomment";
 
