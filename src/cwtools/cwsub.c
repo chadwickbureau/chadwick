@@ -239,6 +239,7 @@ cwsub_print_welcome_message(char *argv0)
   fprintf(stderr,
 	  "\nChadwick substitute descriptor, version " VERSION); 
   fprintf(stderr, "\n  Type '%s -h' for help.\n", argv0);
+  fprintf(stderr, "Copyright (c) 2002-2012, T. L. Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com");
   fprintf(stderr, "This is free software, "
 	  "subject to the terms of the GNU GPL license.\n\n");
 }
