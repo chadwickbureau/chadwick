@@ -112,6 +112,9 @@ cw_box_pitching_create(void)
   pitching->sh = 0;
   pitching->sf = 0;
   pitching->pk = 0;
+  pitching->w = 0;
+  pitching->l = 0;
+  pitching->sv = 0;
   pitching->inr = 0;
   pitching->inrs = 0;
   pitching->xb = 0;
@@ -1436,7 +1439,15 @@ cw_box_create(CWGame *game)
       }
     }
   }
-
+  if (cw_game_info_lookup(game, "wp") != NULL) {
+    cw_box_find_pitcher(boxscore, cw_game_info_lookup(game, "wp"))->pitching->w = 1;
+  }
+  if (cw_game_info_lookup(game, "lp") != NULL) {
+    cw_box_find_pitcher(boxscore, cw_game_info_lookup(game, "lp"))->pitching->l = 1;
+  }
+  if (cw_game_info_lookup(game, "save") != NULL) {
+    cw_box_find_pitcher(boxscore, cw_game_info_lookup(game, "save"))->pitching->sv = 1;
+  }
   return boxscore;
 }
 
