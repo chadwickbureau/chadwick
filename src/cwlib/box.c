@@ -1378,6 +1378,7 @@ cw_box_create(CWGame *game)
 {
   int i, t;
   CWBoxscore *boxscore = (CWBoxscore *) malloc(sizeof(CWBoxscore));
+  CWBoxPitcher *pitcher = NULL;
 
   for (t = 0; t <= 1; t++) {
     for (i = 0; i <= 9; i++) {
@@ -1440,13 +1441,16 @@ cw_box_create(CWGame *game)
     }
   }
   if (cw_game_info_lookup(game, "wp") != NULL) {
-    cw_box_find_pitcher(boxscore, cw_game_info_lookup(game, "wp"))->pitching->w = 1;
+    pitcher = cw_box_find_pitcher(boxscore, cw_game_info_lookup(game, "wp"));
+    if (pitcher != NULL)  pitcher->pitching->w = 1;
   }
   if (cw_game_info_lookup(game, "lp") != NULL) {
-    cw_box_find_pitcher(boxscore, cw_game_info_lookup(game, "lp"))->pitching->l = 1;
+    pitcher = cw_box_find_pitcher(boxscore, cw_game_info_lookup(game, "lp"));
+    if (pitcher != NULL)  pitcher->pitching->l = 1;
   }
   if (cw_game_info_lookup(game, "save") != NULL) {
-    cw_box_find_pitcher(boxscore, cw_game_info_lookup(game, "save"))->pitching->sv = 1;
+    pitcher = cw_box_find_pitcher(boxscore, cw_game_info_lookup(game, "save"));
+    if (pitcher != NULL)  pitcher->pitching->sv = 1;
   }
   return boxscore;
 }
