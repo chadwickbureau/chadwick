@@ -1429,7 +1429,7 @@ cw_box_create(CWGame *game)
     /* There is no play-by-play; this is a new "boxscore event file" */
     cw_box_process_boxscore_file(boxscore, game);
   }
-  cw_box_compute_earned_runs(boxscore, game);
+  /*cw_box_compute_earned_runs(boxscore, game);*/
   
   for (t = 0; t <= 1; t++) { 
     boxscore->pitchers[t]->pitching->gf = 1;
