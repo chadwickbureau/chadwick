@@ -39,7 +39,7 @@
  */
 static void
 cwbox_player_metadata(XMLNode *parent, 
-		      CWBoxPlayer *player, int seq, CWRoster *roster)
+		      CWBoxPlayer *player, int slot, int seq, CWRoster *roster)
 {
   XMLNode *node = NULL, *nameNode = NULL;
   CWPlayer *bio;
@@ -62,6 +62,8 @@ cwbox_player_metadata(XMLNode *parent,
   xml_node_attribute(node, "player-key", player->player_id);
   xml_node_attribute(node, "status", 
 	     ((seq == 1) ? "starter" : "bench"));
+  xml_node_attribute_int(node, "lineup-slot", slot);
+  xml_node_attribute_int(node, "lineup-slot-sequence", seq);
 
   if (roster != NULL)  {
     bio = cw_roster_player_find(roster, player->player_id);
@@ -252,7 +254,7 @@ cwbox_player(XMLNode *parent, CWGame *game,
   node = xml_node_open(parent, "player");
   xml_node_attribute_fmt(node, "id", "p.%s", player->player_id);
 
-  cwbox_player_metadata(node, player, seq, roster);
+  cwbox_player_metadata(node, player, slot, seq, roster);
 
   statsNode = xml_node_open(node, "player-stats");
   statsBaseballNode = xml_node_open(statsNode, "player-stats-baseball");
