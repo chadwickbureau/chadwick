@@ -353,7 +353,7 @@ cwbox_team_stats_baseball(XMLNode *parent,
   xml_node_attribute_posint(node, "sac-flies", sf);
   xml_node_attribute_posint(node, "stolen-bases", sb);
   xml_node_attribute_posint(node, "stolen-bases-caught", cs);
-  xml_node_attribute_posint(node, "reached-base-defensive-interferences", xi);
+  xml_node_attribute_posint(node, "reached-base-defensive-interference", xi);
   xml_node_attribute_posint(node, "left-on-base", boxscore->lob[t]);
   xml_node_attribute_posint(node, "left-in-scoring-position", lisp);
   xml_node_attribute_posint(node, "moved-up", movedup);
