@@ -16,8 +16,8 @@ Many of these extended fields are defined to match fields which appear
 in the Retrosheet gamelogs.  
 
 .. note::
-   :program:`cwevent` guarantees that the standard field numbers will
-   match those used by BEVENT.  Standard field numbers therefore can
+   :program:`cwgame` guarantees that the standard field numbers will
+   match those used by BGAME.  Standard field numbers therefore can
    be treated as stable, and it should be safe to write scripts
    referring to them.  Extended fields are provisional, and extended
    fields may be added or withdrawn in future versions.  Extended
@@ -25,7 +25,7 @@ in the Retrosheet gamelogs.
    related fields being grouped.  Therefore, extended field numbers
    are not promised to be stable.  It is recommended to use the field
    labels instead in writing scripts to process the output of
-   :program:`cwevent` extended fields.
+   :program:`cwgame` extended fields.
  
 The following table gives the contents of each of the 84 fields
 :program:`cwgame` outputs.
