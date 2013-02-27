@@ -36,6 +36,7 @@ libchadwick_la_SOURCES = \
 	gameiter.h \
 	league.c \
 	league.h \
+	lint.c \
 	parse.c \
 	parse.h \
 	roster.c \

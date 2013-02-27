@@ -192,30 +192,6 @@ cw_box_enter_starters(CWBoxscore *boxscore, CWGame *game)
 {
   int i, t;
 
-  /* Error checking: look for invalid slots */
-  CWAppearance *app;
-
-  for (app = game->first_starter; app; app = app->next) {
-    if (app->slot < 0 || app->slot > 9) {
-      fprintf(stderr, 
-	      "ERROR: In %s, invalid slot %d for player '%s'.\n",
-	      game->game_id, app->slot, app->player_id);
-      exit(1);
-    }
-    if (app->team < 0 || app->team > 1) {
-      fprintf(stderr,
-	      "ERROR: In %s, invalid team %d for player '%s'.\n",
-	      game->game_id, app->team, app->player_id);
-      exit(1);
-    }
-    if (app->pos < 1 || app->pos > 10) {
-      fprintf(stderr,
-	      "ERROR: In %s, invalid position %d for player '%s'.\n",
-	      game->game_id, app->pos, app->player_id);
-      exit(1);
-    }
-  }
-
   for (t = 0; t <= 1; t++) {
     for (i = 0; i <= 9; i++) {
       CWAppearance *app = cw_game_starter_find(game, t, i);
@@ -1035,66 +1011,6 @@ cw_box_compute_earned_runs(CWBoxscore *boxscore, CWGame *game)
 }
 
 /*
- * Do some rudimentary sanity checking, looking for obvious errors
- * in the play-by-play.  This should eventually become part of
- * libchadwick proper.
- */
-static void
-cw_box_sanity_check(CWGameIterator *gameiter)
-{
-  int src, dest;
-
-  if (!gameiter->parse_ok) {
-    fprintf(stderr, "Parse error in game %s at event %d:\n",
-	    gameiter->game->game_id, gameiter->state->event_count+1);
-    fprintf(stderr, "Invalid play string \"%s\" (%s batting)\n",
-	    gameiter->event->event_text, gameiter->event->batter);
-    exit(1);
-  }
-
-  if (gameiter->event_data->dp_flag &&
-      cw_event_outs_on_play(gameiter->event_data) < 2) {
-    fprintf(stderr, "Play-by-play error in game %s at event %d:\n",
-	    gameiter->game->game_id, gameiter->state->event_count+1);
-    fprintf(stderr, "Fewer than two outs on play marked DP (event \"%s\", %s batting)\n",
-	    gameiter->event->event_text, gameiter->event->batter);
-    exit(1);
-  }
-
-  if (gameiter->event_data->tp_flag &&
-      cw_event_outs_on_play(gameiter->event_data) < 3) {
-    fprintf(stderr, "Play-by-play error in game %s at event %d:\n",
-	    gameiter->game->game_id, gameiter->state->event_count+1);
-    fprintf(stderr, "Fewer than three outs on play marked TP (event \"%s\", %s batting)\n",
-	    gameiter->event->event_text, gameiter->event->batter);
-    exit(1);
-  }
-
-  for (dest = 1; dest <= 3; dest++) {
-    if (!strcmp(gameiter->state->runners[dest], "")) {
-      continue;
-    }
-
-    for (src = 0; src < dest; src++) {
-      int srcAdv = gameiter->event_data->advance[src];
-      int destAdv = gameiter->event_data->advance[dest];
-
-      if (srcAdv >= destAdv && 
-	  !cw_event_runner_put_out(gameiter->event_data, dest) &&
-	  destAdv < 4 &&
-	  gameiter->state->outs + cw_event_outs_on_play(gameiter->event_data) < 3) {
-	fprintf(stderr, "Play-by-play error in game %s at event %d:\n",
-		gameiter->game->game_id, gameiter->state->event_count+1);
-	fprintf(stderr, "Runner on %d overtaken by runner on %d (event \"%s\", %s batting)\n",
-		dest, src,
-		gameiter->event->event_text, gameiter->event->batter);
-	exit(1);
-      }
-    }
-  }
-}
-
-/*
  * Iterate through the game, building the boxscore
  */
 static void
@@ -1109,8 +1025,6 @@ cw_box_iterate_game(CWBoxscore *boxscore, CWGame *game)
     }
 
     if (strcmp(gameiter->event->event_text, "NP")) {
-      cw_box_sanity_check(gameiter);
-
       cw_box_batter_stats(boxscore, gameiter);
       cw_box_runner_stats(boxscore, gameiter);
       cw_box_fielder_stats(boxscore, gameiter);

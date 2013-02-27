@@ -198,6 +198,12 @@ void cw_game_comment_append(CWGame *game, char *comment);
  */
 int cw_data_get_item_int(CWData *data, unsigned int index);
 
+/*
+ * Examine game for internal (in)consistency.  Returns zero if a problem found.
+ */
+int cw_game_lint(CWGame *game);
+
+
 #endif  /* CW_GAME_H */
 
 

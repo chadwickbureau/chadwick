@@ -868,8 +868,16 @@ extern void cwbox_print_sportsml(XMLDoc *doc,
 
 void cwbox_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 {
-  CWBoxscore *boxscore = cw_box_create(game);
+  CWBoxscore *boxscore = 0;
 
+  if (!cw_game_lint(game)) {
+    fprintf(stderr, "WARNING: Sanity check fails for game %s, skipping...\n",
+	    game->game_id);
+    return;
+  }
+
+  boxscore = cw_box_create(game);
+ 
   if (!visitors) {
     fprintf(stderr, "WARNING: In game %s, could not find roster for visiting team.\n",
 	    game->game_id);
