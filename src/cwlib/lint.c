@@ -134,8 +134,8 @@ cw_game_lint(CWGame *game)
   while (gameiter->event != NULL) {
     if (strcmp(gameiter->event->event_text, "NP")) {
       ok &= cw_game_lint_state(gameiter);
-      cw_gameiter_next(gameiter);
     }
+    cw_gameiter_next(gameiter);
   }
 
   free(gameiter);
