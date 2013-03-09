@@ -1,6 +1,7 @@
 #
 # This file is part of Chadwick
-# Copyright (c) 2002-2010, Theodore Turocy (ted.turocy@gmail.com)
+# Copyright (c) 2002-2013, Dr T L Turocy (ted.turocy@gmail.com)
+#                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
 #
 # FILE: src/cwlib/Makefile.am
 # Automake input script for cwlib subdirectory
