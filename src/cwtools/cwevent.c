@@ -1,6 +1,7 @@
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2012, T. L. Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2013, Dr T L Turocy (ted.turocy@gmail.com)
+ *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *                          Sean Forman, Sports Reference LLC
  *                          XML Team Solutions, Inc.
  *
@@ -940,8 +941,8 @@ static field_struct field_data[] = {
   /* 13 */ { cwevent_res_batter_hand, "RESP_BAT_HAND_CD", "res batter hand*" },
   /* 14 */ { cwevent_pitcher, "PIT_ID", "pitcher" },
   /* 15 */ { cwevent_pitcher_hand, "PIT_HAND_CD", "pitcher hand" },
-  /* 16 */ { cwevent_res_pitcher, "RES_PIT_ID", "res pitcher*" },
-  /* 17 */ { cwevent_res_pitcher_hand, "RES_PIT_HAND_CD", "res pitcher hand*" },
+  /* 16 */ { cwevent_res_pitcher, "RESP_PIT_ID", "res pitcher*" },
+  /* 17 */ { cwevent_res_pitcher_hand, "RESP_PIT_HAND_CD", "res pitcher hand*" },
   /* 18 */ { cwevent_catcher, "POS2_FLD_ID", "catcher" },
   /* 19 */ { cwevent_first_baseman, "POS3_FLD_ID", "first base" },
   /* 20 */ { cwevent_second_baseman, "POS4_FLD_ID", "second base" },
@@ -2057,7 +2058,7 @@ cwevent_print_welcome_message(char *argv0)
   fprintf(stderr, 
 	  "\nChadwick expanded event descriptor, version " VERSION); 
   fprintf(stderr, "\n  Type '%s -h' for help.\n", argv0);
-  fprintf(stderr, "Copyright (c) 2002-2012\nT. L. Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)\n");
+  fprintf(stderr, "Copyright (c) 2002-2013\nDr T L Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)\n");
   fprintf(stderr, "This is free software, " 
 	  "subject to the terms of the GNU GPL license.\n\n");
 }

@@ -18,7 +18,8 @@ Authors
 -------
 
 Chadwick is written, maintained, and Copyright © 2002-2012 by
-T. L. Turocy (ted.turocy <aht> gmail <daht> com) at Chadwick Baseball Bureau.
+T. L. Turocy (ted.turocy <aht> gmail <daht> com) 
+at Chadwick Baseball Bureau (http://www.chadwick-bureau.com).
 
 License
 -------

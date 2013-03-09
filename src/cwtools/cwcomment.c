@@ -1,6 +1,7 @@
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2012, T. L. Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2013, Dr T L Turocy (ted.turocy@gmail.com)
+ *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *
  * FILE: src/cwtools/cwcomment.c
  * Chadwick comment extractor program
@@ -226,7 +227,7 @@ cwcomment_print_welcome_message(char *argv0)
   fprintf(stderr,
 	  "\nChadwick comment extractor, version " VERSION); 
   fprintf(stderr, "\n  Type '%s -h' for help.\n", argv0);
-  fprintf(stderr, "Copyright (c) 2002-2012\nT. L. Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)\n");
+  fprintf(stderr, "Copyright (c) 2002-2013\nDr T L Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)\n");
   fprintf(stderr, "This is free software, "
 	  "subject to the terms of the GNU GPL license.\n\n");
 }
