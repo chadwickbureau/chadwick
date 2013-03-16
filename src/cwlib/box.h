@@ -52,7 +52,7 @@ typedef struct cw_box_player_struct {
 } CWBoxPlayer;
 
 typedef struct cw_box_pitching_struct {
-  int g, gs, cg, sho, gf, outs, r, er, h, b2, b3, hr, bb, ibb, so, bf, bk, wp, hb;
+  int g, gs, cg, sho, gf, outs, ab, r, er, h, b2, b3, hr, bb, ibb, so, bf, bk, wp, hb;
   int sh, sf, pk;
   int w, l, sv;
 

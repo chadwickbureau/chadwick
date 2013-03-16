@@ -97,6 +97,7 @@ cw_box_pitching_create(void)
   pitching->sho = 0;
   pitching->gf = 0;
   pitching->outs = 0;
+  pitching->ab = 0;
   pitching->r = 0;
   pitching->er = 0;
   pitching->h = 0;
@@ -534,6 +535,7 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
 
   if (cw_event_is_official_ab(event_data)) {
     player->batting->ab++;
+    pitcher->pitching->ab++;
 
     if (strcmp(gameiter->state->runners[2], "") ||
 	strcmp(gameiter->state->runners[3], "")) {
@@ -1192,6 +1194,7 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
       pitcher->pitching->bk = cw_data_get_item_int(stat, 18);
       pitcher->pitching->sh = cw_data_get_item_int(stat, 19);
       pitcher->pitching->sf = cw_data_get_item_int(stat, 20);
+      pitcher->pitching->ab = -1;
       pitcher->pitching->pk = -1;
       pitcher->pitching->inr = -1;
       pitcher->pitching->inrs = -1;

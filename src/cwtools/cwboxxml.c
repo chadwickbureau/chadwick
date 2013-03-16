@@ -201,9 +201,10 @@ cwbox_xml_pitching(CWGame *game, CWBoxscore *boxscore, int t, CWRoster *roster)
 	    pitcher->pitching->r == 0) ? 1 : 0,
 	   (pitcher->prev != NULL && 
 	    pitcher->next == NULL) ? 1 : 0);
-    printf("outs=\"%d\" bf=\"%d\" h=\"%d\" r=\"%d\" "
+    printf("outs=\"%d\" ab=\"%d\" bf=\"%d\" h=\"%d\" r=\"%d\" "
 	   "er=\"%d\" hr=\"%d\" ",
-	   pitcher->pitching->outs, pitcher->pitching->bf,
+	   pitcher->pitching->outs, pitcher->pitching->ab,
+	   pitcher->pitching->bf,
 	   pitcher->pitching->h, pitcher->pitching->r,
 	   pitcher->pitching->er, pitcher->pitching->hr);
     printf("bb=\"%d\" ibb=\"%d\" so=\"%d\" wp=\"%d\" "

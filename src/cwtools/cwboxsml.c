@@ -184,6 +184,10 @@ cwbox_player_stats_pitching(XMLNode *parent,
 			   pitcher->pitching->outs % 3);
 
   }
+  xml_node_attribute_posint(node, "batters-at-bats-against",
+			    pitcher->pitching->ab);
+  xml_node_attribute_posint(node, "batters-total-against",
+			    pitcher->pitching->bf);
   xml_node_attribute_posint(node, "hits", pitcher->pitching->h);
   xml_node_attribute_posint(node, "runs-allowed", pitcher->pitching->r);
   xml_node_attribute_posint(node, "earned-runs", pitcher->pitching->er);
