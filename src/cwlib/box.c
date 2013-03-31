@@ -383,6 +383,9 @@ cw_box_find_player(CWBoxscore *boxscore, char *player_id)
 {
   int i, t;
 
+  if (player_id == NULL)  {
+    return NULL;
+  }
   for (t = 0; t <= 1; t++) {
     for (i = 0; i <= 9; i++) {
       CWBoxPlayer *player = boxscore->slots[i][t];
@@ -835,14 +838,20 @@ static void
 cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
 {
   int pos, i;
-  CWBoxFielding *fielding;
+  CWBoxPlayer *player = NULL; 
+  CWBoxFielding *fielding = NULL;
   char *player_id;
 
   for (pos = 1; pos <= 9; pos++) {
     int accepted = 0;
-
-    fielding = cw_box_find_player(boxscore, 
-				  gameiter->state->fielders[pos][1-gameiter->state->batting_team])->fielding[pos];
+    player = cw_box_find_player(boxscore, 
+				gameiter->state->fielders[pos][1-gameiter->state->batting_team]);
+    if (player != NULL) {
+      fielding = player->fielding[pos];
+    }
+    else {
+      fielding = NULL;
+    }
     if (fielding == NULL) {
       fprintf(stderr, 
 	      "ERROR: In %s, no entry for fielder at position %d at event %d.\n",
@@ -852,9 +861,7 @@ cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
 	      gameiter->event->batter, gameiter->event->event_text);
       exit(1);
     }
-    player_id = cw_box_find_player(boxscore, 
-				   gameiter->state->fielders[pos][1-gameiter->state->batting_team])->player_id;
-    
+
     fielding->outs += cw_event_outs_on_play(gameiter->event_data);
 
     if (gameiter->event_data->event_type == CW_EVENT_SINGLE ||
