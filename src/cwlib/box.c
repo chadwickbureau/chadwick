@@ -1357,12 +1357,14 @@ cw_box_create(CWGame *game)
   /*cw_box_compute_earned_runs(boxscore, game);*/
   
   for (t = 0; t <= 1; t++) { 
-    boxscore->pitchers[t]->pitching->gf = 1;
     if (boxscore->pitchers[t]->prev == NULL) {
       boxscore->pitchers[t]->pitching->cg = 1;
       if (boxscore->pitchers[t]->pitching->r == 0) {
 	boxscore->pitchers[t]->pitching->sho = 1;
       }
+    }
+    else {
+      boxscore->pitchers[t]->pitching->gf = 1;
     }
   }
   if (cw_game_info_lookup(game, "wp") != NULL) {
