@@ -946,80 +946,6 @@ cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
 }
 
 /*
- * Take earned runs totals from data, lines, if present.
- *
- * This function is written so that, if one wants, one can completely
- * omit marking unearned runs in the PBP.
- *
- * However, in the case of runs which are earned for the pitcher but
- * unearned for the team, one simply cannot set the total number of
- * earned runs for the team to the sum of the pitchers.  Since Retrosheet
- * does not provide data lines for team earned runs, we have to do a little
- * magic. If the number of earned runs reported in the PBP for the team
- * is less than the sum of the earned runs reported in data lines for the
- * pitchers of that team, we keep the number of team earned runs in the
- * PBP.
- */
-static void
-cw_box_compute_earned_runs(CWBoxscore *boxscore, CWGame *game)
-{
-  int t, cleared = 0, ter[2];
-  CWData *data = game->first_data;
-  CWBoxPitcher *pitcher;
-
-  while (data) {
-    if (!cleared && !strcmp(data->data[0], "er")) {
-      for (t = 0; t <= 1; t++) {
-	pitcher = cw_box_get_starting_pitcher(boxscore, t);
-
-	while (pitcher != NULL) {
-	  pitcher->pitching->er = 0;
-	  pitcher = pitcher->next;
-	}
-
-	ter[t] = boxscore->er[t];
-	boxscore->er[t] = -1;
-      }
-
-      cleared = 1;
-    }
-
-    if (!strcmp(data->data[0], "er")) {
-      pitcher = cw_box_find_pitcher(boxscore, data->data[1]);
-      if (pitcher != NULL) {
-	pitcher->pitching->er = atoi(data->data[2]);
-      }
-      else if (!strcmp(data->data[1], 
-		       cw_game_info_lookup(game, "visteam"))) {
-	boxscore->er[0] = atoi(data->data[2]);
-      }
-      else if (!strcmp(data->data[1],
-		       cw_game_info_lookup(game, "hometeam"))) {
-	boxscore->er[1] = atoi(data->data[2]);
-      }
-    }
-
-    data = data->next;
-  }
-
-  for (t = 0; t <= 1; t++) {
-    if (boxscore->er[t] == -1) {
-      boxscore->er[t] = 0;
-      pitcher = cw_box_get_starting_pitcher(boxscore, t);
-
-      while (pitcher != NULL) {
-	boxscore->er[t] += pitcher->pitching->er;
-	pitcher = pitcher->next;
-      }
-
-      if (boxscore->er[t] > ter[t]) {
-	boxscore->er[t] = ter[t];
-      }
-    }
-  }
-}
-
-/*
  * Iterate through the game, building the boxscore
  */
 static void
@@ -1353,7 +1279,6 @@ cw_box_create(CWGame *game)
     /* There is no play-by-play; this is a new "boxscore event file" */
     cw_box_process_boxscore_file(boxscore, game);
   }
-  /*cw_box_compute_earned_runs(boxscore, game);*/
   
   for (t = 0; t <= 1; t++) { 
     if (boxscore->pitchers[t]->prev == NULL) {
