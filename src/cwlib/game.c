@@ -544,6 +544,52 @@ void cw_game_comment_append(CWGame *game, char *text)
   }
 }
 
+void 
+cw_game_replace_player(CWGame *game, char *key_old, char *key_new) 
+{
+  CWAppearance *sub;
+  CWData *data;
+  CWEvent *event;
+
+  for (event = game->first_event; event != NULL; event = event->next) {
+    if (!strcmp(event->batter, key_old)) {
+      free(event->batter);
+      event->batter = (char *) malloc(sizeof(char) * (strlen(key_new)+1));
+      strcpy(event->batter, key_new);
+    }
+
+    for (sub = event->first_sub; sub != NULL; sub = sub->next) {
+      if (!strcmp(sub->player_id, key_old)) {
+	free(sub->player_id);
+	sub->player_id = (char *) malloc(sizeof(char) * (strlen(key_new)+1));
+	strcpy(sub->player_id, key_new);
+      }
+    }
+  }
+
+  for (data = game->first_data; data != NULL; data = data->next) {
+    if (data->num_data >= 3 && !strcmp(data->data[0], "er") &&
+	!strcmp(data->data[1], key_old)) {
+      free(data->data[1]);
+      data->data[1] = (char *) malloc(sizeof(char) * (strlen(key_new)+1));
+      strcpy(data->data[1], key_new);
+    }
+  }
+
+  if (cw_game_info_lookup(game, "wp") != NULL &&
+      !strcmp(cw_game_info_lookup(game, "wp"), key_old)) {
+    cw_game_info_set(game, "wp", key_new);
+  }
+  if (cw_game_info_lookup(game, "lp") != NULL &&
+      !strcmp(cw_game_info_lookup(game, "lp"), key_old)) {
+    cw_game_info_set(game, "lp", key_new);
+  }
+  if (cw_game_info_lookup(game, "save") != NULL &&
+      !strcmp(cw_game_info_lookup(game, "save"), key_old)) {
+    cw_game_info_set(game, "save", key_new);
+  }
+}
+
 CWGame *
 cw_game_read(FILE *file)
 {

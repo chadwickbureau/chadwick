@@ -194,6 +194,11 @@ void cw_game_evdata_append(CWGame *game, int num_data, char **data);
 void cw_game_comment_append(CWGame *game, char *comment);
 
 /*
+ * Replace all instances of player ID 'key_old' with 'key_new' in the game.
+ */
+void cw_game_replace_player(CWGame *game, char *key_old, char *key_new);
+
+/*
  * Safely extract an integer value from a CWData object.  Returns -1 (interpreted as
  * a null value) if the requested index is invalid
  */
