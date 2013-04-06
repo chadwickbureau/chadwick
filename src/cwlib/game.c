@@ -547,12 +547,12 @@ void cw_game_comment_append(CWGame *game, char *text)
 CWGame *
 cw_game_read(FILE *file)
 {
-  char buf[256], *tok;
+  char buf[1024], *tok;
   fpos_t filepos;
-  char batHand = ' ', batHandBatter[256], pitHand = ' ';
+  char batHand = ' ', batHandBatter[1024], pitHand = ' ';
   CWGame *game;
 
-  if (fgets(buf, 256, file) == NULL) {
+  if (fgets(buf, 1024, file) == NULL) {
     return NULL;
   }
   tok = cw_strtok(buf);
@@ -571,7 +571,7 @@ cw_game_read(FILE *file)
 
   while (!feof(file)) {
     fgetpos(file, &filepos);
-    if (fgets(buf, 256, file) == NULL) {
+    if (fgets(buf, 1024, file) == NULL) {
       if (feof(file)) {
 	break;
       }
