@@ -649,8 +649,8 @@ cw_game_read(FILE *file)
       char *field, *value;
       field = cw_strtok(NULL);
       value = cw_strtok(NULL);
-      if (field && value) {
-	cw_game_info_append(game, field, value);
+      if (field) {
+	cw_game_info_append(game, field, (value) ? value : "");
       }
     }
     else if (!strcmp(tok, "start")) {
@@ -801,6 +801,8 @@ cw_game_write_header(CWGame *game, FILE *file)
 	!strcmp(info->label, "ump1b") ||
 	!strcmp(info->label, "ump2b") ||
 	!strcmp(info->label, "ump3b") ||
+	!strcmp(info->label, "umplf") ||
+	!strcmp(info->label, "umprf") ||
 	!strcmp(info->label, "scorer") ||
 	!strcmp(info->label, "translator") ||
 	!strcmp(info->label, "inputter")) {
