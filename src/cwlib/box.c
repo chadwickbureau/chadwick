@@ -496,7 +496,8 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
 	    gameiter->state->event_count);
     fprintf(stderr, "      (Batter ID '%s', event text '%s')\n",
 	    gameiter->event->batter, gameiter->event->event_text);
-    exit(1);
+    fprintf(stderr, "      Skipping statistics tabulation for this play.\n");
+    return;
   }
   
   pitcher = boxscore->pitchers[1-gameiter->state->batting_team];
@@ -521,13 +522,14 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
   }
   if (pitcher == NULL) {
     fprintf(stderr, 
-	    "ERROR: In %s, no entry for pitcher '%s' at event %d.\n",
+	    "WARNING: In %s, no entry for pitcher '%s' at event %d.\n",
 	    gameiter->game->game_id, 
 	    boxscore->pitchers[1-gameiter->state->batting_team]->player_id,
 	    gameiter->state->event_count);
     fprintf(stderr, "      (Batter ID '%s', event text '%s')\n",
 	    gameiter->event->batter, gameiter->event->event_text);
-    exit(1);
+    fprintf(stderr, "      Skipping statistics tabulation for this play.\n");
+    return;
   }
 
   if (cw_event_is_batter(event_data)) {
@@ -724,7 +726,8 @@ cw_box_runner_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
 	      gameiter->state->event_count);
       fprintf(stderr, "      (Batter ID '%s', event text '%s')\n",
 	      gameiter->event->batter, gameiter->event->event_text);
-      exit(1);
+      fprintf(stderr, "      Skipping statistics tabulation for this play.\n");
+      return;
     }
 
     pitcher = cw_box_find_pitcher(boxscore, gameiter->state->pitchers[base]);
@@ -736,7 +739,8 @@ cw_box_runner_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
 	      gameiter->state->event_count);
       fprintf(stderr, "      (Batter ID '%s', event text '%s')\n",
 	      gameiter->event->batter, gameiter->event->event_text);
-      exit(1);
+      fprintf(stderr, "      Skipping statistics tabulation for this play.\n");
+      return;
     }
 
     /* Since we only store pointers to the player IDs in the event,
