@@ -840,7 +840,6 @@ cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
   int pos, i;
   CWBoxPlayer *player = NULL; 
   CWBoxFielding *fielding = NULL;
-  char *player_id;
 
   for (pos = 1; pos <= 9; pos++) {
     int accepted = 0;
@@ -910,7 +909,7 @@ cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
 	fielding->e++;
 	cw_box_add_event(&(boxscore->err_list), 
 			 gameiter->state->inning, gameiter->state->batting_team,
-			 1, player_id);
+			 1, player->player_id);
       }
     }
 
@@ -929,7 +928,7 @@ cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       fielding->pb++;
       cw_box_add_event(&(boxscore->pb_list), 
 		       gameiter->state->inning, gameiter->state->batting_team,
-		       2, pitcher->player_id, player_id);
+		       2, pitcher->player_id, player->player_id);
     }
 
     if (pos == 2 && 
@@ -1436,12 +1435,14 @@ cw_box_create(CWGame *game)
   cw_box_compute_earned_runs(boxscore, game);
   
   for (t = 0; t <= 1; t++) { 
-    boxscore->pitchers[t]->pitching->gf = 1;
     if (boxscore->pitchers[t]->prev == NULL) {
       boxscore->pitchers[t]->pitching->cg = 1;
       if (boxscore->pitchers[t]->pitching->r == 0) {
 	boxscore->pitchers[t]->pitching->sho = 1;
       }
+    }
+    else {
+      boxscore->pitchers[t]->pitching->gf = 1;
     }
   }
 

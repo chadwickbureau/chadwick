@@ -547,12 +547,12 @@ void cw_game_comment_append(CWGame *game, char *text)
 CWGame *
 cw_game_read(FILE *file)
 {
-  char buf[256], *tok;
+  char buf[1024], *tok;
   fpos_t filepos;
-  char batHand = ' ', batHandBatter[256], pitHand = ' ';
+  char batHand = ' ', batHandBatter[1024], pitHand = ' ';
   CWGame *game;
 
-  if (fgets(buf, 256, file) == NULL) {
+  if (fgets(buf, 1024, file) == NULL) {
     return NULL;
   }
   tok = cw_strtok(buf);
@@ -571,7 +571,7 @@ cw_game_read(FILE *file)
 
   while (!feof(file)) {
     fgetpos(file, &filepos);
-    if (fgets(buf, 256, file) == NULL) {
+    if (fgets(buf, 1024, file) == NULL) {
       if (feof(file)) {
 	break;
       }
@@ -603,8 +603,8 @@ cw_game_read(FILE *file)
       char *field, *value;
       field = cw_strtok(NULL);
       value = cw_strtok(NULL);
-      if (field && value) {
-	cw_game_info_append(game, field, value);
+      if (field) {
+	cw_game_info_append(game, field, (value) ? value : "");
       }
     }
     else if (!strcmp(tok, "start")) {
@@ -755,6 +755,8 @@ cw_game_write_header(CWGame *game, FILE *file)
 	!strcmp(info->label, "ump1b") ||
 	!strcmp(info->label, "ump2b") ||
 	!strcmp(info->label, "ump3b") ||
+	!strcmp(info->label, "umplf") ||
+	!strcmp(info->label, "umprf") ||
 	!strcmp(info->label, "scorer") ||
 	!strcmp(info->label, "translator") ||
 	!strcmp(info->label, "inputter")) {
