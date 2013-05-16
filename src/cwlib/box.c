@@ -843,7 +843,8 @@ cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
 	      gameiter->state->event_count);
       fprintf(stderr, "      (Batter ID '%s', event text '%s')\n",
 	      gameiter->event->batter, gameiter->event->event_text);
-      exit(1);
+      fprintf(stderr, "      Skipping statistics tabulation for this play.\n");
+      return;
     }
 
     fielding->outs += cw_event_outs_on_play(gameiter->event_data);
