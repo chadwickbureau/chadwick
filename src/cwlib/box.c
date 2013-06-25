@@ -60,6 +60,8 @@ cw_box_batting_create(void)
   batting->xi = 0;
   batting->lisp = 0;
   batting->movedup = 0;
+  batting->pitches = 0;
+  batting->strikes = 0;
   return batting;
 }
 
@@ -123,6 +125,8 @@ cw_box_pitching_create(void)
   pitching->xbinn = 0;
   pitching->gb = 0;
   pitching->fb = 0;
+  pitching->pitches = 0;
+  pitching->strikes = 0;
   return pitching;
 }
 
@@ -467,6 +471,66 @@ cw_box_cleanup_event_list(CWBoxEvent **list)
     event = next_event;
   }
   *list = NULL;
+}
+
+/* 
+ * Update pitch stats with current event.
+ * This is called even for NP events, as pitches may occur prior to a
+ * substitution.
+ * Only counts pitches following the last period in the pitch string.
+ */
+static void
+cw_box_pitch_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
+{
+  CWBoxPlayer *player;
+  CWBoxPitcher *pitcher;
+  char *pitch;
+
+  if (gameiter->event->pitches[0] == '\0') {
+    return;
+  }
+  player = cw_box_find_player(boxscore, gameiter->event->batter);
+  pitcher = boxscore->pitchers[1-gameiter->state->batting_team];
+  if (pitcher == NULL) {
+    if (gameiter->state->batting_team == 0) {
+      fprintf(stderr,
+	      "ERROR: In %s, no pitcher in lineup for home team.\n",
+	      gameiter->game->game_id);
+    }
+    else {
+      fprintf(stderr,
+	      "ERROR: In %s, no pitcher in lineup for visiting team.\n",
+	      gameiter->game->game_id);
+    }
+    return;
+  }
+
+  pitch = strrchr(gameiter->event->pitches, '.');
+  if (pitch == NULL) {
+    pitch = gameiter->event->pitches;
+  }
+  else {
+    /* start from the first pitch after the last period */
+    pitch++;
+  }
+  
+  while (*pitch != '\0') {
+    if (*pitch == 'B' || *pitch == 'H' || *pitch == 'I' || *pitch == 'P' || 
+	*pitch == 'V') {
+      player->batting->pitches++;
+      pitcher->pitching->pitches++;
+    }
+    else if (*pitch == 'C' || *pitch == 'F' || *pitch == 'K' || *pitch == 'L' ||
+	     *pitch == 'M' || *pitch == 'O' || *pitch == 'Q' || *pitch == 'R' ||
+	     *pitch == 'S' || *pitch == 'T' || *pitch == 'X' || *pitch == 'Y') {
+      player->batting->pitches++;
+      player->batting->strikes++;
+      pitcher->pitching->pitches++;
+      pitcher->pitching->strikes++;
+    }
+    pitch++;
+  }
+
 }
 
 /*
@@ -964,6 +1028,7 @@ cw_box_iterate_game(CWBoxscore *boxscore, CWGame *game)
       boxscore->linescore[gameiter->state->inning][gameiter->state->batting_team] = 0;
     }
 
+    cw_box_pitch_stats(boxscore, gameiter);
     if (strcmp(gameiter->event->event_text, "NP")) {
       cw_box_batter_stats(boxscore, gameiter);
       cw_box_runner_stats(boxscore, gameiter);
