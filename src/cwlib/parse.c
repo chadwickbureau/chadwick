@@ -1308,12 +1308,15 @@ static int cw_parse_hit_by_pitch(CWParserState *state, CWEventData *event,
  * at exit:  p-state->sym points to '.' or end of string, as appropriate
  *
  * Notes:
- * - 'C/E1' and 'C/E3' are considered legal strings (per David W. Smith);
+ * - 'C/E1', 'C/4E1' and 'C/E3' are considered legal strings (per David W. Smith);
  *   these are for cases where batter was awarded first due to interference
  *   by the pitcher or first baseman, respectively, event though these
  *   are not truly "catcher's" interference.  DWS says these are the only
  *   legal exceptions currently in the DiamondWare engine, so we will
- *   follow along with that convention here.
+ *   follow along with that convention here.  While in principle
+ *   any legal fielding credit string ending in En could appear, the chances
+ *   of occurrence in an actual game are small, while the chances that they could
+ *   be incorrect input would be large.
  */
 static int cw_parse_interference(CWParserState *state, CWEventData *event,
 				 int flags)
@@ -1332,6 +1335,10 @@ static int cw_parse_interference(CWParserState *state, CWEventData *event,
     }
     else if (!strcmp(state->token, "E1")) {
       event->errors[event->num_errors++] = 1;
+    }
+    else if (!strcmp(state->token, "4E1")) {
+      event->errors[event->num_errors++] = 1;
+      event->assists[event->num_assists++] = 4;
     }
     else if (!strcmp(state->token, "E3")) {
       event->errors[event->num_errors++] = 3;
