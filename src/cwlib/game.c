@@ -551,6 +551,14 @@ cw_game_replace_player(CWGame *game, char *key_old, char *key_new)
   CWData *data;
   CWEvent *event;
 
+  for (sub = game->first_starter; sub != NULL; sub = sub->next) {
+    if (!strcmp(sub->player_id, key_old)) {
+      free(sub->player_id);
+      sub->player_id = (char *) malloc(sizeof(char) * (strlen(key_new)+1));
+      strcpy(sub->player_id, key_new);
+    }
+  }
+
   for (event = game->first_event; event != NULL; event = event->next) {
     if (!strcmp(event->batter, key_old)) {
       free(event->batter);
