@@ -94,6 +94,19 @@ cw_game_lint_state(CWGameIterator *gameiter)
     ok = 0;
   }
 
+  for (src = 1; src <= 3; src++) {
+    if (!strcmp(gameiter->state->runners[src], "") &&
+	(gameiter->event_data->advance[src] != 0 ||
+	 cw_event_runner_put_out(gameiter->event_data, src))) {
+      fprintf(stderr, "Play-by-play error in game %s at event %d:\n",
+	      gameiter->game->game_id, gameiter->state->event_count+1);
+      fprintf(stderr, "Advancement from empty base %d (event \"%s\", %s batting)\n",
+	      src,
+	      gameiter->event->event_text, gameiter->event->batter);
+      ok = 0;
+    }
+  }
+
   for (dest = 1; dest <= 3; dest++) {
     if (!strcmp(gameiter->state->runners[dest], "")) {
       continue;

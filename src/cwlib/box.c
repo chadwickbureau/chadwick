@@ -733,9 +733,9 @@ cw_box_runner_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
     pitcher = cw_box_find_pitcher(boxscore, gameiter->state->pitchers[base]);
     if (pitcher == NULL) {
       fprintf(stderr, 
-	      "ERROR: In %s, no entry for pitcher '%s' at event %d.\n",
+	      "ERROR: In %s, no entry for responsible pitcher '%s' for base %d at event %d.\n",
 	      gameiter->game->game_id, 
-	      boxscore->pitchers[1-gameiter->state->batting_team]->player_id,
+	      gameiter->state->pitchers[base], base,
 	      gameiter->state->event_count);
       fprintf(stderr, "      (Batter ID '%s', event text '%s')\n",
 	      gameiter->event->batter, gameiter->event->event_text);
