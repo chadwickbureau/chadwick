@@ -230,6 +230,13 @@ cwbox_player_stats_pitching(XMLNode *parent,
 			 (pitcher->prev != NULL && 
 			  pitcher->next == NULL) ? 1 : 0);
 
+  if (cw_game_info_lookup(game, "pitches") &&
+      !strcmp(cw_game_info_lookup(game, "pitches"), "pitches")) {
+    xml_node_attribute_int(node, "number-of-pitches",
+			   pitcher->pitching->pitches);
+    xml_node_attribute_int(node, "number-of-strikes",
+			   pitcher->pitching->strikes);
+  }
 
   if (cw_game_info_lookup(game, "wp") &&
       !strcmp(pitcher->player_id, cw_game_info_lookup(game, "wp"))) {
@@ -293,6 +300,7 @@ cwbox_team_stats_baseball(XMLNode *parent,
 
   int outs = 0, ha = 0, ra = 0, er = 0, hra = 0, bba = 0, ibba = 0, soa = 0;
   int sha = 0, sfa = 0, hb = 0, wp = 0, bk = 0, pk = 0, inr = 0, inrs = 0;
+  int pitches = 0, strikes = 0;
 
   for (slot = 1; slot <= 9; slot++) {
     player = cw_box_get_starter(boxscore, t, slot);
@@ -392,6 +400,8 @@ cwbox_team_stats_baseball(XMLNode *parent,
     pk += pitcher->pitching->pk;
     inr += pitcher->pitching->inr;
     inrs += pitcher->pitching->inrs;
+    pitches += pitcher->pitching->pitches;
+    strikes += pitcher->pitching->strikes;
     
     pitcher = pitcher->next;
   }
@@ -419,6 +429,11 @@ cwbox_team_stats_baseball(XMLNode *parent,
   xml_node_attribute_posint(node, "pick-offs", pk);
   xml_node_attribute_posint(node, "inherited-runners-total", inr);
   xml_node_attribute_posint(node, "inherited-runners-scored", inrs);
+  if (cw_game_info_lookup(game, "pitches") &&
+      !strcmp(cw_game_info_lookup(game, "pitches"), "pitches")) {
+    xml_node_attribute_int(node, "number-of-pitches", pitches);
+    xml_node_attribute_int(node, "number-of-strikes", strikes);
+  }
 
   if (cw_box_get_starting_pitcher(boxscore, t)->next == NULL) {
     xml_node_attribute_int(node, "games-complete", 1);

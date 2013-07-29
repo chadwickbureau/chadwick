@@ -30,7 +30,7 @@
 
 typedef struct cw_box_batting_struct {
   int g, pa, ab, r, h, b2, b3, hr, hrslam, bi, bi2out, bb, ibb, so, gdp, hp, sh, sf, sb, cs, xi;
-  int lisp, movedup;
+  int lisp, movedup, pitches, strikes;
 } CWBoxBatting;
 
 typedef struct cw_box_fielding_struct {
@@ -67,6 +67,7 @@ typedef struct cw_box_pitching_struct {
   int xb, xbinn;
   /* gb and fb are ground-ball outs and fly-ball outs */
   int gb, fb;
+  int pitches, strikes;
 } CWBoxPitching;
 
 /*

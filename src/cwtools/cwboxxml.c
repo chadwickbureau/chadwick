@@ -220,6 +220,12 @@ cwbox_xml_pitching(CWGame *game, CWBoxscore *boxscore, int t, CWRoster *roster)
 	     pitcher->pitching->xb, pitcher->pitching->xbinn);
     }
 
+    if (cw_game_info_lookup(game, "pitches") &&
+      !strcmp(cw_game_info_lookup(game, "pitches"), "pitches")) {
+      printf("pitch=\"%d\" strike=\"%d\" ",
+	     pitcher->pitching->pitches, pitcher->pitching->strikes);
+    }
+
     if (cw_game_info_lookup(game, "wp") &&
 	!strcmp(pitcher->player_id, cw_game_info_lookup(game, "wp"))) {
       printf("dec=\"W\" ");
