@@ -1740,39 +1740,25 @@ static int cw_parse_strikeout(CWParserState *state, CWEventData *event,
     else if (!strcmp(state->token, "TP")) {
       event->tp_flag = 1;
     }
-    else if (!strcmp(state->token, "B")) {
+    else if (!strcmp(state->token, "B") ||
+	     !strcmp(state->token, "BF") ||
+	     !strcmp(state->token, "BG") ||
+	     !strcmp(state->token, "BP")) {
       event->bunt_flag = 1;
-      /* This is to match bevent's output.  Apparently, bevent believes
-       * that K/B is reserved for foul bunt strikeouts, and not strikeouts
-       * on missed bunt attempts. */
-      event->batted_ball_type = 'G';
-    }
-    else if (!strcmp(state->token, "BF")) {
-      /* While the /BF flag usually would mean a foul bunt fly, this
-       * often appears with strikeouts.  Conjecture that this might
-       * be a coding problem: inputters might think this means 'bunt foul'.
-       * However, bevent clearly treats this literally, so we will as
-       * well, for now. */
-      event->bunt_flag = 1;
-      event->batted_ball_type = 'F';
-    }
-    else if (!strcmp(state->token, "BG")) {
-      event->bunt_flag = 1;
-      event->batted_ball_type = 'G';
-    }
-    else if (!strcmp(state->token, "BP")) {
-      event->bunt_flag = 1;
-      event->batted_ball_type = 'P';
     }
     else if (!strcmp(state->token, "F")) {
-      event->batted_ball_type = 'F';
+      /* Until 2013 (and Chadwick 0.6.2 and later), BEVENT incorrectly
+	 treated this as a bunt fly.  This was grammatically correct,
+	 but not what this flag meant in this special case.  So, we
+	 no longer give a fly ball batted_ball_type in this instance. */
     }
     else if (!strcmp(state->token, "FL")) {
       event->foul_flag = 1;
     }
     else if (!strcmp(state->token, "L")) {
-      /* This is weird, but it's what BEVENT does. */
-      event->batted_ball_type = 'L';
+      /* Until 2013 (and Chadwick 0.6.2 and later), BEVENT incorrectly
+	 treated this as a line drive.  This was grammatically correct,
+	 but a bit odd.  Now, we accept the flag but take no action. */
     }
     else {
       /* Do nothing.  In theory, there shouldn't be any other flags other
