@@ -568,11 +568,13 @@ static int cw_parse_advance_modifier(CWParserState *state,
 	event->error_types[event->num_errors - 1] = 'T';
       }
       else if (!strcmp(state->token, "INT") ||
-	       !strcmp(state->token, "BINT")) {
-	/* silently accept interference flag; /BINT appears in 2006 */
+	       !strcmp(state->token, "BINT") ||
+	       !strcmp(state->token, "OBS")) {
+	/* silently accept interference and obstruction flags */
       }
-      else if (!strcmp(state->token, "G")) {
-	/* FC5.2X3(5/G) appears in 81TEX.EVA; accept silently */
+      else if (!strcmp(state->token, "G") ||
+	       !strcmp(state->token, "U")) {
+	/* a few fielder's choice plays have these modifiers on the putout */
       }
       else if (!strcmp(state->token, "AP")) {
 	/* 1X3(15/AP) appears in 2005SFN.EVN; appeal play? */
@@ -734,6 +736,14 @@ static void cw_parse_flags(CWParserState *state, CWEventData *event)
       event->dp_flag = 1;
       event->batted_ball_type = 'P';
     }
+    else if (!strcmp(flag, "/BFDP")) {
+      /* grammatically this would be bunt-fly double play, but it is
+	 interpreted as bunt-foul double play */
+      event->bunt_flag = 1;
+      event->dp_flag = 1;
+      event->batted_ball_type = 'P';
+      event->foul_flag = 1;
+    }
     else if (!strcmp(flag, "/TP")) {
       event->tp_flag = 1;
     }
@@ -792,6 +802,10 @@ static void cw_parse_flags(CWParserState *state, CWEventData *event)
     else if (!strcmp(flag, "/L")) {
       event->batted_ball_type = 'L';
     }
+    else if (!strcmp(flag, "/IF")) {
+      /* Infield fly is assumed to be a popup */
+      event->batted_ball_type = 'P';
+    }
     else if (strlen(flag) >= 3) {
       char traj = (flag[1] == 'B') ? flag[2] : flag[1];
       char *loc = (flag[1] == 'B') ? flag + 3 : flag + 2;
@@ -848,10 +862,19 @@ static void cw_parse_flags(CWParserState *state, CWEventData *event)
  * at exit:  state->sym points to first character after 'BK' token
  *
  * Notes:
- * - Nothing to do here really; balks shouldn't take flags, etc.
+ * - Very few flags may make sense on a balk: /OBS (obstruction) is the
+ *   only one currently supported
  */
 static int cw_parse_balk(CWParserState *state, CWEventData *event, int flags)
 {
+  while (flags && state->sym == '/') {
+    cw_parse_flag(state);
+
+    if (!strcmp(state->token, "OBS")) {
+      /* Silently accept obstruction flag. */
+    }
+  }
+
   return 1;
 }
 
@@ -1292,12 +1315,20 @@ static int cw_parse_generic_out(CWParserState *state, CWEventData *event,
  * at exit:  state->sym points to first character after 'HP'/'HBP' token
  *
  * Notes:
+ * - Only flag that is currently accepted is /REV
  * - Sets advancement of batter to 1, which is implied by primary event
  */
 static int cw_parse_hit_by_pitch(CWParserState *state, CWEventData *event,
 				 int flags)
 {
   event->advance[0] = 1;
+  while (flags && state->sym == '/') {
+    cw_parse_flag(state);
+
+    if (!strcmp(state->token, "REV")) {
+      /* Silently accept review flag. */
+    }
+  }
   return 1;
 }
 
@@ -1432,8 +1463,8 @@ static int cw_parse_indifference(CWParserState *state, CWEventData *event,
  * at exit:  state->sym points to '.' or end of string, as appropriate
  *
  * Notes:
- * - _flags are unusual with this event; /INT, /DP, and /TP are accepted,
- *   though only /INT has occurred so far in Retrosheet data
+ * - flags are unusual with this event; /AP, /BINT, /INT, /OBA, /DP, and /TP 
+ *   are accepted.
  */
 static int cw_parse_other_advance(CWParserState *state, CWEventData *event,
 				  int flags)
@@ -1441,11 +1472,20 @@ static int cw_parse_other_advance(CWParserState *state, CWEventData *event,
   while (flags && state->sym == '/') {
     cw_parse_flag(state);
 
-    if (!strcmp(state->token, "INT")) {
+    if (!strcmp(state->token, "BINT")) {
+      /* silently accept batter interference flag */
+    }
+    else if (!strcmp(state->token, "INT")) {
       /* silently accept interference flag */
+    }
+    else if (!strcmp(state->token, "AP")) {
+      /* silently accept appeal play flag */
     }
     else if (!strcmp(state->token, "DP")) {
       event->dp_flag = 1;
+    }
+    else if (!strcmp(state->token, "OBS")) {
+      /* silently accept obstruction flag */
     }
     else if (!strcmp(state->token, "TP")) {
       event->tp_flag = 1;
@@ -1468,7 +1508,7 @@ static int cw_parse_other_advance(CWParserState *state, CWEventData *event,
  * at exit:  state->sym points to first character after 'PB' token
  *
  * Notes:
- * - The only meaningful flag for WP is /DP 
+ * - The only meaningful flag for PB is /DP 
  */
 static int cw_parse_passed_ball(CWParserState *state, CWEventData *event,
 				int flags)
@@ -1820,6 +1860,9 @@ static int cw_parse_walk(CWParserState *state, CWEventData *event, int flags)
     }
     else if (!strcmp(state->token, "DP")) {
       event->dp_flag = 1;
+    }
+    else if (!strcmp(state->token, "BOOT")) {
+      /* Silently accept batting out of order flag */
     }
     else if (state->token[0] == 'R') {
       /* There are instances of the relay flag /R, for example, in
