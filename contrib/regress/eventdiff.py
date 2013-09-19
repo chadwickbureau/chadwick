@@ -113,7 +113,7 @@ def run_diff(tool1_path, tool2_path, data_path, year):
     
 if __name__ == "__main__":
     import sys
-    run_diff(sys.argv[1], sys.argv[2], "/home/dataczar/retrosheet",
+    run_diff(sys.argv[1], sys.argv[2], "/home/dataczar/git/retrosheet/event/regular",
              sys.argv[3])
 
     
