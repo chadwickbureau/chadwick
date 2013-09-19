@@ -206,10 +206,10 @@ DECLARE_FIELDFUNC(cwgame_game_id)
 /* Field 1 */
 DECLARE_FIELDFUNC(cwgame_date)
 {
-  return sprintf(buffer, (ascii) ? "\"%c%c%c%c%c%c\"" : "%c%c%c%c%c%c",
-		 gameiter->game->game_id[5], gameiter->game->game_id[6],
-		 gameiter->game->game_id[7], gameiter->game->game_id[8],
-		 gameiter->game->game_id[9], gameiter->game->game_id[10]);
+  char *date = cw_game_info_lookup(gameiter->game, "date");
+  return sprintf(buffer, (ascii) ? "\"%c%c%c%c%c%c%c%c\"" : "%c%c%c%c%c%c%c%c",
+		 date[0], date[1], date[2], date[3],
+		 date[5], date[6], date[8], date[9]);
 }
 
 /* Field 2 */
