@@ -497,9 +497,14 @@ static int cw_parse_advance_modifier(CWParserState *state,
 				     int safe, int baseFrom, int baseTo)
 {
   int i;
+  int is_error = 0;
 
   if (isfielder(state->sym) || state->sym == 'E') {
+    if (state->sym == 'E') {
+      is_error = 1;
+    }
     if (cw_parse_fielding_credit(state, event, ' ')) {
+      is_error = 1;
       if (!safe) {
 	safe = 1;
 	event->muff_flag[baseFrom] = 1;
@@ -565,7 +570,13 @@ static int cw_parse_advance_modifier(CWParserState *state,
 	  !strcmp(state->token, "TH2") ||
 	  !strcmp(state->token, "TH3") ||
 	  !strcmp(state->token, "THH")) {
-	event->error_types[event->num_errors - 1] = 'T';
+	if (is_error) {
+	  /* /TH flag occasionally appears at the end of an out credit.
+	   * Without this check, an earlier error in the string would
+	   * get flagged incorrectly as a throwing error.
+	   */ 
+	  event->error_types[event->num_errors - 1] = 'T';
+	}
       }
       else if (!strcmp(state->token, "INT") ||
 	       !strcmp(state->token, "BINT") ||
