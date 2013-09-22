@@ -17,7 +17,7 @@ statistics collection.
 Authors
 -------
 
-Chadwick is written, maintained, and Copyright © 2002-2012 by
+Chadwick is written, maintained, and Copyright © 2002-2013 by
 T. L. Turocy (ted.turocy <aht> gmail <daht> com) 
 at Chadwick Baseball Bureau (http://www.chadwick-bureau.com).
 
@@ -31,7 +31,7 @@ possibilities.
 Downloading
 -----------
 
-The current version of Chadwick is version 0.6.1.
+The current version of Chadwick is version 0.6.2.
 You can download the latest releases of Chadwick from Sourceforge:
 http://sourceforge.net/projects/chadwick/files
 

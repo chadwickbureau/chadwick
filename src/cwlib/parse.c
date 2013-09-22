@@ -497,9 +497,14 @@ static int cw_parse_advance_modifier(CWParserState *state,
 				     int safe, int baseFrom, int baseTo)
 {
   int i;
+  int is_error = 0;
 
   if (isfielder(state->sym) || state->sym == 'E') {
+    if (state->sym == 'E') {
+      is_error = 1;
+    }
     if (cw_parse_fielding_credit(state, event, ' ')) {
+      is_error = 1;
       if (!safe) {
 	safe = 1;
 	event->muff_flag[baseFrom] = 1;
@@ -565,14 +570,22 @@ static int cw_parse_advance_modifier(CWParserState *state,
 	  !strcmp(state->token, "TH2") ||
 	  !strcmp(state->token, "TH3") ||
 	  !strcmp(state->token, "THH")) {
-	event->error_types[event->num_errors - 1] = 'T';
+	if (is_error) {
+	  /* /TH flag occasionally appears at the end of an out credit.
+	   * Without this check, an earlier error in the string would
+	   * get flagged incorrectly as a throwing error.
+	   */ 
+	  event->error_types[event->num_errors - 1] = 'T';
+	}
       }
       else if (!strcmp(state->token, "INT") ||
-	       !strcmp(state->token, "BINT")) {
-	/* silently accept interference flag; /BINT appears in 2006 */
+	       !strcmp(state->token, "BINT") ||
+	       !strcmp(state->token, "OBS")) {
+	/* silently accept interference and obstruction flags */
       }
-      else if (!strcmp(state->token, "G")) {
-	/* FC5.2X3(5/G) appears in 81TEX.EVA; accept silently */
+      else if (!strcmp(state->token, "G") ||
+	       !strcmp(state->token, "U")) {
+	/* a few fielder's choice plays have these modifiers on the putout */
       }
       else if (!strcmp(state->token, "AP")) {
 	/* 1X3(15/AP) appears in 2005SFN.EVN; appeal play? */
@@ -734,6 +747,14 @@ static void cw_parse_flags(CWParserState *state, CWEventData *event)
       event->dp_flag = 1;
       event->batted_ball_type = 'P';
     }
+    else if (!strcmp(flag, "/BFDP")) {
+      /* grammatically this would be bunt-fly double play, but it is
+	 interpreted as bunt-foul double play */
+      event->bunt_flag = 1;
+      event->dp_flag = 1;
+      event->batted_ball_type = 'P';
+      event->foul_flag = 1;
+    }
     else if (!strcmp(flag, "/TP")) {
       event->tp_flag = 1;
     }
@@ -792,6 +813,10 @@ static void cw_parse_flags(CWParserState *state, CWEventData *event)
     else if (!strcmp(flag, "/L")) {
       event->batted_ball_type = 'L';
     }
+    else if (!strcmp(flag, "/IF")) {
+      /* Infield fly is assumed to be a popup */
+      event->batted_ball_type = 'P';
+    }
     else if (strlen(flag) >= 3) {
       char traj = (flag[1] == 'B') ? flag[2] : flag[1];
       char *loc = (flag[1] == 'B') ? flag + 3 : flag + 2;
@@ -848,10 +873,19 @@ static void cw_parse_flags(CWParserState *state, CWEventData *event)
  * at exit:  state->sym points to first character after 'BK' token
  *
  * Notes:
- * - Nothing to do here really; balks shouldn't take flags, etc.
+ * - Very few flags may make sense on a balk: /OBS (obstruction) is the
+ *   only one currently supported
  */
 static int cw_parse_balk(CWParserState *state, CWEventData *event, int flags)
 {
+  while (flags && state->sym == '/') {
+    cw_parse_flag(state);
+
+    if (!strcmp(state->token, "OBS")) {
+      /* Silently accept obstruction flag. */
+    }
+  }
+
   return 1;
 }
 
@@ -1292,12 +1326,20 @@ static int cw_parse_generic_out(CWParserState *state, CWEventData *event,
  * at exit:  state->sym points to first character after 'HP'/'HBP' token
  *
  * Notes:
+ * - Only flag that is currently accepted is /REV
  * - Sets advancement of batter to 1, which is implied by primary event
  */
 static int cw_parse_hit_by_pitch(CWParserState *state, CWEventData *event,
 				 int flags)
 {
   event->advance[0] = 1;
+  while (flags && state->sym == '/') {
+    cw_parse_flag(state);
+
+    if (!strcmp(state->token, "REV")) {
+      /* Silently accept review flag. */
+    }
+  }
   return 1;
 }
 
@@ -1308,12 +1350,15 @@ static int cw_parse_hit_by_pitch(CWParserState *state, CWEventData *event,
  * at exit:  p-state->sym points to '.' or end of string, as appropriate
  *
  * Notes:
- * - 'C/E1' and 'C/E3' are considered legal strings (per David W. Smith);
+ * - 'C/E1', 'C/4E1' and 'C/E3' are considered legal strings (per David W. Smith);
  *   these are for cases where batter was awarded first due to interference
  *   by the pitcher or first baseman, respectively, event though these
  *   are not truly "catcher's" interference.  DWS says these are the only
  *   legal exceptions currently in the DiamondWare engine, so we will
- *   follow along with that convention here.
+ *   follow along with that convention here.  While in principle
+ *   any legal fielding credit string ending in En could appear, the chances
+ *   of occurrence in an actual game are small, while the chances that they could
+ *   be incorrect input would be large.
  */
 static int cw_parse_interference(CWParserState *state, CWEventData *event,
 				 int flags)
@@ -1332,6 +1377,10 @@ static int cw_parse_interference(CWParserState *state, CWEventData *event,
     }
     else if (!strcmp(state->token, "E1")) {
       event->errors[event->num_errors++] = 1;
+    }
+    else if (!strcmp(state->token, "4E1")) {
+      event->errors[event->num_errors++] = 1;
+      event->assists[event->num_assists++] = 4;
     }
     else if (!strcmp(state->token, "E3")) {
       event->errors[event->num_errors++] = 3;
@@ -1425,8 +1474,8 @@ static int cw_parse_indifference(CWParserState *state, CWEventData *event,
  * at exit:  state->sym points to '.' or end of string, as appropriate
  *
  * Notes:
- * - _flags are unusual with this event; /INT, /DP, and /TP are accepted,
- *   though only /INT has occurred so far in Retrosheet data
+ * - flags are unusual with this event; /AP, /BINT, /INT, /OBA, /DP, and /TP 
+ *   are accepted.
  */
 static int cw_parse_other_advance(CWParserState *state, CWEventData *event,
 				  int flags)
@@ -1434,11 +1483,20 @@ static int cw_parse_other_advance(CWParserState *state, CWEventData *event,
   while (flags && state->sym == '/') {
     cw_parse_flag(state);
 
-    if (!strcmp(state->token, "INT")) {
+    if (!strcmp(state->token, "BINT")) {
+      /* silently accept batter interference flag */
+    }
+    else if (!strcmp(state->token, "INT")) {
       /* silently accept interference flag */
+    }
+    else if (!strcmp(state->token, "AP")) {
+      /* silently accept appeal play flag */
     }
     else if (!strcmp(state->token, "DP")) {
       event->dp_flag = 1;
+    }
+    else if (!strcmp(state->token, "OBS")) {
+      /* silently accept obstruction flag */
     }
     else if (!strcmp(state->token, "TP")) {
       event->tp_flag = 1;
@@ -1461,7 +1519,7 @@ static int cw_parse_other_advance(CWParserState *state, CWEventData *event,
  * at exit:  state->sym points to first character after 'PB' token
  *
  * Notes:
- * - The only meaningful flag for WP is /DP 
+ * - The only meaningful flag for PB is /DP 
  */
 static int cw_parse_passed_ball(CWParserState *state, CWEventData *event,
 				int flags)
@@ -1693,39 +1751,25 @@ static int cw_parse_strikeout(CWParserState *state, CWEventData *event,
     else if (!strcmp(state->token, "TP")) {
       event->tp_flag = 1;
     }
-    else if (!strcmp(state->token, "B")) {
+    else if (!strcmp(state->token, "B") ||
+	     !strcmp(state->token, "BF") ||
+	     !strcmp(state->token, "BG") ||
+	     !strcmp(state->token, "BP")) {
       event->bunt_flag = 1;
-      /* This is to match bevent's output.  Apparently, bevent believes
-       * that K/B is reserved for foul bunt strikeouts, and not strikeouts
-       * on missed bunt attempts. */
-      event->batted_ball_type = 'G';
-    }
-    else if (!strcmp(state->token, "BF")) {
-      /* While the /BF flag usually would mean a foul bunt fly, this
-       * often appears with strikeouts.  Conjecture that this might
-       * be a coding problem: inputters might think this means 'bunt foul'.
-       * However, bevent clearly treats this literally, so we will as
-       * well, for now. */
-      event->bunt_flag = 1;
-      event->batted_ball_type = 'F';
-    }
-    else if (!strcmp(state->token, "BG")) {
-      event->bunt_flag = 1;
-      event->batted_ball_type = 'G';
-    }
-    else if (!strcmp(state->token, "BP")) {
-      event->bunt_flag = 1;
-      event->batted_ball_type = 'P';
     }
     else if (!strcmp(state->token, "F")) {
-      event->batted_ball_type = 'F';
+      /* Until 2013 (and Chadwick 0.6.2 and later), BEVENT incorrectly
+	 treated this as a bunt fly.  This was grammatically correct,
+	 but not what this flag meant in this special case.  So, we
+	 no longer give a fly ball batted_ball_type in this instance. */
     }
     else if (!strcmp(state->token, "FL")) {
       event->foul_flag = 1;
     }
     else if (!strcmp(state->token, "L")) {
-      /* This is weird, but it's what BEVENT does. */
-      event->batted_ball_type = 'L';
+      /* Until 2013 (and Chadwick 0.6.2 and later), BEVENT incorrectly
+	 treated this as a line drive.  This was grammatically correct,
+	 but a bit odd.  Now, we accept the flag but take no action. */
     }
     else {
       /* Do nothing.  In theory, there shouldn't be any other flags other
@@ -1813,6 +1857,9 @@ static int cw_parse_walk(CWParserState *state, CWEventData *event, int flags)
     }
     else if (!strcmp(state->token, "DP")) {
       event->dp_flag = 1;
+    }
+    else if (!strcmp(state->token, "BOOT")) {
+      /* Silently accept batting out of order flag */
     }
     else if (state->token[0] == 'R') {
       /* There are instances of the relay flag /R, for example, in
