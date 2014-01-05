@@ -722,68 +722,28 @@ DECLARE_FIELDFUNC(cwevent_po3_flag)
 		 gameiter->event_data->po_flag[3] ? 'T' : 'F');
 }
 
-/*
- * In cwevent, the "responsible pitcher" is usually the pitcher responsible
- * at the beginning of the play.  However, on a play like 32(3)/FO.2-H(E2),
- * the runner scoring should be charged to the pitcher who was initially
- * responsible for the runner on third, and so that pitcher is listed
- * as the responsible pitcher so that stats can be calculated directly
- * from the cwevent output without having to reparse the play.
- */
-char *
-cwevent_responsible_pitcher(CWGameState *state, CWEventData *event_data,
-			    int base)
-{
-  if (base == 3) {
-    return state->pitchers[3];
-  }
-  else if (base == 2) {
-    if (cw_event_runner_put_out(event_data, 3) &&
-	event_data->fc_flag[3] && event_data->advance[2] >= 4) {
-      return state->pitchers[3];
-    }
-    else {
-      return state->pitchers[2];
-    }
-  }
-  else {
-    if (cw_event_runner_put_out(event_data, 3) &&
-	event_data->fc_flag[3] && event_data->advance[2] >= 4) {
-      return state->pitchers[2];
-    }
-    else if (cw_event_runner_put_out(event_data, 3) &&
-	     !strcmp(state->runners[2], "") &&
-	     event_data->advance[1] >= 4) {
-      return state->pitchers[3];
-    }
-    else {
-      return state->pitchers[1];
-    }
-  }
-}
-
 /* Field 75 */
 DECLARE_FIELDFUNC(cwevent_responsible_pitcher1)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 cwevent_responsible_pitcher(gameiter->state, 
-					     gameiter->event_data, 1));
+		 cw_gamestate_responsible_pitcher(gameiter->state, 
+						  gameiter->event_data, 1));
 }
 
 /* Field 76 */
 DECLARE_FIELDFUNC(cwevent_responsible_pitcher2)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 cwevent_responsible_pitcher(gameiter->state,
-					     gameiter->event_data, 2));
+		 cw_gamestate_responsible_pitcher(gameiter->state,
+						  gameiter->event_data, 2));
 }
 
 /* Field 77 */
 DECLARE_FIELDFUNC(cwevent_responsible_pitcher3)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 cwevent_responsible_pitcher(gameiter->state,
-					     gameiter->event_data, 3));
+		 cw_gamestate_responsible_pitcher(gameiter->state,
+						  gameiter->event_data, 3));
 }
 
 /* Field 78 */

@@ -630,6 +630,50 @@ cw_gamestate_charged_pitcher(CWGameState *state, CWEventData *event_data)
 }
 
 /*
+ * The "responsible pitcher" is usually the pitcher responsible
+ * at the beginning of the play.  However, on a play like 32(3)/FO.2-H(E2),
+ * the runner scoring should be charged to the pitcher who was initially
+ * responsible for the runner on third, and so that pitcher is listed
+ * as the responsible pitcher so that stats can be calculated directly
+ * from the cwevent output without having to reparse the play.
+ */
+char *
+cw_gamestate_responsible_pitcher(CWGameState *state, CWEventData *event_data,
+				 int base)
+{
+  if (!strcmp(state->runners[base], "")) {
+    return "";
+  }
+  if (base == 3) {
+    return state->pitchers[3];
+  }
+  else if (base == 2) {
+    if (cw_event_runner_put_out(event_data, 3) &&
+	event_data->fc_flag[3] && event_data->advance[2] >= 4) {
+      return state->pitchers[3];
+    }
+    else {
+      return state->pitchers[2];
+    }
+  }
+  else {
+    if (cw_event_runner_put_out(event_data, 3) &&
+	event_data->fc_flag[3] && event_data->advance[2] >= 4) {
+      return state->pitchers[2];
+    }
+    else if (cw_event_runner_put_out(event_data, 3) &&
+	     event_data->fc_flag[3] &&
+	     !strcmp(state->runners[2], "") &&
+	     event_data->advance[1] >= 4) {
+      return state->pitchers[3];
+    }
+    else {
+      return state->pitchers[1];
+    }
+  }
+}
+
+/*
  * Private auxiliary function to set up lineups with starters 
  */
 static void
