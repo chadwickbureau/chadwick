@@ -22,7 +22,7 @@
 #
 
 
-AC_INIT([chadwick], [0.6.2])
+AC_INIT([chadwick], [0.6.3])
 AC_CONFIG_SRCDIR([src/cwlib/chadwick.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
