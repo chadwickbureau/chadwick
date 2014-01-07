@@ -31,9 +31,11 @@ possibilities.
 Downloading
 -----------
 
-The current version of Chadwick is version 0.6.2.
-You can download the latest releases of Chadwick from Sourceforge:
-http://sourceforge.net/projects/chadwick/files
+The current version of Chadwick is version 0.6.3.
+
+* `Full source code
+  <http://sourceforge.net/projects/chadwick/files/chadwick-0.6/chadwick-0.6.3/chadwick-0.6.3.tar.gz>`_
+* `Pre-built command-line binaries for Microsoft Windows <http://sourceforge.net/projects/chadwick/files/chadwick-0.6/chadwick-0.6.3/chadwick-0.6.3.zip>`_
 
 
 Community
