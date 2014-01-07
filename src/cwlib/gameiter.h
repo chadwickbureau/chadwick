@@ -108,6 +108,14 @@ char *cw_gamestate_charged_pitcher(CWGameState *state,
 
 
 /*
+ * The pitcher who is charged with the scoring of the runner on base 'base'
+ */
+char *cw_gamestate_responsible_pitcher(CWGameState *state, 
+				       CWEventData *event_data,
+				       int base);
+
+
+/*
  * TODO:
  * - Add roster context to iterator (or maybe to the game?)
  */

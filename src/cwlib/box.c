@@ -794,7 +794,10 @@ cw_box_runner_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       return;
     }
 
-    pitcher = cw_box_find_pitcher(boxscore, gameiter->state->pitchers[base]);
+    pitcher = cw_box_find_pitcher(boxscore, 
+				  cw_gamestate_responsible_pitcher(gameiter->state,
+								   gameiter->event_data,
+								   base));
     if (pitcher == NULL) {
       fprintf(stderr, 
 	      "ERROR: In %s, no entry for responsible pitcher '%s' for base %d at event %d.\n",

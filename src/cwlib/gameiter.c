@@ -255,21 +255,7 @@ cw_gamestate_process_advance(CWGameState *state,
   strncpy(state->catchers[0],
 	  state->fielders[2][1-state->batting_team], 49);
   
-  if (event_data->advance[3] == 2) {
-    /* Backwards advances are now supported thanks to Jean Segura */
-    strcpy(state->runners[2], state->runners[3]);
-    state->runner_src_event[2] = state->runner_src_event[3];
-    strcpy(state->pitchers[2], state->pitchers[3]);
-    strcpy(state->catchers[2], state->catchers[3]);
-  }
-  if (event_data->advance[3] == 1) {
-    strcpy(state->runners[1], state->runners[3]);
-    state->runner_src_event[1] = state->runner_src_event[3];
-    strcpy(state->pitchers[1], state->pitchers[3]);
-    strcpy(state->catchers[1], state->catchers[3]);
-  }
-
-  if (event_data->advance[3] >= 4 || event_data->advance[3] <= 2 ||
+  if (event_data->advance[3] >= 4 ||
       cw_event_runner_put_out(event_data, 3)) {
     if (event_data->fc_flag[3] && cw_event_runner_put_out(event_data, 3)) {
       cw_gamestate_push_pitchers(state, 3);
@@ -286,14 +272,8 @@ cw_gamestate_process_advance(CWGameState *state,
     strcpy(state->pitchers[3], state->pitchers[2]);
     strcpy(state->catchers[3], state->catchers[2]);
   }
-  else if (event_data->advance[2] == 1) {
-    strcpy(state->runners[1], state->runners[2]);
-    state->runner_src_event[1] = state->runner_src_event[2];
-    strcpy(state->pitchers[1], state->pitchers[2]);
-    strcpy(state->catchers[1], state->catchers[2]);
-  }
 
-  if (event_data->advance[2] >= 3 || event_data->advance[2] == 1 ||
+  if (event_data->advance[2] >= 3 || 
       cw_event_runner_put_out(event_data, 2)) {
     if (event_data->fc_flag[2] && cw_event_runner_put_out(event_data, 2)) {
       cw_gamestate_push_pitchers(state, 2);
@@ -325,6 +305,42 @@ cw_gamestate_process_advance(CWGameState *state,
     state->runner_src_event[1] = 0;
     strcpy(state->pitchers[1], "");
     strcpy(state->catchers[1], "");
+  }
+
+  /* Backwards advances are now supported thanks to Jean Segura.
+   * These need to be processed after forward advances, to avoid
+   * clobbering runner data.
+   */
+  if (event_data->advance[3] == 2) {
+    strcpy(state->runners[2], state->runners[3]);
+    state->runner_src_event[2] = state->runner_src_event[3];
+    strcpy(state->pitchers[2], state->pitchers[3]);
+    strcpy(state->catchers[2], state->catchers[3]);
+    strcpy(state->runners[3], "");
+    state->runner_src_event[3] = 0;
+    strcpy(state->pitchers[3], "");
+    strcpy(state->catchers[3], "");
+  }
+  else if (event_data->advance[3] == 1) {
+    strcpy(state->runners[1], state->runners[3]);
+    state->runner_src_event[1] = state->runner_src_event[3];
+    strcpy(state->pitchers[1], state->pitchers[3]);
+    strcpy(state->catchers[1], state->catchers[3]);
+    strcpy(state->runners[3], "");
+    state->runner_src_event[3] = 0;
+    strcpy(state->pitchers[3], "");
+    strcpy(state->catchers[3], "");
+  }
+  if (event_data->advance[2] == 1) {
+    fprintf(stderr, "Backwards advance detected!\n");
+    strcpy(state->runners[1], state->runners[2]);
+    state->runner_src_event[1] = state->runner_src_event[2];
+    strcpy(state->pitchers[1], state->pitchers[2]);
+    strcpy(state->catchers[1], state->catchers[2]);
+    strcpy(state->runners[2], "");
+    state->runner_src_event[2] = 0;
+    strcpy(state->pitchers[2], "");
+    strcpy(state->catchers[2], "");
   }
 
   if (event_data->advance[0] >= 1 && event_data->advance[0] <= 3) {
@@ -626,6 +642,50 @@ cw_gamestate_charged_pitcher(CWGameState *state, CWEventData *event_data)
   }
   else {
     return state->fielders[1][1-state->batting_team];
+  }
+}
+
+/*
+ * The "responsible pitcher" is usually the pitcher responsible
+ * at the beginning of the play.  However, on a play like 32(3)/FO.2-H(E2),
+ * the runner scoring should be charged to the pitcher who was initially
+ * responsible for the runner on third, and so that pitcher is listed
+ * as the responsible pitcher so that stats can be calculated directly
+ * from the cwevent output without having to reparse the play.
+ */
+char *
+cw_gamestate_responsible_pitcher(CWGameState *state, CWEventData *event_data,
+				 int base)
+{
+  if (!strcmp(state->runners[base], "")) {
+    return "";
+  }
+  if (base == 3) {
+    return state->pitchers[3];
+  }
+  else if (base == 2) {
+    if (cw_event_runner_put_out(event_data, 3) &&
+	event_data->fc_flag[3] && event_data->advance[2] >= 4) {
+      return state->pitchers[3];
+    }
+    else {
+      return state->pitchers[2];
+    }
+  }
+  else {
+    if (cw_event_runner_put_out(event_data, 3) &&
+	event_data->fc_flag[3] && event_data->advance[2] >= 4) {
+      return state->pitchers[2];
+    }
+    else if (cw_event_runner_put_out(event_data, 3) &&
+	     event_data->fc_flag[3] &&
+	     !strcmp(state->runners[2], "") &&
+	     event_data->advance[1] >= 4) {
+      return state->pitchers[3];
+    }
+    else {
+      return state->pitchers[1];
+    }
   }
 }
 
