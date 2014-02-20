@@ -944,7 +944,22 @@ cw_game_write(CWGame *game, FILE *file)
   cw_game_write_data(game, file);
 }
 
-
+void 
+cw_event_comment_append(CWEvent *event, char *text)
+{
+  CWComment *comment = (CWComment *) malloc(sizeof(CWComment));
+  comment->text = (char *) malloc(sizeof(char) * (strlen(text) + 1));
+  strcpy(comment->text, text);
+  comment->next = NULL;
+  comment->prev = event->last_comment;
+  if (event->last_comment) {
+    event->last_comment->next = comment;
+  }
+  else {
+    event->first_comment = comment;
+  }
+  event->last_comment = comment;
+}
 
 
 

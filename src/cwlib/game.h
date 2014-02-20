@@ -209,6 +209,10 @@ int cw_data_get_item_int(CWData *data, unsigned int index);
  */
 int cw_game_lint(CWGame *game);
 
+/*
+ * Add a comment to the event
+ */
+void cw_event_comment_append(CWEvent *event, char *comment);
 
 #endif  /* CW_GAME_H */
 
