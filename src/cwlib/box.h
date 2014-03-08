@@ -53,7 +53,7 @@ typedef struct cw_box_player_struct {
 
 typedef struct cw_box_pitching_struct {
   int g, gs, cg, sho, gf, outs, ab, r, er, h, b2, b3, hr, bb, ibb, so, bf, bk, wp, hb;
-  int sh, sf, pk;
+  int gdp, sh, sf, pk;
   int w, l, sv;
 
   /* inherited runners/inherited runners scored
