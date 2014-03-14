@@ -534,7 +534,8 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
     exit(1);
   }
 
-  while (strcmp(pitcher->player_id, 
+  while (pitcher && 
+	 strcmp(pitcher->player_id, 
 		cw_gamestate_charged_pitcher(gameiter->state,
 					     event_data))) {
     pitcher = pitcher->prev;
