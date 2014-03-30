@@ -499,7 +499,7 @@ fields. These are are specified using the ``-x`` command-line flag.
      - fate of runner on third
      - ``RUN3_FATE_ID``
    * - 55
-     - runs scored in half inning after this eveng
+     - runs scored in half inning after this event
      - ``FATE_RUNS_CT``
    * - 56
      - fielder with sixth assist
