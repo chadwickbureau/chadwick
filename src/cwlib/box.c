@@ -405,7 +405,7 @@ cw_box_find_current_player(CWBoxscore *boxscore, char *player_id)
   for (t = 0; t <= 1; t++) {
     for (i = 0; i <= 9; i++) {
       CWBoxPlayer *player = boxscore->slots[i][t];
-      if (!strcmp(player->player_id, player_id)) {
+      if (player != NULL && !strcmp(player->player_id, player_id)) {
 	return player;
       }
     }
@@ -573,10 +573,10 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
   CWBoxPlayer *player;
   CWBoxPitcher *pitcher;
 
-  player = cw_box_find_current_player(boxscore, 
-				      cw_gamestate_charged_batter(gameiter->state,
-								  gameiter->event->batter,
-								  event_data));
+  player = cw_box_find_player(boxscore, 
+			      cw_gamestate_charged_batter(gameiter->state,
+							  gameiter->event->batter,
+							  event_data));
   if (cw_event_is_batter(event_data) && player == NULL) {
     /* If not a batter event, we will be tolerant if the player ID
      * in the batter field is bogus.
