@@ -59,6 +59,8 @@ cw_gamestate_initialize(CWGameState *state)
   state->hits[0] = state->hits[1] = 0;
   state->errors[0] = state->errors[1] = 0;
   state->times_out[0] = state->times_out[1] = 0;
+  state->next_batter[0] = 1;
+  state->next_batter[1] = 1;
   state->num_batters[0] = state->num_batters[1] = 0;
   state->dh_slot[0] = state->dh_slot[1] = 0;
 
@@ -115,6 +117,7 @@ cw_gamestate_copy(CWGameState *orig_state)
     state->hits[t] = orig_state->hits[t];
     state->errors[t] = orig_state->errors[t];
     state->times_out[t] = orig_state->times_out[t];
+    state->next_batter[t] = orig_state->next_batter[t];
     state->num_batters[t] = orig_state->num_batters[t];
     state->dh_slot[t] = orig_state->dh_slot[t];
   }
@@ -377,6 +380,10 @@ void cw_gamestate_update(CWGameState *state,
 
   if (cw_event_is_batter(event_data)) {
     state->num_batters[state->batting_team]++;
+    state->next_batter[state->batting_team]++;
+    if (state->next_batter[state->batting_team] == 10) {
+      state->next_batter[state->batting_team] = 1;
+    }
     state->inning_batters++;
     state->ph_flag = 0;
     state->is_leadoff = 0;
@@ -850,6 +857,9 @@ cw_gameiter_next(CWGameIterator *gameiter)
 
   if (gameiter->event && strcmp(gameiter->event->event_text, "NP")) {
     int i;
+    if (gameiter->event->ladj_slot != 0) {
+      gameiter->state->next_batter[gameiter->state->batting_team] = gameiter->event->ladj_slot;
+    }
     gameiter->state->batter_hand = gameiter->event->batter_hand;
     gameiter->parse_ok = cw_parse_event(gameiter->event->event_text,
 					gameiter->event_data);

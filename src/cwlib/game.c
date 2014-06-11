@@ -126,6 +126,9 @@ static void cw_game_cleanup_events(CWGame *game, CWEvent *event)
     free(event->count);
     free(event->pitches);
     free(event->event_text);
+    if (event->pitcher_hand_id) {
+      free(event->pitcher_hand_id);
+    }
     while (sub != NULL) {
       CWAppearance *next_sub = sub->next;
       free(sub->player_id);
@@ -376,6 +379,9 @@ void cw_game_event_append(CWGame *game, int inning, int batting_team,
   strcpy(event->event_text, event_text);
   event->batter_hand = ' ';
   event->pitcher_hand = ' ';
+  event->pitcher_hand_id = NULL;
+  event->ladj_align = 0;
+  event->ladj_slot = 0;
   event->prev = game->last_event;
   event->next = NULL;
   event->first_sub = NULL;
@@ -603,7 +609,8 @@ cw_game_read(FILE *file)
 {
   char buf[1024], *tok;
   fpos_t filepos;
-  char batHand = ' ', batHandBatter[1024], pitHand = ' ';
+  char batHand = ' ', batHandBatter[1024], pitHand = ' ', pitHandPitcher[1024];
+  int ladjAlign = 0, ladjSlot = 0;
   CWGame *game;
 
   if (fgets(buf, 1024, file) == NULL) {
@@ -697,7 +704,17 @@ cw_game_read(FILE *file)
 
       if (pitHand != ' ') {
 	game->last_event->pitcher_hand = pitHand;
+	game->last_event->pitcher_hand_id = (char *) malloc(strlen(pitHandPitcher)+1);
+	strcpy(game->last_event->pitcher_hand_id, pitHandPitcher);
 	pitHand = ' ';
+	strcpy(pitHandPitcher, "");
+      }
+
+      if (ladjSlot != 0) {
+	game->last_event->ladj_align = ladjAlign;
+	game->last_event->ladj_slot = ladjSlot;
+	ladjAlign = 0;
+	ladjSlot = 0;
       }
     }
     else if (!strcmp(tok, "sub")) {
@@ -782,8 +799,18 @@ cw_game_read(FILE *file)
       pitcher = cw_strtok(NULL);
       throws = cw_strtok(NULL);
       if (pitcher && throws) {
+	strncpy(pitHandPitcher, pitcher, 255);
 	pitHand = throws[0];
       }
+    }
+    else if (!strcmp(tok, "ladj")) {
+      char *align, *slot;
+      align = cw_strtok(NULL);
+      slot = cw_strtok(NULL);
+      if (align && slot) {
+	ladjAlign = atoi(align);
+	ladjSlot = atoi(slot);
+      }      
     }
   }
 
@@ -855,6 +882,12 @@ cw_game_write_events(CWGame *game, FILE *file)
   while (event != NULL) {
     if (event->batter_hand != ' ') {
       fprintf(file, "badj,%s,%c\n", event->batter, event->batter_hand);
+    }
+    if (event->pitcher_hand != ' ') {
+      fprintf(file, "padj,%s,%c\n", event->pitcher_hand_id, event->pitcher_hand);
+    }
+    if (event->ladj_slot != 0) {
+      fprintf(file, "ladj,%d,%d\n", event->ladj_align, event->ladj_slot);
     }
 	      
     fprintf(file, "play,%d,%d,%s,%s,%s,%s\n",

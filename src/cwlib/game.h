@@ -62,7 +62,9 @@ typedef struct cw_event_struct {
   int inning, batting_team;
   char *batter, *count, *pitches, *event_text;
   /* These are used for badj and padj; if spaces, use roster file */
-  char batter_hand, pitcher_hand;
+  char batter_hand, pitcher_hand, *pitcher_hand_id;
+  /* These are used for ladj; ladj_slot = 0 means no adjustment */
+  int ladj_align, ladj_slot;
   CWAppearance *first_sub, *last_sub;
   CWComment *first_comment, *last_comment;
   struct cw_event_struct *prev, *next;
