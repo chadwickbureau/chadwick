@@ -848,6 +848,18 @@ cw_box_runner_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
      */
     catcher = cw_box_find_current_player(boxscore, 
 					 gameiter->state->fielders[2][1-gameiter->state->batting_team]);
+    if (catcher == NULL) {
+      fprintf(stderr, 
+	      "ERROR: In %s, no entry for catcher '%s' for base %d at event %d.\n",
+	      gameiter->game->game_id, 
+	      gameiter->state->fielders[2][1-gameiter->state->batting_team], 
+	      base,
+	      gameiter->state->event_count);
+      fprintf(stderr, "      (Batter ID '%s', event text '%s')\n",
+	      gameiter->event->batter, gameiter->event->event_text);
+      fprintf(stderr, "      Skipping statistics tabulation for this play.\n");
+      return;
+    }
 
     if (gameiter->event_data->advance[base] >= 4) {
       player->batting->r++;
