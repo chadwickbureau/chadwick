@@ -613,6 +613,8 @@ class BoxscoreBattingLine(object):
     if v is None or v == "" or v == "0:00":
       self.metadata["starttime"] = "0:00"
       return
+    if isinstance(v, basestring):
+      v = datetime.datetime.strptime(v, "%I:%M%p").time()
     t = v.strftime("%I:%M%p").lstrip("0")
     self.metadata["starttime"] = t
     if self.is_night is None:
