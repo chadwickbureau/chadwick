@@ -67,7 +67,7 @@ class BoxPlayer(object):
       for slot in range(1, 10) + [ 0 ]:
         p = cw_box_get_starter(self._box, t, slot) 
         while p is not None:
-          if p == self._box_player:
+          if p.player_id == self._box_player.player_id:
             return slot
           p = p.next
     return None
@@ -79,7 +79,7 @@ class BoxPlayer(object):
         p = cw_box_get_starter(self._box, t, slot) 
         seq = 1
         while p is not None:
-          if p == self._box_player:
+          if p.player_id == self._box_player.player_id:
             return seq
           p = p.next
           seq += 1
