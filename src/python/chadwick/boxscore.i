@@ -431,11 +431,17 @@ class BoxPlayer(object):
   @property
   def P_GS(self):   return self._pitching_stat("gs")
   @property
-  def P_CG(self):   return self._pitching_stat("cg")
+  def P_CG(self):   
+    if self._box.game.status == "S":  return 0
+    return self._pitching_stat("cg")
   @property
-  def P_SHO(self):  return self._pitching_stat("sho")
+  def P_SHO(self):  
+    if self._box.game.status == "S":  return 0
+    return self._pitching_stat("sho")
   @property
-  def P_GF(self):   return self._pitching_stat("gf")
+  def P_GF(self):   
+    if self._box.game.status == "S":  return 0
+    return self._pitching_stat("gf")
   @property
   def P_W(self):    return self._pitching_stat("w")
   @property

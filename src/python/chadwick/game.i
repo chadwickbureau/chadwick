@@ -502,8 +502,17 @@ class BoxscoreBattingLine(object):
   __swig_setmethods__["phase"] = _set_phase
   phase = _swig_property(_get_phase, _set_phase)
 
-  def _get_status(self):   return "F"
-  def _set_status(self, v):   raise NotImplementedError
+  def _get_status(self):   
+    status = cw_game_info_lookup(self, "cw:status")
+    if status is None:  return "F"
+    return { "final": "F", "suspended": "S" }[status]
+  def _set_status(self, v):   
+    if v == "F":
+      return cw_game_info_set(self, "cw:status", "final")
+    elif v == "S":
+      return cw_game_info_set(self, "cw:status", "suspended")
+    else:
+      raise ValueError("Unknown value '%s' for status" % v)
   __swig_getmethods__["status"] = _get_status
   __swig_setmethods__["status"] = _set_status
   status = _swig_property(_get_status, _set_status)
