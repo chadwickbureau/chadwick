@@ -210,7 +210,11 @@ cw_box_enter_starters(CWBoxscore *boxscore, CWGame *game)
       boxscore->slots[i][t]->positions[0] = app->pos;
       if (app->pos < 10) {
 	boxscore->slots[i][t]->fielding[app->pos] = cw_box_fielding_create();
-	boxscore->slots[i][t]->fielding[app->pos]->g = 1;
+	/* Under modern rules, players only receive credit for a game
+	 *  in the field when they appear there for at least one event.
+	 *
+	 * boxscore->slots[i][t]->fielding[app->pos]->g = 1;
+	 */
       }
       if (app->pos == 1) {
 	boxscore->pitchers[t] = cw_box_pitcher_create(app->player_id, app->name);
@@ -312,7 +316,17 @@ cw_box_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
       CWBoxFielding *fielding = boxscore->slots[sub->slot][sub->team]->fielding[sub->pos];
       if (fielding == NULL) {
 	boxscore->slots[sub->slot][sub->team]->fielding[sub->pos] = cw_box_fielding_create();
-	boxscore->slots[sub->slot][sub->team]->fielding[sub->pos]->g = 1;
+	/* The mere announcement of a player at a position does not award
+	 * him a game played at the position (under modern rules).
+	 * Therefore, the game played is set when processing fielding credits
+	 * for events.
+	 * A future enhancement would allow this to be configurable,
+	 * as previously the convention was to award a game played at
+	 * a position if the player was listed in the lineup.
+	 * (See e.g. Lou Gehrig's appearances at shortstop.)
+	 *
+	 * boxscore->slots[sub->slot][sub->team]->fielding[sub->pos]->g = 1;
+	 */
       }
     }
 
@@ -959,6 +973,10 @@ cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       return;
     }
 
+    /* Fielders are credited with a game played only if they are
+     * on the field at a position for at least one event.
+     */
+    fielding->g = 1;
     fielding->outs += cw_event_outs_on_play(gameiter->event_data);
 
     if (gameiter->event_data->event_type == CW_EVENT_SINGLE ||
