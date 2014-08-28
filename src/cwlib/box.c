@@ -671,6 +671,16 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
     CWBoxPlayer *catcher = 
       cw_box_find_player(boxscore, 
 			 gameiter->state->fielders[2][1-gameiter->state->batting_team]);
+    if (catcher == NULL) {
+      fprintf(stderr, 
+	      "ERROR: In %s, no entry for fielder at position 2 at event %d.\n",
+	      gameiter->game->game_id,
+	      gameiter->state->event_count);
+      fprintf(stderr, "      (Batter ID '%s', event text '%s')\n",
+	      gameiter->event->batter, gameiter->event->event_text);
+      fprintf(stderr, "      Skipping statistics tabulation for this play.\n");
+      return;
+    }
     cw_box_add_event(&(boxscore->wp_list), 
 		     gameiter->state->inning, gameiter->state->batting_team,
 		     2, pitcher->player_id, catcher->player_id);
