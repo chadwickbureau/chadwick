@@ -1,8 +1,3 @@
-.. Chadwick documentation master file, created by
-   sphinx-quickstart on Wed Jul 29 16:12:46 2009.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 =======================================================
  Chadwick: Software Tools for Game-Level Baseball Data
 =======================================================
@@ -17,7 +12,7 @@ statistics collection.
 Authors
 -------
 
-Chadwick is written, maintained, and Copyright © 2002-2013 by
+Chadwick is written, maintained, and Copyright © 2002-2014 by
 T. L. Turocy (ted.turocy <aht> gmail <daht> com) 
 at Chadwick Baseball Bureau (http://www.chadwick-bureau.com).
 
@@ -37,18 +32,28 @@ The current version of Chadwick is version 0.6.3.
   <http://sourceforge.net/projects/chadwick/files/chadwick-0.6/chadwick-0.6.3/chadwick-0.6.3.tar.gz>`_
 * `Pre-built command-line binaries for Microsoft Windows <http://sourceforge.net/projects/chadwick/files/chadwick-0.6/chadwick-0.6.3/chadwick-0.6.3.zip>`_
 
+Development
+-----------
+
+The Chadwick source code is managed using git, at
+https://github.com/chadwickbureau/chadwick.
+
+Bugs in Chadwick should be reported to the issue tracker on github at
+https://github.com/chadwickbureau/chadwick/issues.
+Please be as specific as possible in reporting a bug, including the
+version of Chadwick you are using, the operating system(s) you're
+using, and a detailed list of steps to reproduce the issue.
 
 Community
 ---------
 
-You can get or share information about the Chadwick tools on the following
-mailing lists:
+To get the latest news on the Chadwick tool suite, you can:
 
-- **chadwick-announce** (http://lists.sourceforge.net/lists/listinfo/chadwick-announce): An announcement-only (low-traffic) mailing list, with messages only about new public releases of Chadwick.
-
-- **chadwick-users** (http://lists.sourceforge.net/lists/listinfo/chadwick-users): A mailing list for users of Chadwick.
-
-- **chadwick-devel** (http://lists.sourceforge.net/lists/listinfo/chadwick-devel): A mailing list for people interested in development of future releases of Chadwick. 
+- Subscribe to the Chadwick Baseball Bureau's twitter feed
+  (@chadwickbureau);
+- Like the Chadwick Baseball Bureau on Facebook;
+- Read the Chadwick Baseball Bureau's blog at
+  (http://www.chadwick-bureau.com/blog/)
 
 Acknowledgments
 ---------------
