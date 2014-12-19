@@ -1,6 +1,6 @@
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2013, Dr T L Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2014, Dr T L Turocy (ted.turocy@gmail.com)
  *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *
  * FILE: src/cwlib/parse.c
@@ -1492,8 +1492,15 @@ static int cw_parse_other_advance(CWParserState *state, CWEventData *event,
     else if (!strcmp(state->token, "AP")) {
       /* silently accept appeal play flag */
     }
+    else if (!strcmp(state->token, "MREV") ||
+	     !strcmp(state->token, "UREV")) {
+      /* silently accept review flags */
+    }
     else if (!strcmp(state->token, "DP")) {
       event->dp_flag = 1;
+    }
+    else if (!strcmp(state->token, "NDP")) {
+      /* silently accept flag indicating no double play */
     }
     else if (!strcmp(state->token, "OBS")) {
       /* silently accept obstruction flag */
@@ -1860,6 +1867,10 @@ static int cw_parse_walk(CWParserState *state, CWEventData *event, int flags)
     }
     else if (!strcmp(state->token, "BOOT")) {
       /* Silently accept batting out of order flag */
+    }
+    else if (!strcmp(state->token, "MREV") ||
+	     !strcmp(state->token, "UREV")) {
+      /* Silently accept review flags */
     }
     else if (state->token[0] == 'R') {
       /* There are instances of the relay flag /R, for example, in
