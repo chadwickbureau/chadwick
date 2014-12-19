@@ -332,7 +332,6 @@ cw_gamestate_process_advance(CWGameState *state,
     strcpy(state->catchers[3], "");
   }
   if (event_data->advance[2] == 1) {
-    fprintf(stderr, "Backwards advance detected!\n");
     strcpy(state->runners[1], state->runners[2]);
     state->runner_src_event[1] = state->runner_src_event[2];
     strcpy(state->pitchers[1], state->pitchers[2]);
