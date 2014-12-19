@@ -1,7 +1,0 @@
-2003-09-23    <arbiter@econ.tamu.edu>
-
-	* Plays K+DI and W+DI parsed correctly
-	* Relax parsing after strikeouts and CIs: unexpected flags are 
-	  simply ignored silently.
-	
-
