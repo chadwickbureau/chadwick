@@ -816,7 +816,7 @@ class BoxscoreBattingLine(object):
 %pythoncode %{
   @property
   def events(self):
-    gameiter = GameIterator(self)
+    gameiter = CWGameIterator(self)
     while not gameiter.at_end:
       yield EventContext(gameiter)
       gameiter.next()
