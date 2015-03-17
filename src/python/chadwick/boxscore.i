@@ -55,11 +55,11 @@ class BoxPlayer(object):
     return "-".join([ lookup[self._box_player._get_position(i)]
                       for i in xrange(self._box_player.num_positions) ])
   @property
-  def B_G_DH(self):  return "dh" in self.pos
+  def B_G_DH(self):  return 1 if "dh" in self.pos else 0
   @property
-  def B_G_PH(self):  return "ph" in self.pos
+  def B_G_PH(self):  return 1 if "ph" in self.pos else 0
   @property
-  def B_G_PR(self):  return "pr" in self.pos
+  def B_G_PR(self):  return 1 if "pr" in self.pos else 0
 
   @property
   def order_slot(self):
