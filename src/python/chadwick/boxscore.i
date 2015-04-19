@@ -92,7 +92,7 @@ class BoxPlayer(object):
     if fielding is not None:  return getattr(fielding, attr)
     return 0
   def _pitching_stat(self, attr):
-    if self.F_P_G == 0:  
+    if self.P_G == 0:  
         # This takes care of the case of a player re-entry: a player
         # might pitch, be removed, and then re-appear later as a 
         # courtesy runner (or illegal substitution).  We only report
@@ -166,7 +166,7 @@ class BoxPlayer(object):
       return None
   
   @property
-  def F_P_G(self):    return self._fielding_stat(1, "g")
+  def F_P_G(self):    return self.P_G   
   @property
   def F_P_OUT(self):  return self._fielding_stat(1, "outs")
   @property
@@ -427,7 +427,11 @@ class BoxPlayer(object):
   @property
   def P_G(self):    
     # Multiple pitching stints in a game still count only as one game pitched
-    return min(self._pitching_stat("g"), 1)
+    for t in [ 0, 1 ]:
+      for pitcher in self._box.teams[t]._pitching_records:
+        if pitcher.player_id == self.key_player:
+          return 1
+    return 0
   @property
   def P_GS(self):   return self._pitching_stat("gs")
   @property
