@@ -1115,8 +1115,9 @@ static int cw_parse_safe_on_error(CWParserState *state,
 				  CWEventData *event, int flags)
 {
   event->advance[0] = 1;
-  
-  if (state->sym < '1' || state->sym > '9') {
+
+  /* Chadwick extension: accept E0 for reached on error, unknown fielder */
+  if (state->sym < '0' || state->sym > '9') {
     return cw_parse_invalid(state);
   }
 
