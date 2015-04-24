@@ -106,6 +106,7 @@ cw_box_pitching_create(void)
   pitching->b2 = 0;
   pitching->b3 = 0;
   pitching->hr = 0;
+  pitching->hrslam = 0;
   pitching->bb = 0;
   pitching->ibb = 0;
   pitching->so = 0;
@@ -689,10 +690,11 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
 	event->outs = gameiter->state->outs;
 	strcpy(event->location, gameiter->event_data->hit_location);
 	player->batting->hr++;
+	res_pitcher->pitching->hr++;
 	if (cw_event_rbi_on_play(event_data) == 4) {
 	  player->batting->hrslam++;
+	  res_pitcher->pitching->hrslam++;
 	}
-	res_pitcher->pitching->hr++;
       }
     }
     else if (event_data->event_type == CW_EVENT_STRIKEOUT) {

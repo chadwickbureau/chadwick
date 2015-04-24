@@ -475,7 +475,7 @@ class BoxPlayer(object):
   @property
   def P_HR(self):   return self._pitching_stat("hr")
   @property
-  def P_HR4(self):  return None
+  def P_HR4(self):  return self._pitching_stat("hrslam")
   @property
   def P_BB(self):   return self._pitching_stat("bb")
   @property
@@ -560,11 +560,40 @@ class CWBoxscoreTeam(object):
     raise AttributeError(attr)
 
   @property
+  def R_G(self):  return 1
+  @property
+  def R_W(self):
+    # Does not handle possibility of forfeits, which do not have standard metadata coding yet
+    return 1 if self.B_R > self.P_R else 0
+  @property
+  def R_L(self):
+    # Does not handle possibility of forfeits, which do not have standard metadata coding yet
+    return 1 if self.B_R < self.P_R else 0
+  @property
+  def R_T(self):
+    # Does not handle possibility of forfeits, which do not have standard metadata coding yet
+    return 1 if self.B_R == self.P_R else 0
+  @property
+  def B_G(self):    return 1
+  @property
+  def P_G(self):    return 1
+  @property
+  def F_G(self):    return 1
+
+  @property
   def B_LOB(self):  return self.box._get_lob(self.t)
   @property
   def P_GP(self):   return len(list(self.pitchers))
   @property
   def P_ER(self):   return self.box._get_er(self.t)
+  @property
+  def P_SHO(self):
+     return 1 if self.P_R == 0 else 0
+  @property
+  def P_CSHO(self):
+     return 1 if self.P_SHO == 1 and self.P_GP > 1 else 0
+  @property
+  def F_OUT(self):  return self.P_OUT
   @property
   def F_DP(self):   return self.box._get_dp(self.t)
   @property
