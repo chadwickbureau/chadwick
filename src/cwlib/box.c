@@ -332,7 +332,10 @@ cw_box_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
     }
 
     boxscore->slots[sub->slot][sub->team]->positions[boxscore->slots[sub->slot][sub->team]->num_positions++] = sub->pos;
-
+    if (sub->pos >= 11 && sub->slot == gameiter->state->dh_slot[sub->team]) {
+      /* Entering as a PH or PR for a DH automatically makes the player the DH. */
+      boxscore->slots[sub->slot][sub->team]->positions[boxscore->slots[sub->slot][sub->team]->num_positions++] = 10;
+    }
 
     /* Guard against possibility of pitcher being subbed into batting
      * order slot when a team loses the DH -- don't want to create a
