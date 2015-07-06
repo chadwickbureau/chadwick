@@ -854,11 +854,11 @@ cw_gameiter_next(CWGameIterator *gameiter)
     cw_gamestate_change_sides(gameiter->state, gameiter->event);
   }
 
+  if (gameiter->event && gameiter->event->ladj_slot != 0) {
+    gameiter->state->next_batter[gameiter->state->batting_team] = gameiter->event->ladj_slot;
+  }
   if (gameiter->event && strcmp(gameiter->event->event_text, "NP")) {
     int i;
-    if (gameiter->event->ladj_slot != 0) {
-      gameiter->state->next_batter[gameiter->state->batting_team] = gameiter->event->ladj_slot;
-    }
     gameiter->state->batter_hand = gameiter->event->batter_hand;
     gameiter->parse_ok = cw_parse_event(gameiter->event->event_text,
 					gameiter->event_data);

@@ -86,10 +86,15 @@ class BoxPlayer(object):
     return None
 
   def _batting_stat(self, attr):
-    return getattr(self._box_player.batting, attr)
+    value = getattr(self._box_player.batting, attr)
+    if value == -1: return None
+    return value
   def _fielding_stat(self, pos, attr):
     fielding = self._box_player._get_fielding_at_pos(pos)    
-    if fielding is not None:  return getattr(fielding, attr)
+    if fielding is not None: 
+        value = getattr(fielding, attr)
+        if value == -1: return None
+        return value
     return 0
   def _pitching_stat(self, attr):
     if self.P_G == 0:  
@@ -103,6 +108,7 @@ class BoxPlayer(object):
       for pitcher in self._box.teams[t]._pitching_records:
         if pitcher.player_id == self.key_player:
           value += getattr(pitcher.pitching, attr)
+    if value < 0:  return None
     return value
   @property
   def B_G(self):    return self._batting_stat("g")
@@ -115,7 +121,11 @@ class BoxPlayer(object):
   @property
   def B_H(self):    return self._batting_stat("h")
   @property
-  def B_TB(self):   return self.B_H+self.B_2B+2*self.B_3B+3*self.B_HR
+  def B_TB(self):   
+    try:
+      return self.B_H+self.B_2B+2*self.B_3B+3*self.B_HR
+    except TypeError:
+      return None
   @property
   def B_2B(self):   return self._batting_stat("b2")
   @property
@@ -126,6 +136,11 @@ class BoxPlayer(object):
   def B_HR4(self):  return self._batting_stat("hrslam")
   @property
   def B_RBI(self):  return self._batting_stat("bi")
+  @property
+  def B_GW(self):  
+    gw = self._batting_stat("gw")
+    if gw == -1:  return None
+    return gw
   @property
   def B_BB(self):   return self._batting_stat("bb")
   @property
@@ -174,7 +189,11 @@ class BoxPlayer(object):
   @property
   def F_P_BF(self):   return self._fielding_stat(1, "bf")
   @property
-  def F_P_TC(self):   return self.F_P_PO+self.F_P_A+self.F_P_E
+  def F_P_TC(self):   
+    try:
+      return self.F_P_PO+self.F_P_A+self.F_P_E
+    except TypeError: 
+      return None
   @property
   def F_P_PO(self):   return self._fielding_stat(1, "po")
   @property
@@ -195,7 +214,11 @@ class BoxPlayer(object):
   @property
   def F_C_BF(self):   return self._fielding_stat(2, "bf")
   @property
-  def F_C_TC(self):   return self.F_C_PO+self.F_C_A+self.F_C_E
+  def F_C_TC(self):   
+    try:
+      return self.F_C_PO+self.F_C_A+self.F_C_E
+    except TypeError:
+      return None
   @property
   def F_C_PO(self):   return self._fielding_stat(2, "po")
   @property
@@ -220,7 +243,11 @@ class BoxPlayer(object):
   @property
   def F_1B_BF(self):   return self._fielding_stat(3, "bf")
   @property
-  def F_1B_TC(self):   return self.F_1B_PO+self.F_1B_A+self.F_1B_E
+  def F_1B_TC(self):   
+    try:
+      return self.F_1B_PO+self.F_1B_A+self.F_1B_E
+    except TypeError:
+      return None
   @property
   def F_1B_PO(self):   return self._fielding_stat(3, "po")
   @property
@@ -241,7 +268,11 @@ class BoxPlayer(object):
   @property
   def F_2B_BF(self):   return self._fielding_stat(4, "bf")
   @property
-  def F_2B_TC(self):   return self.F_2B_PO+self.F_2B_A+self.F_2B_E
+  def F_2B_TC(self):   
+    try:
+      return self.F_2B_PO+self.F_2B_A+self.F_2B_E
+    except TypeError:
+      return None
   @property
   def F_2B_PO(self):   return self._fielding_stat(4, "po")
   @property
@@ -262,7 +293,11 @@ class BoxPlayer(object):
   @property
   def F_3B_BF(self):   return self._fielding_stat(5, "bf")
   @property
-  def F_3B_TC(self):   return self.F_3B_PO+self.F_3B_A+self.F_3B_E
+  def F_3B_TC(self):   
+    try:
+      return self.F_3B_PO+self.F_3B_A+self.F_3B_E
+    except TypeError:
+      return None
   @property
   def F_3B_PO(self):   return self._fielding_stat(5, "po")
   @property
@@ -283,7 +318,11 @@ class BoxPlayer(object):
   @property
   def F_SS_BF(self):   return self._fielding_stat(6, "bf")
   @property
-  def F_SS_TC(self):   return self.F_SS_PO+self.F_SS_A+self.F_SS_E
+  def F_SS_TC(self):   
+    try:
+      return self.F_SS_PO+self.F_SS_A+self.F_SS_E
+    except TypeError:
+      return None
   @property
   def F_SS_PO(self):   return self._fielding_stat(6, "po")
   @property
@@ -304,7 +343,11 @@ class BoxPlayer(object):
   @property
   def F_LF_BF(self):   return self._fielding_stat(7, "bf")
   @property
-  def F_LF_TC(self):   return self.F_LF_PO+self.F_LF_A+self.F_LF_E
+  def F_LF_TC(self):   
+    try:
+      return self.F_LF_PO+self.F_LF_A+self.F_LF_E
+    except TypeError:
+      return None
   @property
   def F_LF_PO(self):   return self._fielding_stat(7, "po")
   @property
@@ -325,7 +368,11 @@ class BoxPlayer(object):
   @property
   def F_CF_BF(self):   return self._fielding_stat(8, "bf")
   @property
-  def F_CF_TC(self):   return self.F_CF_PO+self.F_CF_A+self.F_CF_E
+  def F_CF_TC(self):   
+    try:
+      return self.F_CF_PO+self.F_CF_A+self.F_CF_E
+    except TypeError:
+      return None
   @property
   def F_CF_PO(self):   return self._fielding_stat(8, "po")
   @property
@@ -346,7 +393,11 @@ class BoxPlayer(object):
   @property
   def F_RF_BF(self):   return self._fielding_stat(9, "bf")
   @property
-  def F_RF_TC(self):   return self.F_RF_PO+self.F_RF_A+self.F_RF_E
+  def F_RF_TC(self):   
+    try:
+      return self.F_RF_PO+self.F_RF_A+self.F_RF_E
+    except TypeError:
+      return None
   @property
   def F_RF_PO(self):   return self._fielding_stat(9, "po")
   @property
@@ -361,23 +412,59 @@ class BoxPlayer(object):
   @property
   def F_OF_G(self):    return min(1, self.F_LF_G+self.F_CF_G+self.F_RF_G)
   @property
-  def F_OF_OUT(self):  return self.F_LF_OUT+self.F_CF_OUT+self.F_RF_OUT
+  def F_OF_OUT(self):  
+    try:
+      return self.F_LF_OUT+self.F_CF_OUT+self.F_RF_OUT
+    except TypeError:
+      return None
   @property
-  def F_OF_BIP(self):  return self.F_LF_BIP+self.F_CF_BIP+self.F_RF_BIP
+  def F_OF_BIP(self):  
+     try:
+       return self.F_LF_BIP+self.F_CF_BIP+self.F_RF_BIP
+     except TypeError:
+       return None
   @property
-  def F_OF_BF(self):   return self.F_LF_BF+self.F_CF_BF+self.F_RF_BF
+  def F_OF_BF(self):   
+     try:
+       return self.F_LF_BF+self.F_CF_BF+self.F_RF_BF
+     except TypeError: 
+       return None
   @property
-  def F_OF_TC(self):   return self.F_LF_TC+self.F_CF_TC+self.F_RF_TC
+  def F_OF_TC(self):   
+    try:
+      return self.F_LF_TC+self.F_CF_TC+self.F_RF_TC
+    except TypeError:
+      return None
   @property
-  def F_OF_PO(self):   return self.F_LF_PO+self.F_CF_PO+self.F_RF_PO
+  def F_OF_PO(self):  
+    try:
+      return self.F_LF_PO+self.F_CF_PO+self.F_RF_PO
+    except TypeError:
+      return None
   @property
-  def F_OF_A(self):    return self.F_LF_A+self.F_CF_A+self.F_RF_A
+  def F_OF_A(self):   
+    try:
+      return self.F_LF_A+self.F_CF_A+self.F_RF_A
+    except TypeError:
+      return None
   @property
-  def F_OF_E(self):    return self.F_LF_E+self.F_CF_E+self.F_RF_E
+  def F_OF_E(self):    
+    try:
+      return self.F_LF_E+self.F_CF_E+self.F_RF_E
+    except TypeError:
+      return None
   @property
-  def F_OF_DP(self):   return self.F_LF_DP+self.F_CF_DP+self.F_RF_DP
+  def F_OF_DP(self):  
+    try:
+      return self.F_LF_DP+self.F_CF_DP+self.F_RF_DP
+    except TypeError:
+      return None
   @property
-  def F_OF_TP(self):   return self.F_LF_TP+self.F_CF_TP+self.F_RF_TP
+  def F_OF_TP(self):   
+    try:
+      return self.F_LF_TP+self.F_CF_TP+self.F_RF_TP
+    except TypeError:
+      return None
 
   @property
   def F_G(self):       return min(1, sum([ getattr(self, "F_%s_G" % pos)
@@ -467,7 +554,11 @@ class BoxPlayer(object):
   @property
   def P_H(self):    return self._pitching_stat("h")
   @property
-  def P_TB(self):   return self.P_H+self.P_2B+2*self.P_3B+3*self.P_HR
+  def P_TB(self):   
+    try:
+      return self.P_H+self.P_2B+2*self.P_3B+3*self.P_HR
+    except TypeError:
+      return None
   @property
   def P_2B(self):   return self._pitching_stat("b2")
   @property
@@ -495,7 +586,7 @@ class BoxPlayer(object):
   @property
   def P_BK(self):   return self._pitching_stat("bk")
   @property
-  def P_XI(self):   return None
+  def P_XI(self):   return self._pitching_stat("xi")
   @property
   def P_GO(self):   return self._pitching_stat("gb")
   @property
@@ -581,11 +672,17 @@ class CWBoxscoreTeam(object):
   def F_G(self):    return 1
 
   @property
-  def B_LOB(self):  return self.box._get_lob(self.t)
+  def B_LOB(self):  
+    lob = self.box._get_lob(self.t)
+    if lob == -1:  return None
+    return lob
   @property
   def P_GP(self):   return len(list(self.pitchers))
   @property
-  def P_ER(self):   return self.box._get_er(self.t)
+  def P_ER(self):   
+    er = self.box._get_er(self.t)
+    if er == -1:  return None
+    return er
   @property
   def P_SHO(self):
      return 1 if self.P_R == 0 else 0
@@ -595,9 +692,15 @@ class CWBoxscoreTeam(object):
   @property
   def F_OUT(self):  return self.P_OUT
   @property
-  def F_DP(self):   return self.box._get_dp(self.t)
+  def F_DP(self):  
+    dp = self.box._get_dp(self.t)
+    if dp == -1:  return None
+    return dp
   @property
-  def F_TP(self):   return self.box._get_tp(self.t)
+  def F_TP(self):   
+    tp = self.box._get_tp(self.t)
+    if tp == -1:  return None
+    return tp
 
 
 %}

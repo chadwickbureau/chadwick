@@ -29,7 +29,7 @@
 #include "game.h"
 
 typedef struct cw_box_batting_struct {
-  int g, pa, ab, r, h, b2, b3, hr, hrslam, bi, bi2out, bb, ibb, so, gdp, hp, sh, sf, sb, cs, xi;
+  int g, pa, ab, r, h, b2, b3, hr, hrslam, bi, bi2out, gw, bb, ibb, so, gdp, hp, sh, sf, sb, cs, xi;
   int lisp, movedup, pitches, strikes;
 } CWBoxBatting;
 
@@ -53,7 +53,7 @@ typedef struct cw_box_player_struct {
 
 typedef struct cw_box_pitching_struct {
   int g, gs, cg, sho, gf, outs, ab, r, er, h, b2, b3, hr, hrslam, bb, ibb, so, bf, bk, wp, hb;
-  int gdp, sh, sf, pk;
+  int gdp, sh, sf, xi, pk;
   int w, l, sv;
 
   /* inherited runners/inherited runners scored

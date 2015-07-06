@@ -48,6 +48,8 @@ cw_box_batting_create(void)
   batting->hrslam = 0;
   batting->bi = 0;
   batting->bi2out = 0;
+  /* Choose to default GWRBI field to NULL instead of zero. */
+  batting->gw = -1;
   batting->bb = 0;
   batting->ibb = 0;
   batting->so = 0;
@@ -117,6 +119,7 @@ cw_box_pitching_create(void)
   pitching->gdp = 0;
   pitching->sh = 0;
   pitching->sf = 0;
+  pitching->xi = 0;
   pitching->pk = 0;
   pitching->w = 0;
   pitching->l = 0;
@@ -737,6 +740,7 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
   }
   else if (event_data->event_type == CW_EVENT_INTERFERENCE) {
     player->batting->xi++;
+    res_pitcher->pitching->xi++;
   }
 
   if (event_data->event_type == CW_EVENT_GENERICOUT &&
@@ -1280,6 +1284,7 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
       pitcher->pitching->sf = cw_data_get_item_int(stat, 20);
       pitcher->pitching->ab = -1;
       pitcher->pitching->gdp = -1;
+      pitcher->pitching->xi = -1;
       pitcher->pitching->pk = -1;
       pitcher->pitching->inr = -1;
       pitcher->pitching->inrs = -1;
@@ -1382,6 +1387,7 @@ cw_box_create(CWGame *game)
   int i, t;
   CWBoxscore *boxscore = (CWBoxscore *) malloc(sizeof(CWBoxscore));
   CWBoxPitcher *pitcher = NULL;
+  CWBoxPlayer *batter = NULL;
 
   for (t = 0; t <= 1; t++) {
     for (i = 0; i <= 9; i++) {
@@ -1455,6 +1461,10 @@ cw_box_create(CWGame *game)
   if (cw_game_info_lookup(game, "save") != NULL) {
     pitcher = cw_box_find_pitcher(boxscore, cw_game_info_lookup(game, "save"));
     if (pitcher != NULL)  pitcher->pitching->sv = 1;
+  }
+  if (cw_game_info_lookup(game, "gwrbi") != NULL) {
+    batter = cw_box_find_player(boxscore, cw_game_info_lookup(game, "gwrbi"));
+    if (batter != NULL)  batter->batting->gw = 1;
   }
   return boxscore;
 }
