@@ -547,12 +547,6 @@ static int cw_parse_advance_modifier(CWParserState *state,
       }
       event->touches[--event->num_touches] = 0;
     }
-    else if (/*(event->event_type == CW_EVENT_GENERICOUT &&
-	       baseFrom == baseTo) ||*/
-	     (event->event_type == CW_EVENT_SINGLE &&
-	      strstr(state->inputString, "/BR"))) {
-      event->fc_flag[baseFrom] = 1;
-    }
     
     if (state->token[0] != 'E') {
       cw_event_set_play(event, baseFrom, state->token);
