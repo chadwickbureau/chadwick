@@ -541,6 +541,15 @@ cw_box_pitch_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
     return;
   }
   player = cw_box_find_current_player(boxscore, gameiter->event->batter);
+  if (player == NULL) {
+    fprintf(stderr, 
+	    "ERROR: In %s, no entry for batter at event %d.\n",
+	    gameiter->game->game_id, gameiter->state->event_count);
+    fprintf(stderr, "      (Batter ID '%s', event text '%s')\n",
+	    gameiter->event->batter, gameiter->event->event_text);
+    fprintf(stderr, "      Skipping pitches tabulation for this play.\n");
+    return;
+  }
   pitcher = boxscore->pitchers[1-gameiter->state->batting_team];
   if (pitcher == NULL) {
     if (gameiter->state->batting_team == 0) {
