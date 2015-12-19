@@ -1,6 +1,6 @@
 #
 # This file is part of Chadwick
-# Copyright (c) 2002-2014, Dr T L Turocy (ted.turocy@gmail.com)
+# Copyright (c) 2002-2015, Dr T L Turocy (ted.turocy@gmail.com)
 #                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
 #
 # FILE: configure.ac
@@ -22,7 +22,7 @@
 #
 
 
-AC_INIT([chadwick], [0.6.4])
+AC_INIT([chadwick], [0.6.5])
 AC_CONFIG_SRCDIR([src/cwlib/chadwick.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE

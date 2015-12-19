@@ -1,6 +1,6 @@
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2014, Dr T L Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2015, Dr T L Turocy (ted.turocy@gmail.com)
  *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *
  * FILE: src/cwlib/parse.c
@@ -587,6 +587,9 @@ static int cw_parse_advance_modifier(CWParserState *state,
       else if (!strcmp(state->token, "BR")) {
 	/* 1X2(6/BR) appears in NYA195605132 */
       }	
+      else if (!strcmp(state->token, "FO")) {
+	/* 1X2(6E4/FO) appears in LAN201509150 */
+      }
       else {
 	return cw_parse_invalid(state);
       }
@@ -1661,7 +1664,7 @@ static int cw_parse_ground_rule_double(CWParserState *state,
 				       CWEventData *event,
 				       int flags)
 {
-  if (state->sym >= '1' && state->sym <= '9') {
+  while (state->sym >= '1' && state->sym <= '9') {
     /* Some newer event files have fielders after the DGR, which seems
      * like it ought not be possible -- but oh well!
      * bevent does not give a 'fielded by' credit for this case.
@@ -1871,6 +1874,12 @@ static int cw_parse_walk(CWParserState *state, CWEventData *event, int flags)
       /* There are instances of the relay flag /R, for example, in
 	 TEX199709200, where the runner on third got picked off after
 	 a walk */
+    }
+    else if (!strcmp(state->token, "UINT")) {
+      /* Accept umpire interference flag; no action required */
+    }
+    else if (!strcmp(state->token, "COUR")) {
+      /* Accept courtesy runner flag; no action required */
     }
     else {
       return cw_parse_invalid(state);
