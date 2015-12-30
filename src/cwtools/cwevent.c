@@ -1764,7 +1764,7 @@ DECLARE_FIELDFUNC(cwevent_assist10)
 /* Extended Field 61 */
 DECLARE_FIELDFUNC(cwevent_unknown_out_flag)
 {
-  return sprintf(buffer, "%c",
+  return sprintf(buffer, (ascii) ? "\"%c\"" : "%c",
 		 (!strcmp(gameiter->event_data->play[0], "99") ||
 		  !strcmp(gameiter->event_data->play[1], "99") ||
 		  !strcmp(gameiter->event_data->play[2], "99") ||
@@ -1774,7 +1774,7 @@ DECLARE_FIELDFUNC(cwevent_unknown_out_flag)
 /* Extended Field 62 */
 DECLARE_FIELDFUNC(cwevent_uncertain_play_flag)
 {
-  return sprintf(buffer, "%c",
+  return sprintf(buffer, (ascii) ? "\"%c\"" : "%c",
 		 (gameiter->event->event_text[strlen(gameiter->event->event_text)-1] == '#') ? 'T' : 'F');
 }
 
