@@ -21,12 +21,12 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
-from libchadwick import create_game
-from libchadwick import read_game
+from chadwick.libchadwick import create_game
+from chadwick.libchadwick import read_game
 
-from libchadwick import create_scorebook
-from libchadwick import read_scorebook
+from chadwick.libchadwick import create_scorebook
+from chadwick.libchadwick import read_scorebook
 
-from libchadwick import create_league
-from libchadwick import read_league
+from chadwick.libchadwick import create_league
+from chadwick.libchadwick import read_league
 

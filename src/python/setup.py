@@ -30,8 +30,8 @@ setup(name="chadwick",
       author_email="ted.turocy@gmail.com",
       url="http://chadwick.sourceforge.net",
       packages=['chadwick'],
-      ext_modules=[Extension('chadwick._libchadwick',
-                             ['chadwick/libchadwick.i',
+      ext_modules=[Extension('_libchadwick',
+                             sources=['chadwick/libchadwick.i',
                               '../cwlib/book.c',
                               '../cwlib/box.c',
                               '../cwlib/file.c',
@@ -42,6 +42,6 @@ setup(name="chadwick",
                               '../cwlib/parse.c',
                               '../cwlib/roster.c'],
                              include_dirs=['../cwlib'],
-                             swig_opts=['-I../cwlib'] )]
+                             swig_opts=['-I../cwlib', '-py3'] )]
       )
 
