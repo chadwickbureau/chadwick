@@ -1383,6 +1383,9 @@ static int cw_parse_interference(CWParserState *state, CWEventData *event,
     else if (!strcmp(state->token, "E3")) {
       event->errors[event->num_errors++] = 3;
     }
+    else if (!strcmp(state->token, "E4")) {
+      event->errors[event->num_errors++] = 4;
+    }
     else if (!strcmp(state->token, "E6")) {
       event->errors[event->num_errors++] = 6;
     }
