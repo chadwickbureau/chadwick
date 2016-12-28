@@ -52,8 +52,13 @@ class BoxPlayer(object):
   def pos(self):
     lookup = [ "", "p", "c", "1b", "2b", "3b", "ss", "lf", "cf", "rf",
                "dh", "ph", "pr" ]
-    return "-".join([ lookup[self._box_player._get_position(i)]
-                      for i in xrange(self._box_player.num_positions) ])
+    poslist = "-".join([ lookup[self._box_player._get_position(i)]
+                       for i in xrange(self._box_player.num_positions) ])
+    if self._box_player.ph_inn > 0 and "ph" not in poslist:
+      poslist = "ph-" + poslist
+    if self._box_player.pr_inn > 0 and "pr" not in poslist:
+      poslist = "pr-" + poslist
+    return poslist
   @property
   def B_G_DH(self):  return 1 if "dh" in self.pos else 0
   @property
