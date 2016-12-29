@@ -151,6 +151,7 @@ cw_box_player_create(char *player_id, char *name)
   strcpy(player->name, name);
   player->batting = cw_box_batting_create();
   player->num_positions = player->ph_inn = player->pr_inn = 0;
+  player->start_position = -1;
   for (i = 0; i <= 9; i++) {
     player->fielding[i] = NULL;
   }
@@ -212,6 +213,7 @@ cw_box_enter_starters(CWBoxscore *boxscore, CWGame *game)
       boxscore->slots[i][t]->batting->g = 1;
       boxscore->slots[i][t]->num_positions++;
       boxscore->slots[i][t]->positions[0] = app->pos;
+      boxscore->slots[i][t]->start_position = app->pos;
       if (app->pos < 10) {
 	boxscore->slots[i][t]->fielding[app->pos] = cw_box_fielding_create();
 	/* Under modern rules, players only receive credit for a game

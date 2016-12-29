@@ -188,6 +188,8 @@ class BoxPlayer(object):
   @property
   def F_P_G(self):    return self.P_G   
   @property
+  def F_P_GS(self):   return self.P_GS
+  @property
   def F_P_OUT(self):  return self._fielding_stat(1, "outs")
   @property
   def F_P_BIP(self):  return self._fielding_stat(1, "bip")
@@ -212,6 +214,8 @@ class BoxPlayer(object):
 
   @property
   def F_C_G(self):    return self._fielding_stat(2, "g")
+  @property
+  def F_C_GS(self):   return 1 if self._box_player.start_position == 2 else 0
   @property
   def F_C_OUT(self):  return self._fielding_stat(2, "outs")
   @property
@@ -242,6 +246,8 @@ class BoxPlayer(object):
   @property
   def F_1B_G(self):    return self._fielding_stat(3, "g")
   @property
+  def F_1B_GS(self):   return 1 if self._box_player.start_position == 3 else 0
+  @property
   def F_1B_OUT(self):  return self._fielding_stat(3, "outs")
   @property
   def F_1B_BIP(self):  return self._fielding_stat(3, "bip")
@@ -266,6 +272,8 @@ class BoxPlayer(object):
 
   @property
   def F_2B_G(self):    return self._fielding_stat(4, "g")
+  @property
+  def F_2B_GS(self):   return 1 if self._box_player.start_position == 4 else 0
   @property
   def F_2B_OUT(self):  return self._fielding_stat(4, "outs")
   @property
@@ -292,6 +300,8 @@ class BoxPlayer(object):
   @property
   def F_3B_G(self):    return self._fielding_stat(5, "g")
   @property
+  def F_3B_GS(self):   return 1 if self._box_player.start_position == 5 else 0
+  @property
   def F_3B_OUT(self):  return self._fielding_stat(5, "outs")
   @property
   def F_3B_BIP(self):  return self._fielding_stat(5, "bip")
@@ -316,6 +326,8 @@ class BoxPlayer(object):
 
   @property
   def F_SS_G(self):    return self._fielding_stat(6, "g")
+  @property
+  def F_SS_GS(self):   return 1 if self._box_player.start_position == 6 else 0
   @property
   def F_SS_OUT(self):  return self._fielding_stat(6, "outs")
   @property
@@ -342,6 +354,8 @@ class BoxPlayer(object):
   @property
   def F_LF_G(self):    return self._fielding_stat(7, "g")
   @property
+  def F_LF_GS(self):   return 1 if self._box_player.start_position == 7 else 0
+  @property
   def F_LF_OUT(self):  return self._fielding_stat(7, "outs")
   @property
   def F_LF_BIP(self):  return self._fielding_stat(7, "bip")
@@ -366,6 +380,8 @@ class BoxPlayer(object):
 
   @property
   def F_CF_G(self):    return self._fielding_stat(8, "g")
+  @property
+  def F_CF_GS(self):   return 1 if self._box_player.start_position == 8 else 0
   @property
   def F_CF_OUT(self):  return self._fielding_stat(8, "outs")
   @property
@@ -392,6 +408,8 @@ class BoxPlayer(object):
   @property
   def F_RF_G(self):    return self._fielding_stat(9, "g")
   @property
+  def F_RF_GS(self):   return 1 if self._box_player.start_position == 9 else 0
+  @property
   def F_RF_OUT(self):  return self._fielding_stat(9, "outs")
   @property
   def F_RF_BIP(self):  return self._fielding_stat(9, "bip")
@@ -416,6 +434,9 @@ class BoxPlayer(object):
 
   @property
   def F_OF_G(self):    return min(1, self.F_LF_G+self.F_CF_G+self.F_RF_G)
+  @property
+  def F_OF_GS(self):   
+    return 1 if self._box_player.start_position in [7,8,9] else 0
   @property
   def F_OF_OUT(self):  
     try:

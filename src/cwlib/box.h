@@ -44,6 +44,10 @@ typedef struct cw_box_player_struct {
   char *player_id, *name;
   CWBoxBatting *batting;
   int ph_inn, pr_inn, num_positions;
+  /* The position the player was listed at in the starting lineup;
+   * -1 if not a starter
+   */
+  int start_position;
   /* The list of positions the player played. */
   int positions[40];
   /* Fielding statistics per position (uses usual position numbering) */
