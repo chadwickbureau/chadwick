@@ -17,13 +17,15 @@ information from Retrosheet play-by-play event files:
 - :program:`cwbox`, a boxscore generator, which
   replaces and extends the DiamondWare program BOX.
 
+- :program:`cwdaily`, which produces day-by-day player statistical
+  totals.  This program is unique to Chadwick.
+  
 - :ref:`cwsub <cwtools.cwsub>`, which extracts information
   about in-game player substitutions. This program is unique to
   Chadwick.
 
 - :program:`cwcomment`, which extracts comment
   fields from event files. This program is unique to Chadwick.
-
 
 This documentation is intended to be read in conjunction with the 
 materials provided by Retrosheet summarizing the contents of

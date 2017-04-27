@@ -20,6 +20,7 @@ cwcomment
 cwevent
 cwgame
 cwsub
+cwdaily
 *.a
 *.la
 pychadwick
@@ -29,3 +30,4 @@ pychadwick
 *.so
 build/
 .DS_Store
+compile
