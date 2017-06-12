@@ -129,6 +129,9 @@ static void cw_game_cleanup_events(CWGame *game, CWEvent *event)
     if (event->pitcher_hand_id) {
       free(event->pitcher_hand_id);
     }
+    if (event->itb_runner_id) {
+      free(event->itb_runner_id);
+    }
     while (sub != NULL) {
       CWAppearance *next_sub = sub->next;
       free(sub->player_id);
@@ -382,6 +385,8 @@ void cw_game_event_append(CWGame *game, int inning, int batting_team,
   event->pitcher_hand_id = NULL;
   event->ladj_align = 0;
   event->ladj_slot = 0;
+  event->itb_base = 0;
+  event->itb_runner_id = NULL;
   event->prev = game->last_event;
   event->next = NULL;
   event->first_sub = NULL;
@@ -636,7 +641,8 @@ cw_game_read(FILE *file)
   char buf[1024], *tok;
   fpos_t filepos;
   char batHand = ' ', batHandBatter[1024], pitHand = ' ', pitHandPitcher[1024];
-  int ladjAlign = 0, ladjSlot = 0;
+  char itbRunner[1024];
+  int ladjAlign = 0, ladjSlot = 0, itbBase = 0;
   CWGame *game;
 
   if (fgets(buf, 1024, file) == NULL) {
@@ -742,6 +748,14 @@ cw_game_read(FILE *file)
 	ladjAlign = 0;
 	ladjSlot = 0;
       }
+
+      if (itbBase != 0) {
+	game->last_event->itb_base = itbBase;
+	game->last_event->itb_runner_id = (char *) malloc(strlen(itbRunner)+1);
+	strcpy(game->last_event->itb_runner_id, itbRunner);
+	itbBase = 0;
+	strcpy(itbRunner, "");
+      }
     }
     else if (!strcmp(tok, "sub")) {
       char *player_id, *name, *team, *slot, *pos;
@@ -838,6 +852,17 @@ cw_game_read(FILE *file)
 	ladjSlot = atoi(slot);
       }      
     }
+    else if (!strcmp(tok, "cw:itb")) {
+      /* Chadwick extension: international tiebreaker */
+      /* Format: cw:itb,runner-id,base */
+      char *runner, *base;
+      runner = cw_strtok(NULL);
+      base = cw_strtok(NULL);
+      if (runner && base) {
+	strncpy(itbRunner, runner, 255);
+	itbBase = atoi(base);
+      }
+    }      
   }
 
   return game;
@@ -915,7 +940,9 @@ cw_game_write_events(CWGame *game, FILE *file)
     if (event->ladj_slot != 0) {
       fprintf(file, "ladj,%d,%d\n", event->ladj_align, event->ladj_slot);
     }
-	      
+    if (event->itb_base != 0) {
+      fprintf(file, "cw:itb,%s,%d\n", event->itb_runner_id, event->itb_base);
+    }      
     fprintf(file, "play,%d,%d,%s,%s,%s,%s\n",
 	    event->inning, event->batting_team,
 	    event->batter, event->count, event->pitches,

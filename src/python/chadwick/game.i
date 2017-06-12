@@ -865,7 +865,8 @@ class BoxscoreBattingLine(object):
     return cw_game_starter_find_by_position(self, team, pos)
 
   def append_event(self, play=None, count=None, pitches=None,
-                   batter_hand=None):
+                   batter_hand=None,
+                   itb_base=None, itb_runner_id=None):
     """
     Add a new event to the game, using the game state after the current 
     last event.
@@ -880,6 +881,9 @@ class BoxscoreBattingLine(object):
                          play if play is not None else "NP")
     if batter_hand is not None:
       self.last_event.batter_hand = batter_hand.upper()
+    if itb_base is not None and itb_runner_id is not None:
+      self.last_event.itb_base = itb_base
+      self.last_event.itb_runner_id = itb_runner_id 
     self.state.ToEnd()
     if hasattr(self, "_boxscore"): del self._boxscore
     self._calc_pitcher_er()

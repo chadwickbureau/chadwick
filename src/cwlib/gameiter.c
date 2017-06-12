@@ -63,7 +63,7 @@ cw_gamestate_initialize(CWGameState *state)
   state->next_batter[1] = 1;
   state->num_batters[0] = state->num_batters[1] = 0;
   state->dh_slot[0] = state->dh_slot[1] = 0;
-
+  state->num_itb_runners[0] = state->num_itb_runners[1] = 0;
   state->is_leadoff = 1;
   state->is_new_pa = 1;
   state->ph_flag = 0;
@@ -531,8 +531,8 @@ cw_gamestate_change_sides(CWGameState *state, CWEvent *event)
 int
 cw_gamestate_left_on_base(CWGameState *state, int team)
 {
-  return (state->num_batters[team] - state->score[team] -
-	  state->times_out[team]);
+  return (state->num_batters[team] + state->num_itb_runners[team] -
+	  state->score[team] - state->times_out[team]);
 }
 
 int
@@ -856,6 +856,15 @@ cw_gameiter_next(CWGameIterator *gameiter)
 
   if (gameiter->event && gameiter->event->ladj_slot != 0) {
     gameiter->state->next_batter[gameiter->state->batting_team] = gameiter->event->ladj_slot;
+  }
+  if (gameiter->event && gameiter->event->itb_base != 0) {
+    strcpy(gameiter->state->runners[gameiter->event->itb_base],
+	   gameiter->event->itb_runner_id);
+    strncpy(gameiter->state->pitchers[gameiter->event->itb_base],
+	    gameiter->state->fielders[1][1-gameiter->state->batting_team], 49);
+    strncpy(gameiter->state->catchers[gameiter->event->itb_base],
+	    gameiter->state->fielders[2][1-gameiter->state->batting_team], 49);
+    gameiter->state->num_itb_runners[gameiter->state->batting_team]++;
   }
   if (gameiter->event && strcmp(gameiter->event->event_text, "NP")) {
     int i;
