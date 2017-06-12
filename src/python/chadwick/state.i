@@ -54,7 +54,7 @@
 %}
 
   int _get_inning(void) {
-    if (self->state->outs == 3) return self->state->inning + self->state->batting_team;
+    if (self->state->outs >= 3) return self->state->inning + self->state->batting_team;
     else return self->state->inning;
   }
 %pythoncode %{
@@ -65,7 +65,7 @@
 %}
 
   int _get_half_inning(void) {
-    if (self->state->outs == 3) return (self->state->batting_team + 1) % 2;
+    if (self->state->outs >= 3) return (self->state->batting_team + 1) % 2;
     else return self->state->batting_team;
   }
 %pythoncode %{
@@ -87,7 +87,7 @@
 
 %pythoncode %{
   def _get_is_leadoff(self):
-    return self.game.first_event is None or self.state.outs == 3
+    return self.game.first_event is None or self.state.outs >= 3
   def _set_is_leadoff(self, v): raise AttributeError("can't set attribute")
   __swig_getmethods__["is_leadoff"] = _get_is_leadoff
   __swig_setmethods__["is_leadoff"] = _set_is_leadoff
