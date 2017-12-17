@@ -118,7 +118,7 @@ DECLARE_FIELDFUNC(cwdaily_number)
   char *tmp;
   return sprintf(buffer, (ascii) ? "%d" : "%5d",
 		 (tmp = cw_game_info_lookup(gameiter->game, "number")) ?
-		 atoi(tmp) : 0);
+		 cw_atoi(tmp) : 0);
 }
 
 /* Field 3 */

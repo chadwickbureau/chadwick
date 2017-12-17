@@ -1402,8 +1402,8 @@ cwbox_event_metadata(XMLNode *parent, CWGame *game)
   }
 
   xml_node_attribute_int(node, "game-of-day",
-			 (atoi(cw_game_info_lookup(game, "number")) == 0) ? 1 :
-			 atoi(cw_game_info_lookup(game, "number")));
+			 (cw_atoi(cw_game_info_lookup(game, "number")) == 0) ? 1 :
+			  cw_atoi(cw_game_info_lookup(game, "number")));
 
   if (cw_game_info_lookup(game, "htbf") &&
       !strcmp(cw_game_info_lookup(game, "htbf"), "true")) {

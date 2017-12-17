@@ -1189,10 +1189,10 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
 
   for (stat = game->first_stat; stat; stat = stat->next) {
     if (!strcmp(stat->data[0], "bline")) {
-      slot = atoi(stat->data[3]);
-      team = atoi(stat->data[2]);
+      slot = cw_data_get_item_int(stat, 3);
+      team = cw_data_get_item_int(stat, 2);
 
-      if (atoi(stat->data[4]) == 1) {
+      if (cw_data_get_item_int(stat, 4) == 1) {
 	/* Record for starter */
 	player = cw_box_get_starter(boxscore, team, slot);
       }
@@ -1205,65 +1205,65 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
       }
 
       player->batting->pa = -1;
-      player->batting->ab = atoi(stat->data[5]);
-      player->batting->r = atoi(stat->data[6]);
+      player->batting->ab = cw_data_get_item_int(stat, 5);
+      player->batting->r = cw_data_get_item_int(stat, 6);
       boxscore->score[team] += player->batting->r;
-      player->batting->h = atoi(stat->data[7]);
+      player->batting->h = cw_data_get_item_int(stat, 7);
       boxscore->hits[team] += player->batting->h;
-      player->batting->b2 = atoi(stat->data[8]);
+      player->batting->b2 = cw_data_get_item_int(stat, 8);
       for (i = 1; i <= player->batting->b2; i++) {
 	cw_box_add_event(&(boxscore->b2_list), -1, -1, 2,
 			 player->player_id, "");
       }
-      player->batting->b3 = atoi(stat->data[9]);
+      player->batting->b3 = cw_data_get_item_int(stat, 9);
       for (i = 1; i <= player->batting->b3; i++) {
 	cw_box_add_event(&(boxscore->b3_list), -1, -1, 2,
 			 player->player_id, "");
       }
-      player->batting->hr = atoi(stat->data[10]);
+      player->batting->hr = cw_data_get_item_int(stat, 10);
       for (i = 1; i <= player->batting->hr; i++) {
 	cw_box_add_event(&(boxscore->hr_list), -1, -1, 2,
 			 player->player_id, "");
       }
       player->batting->hrslam = -1;
-      player->batting->bi = atoi(stat->data[11]);
+      player->batting->bi = cw_data_get_item_int(stat, 11);
       player->batting->bi2out = -1;
-      player->batting->sh = atoi(stat->data[12]);
+      player->batting->sh = cw_data_get_item_int(stat, 12);
       for (i = 1; i <= player->batting->sh; i++) {
 	cw_box_add_event(&(boxscore->sh_list), -1, -1, 2,
 			 player->player_id, "");
       }
-      player->batting->sf = atoi(stat->data[13]);
+      player->batting->sf = cw_data_get_item_int(stat, 13);
       for (i = 1; i <= player->batting->sf; i++) {
 	cw_box_add_event(&(boxscore->sf_list), -1, -1, 2,
 			 player->player_id, "");
       }
-      player->batting->hp = atoi(stat->data[14]);
-      player->batting->bb = atoi(stat->data[15]);
-      player->batting->ibb = atoi(stat->data[16]);
-      player->batting->so = atoi(stat->data[17]);
-      player->batting->sb = atoi(stat->data[18]);
+      player->batting->hp = cw_data_get_item_int(stat, 14);
+      player->batting->bb = cw_data_get_item_int(stat, 15);
+      player->batting->ibb = cw_data_get_item_int(stat, 16);
+      player->batting->so = cw_data_get_item_int(stat, 17);
+      player->batting->sb = cw_data_get_item_int(stat, 18);
       for (i = 1; i <= player->batting->sb; i++) {
 	event = cw_box_add_event(&(boxscore->sb_list), -1, -1, 2,
 				 player->player_id, "", "");
 	event->runners = -1;
 	event->pickoff = -1;
       }
-      player->batting->cs = atoi(stat->data[19]);
+      player->batting->cs = cw_data_get_item_int(stat, 19);
       for (i = 1; i <= player->batting->cs; i++) {
 	event = cw_box_add_event(&(boxscore->cs_list), -1, -1, 2,
 				 player->player_id, "", "");
 	event->runners = -1;
 	event->pickoff = -1;
       }
-      player->batting->gdp = atoi(stat->data[20]);
-      player->batting->xi = atoi(stat->data[21]);
+      player->batting->gdp = cw_data_get_item_int(stat, 20);
+      player->batting->xi = cw_data_get_item_int(stat, 21);
       player->batting->lisp = -1;
       player->batting->movedup = -1;
     }
     else if (!strcmp(stat->data[0], "pline")) {
-      team = atoi(stat->data[2]);
-      seq = atoi(stat->data[3]);
+      team = cw_data_get_item_int(stat, 2);
+      seq = cw_data_get_item_int(stat, 3);
 
       if (seq == 1) {
 	/* Record for starter */
@@ -1304,9 +1304,9 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
       pitcher->pitching->fb = -1;
     }
     else if (!strcmp(stat->data[0], "dline")) {
-      team = atoi(stat->data[2]);
-      seq = atoi(stat->data[3]);
-      pos = atoi(stat->data[4]);
+      team = cw_data_get_item_int(stat, 2);
+      seq = cw_data_get_item_int(stat, 3);
+      pos = cw_data_get_item_int(stat, 4);
       player = cw_box_find_player(boxscore, stat->data[1]);
       if (player == NULL) {
 	fprintf(stderr,
@@ -1322,20 +1322,20 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
 	player->fielding[pos] = cw_box_fielding_create();
       }
       player->fielding[pos]->g = 1;
-      player->fielding[pos]->outs = atoi(stat->data[5]);
-      player->fielding[pos]->po = atoi(stat->data[6]);
-      player->fielding[pos]->a = atoi(stat->data[7]);
-      player->fielding[pos]->e = atoi(stat->data[8]);
+      player->fielding[pos]->outs = cw_data_get_item_int(stat, 5);
+      player->fielding[pos]->po = cw_data_get_item_int(stat, 6);
+      player->fielding[pos]->a = cw_data_get_item_int(stat, 7);
+      player->fielding[pos]->e = cw_data_get_item_int(stat, 8);
       boxscore->errors[team] += player->fielding[pos]->e;
-      player->fielding[pos]->dp = atoi(stat->data[9]);
-      player->fielding[pos]->tp = atoi(stat->data[10]);
-      player->fielding[pos]->pb = atoi(stat->data[11]);
+      player->fielding[pos]->dp = cw_data_get_item_int(stat, 9);
+      player->fielding[pos]->tp = cw_data_get_item_int(stat, 10);
+      player->fielding[pos]->pb = cw_data_get_item_int(stat, 11);
       player->fielding[pos]->bip = - 1;
       player->fielding[pos]->bf = -1;
       player->fielding[pos]->xi = -1;
     }
     else if (!strcmp(stat->data[0], "phline")) {
-      team = atoi(stat->data[3]);
+      team = cw_data_get_item_int(stat, 3);
       player = cw_box_find_player(boxscore, stat->data[1]);
       if (player == NULL) {
 	fprintf(stderr,
@@ -1343,10 +1343,10 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
 		game->game_id, stat->data[1]);
 	exit(1);
       }
-      player->ph_inn = atoi(stat->data[2]);
+      player->ph_inn = cw_data_get_item_int(stat, 2);
     }
     else if (!strcmp(stat->data[0], "prline")) {
-      team = atoi(stat->data[3]);
+      team = cw_data_get_item_int(stat, 3);
       player = cw_box_find_player(boxscore, stat->data[1]);
       if (player == NULL) {
 	fprintf(stderr,
@@ -1354,35 +1354,35 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
 		game->game_id, stat->data[1]);
 	exit(1);
       }
-      player->pr_inn = atoi(stat->data[2]);
+      player->pr_inn = cw_data_get_item_int(stat, 2);
     }
     else if (!strcmp(stat->data[0], "tline")) {
-      int team = atoi(stat->data[1]);
-      boxscore->lob[team] = atoi(stat->data[2]);
-      boxscore->er[team] = atoi(stat->data[3]);
-      boxscore->dp[team] = atoi(stat->data[4]);
-      boxscore->tp[team] = atoi(stat->data[5]);
+      int team = cw_data_get_item_int(stat, 1);
+      boxscore->lob[team] = cw_data_get_item_int(stat, 2);
+      boxscore->er[team] = cw_data_get_item_int(stat, 3);
+      boxscore->dp[team] = cw_data_get_item_int(stat, 4);
+      boxscore->tp[team] = cw_data_get_item_int(stat, 5);
     }
   }
 
   for (stat = game->first_line; stat; stat = stat->next) {
-    int team = atoi(stat->data[0]);
+    int team = cw_data_get_item_int(stat, 0);
     for (i = 1; i < stat->num_data; i++) {
-      boxscore->linescore[i][team] = atoi(stat->data[i]);
+      boxscore->linescore[i][team] = cw_data_get_item_int(stat, i);
     }
   }
 
   for (stat = game->first_evdata; stat; stat = stat->next) {
     if (!strcmp(stat->data[0], "dpline")) {
       event = cw_box_add_event(&(boxscore->dp_list), -1,
-			       1-atoi(stat->data[1]), 0);
+			       1-cw_data_get_item_int(stat, 1), 0);
       for (i = 2; i < stat->num_data; i++) {
 	event->players[i-2] = stat->data[i];
       }
     }
     else if (!strcmp(stat->data[0], "tpline")) {
       event = cw_box_add_event(&(boxscore->tp_list), -1,
-			       1-atoi(stat->data[1]), 0);
+			       1-cw_data_get_item_int(stat, 1), 0);
       for (i = 2; i < stat->num_data; i++) {
 	event->players[i-2] = stat->data[i];
       }

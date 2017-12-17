@@ -31,6 +31,12 @@
 char *cw_strtok(char *strToken);
 
 /*
+ * A replacement for C atoi(), which does validity checking and returns
+ * -1 as the "null" value for invalid inputs.
+ */
+int cw_atoi(char *s);
+
+/*
  * Searches for the game 'game_id' in 'file'; sets the file pointer to
  * the first record of the game, if present.
  * Returns nonzero if the game is found.

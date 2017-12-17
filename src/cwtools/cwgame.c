@@ -218,7 +218,7 @@ DECLARE_FIELDFUNC(cwgame_number)
   char *tmp;
   return sprintf(buffer, (ascii) ? "%d" : "%5d",
 		 (tmp = cw_game_info_lookup(gameiter->game, "number")) ?
-		 atoi(tmp) : 0);
+		 cw_atoi(tmp) : 0);
 }
 
 /* Field 3 */
@@ -381,7 +381,7 @@ DECLARE_FIELDFUNC(cwgame_attendance)
   char *tmp;
   return sprintf(buffer, (ascii) ? "%d" : "%5d", 
 		 (tmp = cw_game_info_lookup(gameiter->game, "attendance")) ? 
-		 atoi(tmp) : 0);
+		 cw_atoi(tmp) : 0);
 }
 
 /* Field 19 */
@@ -462,7 +462,7 @@ DECLARE_FIELDFUNC(cwgame_temperature)
   char *tmp;
   return sprintf(buffer, (ascii) ? "%d" : "%3d",
 		 (tmp = cw_game_info_lookup(gameiter->game, "temp")) ? 
-		 atoi(tmp) : 0);
+		 cw_atoi(tmp) : 0);
 }
 
 /* Field 27 */
@@ -485,7 +485,7 @@ DECLARE_FIELDFUNC(cwgame_wind_speed)
   char *tmp;
   return sprintf(buffer, "%d", 
 		 (tmp = cw_game_info_lookup(gameiter->game, "windspeed")) ? 
-		 atoi(tmp) : 0);
+		 cw_atoi(tmp) : 0);
 }
 
 /* Field 29 */
@@ -533,7 +533,7 @@ DECLARE_FIELDFUNC(cwgame_time_of_game)
   char *tmp;
   return sprintf(buffer, (ascii) ? "%d" : "%3d",
 		 (tmp = cw_game_info_lookup(gameiter->game, "timeofgame")) ? 
-		 atoi(tmp) : 0);
+		 cw_atoi(tmp) : 0);
 }
 
 /* Field 33 */

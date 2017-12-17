@@ -34,7 +34,7 @@ int cw_data_get_item_int(CWData *data, unsigned int index)
   if (index >= data->num_data) {
     return -1;
   }
-  return atoi(data->data[index]);
+  return cw_atoi(data->data[index]);
 }
 
 CWGame *cw_game_create(char *game_id)
@@ -709,8 +709,8 @@ cw_game_read(FILE *file)
       pos = cw_strtok(NULL);
       if (player_id && name && team && slot && pos) {
 	cw_game_starter_append(game, player_id, name,
-			       atoi(team), atoi(slot), 
-			       atoi(pos));
+			       cw_atoi(team), cw_atoi(slot), 
+			       cw_atoi(pos));
       }
     } 
     else if (!strcmp(tok, "play")) {
@@ -722,7 +722,7 @@ cw_game_read(FILE *file)
       pitches = cw_strtok(NULL);
       play = cw_strtok(NULL);
       if (inning && batting_team && batter && count && pitches && play) {
-	cw_game_event_append(game, atoi(inning), atoi(batting_team),
+	cw_game_event_append(game, cw_atoi(inning), cw_atoi(batting_team),
 			     batter, count, pitches, play);
       }
       if (batHand != ' ' && !strcmp(batHandBatter, batter)) {
@@ -766,8 +766,8 @@ cw_game_read(FILE *file)
       pos = cw_strtok(NULL);
       if (player_id && name && team && slot && pos) {
 	cw_game_substitute_append(game, player_id, name,
-				  atoi(team), atoi(slot), 
-				  atoi(pos));
+				  cw_atoi(team), cw_atoi(slot), 
+				  cw_atoi(pos));
       }
     }
     else if (!strcmp(tok, "com")) {
@@ -848,8 +848,8 @@ cw_game_read(FILE *file)
       align = cw_strtok(NULL);
       slot = cw_strtok(NULL);
       if (align && slot) {
-	ladjAlign = atoi(align);
-	ladjSlot = atoi(slot);
+	ladjAlign = cw_atoi(align);
+	ladjSlot = cw_atoi(slot);
       }      
     }
     else if (!strcmp(tok, "cw:itb")) {
@@ -860,7 +860,7 @@ cw_game_read(FILE *file)
       base = cw_strtok(NULL);
       if (runner && base) {
 	strncpy(itbRunner, runner, 255);
-	itbBase = atoi(base);
+	itbBase = cw_atoi(base);
       }
     }      
   }
