@@ -66,7 +66,7 @@ int cwdaily_print_integer_or_null(char *buffer, int value)
     return sprintf(buffer, "%d", value);
   }
   else {
-    return sprintf(buffer, "");
+    return sprintf(buffer, "%s", "");
   }
 }
 
