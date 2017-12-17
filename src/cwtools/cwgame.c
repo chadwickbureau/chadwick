@@ -1,6 +1,6 @@
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2015, Dr T L Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2017, Dr T L Turocy (ted.turocy@gmail.com)
  *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *                          Sean Forman, Sports Reference LLC
  *                          XML Team Solutions, Inc.
@@ -2227,7 +2227,7 @@ cwgame_print_welcome_message(char *argv0)
   fprintf(stderr, 
 	  "\nChadwick expanded game descriptor, version " VERSION);
   fprintf(stderr, "\n  Type '%s -h' for help.\n", argv0);
-  fprintf(stderr, "Copyright (c) 2002-2015\nDr T L Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)\n");
+  fprintf(stderr, "Copyright (c) 2002-2017\nDr T L Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)\n");
   fprintf(stderr, "This is free software, "
 	  "subject to the terms of the GNU GPL license.\n\n");
 }
