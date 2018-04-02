@@ -35,7 +35,7 @@
 extern int ascii;
 
 /* Fields to display (-f) */
-int fields[111] = {
+int fields[117] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -47,10 +47,10 @@ int fields[111] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1
+  1, 1, 1, 1, 1, 1, 1
 };
 
-int max_field = 110;
+int max_field = 116;
 
 char program_name[20] = "cwdaily";
 
@@ -179,7 +179,7 @@ DECLARE_BATTING_CATEGORY(cwdaily_B_SH, sh)
 DECLARE_BATTING_CATEGORY(cwdaily_B_SF, sf)
 DECLARE_BATTING_CATEGORY(cwdaily_B_SB, sb)
 DECLARE_BATTING_CATEGORY(cwdaily_B_CS, cs)
-
+DECLARE_BATTING_CATEGORY(cwdaily_B_XI, xi)
 
 DECLARE_FIELDFUNC(cwdaily_P_G)
 {
@@ -213,7 +213,11 @@ DECLARE_PITCHING_CATEGORY(cwdaily_P_GS, gs)
 DECLARE_PITCHING_CATEGORY(cwdaily_P_CG, cg)
 DECLARE_PITCHING_CATEGORY(cwdaily_P_SHO, sho)
 DECLARE_PITCHING_CATEGORY(cwdaily_P_GF, gf)
+DECLARE_PITCHING_CATEGORY(cwdaily_P_W, w)
+DECLARE_PITCHING_CATEGORY(cwdaily_P_L, l)
+DECLARE_PITCHING_CATEGORY(cwdaily_P_SV, sv)
 DECLARE_PITCHING_CATEGORY(cwdaily_P_OUT, outs)
+DECLARE_PITCHING_CATEGORY(cwdaily_P_TBF, bf)
 DECLARE_PITCHING_CATEGORY(cwdaily_P_AB, ab)
 DECLARE_PITCHING_CATEGORY(cwdaily_P_R, r)
 DECLARE_PITCHING_CATEGORY(cwdaily_P_ER, er)
@@ -228,6 +232,7 @@ DECLARE_PITCHING_CATEGORY(cwdaily_P_GDP, gdp)
 DECLARE_PITCHING_CATEGORY(cwdaily_P_HP, hb)
 DECLARE_PITCHING_CATEGORY(cwdaily_P_SH, sh)
 DECLARE_PITCHING_CATEGORY(cwdaily_P_SF, sf)
+DECLARE_PITCHING_CATEGORY(cwdaily_P_XI, xi)
 DECLARE_PITCHING_CATEGORY(cwdaily_P_WP, wp)
 DECLARE_PITCHING_CATEGORY(cwdaily_P_BK, bk)
 
@@ -341,12 +346,17 @@ static field_struct field_data[] = {
   { cwdaily_B_SF, "B_SF", "B_SF:  sacrifice flies" },
   { cwdaily_B_SB, "B_SB", "B_SB:  stolen bases" },
   { cwdaily_B_CS, "B_CS", "B_CS:  caught stealing" },
+  { cwdaily_B_XI, "B_XI", "B_XI:  reached on interference" },
   { cwdaily_P_G, "P_G", "P_G:   games pitched" },
   { cwdaily_P_GS, "P_GS", "P_GS:  games started" },
   { cwdaily_P_CG, "P_CG", "P_CG:  complete games" },
   { cwdaily_P_SHO, "P_SHO", "P_SHO: shutouts" },
   { cwdaily_P_GF, "P_GF", "P_GF:  games finished" },
+  { cwdaily_P_W, "P_W", "P_W:  wins" },
+  { cwdaily_P_L, "P_L", "P_L:  losses" },
+  { cwdaily_P_SV, "P_SV", "P_SV:  saves" },
   { cwdaily_P_OUT, "P_OUT", "P_OUT: outs recorded (innings pitched times 3)" },
+  { cwdaily_P_TBF, "P_TBF", "P_TBF: batters faced" },
   { cwdaily_P_AB, "P_AB", "P_AB:  at bats" },
   { cwdaily_P_R, "P_R", "P_R:   runs allowed" },
   { cwdaily_P_ER, "P_ER", "P_ER:  earned runs allowed" },
@@ -361,6 +371,7 @@ static field_struct field_data[] = {
   { cwdaily_P_HP, "P_HP", "P_HP:  hit batsmen" },
   { cwdaily_P_SH, "P_SH", "P_SH:  sacrifice hits against" },
   { cwdaily_P_SF, "P_SF", "P_SF:  sacrifice flies against" },
+  { cwdaily_P_XI, "P_XI", "P_XI:  reached on interference" },
   { cwdaily_P_WP, "P_WP", "P_WP:  wild pitches" },
   { cwdaily_P_BK, "P_BK", "P_BK:  balks" },
   { cwdaily_F_P_G, "F_P_G", "F_P_G:    games at P" },
