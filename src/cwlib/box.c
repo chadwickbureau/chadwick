@@ -203,6 +203,7 @@ static void
 cw_box_enter_starters(CWBoxscore *boxscore, CWGame *game)
 {
   int i, t;
+  char *date = cw_game_info_lookup(game, "date");
 
   for (t = 0; t <= 1; t++) {
     for (i = 0; i <= 9; i++) {
@@ -210,6 +211,9 @@ cw_box_enter_starters(CWBoxscore *boxscore, CWGame *game)
       if (!app) continue;
 
       boxscore->slots[i][t] = cw_box_player_create(app->player_id, app->name);
+      sprintf(boxscore->slots[i][t]->date, "%c%c%c%c%c%c%c%c",
+	      date[0], date[1], date[2], date[3],
+	      date[5], date[6], date[8], date[9]);
       boxscore->slots[i][t]->batting->g = 1;
       boxscore->slots[i][t]->num_positions++;
       boxscore->slots[i][t]->positions[0] = app->pos;
@@ -276,6 +280,7 @@ cw_box_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
        * Try to do something reasonable here. 
        */
       CWBoxPlayer *player = cw_box_player_create(sub->player_id, sub->name);
+      strncpy(player->date, gameiter->state->date, 8);
       player->batting->g = 1; 
       boxscore->slots[sub->slot][sub->team] = player;
     }
@@ -305,6 +310,7 @@ cw_box_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
     else if (strcmp(sub->player_id, 
 		    boxscore->slots[sub->slot][sub->team]->player_id)) {
       CWBoxPlayer *player = cw_box_player_create(sub->player_id, sub->name);
+      strncpy(player->date, gameiter->state->date, 8);
       player->batting->g = 1; 
       boxscore->slots[sub->slot][sub->team]->next = player;
       player->prev = boxscore->slots[sub->slot][sub->team];
@@ -1182,6 +1188,7 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
   CWBoxEvent *event;
   CWBoxPlayer *player;
   CWBoxPitcher *pitcher;
+  char *date = cw_game_info_lookup(game, "date");
 
   /* Assume games ended with the conclusion of an inning... */
   boxscore->outs_at_end = 3;
@@ -1198,6 +1205,9 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
       }
       else {
 	player = cw_box_player_create(stat->data[1], "");
+	sprintf(player->date, "%c%c%c%c%c%c%c%c",
+		date[0], date[1], date[2], date[3],
+		date[5], date[6], date[8], date[9]);
 	player->batting->g = 1; 
 	boxscore->slots[slot][team]->next = player;
 	player->prev = boxscore->slots[slot][team];

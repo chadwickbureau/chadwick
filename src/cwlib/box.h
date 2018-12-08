@@ -42,6 +42,8 @@ typedef struct cw_box_fielding_struct {
  */
 typedef struct cw_box_player_struct {
   char *player_id, *name;
+  /* The "appearance date" - taking into account resumed games */
+  char date[9];  
   CWBoxBatting *batting;
   int ph_inn, pr_inn, num_positions;
   /* The position the player was listed at in the starting lineup;

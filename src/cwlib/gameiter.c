@@ -734,10 +734,15 @@ cw_gameiter_lineup_setup(CWGameIterator *gameiter)
 void
 cw_gameiter_reset(CWGameIterator *gameiter)
 {
+  char *date = cw_game_info_lookup(gameiter->game, "date");
+
   gameiter->event = gameiter->game->first_event;
 
   cw_gamestate_cleanup(gameiter->state);
   cw_gamestate_initialize(gameiter->state);
+  sprintf(gameiter->state->date, "%c%c%c%c%c%c%c%c",
+	  date[0], date[1], date[2], date[3],
+	  date[5], date[6], date[8], date[9]);
   cw_gameiter_lineup_setup(gameiter);
 
   if (cw_game_info_lookup(gameiter->game, "htbf") &&
@@ -816,6 +821,22 @@ cw_gameiter_process_subs(CWGameIterator *gameiter)
   }
 }
 
+static void
+cw_gameiter_process_comments(CWGameIterator *gameiter)
+{
+  char *token;
+  CWComment *comment = gameiter->event->first_comment;
+
+  while (comment != NULL) {
+    if (strstr(comment->text, "suspended,") == comment->text) {
+      token = strtok(comment->text, ",");
+      token = strtok(NULL, ",");
+      strncpy(gameiter->state->date, token, 8);
+    }
+    comment = comment->next;
+  }
+}
+
 void 
 cw_gameiter_next(CWGameIterator *gameiter)
 {
@@ -825,6 +846,7 @@ cw_gameiter_next(CWGameIterator *gameiter)
 
   }
 
+  cw_gameiter_process_comments(gameiter);
   cw_gameiter_process_subs(gameiter);
 
   /* Now, move on to the next event, and parse it.

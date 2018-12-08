@@ -126,13 +126,8 @@ DECLARE_FIELDFUNC(cwdaily_app_date)
 {
   /* The appearance date differs from the game date in the case of
    * games which are suspended and then resumed.
-   * Extracting this information is not yet implemented in the parser
-   * but will be in the near future.
    */
-  char *date = cw_game_info_lookup(gameiter->game, "date");
-  return sprintf(buffer, (ascii) ? "\"%c%c%c%c%c%c%c%c\"" : "%c%c%c%c%c%c%c%c",
-		 date[0], date[1], date[2], date[3],
-		 date[5], date[6], date[8], date[9]);
+  return sprintf(buffer, "\"%s\"", player->date);
 }  
 
 DECLARE_FIELDFUNC(cwdaily_team_id)

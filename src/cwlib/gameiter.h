@@ -28,6 +28,7 @@
 #include "game.h"
 
 typedef struct cw_game_state {
+  char date[9];     /* Updates on game resumption after suspension */
   int event_count, inning, batting_team, outs, inning_batters, inning_score;
   int score[2], hits[2], errors[2], times_out[2];
   int next_batter[2], num_batters[2], dh_slot[2];
