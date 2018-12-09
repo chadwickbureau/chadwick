@@ -35,7 +35,7 @@
 extern int ascii;
 
 /* Fields to display (-f) */
-int fields[117] = {
+int fields[126] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -47,10 +47,11 @@ int fields[117] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1
 };
 
-int max_field = 116;
+int max_field = 125;
 
 char program_name[20] = "cwdaily";
 
@@ -242,7 +243,14 @@ DECLARE_FIELDFUNC(funcname) \
   } \
 }
 
+#define DECLARE_FIELDING_STARTER(funcname, pos) \
+DECLARE_FIELDFUNC(funcname) \
+{ \
+  return sprintf(buffer, "%d", (player->start_position==pos) ? 1 : 0); \
+}
+
 DECLARE_FIELDING_CATEGORY(cwdaily_F_P_G, 1, g)
+DECLARE_FIELDING_STARTER(cwdaily_F_P_GS, 1)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_P_OUT, 1, outs)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_P_PO, 1, po)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_P_A, 1, a)
@@ -251,6 +259,7 @@ DECLARE_FIELDING_CATEGORY(cwdaily_F_P_DP, 1, dp)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_P_TP, 1, tp)
 
 DECLARE_FIELDING_CATEGORY(cwdaily_F_C_G, 2, g)
+DECLARE_FIELDING_STARTER(cwdaily_F_C_GS, 2)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_C_OUT, 2, outs)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_C_PO, 2, po)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_C_A, 2, a)
@@ -261,6 +270,7 @@ DECLARE_FIELDING_CATEGORY(cwdaily_F_C_PB, 2, pb)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_C_XI, 2, xi)
 
 DECLARE_FIELDING_CATEGORY(cwdaily_F_1B_G, 3, g)
+DECLARE_FIELDING_STARTER(cwdaily_F_1B_GS, 3)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_1B_OUT, 3, outs)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_1B_PO, 3, po)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_1B_A, 3, a)
@@ -269,6 +279,7 @@ DECLARE_FIELDING_CATEGORY(cwdaily_F_1B_DP, 3, dp)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_1B_TP, 3, tp)
 
 DECLARE_FIELDING_CATEGORY(cwdaily_F_2B_G, 4, g)
+DECLARE_FIELDING_STARTER(cwdaily_F_2B_GS, 4)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_2B_OUT, 4, outs)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_2B_PO, 4, po)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_2B_A, 4, a)
@@ -277,6 +288,7 @@ DECLARE_FIELDING_CATEGORY(cwdaily_F_2B_DP, 4, dp)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_2B_TP, 4, tp)
 
 DECLARE_FIELDING_CATEGORY(cwdaily_F_3B_G, 5, g)
+DECLARE_FIELDING_STARTER(cwdaily_F_3B_GS, 5)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_3B_OUT, 5, outs)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_3B_PO, 5, po)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_3B_A, 5, a)
@@ -285,6 +297,7 @@ DECLARE_FIELDING_CATEGORY(cwdaily_F_3B_DP, 5, dp)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_3B_TP, 5, tp)
 
 DECLARE_FIELDING_CATEGORY(cwdaily_F_SS_G, 6, g)
+DECLARE_FIELDING_STARTER(cwdaily_F_SS_GS, 6)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_SS_OUT, 6, outs)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_SS_PO, 6, po)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_SS_A, 6, a)
@@ -293,6 +306,7 @@ DECLARE_FIELDING_CATEGORY(cwdaily_F_SS_DP, 6, dp)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_SS_TP, 6, tp)
 
 DECLARE_FIELDING_CATEGORY(cwdaily_F_LF_G, 7, g)
+DECLARE_FIELDING_STARTER(cwdaily_F_LF_GS, 7)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_LF_OUT, 7, outs)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_LF_PO, 7, po)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_LF_A, 7, a)
@@ -301,6 +315,7 @@ DECLARE_FIELDING_CATEGORY(cwdaily_F_LF_DP, 7, dp)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_LF_TP, 7, tp)
 
 DECLARE_FIELDING_CATEGORY(cwdaily_F_CF_G, 8, g)
+DECLARE_FIELDING_STARTER(cwdaily_F_CF_GS, 8)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_CF_OUT, 8, outs)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_CF_PO, 8, po)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_CF_A, 8, a)
@@ -309,6 +324,7 @@ DECLARE_FIELDING_CATEGORY(cwdaily_F_CF_DP, 8, dp)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_CF_TP, 8, tp)
 
 DECLARE_FIELDING_CATEGORY(cwdaily_F_RF_G, 9, g)
+DECLARE_FIELDING_STARTER(cwdaily_F_RF_GS, 9)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_RF_OUT, 9, outs)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_RF_PO, 9, po)
 DECLARE_FIELDING_CATEGORY(cwdaily_F_RF_A, 9, a)
@@ -370,6 +386,7 @@ static field_struct field_data[] = {
   { cwdaily_P_WP, "P_WP", "P_WP:  wild pitches" },
   { cwdaily_P_BK, "P_BK", "P_BK:  balks" },
   { cwdaily_F_P_G, "F_P_G", "F_P_G:    games at P" },
+  { cwdaily_F_P_GS, "F_P_GS", "F_P_GS:   games started at P" },
   { cwdaily_F_P_OUT, "F_P_OUT", "F_P_OUT:  outs recorded at P (innings fielded times 3)" },
   { cwdaily_F_P_PO, "F_P_PO", "F_P_PO:   putouts at P" },
   { cwdaily_F_P_A, "F_P_A", "F_P_A:    assists at P" },
@@ -377,6 +394,7 @@ static field_struct field_data[] = {
   { cwdaily_F_P_DP, "F_P_DP", "F_P_DP:   double plays at P" },
   { cwdaily_F_P_TP, "F_P_TP", "F_P_TP:   triple plays at P" },
   { cwdaily_F_C_G, "F_C_G", "F_C_G:    games at C" },
+  { cwdaily_F_C_GS, "F_C_GS", "F_C_GS:   games started at C" },
   { cwdaily_F_C_OUT, "F_C_OUT", "F_C_OUT:  outs recorded at C (innings fielded times 3)" },
   { cwdaily_F_C_PO, "F_C_PO", "F_C_PO:   putouts at C" },
   { cwdaily_F_C_A, "F_C_A", "F_C_A:    assists at C" },
@@ -386,6 +404,7 @@ static field_struct field_data[] = {
   { cwdaily_F_C_PB, "F_C_PB", "F_C_PB:   passed balls at C" },
   { cwdaily_F_C_XI, "F_C_XI", "F_C_IX:   catcher's interference at C" },
   { cwdaily_F_1B_G, "F_1B_G", "F_1B_G:   games at 1B" },
+  { cwdaily_F_1B_GS, "F_1B_GS", "F_1B_GS:  games started at 1B" },
   { cwdaily_F_1B_OUT, "F_1B_OUT", "F_1B_OUT: outs recorded at 1B (innings fielded times 3)" },
   { cwdaily_F_1B_PO, "F_1B_PO", "F_1B_PO:  putouts at 1B" },
   { cwdaily_F_1B_A, "F_1B_A", "F_1B_A:   assists at 1B" },
@@ -393,6 +412,7 @@ static field_struct field_data[] = {
   { cwdaily_F_1B_DP, "F_1B_DP", "F_1B_DP:  double plays at 1B" },
   { cwdaily_F_1B_TP, "F_1B_TP", "F_1B_TP:  triple plays at 1B" },
   { cwdaily_F_2B_G, "F_2B_G", "F_2B_G:   games at 2B" },
+  { cwdaily_F_2B_GS, "F_2B_GS", "F_2B_GS:  games started at 2B" },
   { cwdaily_F_2B_OUT, "F_2B_OUT", "F_2B_OUT: outs recorded at 2B (innings fielded times 3)" },
   { cwdaily_F_2B_PO, "F_2B_PO", "F_2B_PO:  putouts at 2B" },
   { cwdaily_F_2B_A, "F_2B_A", "F_2B_A:   assists at 2B" },
@@ -400,6 +420,7 @@ static field_struct field_data[] = {
   { cwdaily_F_2B_DP, "F_2B_DP", "F_2B_DP:  double plays at 2B" },
   { cwdaily_F_2B_TP, "F_2B_TP", "F_2B_TP:  triple plays at 2B" },
   { cwdaily_F_3B_G, "F_3B_G", "F_3B_G:   games at 3B" },
+  { cwdaily_F_3B_GS, "F_3B_GS", "F_3B_GS:  games started at 3B" },
   { cwdaily_F_3B_OUT, "F_3B_OUT", "F_3B_OUT: outs recorded at 3B (innings fielded times 3)" },
   { cwdaily_F_3B_PO, "F_3B_PO", "F_3B_PO:  putouts at 3B" },
   { cwdaily_F_3B_A, "F_3B_A", "F_3B_A:   assists at 3B" },
@@ -407,6 +428,7 @@ static field_struct field_data[] = {
   { cwdaily_F_3B_DP, "F_3B_DP", "F_3B_DP:  double plays at 3B" },
   { cwdaily_F_3B_TP, "F_3B_TP", "F_3B_TP:  triple plays at 3B" },
   { cwdaily_F_SS_G, "F_SS_G", "F_SS_G:    games at SS" },
+  { cwdaily_F_SS_GS, "F_SS_GS", "F_SS_GS:  games started at SS" },
   { cwdaily_F_SS_OUT, "F_SS_OUT", "F_SS_OUT: outs recorded at SS (innings fielded times 3)" },
   { cwdaily_F_SS_PO, "F_SS_PO", "F_SS_PO:  putouts at SS" },
   { cwdaily_F_SS_A, "F_SS_A", "F_SS_A:   assists at SS" },
@@ -414,6 +436,7 @@ static field_struct field_data[] = {
   { cwdaily_F_SS_DP, "F_SS_DP", "F_SS_DP:  double plays at SS" },
   { cwdaily_F_SS_TP, "F_SS_TP", "F_SS_TP:  triple plays at SS" },
   { cwdaily_F_LF_G, "F_LF_G", "F_LF_G:   games at LF" },
+  { cwdaily_F_LF_GS, "F_LF_GS", "F_LF_GS:  games started at LF" },
   { cwdaily_F_LF_OUT, "F_LF_OUT", "F_LF_OUT: outs recorded at LF (innings fielded times 3)" },
   { cwdaily_F_LF_PO, "F_LF_PO", "F_LF_PO:  putouts at LF" },
   { cwdaily_F_LF_A, "F_LF_A", "F_LF_A:   assists at LF" },
@@ -421,6 +444,7 @@ static field_struct field_data[] = {
   { cwdaily_F_LF_DP, "F_LF_DP", "F_LF_DP:  double plays at LF" },
   { cwdaily_F_LF_TP, "F_LF_TP", "F_LF_TP:  triple plays at LF" },
   { cwdaily_F_CF_G, "F_CF_G", "F_CF_G:   games at CF" },
+  { cwdaily_F_CF_GS, "F_CF_GS", "F_CF_GS:  games started at CF" },
   { cwdaily_F_CF_OUT, "F_CF_OUT", "F_CF_OUT: outs recorded at CF (innings fielded times 3)" },
   { cwdaily_F_CF_PO, "F_CF_PO", "F_CF_PO:  putouts at CF" },
   { cwdaily_F_CF_A, "F_CF_A", "F_CF_A:   assists at CF" },
@@ -428,6 +452,7 @@ static field_struct field_data[] = {
   { cwdaily_F_CF_DP, "F_CF_DP", "F_CF_DP:  double plays at CF" },
   { cwdaily_F_CF_TP, "F_CF_TP", "F_CF_TP:  triple plays at CF" },
   { cwdaily_F_RF_G, "F_RF_G", "F_RF_G:   games at RF" },
+  { cwdaily_F_RF_GS, "F_RF_GS", "F_RF_GS:  games started at RF" },
   { cwdaily_F_RF_OUT, "F_RF_OUT", "F_RF_OUT: outs recorded at RF (innings fielded times 3)" },
   { cwdaily_F_RF_PO, "F_RF_PO", "F_RF_PO:  putouts at RF" },
   { cwdaily_F_RF_A, "F_RF_A", "F_RF_A:   assists at RF" },
