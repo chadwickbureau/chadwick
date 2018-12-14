@@ -580,7 +580,10 @@ class BoxPlayer(object):
   @property
   def P_H(self):    return self._pitching_stat("h")
   @property
-  def P_TB(self):   
+  def P_TB(self):
+    if self.P_H is None or self.P_2B is None or \
+       self.P_3B is None or self.P_HR is None:
+      return None
     try:
       return self.P_H+self.P_2B+2*self.P_3B+3*self.P_HR
     except TypeError:
