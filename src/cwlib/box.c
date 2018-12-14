@@ -281,6 +281,7 @@ cw_box_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
        */
       CWBoxPlayer *player = cw_box_player_create(sub->player_id, sub->name);
       strncpy(player->date, gameiter->state->date, 8);
+      player->date[8] = '\0';
       player->batting->g = 1; 
       boxscore->slots[sub->slot][sub->team] = player;
     }
@@ -311,6 +312,7 @@ cw_box_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
 		    boxscore->slots[sub->slot][sub->team]->player_id)) {
       CWBoxPlayer *player = cw_box_player_create(sub->player_id, sub->name);
       strncpy(player->date, gameiter->state->date, 8);
+      player->date[8] = '\0';
       player->batting->g = 1; 
       boxscore->slots[sub->slot][sub->team]->next = player;
       player->prev = boxscore->slots[sub->slot][sub->team];
