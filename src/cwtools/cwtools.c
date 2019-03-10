@@ -27,9 +27,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>   /* for isdigit() */
-#ifdef MSDOS
+#if HAVE_DIR_H
+#include <dos.h>
 #include <dir.h>
-#endif /* MSDOS */
+#elif defined(MSDOS)
+#include <dir.h>
+#endif /* HAVE_DIR_H/MSDOS */
 
 #include "cwlib/chadwick.h"
 
@@ -178,7 +181,19 @@ cwtools_process_scorebook(CWLeague *league, char *filename)
   free(scorebook);
 }
 
-#ifdef MSDOS
+#if HAVE_DIR_H
+void
+cwtools_process_filespec(CWLeague *league, char *filespec)
+{
+  int handle;
+  struct _finddata_t state;
+  if ((handle = _findfirst(filespec, &state)) > 0) {
+    do {
+      cwtools_process_scorebook(league, state.name);
+    } while (!_findnext(handle, &state));
+  }
+}
+#elif defined(MSDOS)
 void 
 cwtools_process_filespec(CWLeague *league, char *filespec)
 {
@@ -190,13 +205,13 @@ cwtools_process_filespec(CWLeague *league, char *filespec)
     done = findnext(&state);
   }
 }
-#else  /* not MSDOS */
+#else  /* not HAVE_DIR_H/MSDOS */
 void
 cwtools_process_filespec(CWLeague *league, char *filespec)
 {
   cwtools_process_scorebook(league, filespec);
 }
-#endif  /* MSDOS/not MSDOS */
+#endif  /* HAVE_DIR_H/MSDOS */
 
 void
 cwtools_parse_field_list(char *text, int maxfield, int *field)

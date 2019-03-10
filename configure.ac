@@ -35,6 +35,8 @@ dnl Checks for libraries.
 
 dnl Checks for header files.
 AC_HEADER_STDC
+AC_CHECK_HEADER([dir.h],
+                [AC_DEFINE(HAVE_DIR_H)])
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_MEMBER([struct tm.tm_gmtoff],
