@@ -2205,7 +2205,7 @@ cwgame_print_field_list(void)
   }
   fprintf(stderr, "\n");
 
-  fprintf(stderr, "These additional fields are available in this version of cwevent.\n");
+  fprintf(stderr, "These additional fields are available in this version of cwgame.\n");
   fprintf(stderr, "These are specified using the -x option, and appear in the output\n");
   fprintf(stderr, "after all fields specified with -f. By default, none of these\n");
   fprintf(stderr, "fields are output.\n");
