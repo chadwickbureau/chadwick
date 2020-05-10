@@ -205,7 +205,7 @@ cw_roster_player_append(CWRoster *roster, CWPlayer *player)
 CWPlayer *
 cw_roster_player_find(CWRoster *roster, char *player_id)
 {
-  CWPlayer *player = roster->first_player;
+  CWPlayer *player = (roster) ? roster->first_player : NULL;
 
   if (player_id == NULL) {
     return NULL;

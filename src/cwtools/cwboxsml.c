@@ -1454,7 +1454,10 @@ cwbox_sports_title(XMLNode *parent, CWGame *game,
   season[4] = '\0';
 
   sprintf(buffer, "%s %s at %s %s, %c%c/%c%c/%s",
-	  visitors->city, visitors->nickname, home->city, home->nickname,
+	  (visitors) ? visitors->city : "",
+	  (visitors) ? visitors->nickname : "",
+	  (home) ? home->city : "",
+	  (home) ? home->nickname : "",
 	  cw_game_info_lookup(game, "date")[5],
 	  cw_game_info_lookup(game, "date")[6],
 	  cw_game_info_lookup(game, "date")[8],
@@ -1555,18 +1558,22 @@ cwbox_sports_content_codes(XMLNode *parent, CWGame *game,
   xml_node_attribute(node, "code-type", "priority");
   xml_node_attribute(node, "code-key", "normal");
 
-  node = xml_node_open(codes, "sports-content-code");
-  xml_node_attribute(node, "code-type", "team");
-  xml_node_attribute(node, "code-key", visitors->team_id);
-  xml_node_attribute_fmt(node, "code-name", "%s %s",
-			 visitors->city, visitors->nickname);
+  if (visitors != NULL) {
+    node = xml_node_open(codes, "sports-content-code");
+    xml_node_attribute(node, "code-type", "team");
+    xml_node_attribute(node, "code-key", visitors->team_id);
+    xml_node_attribute_fmt(node, "code-name", "%s %s",
+  	  		   visitors->city, visitors->nickname);
+  }
 
-  node = xml_node_open(codes, "sports-content-code");
-  xml_node_attribute(node, "code-type", "team");
-  xml_node_attribute(node, "code-key", home->team_id);
-  xml_node_attribute_fmt(node, "code-name", "%s %s",
-			 home->city, home->nickname);
-
+  if (home != NULL) {
+    node = xml_node_open(codes, "sports-content-code");
+    xml_node_attribute(node, "code-type", "team");
+    xml_node_attribute(node, "code-key", home->team_id);
+    xml_node_attribute_fmt(node, "code-name", "%s %s",
+			   home->city, home->nickname);
+  }
+  
   node = xml_node_open(codes, "sports-content-code");
   xml_node_attribute(node, "code-type", "action-listing");
   xml_node_attribute(node, "code-key", "complete");
