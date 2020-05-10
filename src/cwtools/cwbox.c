@@ -271,9 +271,10 @@ cwbox_print_pitcher(CWGame *game,
 		    CWBoxPitcher *pitcher, CWRoster *roster,
 		    int *note_count)
 {
-  char *markers[] = { "*", "+", "#", "**", "++", "##" };
+  char *markers[] = { "*", "+", "#" };
   CWPlayer *bio = NULL;
   char name[256];
+  int i;
 
   if (roster) {
     bio = cw_roster_player_find(roster, pitcher->player_id);
@@ -299,7 +300,10 @@ cwbox_print_pitcher(CWGame *game,
   }
 
   if (pitcher->pitching->xbinn > 0 && pitcher->pitching->xb > 0) {
-    strcat(name, markers[(*note_count)++]);
+    for (i = 0; i <= *note_count / 3; i++) {
+      strcat(name, markers[*note_count % 3]);
+    }
+    *note_count += 1;
   }
 
   printf("%-20s %2d.%1d %2d %2d",
@@ -361,15 +365,18 @@ cwbox_game_find_name(CWGame *game, char *player_id)
 void
 cwbox_print_pitcher_apparatus(CWBoxscore *boxscore)
 {
-  int t, count = 0;
-  char *markers[] = { "*", "+", "#", "**", "++", "##" };
+  int i, t, count = 0;
+  char *markers[] = { "*", "+", "#" };
 
   for (t = 0; t <= 1; t++) {
     CWBoxPitcher *pitcher = cw_box_get_starting_pitcher(boxscore, t);
     while (pitcher != NULL) {
       if (pitcher->pitching->xbinn > 0 && pitcher->pitching->xb > 0) {
-	printf("  %s Pitched to %d batter%s in %d", 
-	       markers[count++],
+	printf("  ");
+	for (i = 0; i <= count / 3; i++) {
+	  printf("%s", markers[count % 3]);
+	}
+	printf(" Pitched to %d batter%s in %d",
 	       pitcher->pitching->xb,
 	       (pitcher->pitching->xb == 1) ? "" : "s",
 	       pitcher->pitching->xbinn);
@@ -388,6 +395,7 @@ cwbox_print_pitcher_apparatus(CWBoxscore *boxscore)
 	else {
 	  printf("th\n");
 	}
+	count += 1;
       }
       pitcher = pitcher->next;
     }
