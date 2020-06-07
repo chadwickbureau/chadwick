@@ -1811,22 +1811,6 @@ static int cw_parse_strikeout(CWParserState *state, CWEventData *event,
   return 1;
 }
 
-static int cw_parse_strikeout_error(CWParserState *state, CWEventData *event,
-				    int flags)
-{
-  if (state->sym < '1' || state->sym > '9') {
-    return cw_parse_invalid(state);
-  }
-
-  event->errors[event->num_errors] = state->sym - '0';
-  event->error_types[event->num_errors++] = 'F';
-  event->play[0][0] = 'E';
-  event->play[0][1] = state->sym;
-  event->play[0][2] = '\0';
-  cw_parse_nextsym(state);
-  return 1;
-}
-
 static int cw_parse_walk(CWParserState *state, CWEventData *event, int flags)
 {
   event->advance[0] = 1;
@@ -2137,7 +2121,6 @@ int cw_parse_event(char *text, CWEventData *event)
     { CW_EVENT_INTENTIONALWALK, "I", cw_parse_walk },
     { CW_EVENT_INTENTIONALWALK, "IW", cw_parse_walk },
     { CW_EVENT_STRIKEOUT, "K", cw_parse_strikeout },
-    { CW_EVENT_STRIKEOUT, "KE", cw_parse_strikeout_error },  /* archaic */
     { CW_EVENT_OTHERADVANCE, "OA", cw_parse_other_advance },
     { CW_EVENT_PASSEDBALL, "PB", cw_parse_passed_ball },
     { CW_EVENT_PICKOFF, "PO", cw_parse_pickoff },
