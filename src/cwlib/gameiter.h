@@ -48,6 +48,7 @@ typedef struct cw_game_state {
   char *removed_for_ph, *removed_for_pr[4];
   char *walk_pitcher;      /* For application of rule 10.18(h)(1) */
   char *strikeout_batter;  /* For application of rule 10.17(b) */
+  char strikeout_batter_hand;
   int removed_position;
   char *go_ahead_rbi;
 

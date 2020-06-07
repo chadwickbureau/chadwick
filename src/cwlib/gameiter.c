@@ -81,6 +81,7 @@ cw_gamestate_initialize(CWGameState *state)
   state->removed_for_ph = NULL;
   state->walk_pitcher = NULL;
   state->strikeout_batter = NULL;
+  state->strikeout_batter_hand = ' ';
   state->go_ahead_rbi = NULL;
 
   for (i = 0; i <= 3; i++) {
@@ -136,6 +137,7 @@ cw_gamestate_copy(CWGameState *orig_state)
   XCOPY(state->removed_for_ph, orig_state->removed_for_ph);
   XCOPY(state->walk_pitcher, orig_state->walk_pitcher);
   XCOPY(state->strikeout_batter, orig_state->strikeout_batter);
+  state->strikeout_batter_hand = orig_state->strikeout_batter_hand;
   XCOPY(state->go_ahead_rbi, orig_state->go_ahead_rbi);
 
   for (i = 0; i <= 3; i++) {
@@ -437,6 +439,7 @@ cw_gamestate_substitute(CWGameState *state,
       state->strikeout_batter = 
 	(char *) malloc((strlen(batter) + 1) * sizeof(char));
       strcpy(state->strikeout_batter, batter);
+      state->strikeout_batter_hand = state->batter_hand;
     }
   }
 
@@ -607,6 +610,12 @@ cw_gamestate_charged_batter_hand(CWGameState *state, char *batter,
 {
   char resPitcherHand, resBatterHand;
 
+  if (event_data->event_type == CW_EVENT_STRIKEOUT &&
+      state->strikeout_batter != NULL &&
+      state->strikeout_batter_hand != ' ') {
+    return state->strikeout_batter_hand;
+  }
+  
   if (state->batter_hand == ' ') {
     resBatterHand = 
       cw_roster_batting_hand(offRoster,
@@ -844,6 +853,9 @@ cw_gameiter_next(CWGameIterator *gameiter)
     cw_gamestate_update(gameiter->state, 
 			gameiter->event->batter, gameiter->event_data);
 
+  }
+  else if (gameiter->event->batter_hand != ' ') {
+    gameiter->state->batter_hand = gameiter->event->batter_hand;
   }
 
   cw_gameiter_process_comments(gameiter);
