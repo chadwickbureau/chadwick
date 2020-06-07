@@ -226,11 +226,15 @@ DECLARE_FIELDFUNC(cwevent_batter_hand)
   }
 
   if (batterHand == 'B') {
-    pitcherHand =
-      cw_roster_throwing_hand((gameiter->event->batting_team == 0) ?
-			      home : visitors,
-			      gameiter->state->fielders[1][1-gameiter->state->batting_team]);
-
+    if (gameiter->state->pitcher_hand != ' ') {
+      pitcherHand = gameiter->state->pitcher_hand;
+    }
+    else{
+      pitcherHand =
+	cw_roster_throwing_hand((gameiter->event->batting_team == 0) ?
+				home : visitors,
+				gameiter->state->fielders[1][1-gameiter->state->batting_team]);
+    }
     if (pitcherHand == 'L') {
       batterHand = 'R';
     }

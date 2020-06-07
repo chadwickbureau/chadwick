@@ -97,6 +97,7 @@ cw_gamestate_initialize(CWGameState *state)
   }
 
   state->batter_hand = ' ';
+  state->pitcher_hand = ' ';
 }
 
 /* Create a copy of orig_state */
@@ -154,7 +155,7 @@ cw_gamestate_copy(CWGameState *orig_state)
   }
 
   state->batter_hand = orig_state->batter_hand;
-
+  state->pitcher_hand = orig_state->pitcher_hand;
   return state;
 }
 
@@ -627,10 +628,15 @@ cw_gamestate_charged_batter_hand(CWGameState *state, char *batter,
   }
 
   if (resBatterHand == 'B') {
-    resPitcherHand = 
-      cw_roster_throwing_hand(defRoster,
-			      cw_gamestate_charged_pitcher(state,
-							   event_data));
+    if (state->pitcher_hand != ' ') {
+      resPitcherHand = state->pitcher_hand;
+    }
+    else {
+      resPitcherHand = 
+	cw_roster_throwing_hand(defRoster,
+				cw_gamestate_charged_pitcher(state,
+							     event_data));
+    }
     if (resPitcherHand == 'L') {
       return 'R';
     }
@@ -765,6 +771,7 @@ cw_gameiter_reset(CWGameIterator *gameiter)
   if (gameiter->event) {
     if (strcmp(gameiter->event->event_text, "NP")) {
       gameiter->state->batter_hand = gameiter->event->batter_hand;
+      gameiter->state->pitcher_hand = gameiter->event->pitcher_hand;
       gameiter->parse_ok = cw_parse_event(gameiter->event->event_text, 
 					  gameiter->event_data);
     }
@@ -854,8 +861,9 @@ cw_gameiter_next(CWGameIterator *gameiter)
 			gameiter->event->batter, gameiter->event_data);
 
   }
-  else if (gameiter->event->batter_hand != ' ') {
+  else {
     gameiter->state->batter_hand = gameiter->event->batter_hand;
+    gameiter->state->pitcher_hand = gameiter->event->pitcher_hand;
   }
 
   cw_gameiter_process_comments(gameiter);
@@ -903,6 +911,7 @@ cw_gameiter_next(CWGameIterator *gameiter)
   if (gameiter->event && strcmp(gameiter->event->event_text, "NP")) {
     int i;
     gameiter->state->batter_hand = gameiter->event->batter_hand;
+    gameiter->state->pitcher_hand = gameiter->event->pitcher_hand;
     gameiter->parse_ok = cw_parse_event(gameiter->event->event_text,
 					gameiter->event_data);
     for (i = 1; i <= 3; i++) {

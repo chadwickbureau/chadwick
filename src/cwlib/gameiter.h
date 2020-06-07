@@ -52,7 +52,7 @@ typedef struct cw_game_state {
   int removed_position;
   char *go_ahead_rbi;
 
-  char batter_hand;
+  char batter_hand, pitcher_hand;
 } CWGameState;
 
 void cw_gamestate_initialize(CWGameState *);
