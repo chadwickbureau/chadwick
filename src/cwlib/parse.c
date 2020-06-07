@@ -235,6 +235,18 @@ cw_parse_nextsym(CWParserState *state)
 }
 
 /*
+ * Return the next character, without advancing the parser
+ */
+static char
+cw_parse_peek(CWParserState *state)
+{
+  if (state->inputPos >= strlen(state->inputString)) {
+    return ' ';
+  }
+  return state->inputString[state->inputPos];
+}
+
+/*
  * Report a parse error; returns 0 (so as to be able to call it in
  * 'return cw_parse_invalid(state)' conveniently 
  * 
@@ -1232,7 +1244,11 @@ static int cw_parse_generic_out(CWParserState *state, CWEventData *event,
   int safe;
   int forcePlay = -1;
 
-  if (state->sym != '?') {
+  if (state->sym != '?' &&
+      (state->sym != '9' || cw_parse_peek(state) != '9')) {
+    /* In June 2020, DWS modified BEVENT so that generic outs
+     * starting with 99 now return fielded_by = 0 instead of fielded_by = 9
+     */
     event->fielded_by = (state->sym - '0');
   }
   event->advance[0] = 1;
