@@ -2062,7 +2062,7 @@ void cw_parse_sanity_check(CWEventData *event)
       event->advance[base] = 0;
     }
 
-    if (!strcmp(event->play[base], "99")) {
+    if (strstr(event->play[base], "99")) {
       /* If fielding credits on any play are listed as unknown, then
        * no fielding credits should be awarded.
        */
