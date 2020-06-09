@@ -146,7 +146,7 @@ fields. These are are specified using the ``-x`` command-line flag.
      - ``AB_FL``
    * - 37
      - Hit value
-     - ``H_FL``
+     - ``H_CD``
    * - 38
      - :ref:`Sacrifice hit flag <cwtools.cwevent.sacflags>`
      - ``SH_FL``
