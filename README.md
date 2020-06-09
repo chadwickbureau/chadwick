@@ -38,6 +38,12 @@ For Windows users, pre-built binaries are available on the release
 page.
 
 
+Documentation
+=============
+
+Documentation is hosted at https://chadwick.readthedocs.io.
+
+
 For further information
 =======================
 
