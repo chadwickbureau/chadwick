@@ -19,6 +19,9 @@
 - Made `cwbox -X` and `cwbox -S` robust to the absence of the team
   file or a roster file by implementing sensible defaults.
 
+## Enhancements
+- Implemented `-n` switch for `cwcomment` to print column headers.
+
 ## Deprecations and removals
 - Support for the `KE` (strikeout + error) primary event type was
   removed.  This was a very old Retrosheet code that has been
