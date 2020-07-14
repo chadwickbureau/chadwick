@@ -77,26 +77,16 @@ int print_header = 0;
 /*
  * This function converts month, date, and year to the day of the week,
  * returning an integer between 0 and 6, inclusive, with 0 indicating Sunday.
- * This function should work for any year from 1901 to 2099.
-*/
+ *
+ * This implementation was posted to comp.lang.c in 1992 by
+ * Tomohiko Sakamoto.
+ */
 static int
-get_day_of_week(int month, int date, int year) 
+get_day_of_week(int month, int day, int year) 
 {
-  /*
-   * The base year is 1900.  Since 1 January 1900 was a Monday, we get the
-   * following keys for the months.
-   */
-  static int month_keys[12] = { 1, 4, 4, 0, 2, 5, 0, 3, 6, 1, 4, 6 };
-
-  int day;
-
-  day = (year - 1900) + (year - 1900) / 4 + month_keys[month - 1] + date - 1;
-  /* The above counts the leap day even if it occurs later in the year */
-  if ((year > 1900) && (year % 4 == 0) && (month < 2)) {
-    day--;
-  }
-  day %= 7;
-  return day;
+  static int t[12] = { 0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4 };
+  year -= month < 3;
+  return (year + year/4 - year/100 + year/400 + t[month-1] + day) % 7;
 }
 
 /*************************************************************************
