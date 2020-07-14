@@ -852,9 +852,12 @@ cw_game_read(FILE *file)
 	ladjSlot = cw_atoi(slot);
       }      
     }
-    else if (!strcmp(tok, "cw:itb")) {
-      /* Chadwick extension: international tiebreaker */
-      /* Format: cw:itb,runner-id,base */
+    else if (!strcmp(tok, "cw:itb") | !strcmp(tok, "radj")) {
+      /* For backwards-compatibility, we also accept the old
+       * Chadwick extension record for this.  It had the same
+       * semantics as the radj record introduced by Dave Smith
+       * for the 2020 season.
+       */
       char *runner, *base;
       runner = cw_strtok(NULL);
       base = cw_strtok(NULL);
