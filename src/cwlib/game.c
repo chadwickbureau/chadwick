@@ -129,8 +129,8 @@ static void cw_game_cleanup_events(CWGame *game, CWEvent *event)
     if (event->pitcher_hand_id) {
       free(event->pitcher_hand_id);
     }
-    if (event->itb_runner_id) {
-      free(event->itb_runner_id);
+    if (event->auto_runner_id) {
+      free(event->auto_runner_id);
     }
     while (sub != NULL) {
       CWAppearance *next_sub = sub->next;
@@ -385,8 +385,8 @@ void cw_game_event_append(CWGame *game, int inning, int batting_team,
   event->pitcher_hand_id = NULL;
   event->ladj_align = 0;
   event->ladj_slot = 0;
-  event->itb_base = 0;
-  event->itb_runner_id = NULL;
+  event->auto_base = 0;
+  event->auto_runner_id = NULL;
   event->prev = game->last_event;
   event->next = NULL;
   event->first_sub = NULL;
@@ -641,8 +641,8 @@ cw_game_read(FILE *file)
   char buf[1024], *tok;
   fpos_t filepos;
   char batHand = ' ', batHandBatter[1024], pitHand = ' ', pitHandPitcher[1024];
-  char itbRunner[1024];
-  int ladjAlign = 0, ladjSlot = 0, itbBase = 0;
+  char autoRunner[1024];
+  int ladjAlign = 0, ladjSlot = 0, autoBase = 0;
   CWGame *game;
 
   if (fgets(buf, 1024, file) == NULL) {
@@ -749,12 +749,12 @@ cw_game_read(FILE *file)
 	ladjSlot = 0;
       }
 
-      if (itbBase != 0) {
-	game->last_event->itb_base = itbBase;
-	game->last_event->itb_runner_id = (char *) malloc(strlen(itbRunner)+1);
-	strcpy(game->last_event->itb_runner_id, itbRunner);
-	itbBase = 0;
-	strcpy(itbRunner, "");
+      if (autoBase != 0) {
+	game->last_event->auto_base = autoBase;
+	game->last_event->auto_runner_id = (char *) malloc(strlen(autoRunner)+1);
+	strcpy(game->last_event->auto_runner_id, autoRunner);
+	autoBase = 0;
+	strcpy(autoRunner, "");
       }
     }
     else if (!strcmp(tok, "sub")) {
@@ -862,8 +862,8 @@ cw_game_read(FILE *file)
       runner = cw_strtok(NULL);
       base = cw_strtok(NULL);
       if (runner && base) {
-	strncpy(itbRunner, runner, 255);
-	itbBase = cw_atoi(base);
+	strncpy(autoRunner, runner, 255);
+	autoBase = cw_atoi(base);
       }
     }      
   }
@@ -943,8 +943,8 @@ cw_game_write_events(CWGame *game, FILE *file)
     if (event->ladj_slot != 0) {
       fprintf(file, "ladj,%d,%d\n", event->ladj_align, event->ladj_slot);
     }
-    if (event->itb_base != 0) {
-      fprintf(file, "cw:itb,%s,%d\n", event->itb_runner_id, event->itb_base);
+    if (event->auto_base != 0) {
+      fprintf(file, "radj,%s,%d\n", event->auto_runner_id, event->auto_base);
     }      
     fprintf(file, "play,%d,%d,%s,%s,%s,%s\n",
 	    event->inning, event->batting_team,

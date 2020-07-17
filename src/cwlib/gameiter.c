@@ -179,7 +179,7 @@ cw_gamestate_initialize(CWGameState *state)
   state->next_batter[1] = 1;
   state->num_batters[0] = state->num_batters[1] = 0;
   state->dh_slot[0] = state->dh_slot[1] = 0;
-  state->num_itb_runners[0] = state->num_itb_runners[1] = 0;
+  state->num_auto_runners[0] = state->num_auto_runners[1] = 0;
   state->is_leadoff = 1;
   state->is_new_pa = 1;
   state->ph_flag = 0;
@@ -563,7 +563,7 @@ cw_gamestate_change_sides(CWGameState *state, CWEvent *event)
 int
 cw_gamestate_left_on_base(CWGameState *state, int team)
 {
-  return (state->num_batters[team] + state->num_itb_runners[team] -
+  return (state->num_batters[team] + state->num_auto_runners[team] -
 	  state->score[team] - state->times_out[team]);
 }
 
@@ -964,10 +964,10 @@ cw_gameiter_next(CWGameIterator *gameiter)
   if (gameiter->event && gameiter->event->ladj_slot != 0) {
     gameiter->state->next_batter[gameiter->state->batting_team] = gameiter->event->ladj_slot;
   }
-  if (gameiter->event && gameiter->event->itb_base != 0) {
+  if (gameiter->event && gameiter->event->auto_base != 0) {
     cw_gamestate_place_runner(gameiter->state,
-			      gameiter->event->itb_base,
-			      gameiter->event->itb_runner_id);
+			      gameiter->event->auto_base,
+			      gameiter->event->auto_runner_id);
   }
   if (gameiter->event && strcmp(gameiter->event->event_text, "NP")) {
     int i;

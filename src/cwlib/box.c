@@ -1165,7 +1165,7 @@ cw_box_iterate_game(CWBoxscore *boxscore, CWGame *game)
 
   for (t = 0; t <= 1; t++) {
     boxscore->lob[t] = (gameiter->state->num_batters[t] +
-			gameiter->state->num_itb_runners[t] - 
+			gameiter->state->num_auto_runners[t] - 
 			gameiter->state->times_out[t] - 
 			gameiter->state->score[t]);
     boxscore->score[t] = gameiter->state->score[t];
