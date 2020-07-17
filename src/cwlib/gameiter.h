@@ -38,7 +38,7 @@ typedef struct cw_game_state {
 
   struct {
     char runner[50], pitcher[50], catcher[50];
-    int src_event;
+    int src_event, is_auto;
   } runners[4];
 
   struct {

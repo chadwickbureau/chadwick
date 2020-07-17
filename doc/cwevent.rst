@@ -671,6 +671,19 @@ many cases there is insufficient information, or the situation
 requires the judgment of the official scorer. Runners which are put
 out are reported as having an advancement of 0.
 
+*New in 0.8.1*: With the introduction of the automatic runner
+placement in extra innings as a tiebreaker for the 2020 season in
+MLB (and earlier in the minor leagues and other leagues), a new
+code 7 is used for runner advancement in the case in which an
+automatic runner scores.  The scoring rule for automatic runners is
+that they are charged to the pitcher who starts the inning, as an
+unearned run.  For the purposes of determining whether a run
+scored is due to the automatic runner, Chadwick follows the same
+convention as is used for assigning responsibility for runners to
+pitchers: in the event that an automatic runner is put out by
+batter action, then the subsequent runner becomes marked as an
+automatic runner.
+
 In most cases, the play on a runner indicates the fielding
 credits involved in putting him out. Chadwick also reports a fielding
 play on a runner when the runner is safe on a dropped throw, such as

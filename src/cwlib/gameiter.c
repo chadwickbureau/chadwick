@@ -67,6 +67,7 @@ cw_gamestate_place_runner(CWGameState *state, int base, char *runner)
 	  state->fielders[1][1-state->batting_team], 49);
   strncpy(state->runners[base].catcher,
 	  state->fielders[2][1-state->batting_team], 49);
+  state->runners[base].is_auto = 1;
 }
 
 /*
@@ -77,7 +78,6 @@ static void
 cw_gamestate_place_batter(CWGameState *state, char *batter, int event_type)
 {
   strncpy(state->runners[0].runner, batter, 49);
-  state->runners[0].src_event = state->event_count;
   if ((event_type == CW_EVENT_WALK ||
        event_type == CW_EVENT_INTENTIONALWALK) &&
       state->walk_pitcher) {
@@ -89,6 +89,8 @@ cw_gamestate_place_batter(CWGameState *state, char *batter, int event_type)
   }
   strncpy(state->runners[0].catcher,
 	  state->fielders[2][1-state->batting_team], 49);
+  state->runners[0].src_event = state->event_count;
+  state->runners[0].is_auto = 0;
 }
 
 /* 
@@ -108,6 +110,7 @@ cw_gamestate_move_runner(CWGameState *state, int src, int dest)
   strcpy(state->runners[dest].pitcher, state->runners[src].pitcher);
   strcpy(state->runners[dest].catcher, state->runners[src].catcher);
   state->runners[dest].src_event = state->runners[src].src_event;
+  state->runners[dest].is_auto = state->runners[src].is_auto;
 }
 
 /*
@@ -128,11 +131,13 @@ cw_gamestate_reassign_responsibility(CWGameState *state, int base)
       cw_gamestate_reassign_responsibility(state, b);
       strcpy(state->runners[b].pitcher, state->runners[base].pitcher);
       strcpy(state->runners[b].catcher, state->runners[base].catcher);
+      state->runners[b].is_auto = state->runners[base].is_auto;
       return;
     }
   }
   strcpy(state->runners[0].pitcher, state->runners[base].pitcher);
   strcpy(state->runners[0].catcher, state->runners[base].catcher);
+  state->runners[0].is_auto = state->runners[base].is_auto;
 }
 
 static void
@@ -142,6 +147,7 @@ cw_gamestate_clear_runner(CWGameState *state, int base)
   strcpy(state->runners[base].pitcher, "");
   strcpy(state->runners[base].catcher, "");
   state->runners[base].src_event = 0;
+  state->runners[base].is_auto = 0;
 }
 
 static void
@@ -154,6 +160,7 @@ cw_gamestate_copy_runners(CWGameState *dest, CWGameState *src)
     strcpy(dest->runners[i].pitcher, src->runners[i].pitcher);
     strcpy(dest->runners[i].catcher, src->runners[i].catcher);
     dest->runners[i].src_event = src->runners[i].src_event;
+    dest->runners[i].is_auto = src->runners[i].is_auto;
   }
 }
 
@@ -1003,6 +1010,15 @@ cw_gameiter_next(CWGameIterator *gameiter)
       }
     }
 
+    for (i = 0; i <- 3; i++) {
+      /* New convention from 2020: Automatic runners who score
+       * are reported as scoring code 7
+       */
+      if (gameiter->event_data->advance[i] >= 4 &&
+	  gameiter->state->runners[i].is_auto) {
+	gameiter->event_data->advance[i] = 7;
+      }
+    }
   }
 }
 
