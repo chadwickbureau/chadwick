@@ -1,3 +1,30 @@
+# [0.8.1] - 2020-07-17
+
+## Behaviour changes
+- The record type `radj` is now a synonym for the `cw:itb` extension
+  for placing automatic runners on base in the tiebreaker.
+- A new runner advancement code 7 has been introduced.  This marks
+  the case in which an automatic runner placed on base via an radj
+  record scores.  This run is always unearned.
+  In the event an automatic runner is put out due to batter action,
+  the subsequent runner becomes considered the automatic runner,
+  just as with the rules for tracking pitcher responsibility for
+  baserunners.
+
+## Bug fixes
+- Day of week was not being correctly reported by `cwgame` for games
+  taking place prior to 1900; in some cases this could lead to
+  core dumps due to accessing memory improperly.  This has been fixed
+  and the new algorithm is valid for any Gregorian calendar date.
+- `cwgame` was not reporting runs, hits, errors, LOB, or number of
+  innings for games in the boxscore file format; these were all
+  being reported as zero.  This has been fixed.
+
+## Deprecations and removals
+- The `cw:itb` record type is now considered deprecated in favour of
+  `radj`.  Support for `cw:itb` will be removed at some point in future.
+
+
 # [0.8.0] - 2020-06-09
 
 ## Behaviour changes

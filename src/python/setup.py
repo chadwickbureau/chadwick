@@ -25,7 +25,7 @@ from setuptools import setup, Extension
 
 setup(name="chadwick",
       description="A library for manipulating baseball game-level and play-level data",
-      version="0.8.0",
+      version="0.8.1",
       author="Dr T L Turocy",
       author_email="ted.turocy@gmail.com",
       url="http://chadwick.sourceforge.net",
