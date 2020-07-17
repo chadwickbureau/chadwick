@@ -36,8 +36,10 @@ typedef struct cw_game_state {
   int num_itb_runners[2];
   int is_leadoff, is_new_pa, ph_flag;
 
-  char runners[4][50], pitchers[4][50], catchers[4][50];
-  int runner_src_event[4];
+  struct {
+    char runner[50], pitcher[50], catcher[50];
+    int src_event;
+  } runners[4];
 
   struct {
     char *player_id, *name;
@@ -85,6 +87,11 @@ int cw_gamestate_player_position(CWGameState *state,
 
 
 /*
+ * Returns nonzero if and only if 'base' is currently occupied.
+ */
+int cw_gamestate_base_occupied(CWGameState *state, int base);
+
+/*
  * The batter who is charged with the outcome of the event
  * (almost always the actual batter, except as indicated in rule 10.17(b)
  */
@@ -118,6 +125,14 @@ char *cw_gamestate_responsible_pitcher(CWGameState *state,
 				       CWEventData *event_data,
 				       int base);
 
+/*
+ * The catcher who is charged with the scoring of the runner on base 'base'.
+ * This is unofficial, but follows the same conventions as for those
+ * of assigning pitcher responsibility.
+ */
+char *cw_gamestate_responsible_catcher(CWGameState *state, 
+				       CWEventData *event_data,
+				       int base);
 
 /*
  * TODO:

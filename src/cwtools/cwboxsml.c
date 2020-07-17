@@ -965,7 +965,7 @@ cwbox_action_baseball_play(XMLNode *parent, CWGameIterator *gameiter,
     xml_node_attribute(node, "batter-advance", "out");
   }
 
-  if (strcmp(gameiter->state->runners[1], "")) {
+  if (cw_gamestate_base_occupied(gameiter->state, 1)) {
     xml_node_attribute_fmt(node, "runner-on-first-idref", "p.%s",
 			   gameiter->state->runners[1]);
     if (gameiter->event_data->advance[1] >= 1 &&
@@ -981,7 +981,7 @@ cwbox_action_baseball_play(XMLNode *parent, CWGameIterator *gameiter,
       xml_node_attribute(node, "runner-on-first-advance", "out");
     }
   }
-  if (strcmp(gameiter->state->runners[2], "")) {
+  if (cw_gamestate_base_occupied(gameiter->state, 2)) {
     xml_node_attribute_fmt(node, "runner-on-second-idref", "p.%s",
 			   gameiter->state->runners[2]);
     if (gameiter->event_data->advance[2] >= 1 &&
@@ -997,9 +997,9 @@ cwbox_action_baseball_play(XMLNode *parent, CWGameIterator *gameiter,
       xml_node_attribute(node, "runner-on-second-advance", "out");
     }
   }
-  if (strcmp(gameiter->state->runners[3], "")) {
+  if (cw_gamestate_base_occupied(gameiter->state, 3)) {
     xml_node_attribute_fmt(node, "runner-on-third-idref", "p.%s",
-			   gameiter->state->runners[3]);
+			   gameiter->state->runners[3].runner);
     if (gameiter->event_data->advance[3] >= 1 &&
 	gameiter->event_data->advance[3] <= 3) {
       xml_node_attribute_int(node, "runner-on-third-advance",
