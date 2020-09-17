@@ -127,7 +127,7 @@ typedef struct field_struct {
 
 
 static field_struct field_data[] = {
-  /* 0 */ { cwcomment_game_id, "GAME ID", "game id" },
+  /* 0 */ { cwcomment_game_id, "GAME_ID", "game id" },
   /* 1 */ { cwcomment_event_number, "EVENT_ID", "event num" },
   /* 2 */ { cwcomment_comment, "COMMENT_TX", "comment text" }
 };
