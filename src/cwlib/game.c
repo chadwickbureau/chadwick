@@ -26,6 +26,7 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "util.h"
 #include "game.h"
 #include "file.h"
 
@@ -41,8 +42,7 @@ CWGame *cw_game_create(char *game_id)
 {
   CWGame *game = (CWGame *) malloc(sizeof(CWGame));
 
-  game->game_id = (char *) malloc(sizeof(char) * (strlen(game_id) + 1));
-  strcpy(game->game_id, game_id);
+  XCOPY(game->game_id, game_id);
   game->version = NULL;
   game->first_info = NULL;
   game->last_info = NULL;
@@ -249,18 +249,15 @@ void cw_game_cleanup(CWGame *game)
 
 void cw_game_set_version(CWGame *game, char *version)
 {
-  game->version = (char *) malloc(sizeof(char) * (strlen(version) + 1));
-  strcpy(game->version, version);
+  XCOPY(game->version, version);
 }
 
 
 void cw_game_info_append(CWGame *game, char *label, char *data)
 {
   CWInfo *info = (CWInfo *) malloc(sizeof(CWInfo));
-  info->label = (char *) malloc(sizeof(char) * (strlen(label) + 1));
-  strcpy(info->label, label);
-  info->data = (char *) malloc(sizeof(char) * (strlen(data) + 1));
-  strcpy(info->data, data);
+  XCOPY(info->label, label);
+  XCOPY(info->data, data);
   info->prev = game->last_info;
   info->next = NULL;
 
@@ -281,8 +278,7 @@ cw_game_info_set(CWGame *game, char *label, char *data)
   while (info != NULL) {
     if (!strcmp(info->label, label)) {
       free(info->data);
-      info->data = (char *) malloc(sizeof(char) * (strlen(data) + 1));
-      strcpy(info->data, data);
+      XCOPY(info->data, data);
       return;
     }
     else {
@@ -318,10 +314,8 @@ void cw_game_starter_append(CWGame *game, char *player_id, char *name,
 			    int team, int slot, int pos)
 {
   CWAppearance *starter = (CWAppearance *) malloc(sizeof(CWAppearance));
-  starter->player_id = (char *) malloc(sizeof(char) * (strlen(player_id) + 1));
-  strcpy(starter->player_id, player_id);
-  starter->name = (char *) malloc(sizeof(char) * (strlen(name) + 1));
-  strcpy(starter->name, name);
+  XCOPY(starter->player_id, player_id);
+  XCOPY(starter->name, name);
   starter->team = team;
   starter->slot = slot;
   starter->pos = pos;
@@ -372,14 +366,10 @@ void cw_game_event_append(CWGame *game, int inning, int batting_team,
   CWEvent *event = (CWEvent *) malloc(sizeof(CWEvent));
   event->inning = inning;
   event->batting_team = batting_team;
-  event->batter = (char *) malloc(sizeof(char) * (strlen(batter) + 1));
-  strcpy(event->batter, batter);
-  event->count = (char *) malloc(sizeof(char) * (strlen(count) + 1));
-  strcpy(event->count, count);
-  event->pitches = (char *) malloc(sizeof(char) * (strlen(pitches) + 1));
-  strcpy(event->pitches, pitches);
-  event->event_text = (char *) malloc(sizeof(char) * (strlen(event_text) + 1));
-  strcpy(event->event_text, event_text);
+  XCOPY(event->batter, batter);
+  XCOPY(event->count, count);
+  XCOPY(event->pitches, pitches);
+  XCOPY(event->event_text, event_text);
   event->batter_hand = ' ';
   event->pitcher_hand = ' ';
   event->pitcher_hand_id = NULL;
@@ -412,10 +402,8 @@ void cw_game_substitute_append(CWGame *game, char *player_id, char *name,
 			       int team, int slot, int pos)
 {
   CWAppearance *sub = (CWAppearance *) malloc(sizeof(CWAppearance));
-  sub->player_id = (char *) malloc(sizeof(char) * (strlen(player_id) + 1));
-  strcpy(sub->player_id, player_id);
-  sub->name = (char *) malloc(sizeof(char) * (strlen(name) + 1));
-  strcpy(sub->name, name);
+  XCOPY(sub->player_id, player_id);
+  XCOPY(sub->name, name);
   sub->team = team;
   sub->slot = slot;
   sub->pos = pos;
@@ -440,8 +428,7 @@ void cw_game_data_append(CWGame *game, int num_data, char **data)
   d->next = NULL;
   
   for (i = 0; i < num_data; i++) {
-    d->data[i] = (char *) malloc(sizeof(char) * (strlen(data[i]) + 1));
-    strcpy(d->data[i], data[i]);
+    XCOPY(d->data[i], data[i]);
   }
 
   if (game->first_data) {
@@ -490,8 +477,7 @@ void cw_game_stat_append(CWGame *game, int num_data, char **data)
   d->next = NULL;
   
   for (i = 0; i < num_data; i++) {
-    d->data[i] = (char *) malloc(sizeof(char) * (strlen(data[i]) + 1));
-    strcpy(d->data[i], data[i]);
+    XCOPY(d->data[i], data[i]);
   }
 
   if (game->first_stat) {
@@ -514,8 +500,7 @@ void cw_game_evdata_append(CWGame *game, int num_data, char **data)
   d->next = NULL;
   
   for (i = 0; i < num_data; i++) {
-    d->data[i] = (char *) malloc(sizeof(char) * (strlen(data[i]) + 1));
-    strcpy(d->data[i], data[i]);
+    XCOPY(d->data[i], data[i]);
   }
 
   if (game->first_evdata) {
@@ -538,8 +523,7 @@ void cw_game_line_append(CWGame *game, int num_data, char **data)
   d->next = NULL;
   
   for (i = 0; i < num_data; i++) {
-    d->data[i] = (char *) malloc(sizeof(char) * (strlen(data[i]) + 1));
-    strcpy(d->data[i], data[i]);
+    XCOPY(d->data[i], data[i]);
   }
 
   if (game->first_line) {
@@ -555,8 +539,7 @@ void cw_game_line_append(CWGame *game, int num_data, char **data)
 void cw_game_comment_append(CWGame *game, char *text)
 {
   CWComment *comment = (CWComment *) malloc(sizeof(CWComment));
-  comment->text = (char *) malloc(sizeof(char) * (strlen(text) + 1));
-  strcpy(comment->text, text);
+  XCOPY(comment->text, text);
   comment->next = NULL;
 
   if (game->first_event == NULL) {
@@ -591,23 +574,20 @@ cw_game_replace_player(CWGame *game, char *key_old, char *key_new)
   for (sub = game->first_starter; sub != NULL; sub = sub->next) {
     if (!strcmp(sub->player_id, key_old)) {
       free(sub->player_id);
-      sub->player_id = (char *) malloc(sizeof(char) * (strlen(key_new)+1));
-      strcpy(sub->player_id, key_new);
+      XCOPY(sub->player_id, key_new);
     }
   }
 
   for (event = game->first_event; event != NULL; event = event->next) {
     if (!strcmp(event->batter, key_old)) {
       free(event->batter);
-      event->batter = (char *) malloc(sizeof(char) * (strlen(key_new)+1));
-      strcpy(event->batter, key_new);
+      XCOPY(event->batter, key_new);
     }
 
     for (sub = event->first_sub; sub != NULL; sub = sub->next) {
       if (!strcmp(sub->player_id, key_old)) {
 	free(sub->player_id);
-	sub->player_id = (char *) malloc(sizeof(char) * (strlen(key_new)+1));
-	strcpy(sub->player_id, key_new);
+	XCOPY(sub->player_id, key_new);
       }
     }
   }
@@ -616,8 +596,7 @@ cw_game_replace_player(CWGame *game, char *key_old, char *key_new)
     if (data->num_data >= 3 && !strcmp(data->data[0], "er") &&
 	!strcmp(data->data[1], key_old)) {
       free(data->data[1]);
-      data->data[1] = (char *) malloc(sizeof(char) * (strlen(key_new)+1));
-      strcpy(data->data[1], key_new);
+      XCOPY(data->data[1], key_new);
     }
   }
 
@@ -736,8 +715,7 @@ cw_game_read(FILE *file)
 
       if (pitHand != ' ') {
 	game->last_event->pitcher_hand = pitHand;
-	game->last_event->pitcher_hand_id = (char *) malloc(strlen(pitHandPitcher)+1);
-	strcpy(game->last_event->pitcher_hand_id, pitHandPitcher);
+	XCOPY(game->last_event->pitcher_hand_id, pitHandPitcher);
 	pitHand = ' ';
 	strcpy(pitHandPitcher, "");
       }
@@ -751,8 +729,7 @@ cw_game_read(FILE *file)
 
       if (autoBase != 0) {
 	game->last_event->auto_base = autoBase;
-	game->last_event->auto_runner_id = (char *) malloc(strlen(autoRunner)+1);
-	strcpy(game->last_event->auto_runner_id, autoRunner);
+	XCOPY(game->last_event->auto_runner_id, autoRunner);
 	autoBase = 0;
 	strcpy(autoRunner, "");
       }
@@ -1037,8 +1014,7 @@ void
 cw_event_comment_append(CWEvent *event, char *text)
 {
   CWComment *comment = (CWComment *) malloc(sizeof(CWComment));
-  comment->text = (char *) malloc(sizeof(char) * (strlen(text) + 1));
-  strcpy(comment->text, text);
+  XCOPY(comment->text, text);
   comment->next = NULL;
   comment->prev = event->last_comment;
   if (event->last_comment) {

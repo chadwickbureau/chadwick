@@ -25,23 +25,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "util.h"
 #include "parse.h"
 #include "gameiter.h"
-
-/* This macro is a convenient shorthand for free()ing and NULLing a pointer
- * if it's not currently NULL. */
-#define XFREE(var)    if (var) { free((var)); (var) = NULL; }
-
-/* This macro is a convenient shortland for malloc()ing and copying a
- * pointer to a string, if it's not currently NULL */
-#define XCOPY(dest, src) \
-  if (src) {  \
-    dest = (char *) malloc(sizeof(char) * (strlen(src) + 1)); \
-    strcpy(dest, src); \
-  } \
-  else { \
-    dest = NULL; \
-  }
 
 /***********************************************************************
  * This suite of functions implements abstractions of manipulation of
