@@ -142,6 +142,10 @@ static void cw_game_cleanup_events(CWGame *game, CWEvent *event)
     while (comment != NULL) {
       CWComment *next_comment = comment->next;
       free(comment->text);
+      XFREE(comment->ejection.person_id);
+      XFREE(comment->ejection.person_role);
+      XFREE(comment->ejection.umpire_id);
+      XFREE(comment->ejection.reason);
       free(comment);
       comment = next_comment;
     }
@@ -539,7 +543,25 @@ void cw_game_line_append(CWGame *game, int num_data, char **data)
 void cw_game_comment_append(CWGame *game, char *text)
 {
   CWComment *comment = (CWComment *) malloc(sizeof(CWComment));
+  char *tok = NULL;
+ 
   XCOPY(comment->text, text);
+  if (strstr(comment->text, "ej,") == comment->text) {
+    tok = strtok(&(comment->text[3]), ",");
+    XCOPY(comment->ejection.person_id, tok);
+    tok = strtok(NULL, ",");
+    XCOPY(comment->ejection.person_role, tok);
+    tok = strtok(NULL, ",");
+    XCOPY(comment->ejection.umpire_id, tok);
+    tok = strtok(NULL, ",");
+    XCOPY(comment->ejection.reason, tok);
+  }
+  else {
+    comment->ejection.person_id = NULL;
+    comment->ejection.person_role = NULL;
+    comment->ejection.umpire_id = NULL;
+    comment->ejection.reason = NULL;
+  }
   comment->next = NULL;
 
   if (game->first_event == NULL) {
