@@ -1,3 +1,17 @@
+# [0.9.0]
+
+## New features
+- With the 2020 release, Retrosheet has introduced two new metadata
+  fields representing the scheduled number of innings and the
+  tiebreaker rule in effect (if any).  These currently appear only in
+  the 2020 event files.  These are now extracted by two new extended
+  fields in `cwgame`.
+
+## Bug fixes
+- Fixed crash which would occur if running `cwcomment` on a boxscore
+  file.
+
+
 # [0.8.1] - 2020-07-17
 
 ## Behaviour changes

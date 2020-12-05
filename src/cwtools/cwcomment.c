@@ -98,8 +98,7 @@ DECLARE_FIELDFUNC(cwcomment_comment)
 	 (beginning) ? gameiter->game->first_comment :
 	 gameiter->event->first_comment; 
        comment; comment = comment->next) {
-    if (comment != gameiter->event->first_comment &&
-	comment != gameiter->game->first_comment) {
+    if (comment->prev) {
       chars += sprintf(buffer, " ");
       buffer += 1;
     }
