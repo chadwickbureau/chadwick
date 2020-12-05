@@ -6,6 +6,17 @@
   tiebreaker rule in effect (if any).  These currently appear only in
   the 2020 event files.  These are now extracted by two new extended
   fields in `cwgame`.
+- `cwcomment` has been extended with new fields which record the
+  contents of ejection and umpire change record, which in Retrosheet
+  files are embedded in the comments.
+
+## Behaviour changes
+- Previously, `cwcomment` catenated all comments in a sequence into
+  one record.  To support the addition of ejection and umpire change
+  record extraction, this behaviour has changed.  Ejection and umpire
+  change comments are not catenated to previous/subsequent comments.
+  However, a series of comments which do not contain these special
+  record type is still catenated as before.
 
 ## Bug fixes
 - Fixed crash which would occur if running `cwcomment` on a boxscore
