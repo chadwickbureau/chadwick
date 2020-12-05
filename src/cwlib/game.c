@@ -146,6 +146,9 @@ static void cw_game_cleanup_events(CWGame *game, CWEvent *event)
       XFREE(comment->ejection.person_role);
       XFREE(comment->ejection.umpire_id);
       XFREE(comment->ejection.reason);
+      XFREE(comment->umpchange.inning);
+      XFREE(comment->umpchange.position);
+      XFREE(comment->umpchange.person_id);
       free(comment);
       comment = next_comment;
     }
@@ -547,7 +550,7 @@ void cw_game_comment_append(CWGame *game, char *text)
  
   XCOPY(comment->text, text);
   if (strstr(comment->text, "ej,") == comment->text) {
-    tok = strtok(&(comment->text[3]), ",");
+    tok = strtok(&(text[3]), ",");
     XCOPY(comment->ejection.person_id, tok);
     tok = strtok(NULL, ",");
     XCOPY(comment->ejection.person_role, tok);
@@ -561,6 +564,19 @@ void cw_game_comment_append(CWGame *game, char *text)
     comment->ejection.person_role = NULL;
     comment->ejection.umpire_id = NULL;
     comment->ejection.reason = NULL;
+  }
+  if (strstr(comment->text, "umpchange,") == comment->text) {
+    tok = strtok(&(text[10]), ",");
+    XCOPY(comment->umpchange.inning, tok);
+    tok = strtok(NULL, ",");
+    XCOPY(comment->umpchange.position, tok);
+    tok = strtok(NULL, ",");
+    XCOPY(comment->umpchange.person_id, tok);
+  }
+  else {
+    comment->umpchange.inning = NULL;
+    comment->umpchange.position = NULL;
+    comment->umpchange.person_id = NULL;
   }
   comment->next = NULL;
 

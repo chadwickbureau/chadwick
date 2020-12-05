@@ -35,11 +35,11 @@
 extern int ascii;
 
 /* Fields to display (-f) */
-int fields[7] = {
-  1, 1, 1, 1, 1, 1, 1
+int fields[10] = {
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 };
 
-int max_field = 6;
+int max_field = 9;
 
 char program_name[20] = "cwcomment";
 
@@ -101,10 +101,9 @@ DECLARE_FIELDFUNC(cwcomment_comment)
       chars += sprintf(buffer, " ");
       buffer += 1;
     }
-
     chars += sprintf(buffer, "%s", com->text);
     buffer += strlen(com->text);
-    if (com->ejection.person_id) {
+    if (com->ejection.person_id || com->umpchange.person_id) {
       break;
     }
   }
@@ -148,6 +147,30 @@ DECLARE_FIELDFUNC(cwcomment_eject_reason)
 		 (comment->ejection.reason) : "");
 }
 
+/* Field 7 */
+DECLARE_FIELDFUNC(cwcomment_umpchange_inning)
+{
+  return sprintf(buffer, "%s",
+		 (comment->umpchange.inning) ?
+		 (comment->umpchange.inning) : "");
+}
+
+/* Field 8 */
+DECLARE_FIELDFUNC(cwcomment_umpchange_position)
+{
+  return sprintf(buffer, "\"%s\"",
+		 (comment->umpchange.position) ?
+		 (comment->umpchange.position) : "");
+}
+
+/* Field 9 */
+DECLARE_FIELDFUNC(cwcomment_umpchange_person_id)
+{
+  return sprintf(buffer, "\"%s\"",
+		 (comment->umpchange.person_id) ?
+		 (comment->umpchange.person_id) : "");
+}
+
 /*
  * convenient structure to hold all information relating to a field
  * together in one place
@@ -168,7 +191,13 @@ static field_struct field_data[] = {
 	    "role of person ejected" },
   /* 5 */ { cwcomment_eject_umpire_id, "EJECT_UMPIRE_ID",
 	    "ID of ejecting umpire" },
-  /* 6 */ { cwcomment_eject_reason, "EJECT_REASON_TX", "reason for ejection" }
+  /* 6 */ { cwcomment_eject_reason, "EJECT_REASON_TX", "reason for ejection" },
+  /* 7 */ { cwcomment_umpchange_inning, "UMPCHANGE_INN_CT",
+	    "inning of umpire change" },
+  /* 8 */ { cwcomment_umpchange_position, "UMPCHANGE_POS_CD",
+	    "position umpire assumed" },
+  /* 9 */ { cwcomment_umpchange_person_id, "UMPCHANGE_PERSON_ID",
+	    "ID of umpire assuming position" }
 };
 
 void
@@ -198,13 +227,14 @@ cwcomment_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 	}
       }
       printf("%s\n", output_line); 
-      if (comment->ejection.person_id) {
+      if (comment->ejection.person_id || comment->umpchange.person_id) {
 	comment = comment->next;
       }
       else {
 	while (comment) {
 	  comment = comment->next;
-	  if (comment && comment->ejection.person_id) {
+	  if (comment &&
+	      (comment->ejection.person_id || comment->umpchange.person_id)) {
 	    break;
 	  }
 	}
@@ -230,13 +260,14 @@ cwcomment_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 	}
       }
       printf("%s\n", output_line);
-      if (comment->ejection.person_id) {
+      if (comment->ejection.person_id || comment->umpchange.person_id) {
 	comment = comment->next;
       }
       else {
 	while (comment) {
 	  comment = comment->next;
-	  if (comment && comment->ejection.person_id) {
+	  if (comment &&
+	      (comment->ejection.person_id || comment->umpchange.person_id)) {
 	    break;
 	  }
 	}
