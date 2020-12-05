@@ -52,7 +52,7 @@ int fields[84] = {
 int max_field = 83;
 
 /* Extended fields to display (-x) */
-int ext_fields[95] = {
+int ext_fields[97] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -60,10 +60,10 @@ int ext_fields[95] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0
+  0, 0, 0, 0, 0, 0, 0, 0
 };
 
-int max_ext_field = 94;
+int max_ext_field = 96;
 
 char program_name[20] = "cwgame";
 
@@ -1999,6 +1999,23 @@ DECLARE_FIELDFUNC(cwgame_acquisition_info)
   return sprintf(buffer, "%s", "");
 }
 
+DECLARE_FIELDFUNC(cwgame_scheduled_innings)
+{
+  char *tmp;
+  return sprintf(buffer, "%s",
+		 (tmp = cw_game_info_lookup(gameiter->game, "innings")) ?
+		 tmp : "9");
+}
+
+DECLARE_FIELDFUNC(cwgame_tiebreaker)
+{
+  char *tmp;
+  return sprintf(buffer, "\"%s\"",
+		 (tmp = cw_game_info_lookup(gameiter->game, "tiebreaker")) ?
+		 tmp : "");
+}
+
+
 static field_struct ext_field_data[] = {
   { cwgame_visitors_league, "AWAY_TEAM_LEAGUE_ID", "visiting team league" },
   { cwgame_home_league, "HOME_TEAM_LEAGUE_ID", "home team league" },
@@ -2094,7 +2111,9 @@ static field_struct ext_field_data[] = {
   { cwgame_home_batter8_name, "HOME_LINEUP8_BAT_NAME_TX", "home batter 8 name" },
   { cwgame_home_batter9_name, "HOME_LINEUP9_BAT_NAME_TX", "home batter 9 name" },
   { cwgame_additional_info, "ADD_INFO_TX", "additional information" },
-  { cwgame_acquisition_info, "ACQ_INFO_TX", "acquisition information" }
+  { cwgame_acquisition_info, "ACQ_INFO_TX", "acquisition information" },
+  { cwgame_scheduled_innings, "SCHED_INN_CT", "scheduled length of game in innings " },
+  { cwgame_tiebreaker, "TIEBREAK_CD", "tiebreaker rule type in use" }
 };
 
 void cwgame_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
