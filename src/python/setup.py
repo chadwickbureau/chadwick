@@ -1,6 +1,6 @@
 #
 # This file is part of Chadwick
-# Copyright (c) 2002-2020, Dr T L Turocy (ted.turocy@gmail.com)
+# Copyright (c) 2002-2021, Dr T L Turocy (ted.turocy@gmail.com)
 #                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
 #
 # FILE: src/python/setup.py
@@ -25,7 +25,7 @@ from setuptools import setup, Extension
 
 setup(name="chadwick",
       description="A library for manipulating baseball game-level and play-level data",
-      version="0.8.1",
+      version="0.9.0",
       author="Dr T L Turocy",
       author_email="ted.turocy@gmail.com",
       url="http://chadwick.sourceforge.net",

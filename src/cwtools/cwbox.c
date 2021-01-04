@@ -1,6 +1,6 @@
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2020, Dr T L Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2021, Dr T L Turocy (ted.turocy@gmail.com)
  *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *                          Sean Forman, Sports Reference LLC
  *                          XML Team Solutions, Inc.
@@ -62,7 +62,7 @@ cwbox_print_welcome_message(char *argv0)
 {
   fprintf(stderr, "\nChadwick boxscore generator, version " VERSION);
   fprintf(stderr, "\n  Type '%s -h' for help.\n", argv0);
-  fprintf(stderr, "Copyright (c) 2002-2020\nDr T L Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)\n");
+  fprintf(stderr, "Copyright (c) 2002-2021\nDr T L Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)\n");
   fprintf(stderr, "This is free software, "
 	  "subject to the terms of the GNU GPL license.\n\n");
 }
