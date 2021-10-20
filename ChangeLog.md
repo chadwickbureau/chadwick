@@ -1,4 +1,13 @@
-# [0.9.0]
+# [0.9.1] - 2021-10-20
+
+## Bug fixes
+- Corrects a regression in which automatic runners for the extra-inning
+  tiebreaker were not being included in LOB calcuations.
+- Corrects the help message for `cwcomment` to list the default fields
+  (these are now 0-9 as of the additions made for 0.9.0)
+
+
+# [0.9.0] - 2021-01-04
 
 ## New features
 - With the 2020 release, Retrosheet has introduced two new metadata
