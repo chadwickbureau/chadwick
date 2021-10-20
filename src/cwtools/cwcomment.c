@@ -298,7 +298,7 @@ cwcomment_print_help(void)
   fprintf(stderr, "  -ft       generate Fortran format files\n");
   fprintf(stderr, "  -m        use master player file instead of local roster files\n");
   fprintf(stderr, "  -f flist  give list of fields to output\n");
-  fprintf(stderr, "              Default is 0-2.\n");
+  fprintf(stderr, "              Default is 0-9.\n");
   fprintf(stderr, "  -d        print list of field numbers and descriptions\n\n");
   fprintf(stderr, "  -q        operate quietly; do not output progress messages\n");
   fprintf(stderr, "  -n        print field names in first row of output\n\n");
