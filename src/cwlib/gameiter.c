@@ -44,6 +44,9 @@ cw_gamestate_base_occupied(CWGameState *state, int base)
 /*
  * This places a runner on a base, setting the responsibility for the
  * runner to the current pitcher and catcher.
+ * This is intended for implementing tiebreaker rules with runners on
+ * base at the start of the inning; use cw_gamestate_move_runner
+ * for implementing advancements.
  */
 static void
 cw_gamestate_place_runner(CWGameState *state, int base, char *runner)
@@ -54,6 +57,7 @@ cw_gamestate_place_runner(CWGameState *state, int base, char *runner)
   strncpy(state->runners[base].catcher,
 	  state->fielders[2][1-state->batting_team], 49);
   state->runners[base].is_auto = 1;
+  state->num_auto_runners[state->batting_team]++;
 }
 
 /*
