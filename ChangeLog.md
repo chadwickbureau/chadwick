@@ -1,3 +1,14 @@
+# [0.9.2] - 2022-01-10
+
+## New features
+- `cwevent` has been extended with a new field `COUNT_TX`, which reports
+  the count string as it appears in the event file.  Null values for
+  balls or strikes in the count are reported as zero in `BALLS_CT` and
+  `STRIKES_CT` for compatibility with `BEVENT`.  This field allows for
+  the diagnosis of missing count data (which is represented by a "?"
+  in the count string.
+
+
 # [0.9.1] - 2021-10-20
 
 ## Bug fixes
