@@ -22,19 +22,18 @@
 #
 
 
-AC_INIT([chadwick], [0.9.1])
+AC_INIT([chadwick],[0.9.1])
 AC_CONFIG_SRCDIR([src/cwlib/chadwick.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign])
 
 dnl Checks for programs.
 AC_PROG_CC
-AC_PROG_LIBTOOL
+LT_INIT
 
 dnl Checks for libraries.
 
 dnl Checks for header files.
-AC_HEADER_STDC
 AC_CHECK_HEADER([dir.h],
                 [AC_DEFINE(HAVE_DIR_H)])
 
