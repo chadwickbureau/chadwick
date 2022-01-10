@@ -522,6 +522,10 @@ fields. These are are specified using the ``-x`` command-line flag.
    * - 62
      - uncertain play flag
      - ``UNCERTAIN_PLAY_EXC_FL``
+   * - 63
+     - :ref:`text of count as appears in event file <cwtools.cwevent.count>`
+     - ``COUNT_TX``
+    
 
 .. _cwtools.cwevent.resplayers:
 
@@ -763,3 +767,27 @@ in the primary event as well as one in the baserunning modifiers.
 The words "first", "second" and so on do not necessarily indicate
 chronological order of the credits, though in most cases they
 do.
+
+
+.. _cwtools.cwevent.count:
+
+Reporting of counts
+-------------------
+
+The DiamondWare data model originally assumed that pitch-level data
+for a game was one of all pitches, count only, or no pitches
+(see the ``info,pitches`` metadata field).  However, many Retrosheet
+files contain count data for selected plate appearances, where known.
+In event files, a question mark is used when either the count of balls
+or strikes (or both) is unknown.  ``BEVENT``` renders nulls in the
+number of balls or strikes as zero in fields 5 and 6
+(``BALLS_CT`` and ``STRIKES_CT``), making it impossible to discern
+whether a play is marked as occurring on a count of 0-0 (even if ``info,pitches``
+is set to ``none``), or on an unknown count.
+
+Extended field 63, ``COUNT_TX``, remedies this by reporting the count
+string as it appears in the file, as a parallel facility to ``PITCH_SEQ_TX``
+and ``EVENT_TX``.  With ``COUNT_TX``, all three of the main elements
+of the `play`  record are accessible in :program:`cwevent` output.
+
+
