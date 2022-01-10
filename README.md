@@ -6,13 +6,13 @@ extracting information from baseball play-by-play and boxscore files
 in the DiamondWare format, as used by Retrosheet
 (http://www.retrosheet.org).
 
-The latest release of Chadwick is 0.9.1.
+The latest release of Chadwick is 0.9.2.
 
 Author and License
 ==================
 
 Chadwick is written and maintained by T L Turocy
-(ted.turocy@gmail.com), and is Copyright (C) 2002-2021 by
+(ted.turocy@gmail.com), and is Copyright (C) 2002-2022 by
 T L Turocy and Chadwick Baseball Bureau.
 
 Chadwick is Open Source software, distributed under the terms of the 
