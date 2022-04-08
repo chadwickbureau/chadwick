@@ -392,10 +392,14 @@ cw_box_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
 }
 
 /*
- * Find the boxscore entry for player with ID player_id
+ * Find the boxscore entry for player with ID player_id.
+ * If batter is nonzero, search only for batting entries; this implements
+ * the 'Ohtani rule' for DHes, in which a player who DHes for himself
+ * has two identities within the game, one in the batting order and
+ * one as the DHed-for pitcher.
  */
 CWBoxPlayer *
-cw_box_find_player(CWBoxscore *boxscore, char *player_id)
+cw_box_find_player(CWBoxscore *boxscore, char *player_id, int batter)
 {
   int i, t;
 
@@ -403,7 +407,7 @@ cw_box_find_player(CWBoxscore *boxscore, char *player_id)
     return NULL;
   }
   for (t = 0; t <= 1; t++) {
-    for (i = 0; i <= 9; i++) {
+    for (i = (batter) ? 1 : 0; i <= 9; i++) {
       CWBoxPlayer *player = boxscore->slots[i][t];
       while (player != NULL) {
 	if (!strcmp(player->player_id, player_id)) {
@@ -616,7 +620,8 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
   player = cw_box_find_player(boxscore, 
 			      cw_gamestate_charged_batter(gameiter->state,
 							  gameiter->event->batter,
-							  event_data));
+							  event_data),
+			      1);
   if (cw_event_is_batter(event_data) && player == NULL) {
     /* If not a batter event, we will be tolerant if the player ID
      * in the batter field is bogus.
@@ -1319,7 +1324,8 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
       team = cw_data_get_item_int(stat, 2);
       seq = cw_data_get_item_int(stat, 3);
       pos = cw_data_get_item_int(stat, 4);
-      player = cw_box_find_player(boxscore, stat->data[1]);
+      player = cw_box_find_player(boxscore, stat->data[1],
+				  (pos != 1) ? 1 : 0);
       if (player == NULL) {
 	fprintf(stderr,
 		"ERROR: In %s, cannot find entry for player '%s' listed in dline.\n",
@@ -1348,7 +1354,7 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
     }
     else if (!strcmp(stat->data[0], "phline")) {
       team = cw_data_get_item_int(stat, 3);
-      player = cw_box_find_player(boxscore, stat->data[1]);
+      player = cw_box_find_player(boxscore, stat->data[1], 1);
       if (player == NULL) {
 	fprintf(stderr,
 		"ERROR: In %s, cannot find entry for player '%s' listed in phline.\n",
@@ -1359,7 +1365,7 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
     }
     else if (!strcmp(stat->data[0], "prline")) {
       team = cw_data_get_item_int(stat, 3);
-      player = cw_box_find_player(boxscore, stat->data[1]);
+      player = cw_box_find_player(boxscore, stat->data[1], 1);
       if (player == NULL) {
 	fprintf(stderr,
 		"ERROR: In %s, cannot find entry for player '%s' listed in prline.\n",
@@ -1487,7 +1493,7 @@ cw_box_create(CWGame *game)
     if (pitcher != NULL)  pitcher->pitching->sv = 1;
   }
   if (cw_game_info_lookup(game, "gwrbi") != NULL) {
-    batter = cw_box_find_player(boxscore, cw_game_info_lookup(game, "gwrbi"));
+    batter = cw_box_find_player(boxscore, cw_game_info_lookup(game, "gwrbi"), 1);
     if (batter != NULL)  batter->batting->gw = 1;
   }
   return boxscore;

@@ -35,7 +35,7 @@ int cw_data_get_item_int(CWData *data, unsigned int index)
   if (index >= data->num_data) {
     return -1;
   }
-  return cw_atoi(data->data[index]);
+  return cw_atoi(data->data[index], NULL);
 }
 
 CWGame *cw_game_create(char *game_id)
@@ -726,8 +726,8 @@ cw_game_read(FILE *file)
       pos = cw_strtok(NULL);
       if (player_id && name && team && slot && pos) {
 	cw_game_starter_append(game, player_id, name,
-			       cw_atoi(team), cw_atoi(slot), 
-			       cw_atoi(pos));
+			       cw_atoi(team, NULL), cw_atoi(slot, NULL), 
+			       cw_atoi(pos, NULL));
       }
     } 
     else if (!strcmp(tok, "play")) {
@@ -739,7 +739,9 @@ cw_game_read(FILE *file)
       pitches = cw_strtok(NULL);
       play = cw_strtok(NULL);
       if (inning && batting_team && batter && count && pitches && play) {
-	cw_game_event_append(game, cw_atoi(inning), cw_atoi(batting_team),
+	cw_game_event_append(game,
+			     cw_atoi(inning, NULL),
+			     cw_atoi(batting_team, NULL),
 			     batter, count, pitches, play);
       }
       if (batHand != ' ' && !strcmp(batHandBatter, batter)) {
@@ -781,8 +783,8 @@ cw_game_read(FILE *file)
       pos = cw_strtok(NULL);
       if (player_id && name && team && slot && pos) {
 	cw_game_substitute_append(game, player_id, name,
-				  cw_atoi(team), cw_atoi(slot), 
-				  cw_atoi(pos));
+				  cw_atoi(team, NULL), cw_atoi(slot, NULL), 
+				  cw_atoi(pos, NULL));
       }
     }
     else if (!strcmp(tok, "com")) {
@@ -863,8 +865,8 @@ cw_game_read(FILE *file)
       align = cw_strtok(NULL);
       slot = cw_strtok(NULL);
       if (align && slot) {
-	ladjAlign = cw_atoi(align);
-	ladjSlot = cw_atoi(slot);
+	ladjAlign = cw_atoi(align, NULL);
+	ladjSlot = cw_atoi(slot, NULL);
       }      
     }
     else if (!strcmp(tok, "cw:itb") | !strcmp(tok, "radj")) {
@@ -878,7 +880,7 @@ cw_game_read(FILE *file)
       base = cw_strtok(NULL);
       if (runner && base) {
 	strncpy(autoRunner, runner, 255);
-	autoBase = cw_atoi(base);
+	autoBase = cw_atoi(base, NULL);
       }
     }      
   }

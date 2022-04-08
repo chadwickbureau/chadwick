@@ -1,3 +1,17 @@
+# [0.9.3] - 2022-04-08
+
+## Behaviour changes
+- The new DH rule for the 2022 season allows a starting pitcher to DH for
+  himself.  Per the text of the rule, such a player has two identities in the
+  lineup, one in his role as the DH in the batting order, and another as the
+  pitcher in batting order slot zero (in DiamondWare terminology).
+  DiamondWare files follow this convention by listing the player with two
+  start records.  This version separates the statistical tabulation for the
+  two identities, with batting (and non-pitcher fielding) statistics for
+  such a player appearing in his record in the batting order, and his
+  pitching (and pitcher fielding) statistics appearing in his slot-zero entry.
+
+
 # [0.9.2] - 2022-01-10
 
 ## New features
