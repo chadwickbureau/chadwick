@@ -569,7 +569,18 @@ cw_gamestate_lineup_slot(CWGameState *state, int team, char *player_id)
 {
   int i;
 
-  for (i = 0; i <= 9; i++) {
+  /*
+   * Searching in decreasing order of slot allows us, in the case of
+   * pitchers DHing for themselves, to preference the lineup entry
+   * in the batting order rather than their identity as a pitcher.
+   *
+   * As a longer-term refinement: There are (rare) instances where
+   * a player appears as a courtesy runner while already in the lineup.
+   * In such a case the approach of this function does not work. 
+   * A more robust solution is to carry a pointer to a player's 
+   * "identity" in the boxscore in the game state.
+   */
+  for (i = 9; i >= 0; i--) {
     if (state->lineups[i][team].player_id &&
 	!strcmp(player_id, state->lineups[i][team].player_id)) {
       return i;

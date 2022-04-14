@@ -1,3 +1,10 @@
+# [unreleased]
+
+- Patch behaviour of function to identify a player's lineup slot, to
+  preference the identity in the batting order of a pitcher who is
+  DHing for himself.
+
+
 # [0.9.3] - 2022-04-08
 
 ## Behaviour changes
