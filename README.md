@@ -6,7 +6,7 @@ extracting information from baseball play-by-play and boxscore files
 in the DiamondWare format, as used by Retrosheet
 (http://www.retrosheet.org).
 
-The latest release of Chadwick is 0.9.2.
+The latest release of Chadwick is 0.9.4.
 
 Author and License
 ==================
