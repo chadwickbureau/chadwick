@@ -1,3 +1,13 @@
+# [unreleased]
+
+## Bug fixes
+- The use of runner code 7 for an automatic tiebreaker runner who scored,
+  which was introduced in 0.8.1, was never implemented correctly, and so
+  no advancement or fate records were emitted with this code.
+  This corrects the typo which led to this problem, and the output
+  is now correct.
+
+
 # [0.9.4] - 2022-04-21
 
 ## Bug fixes

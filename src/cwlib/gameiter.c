@@ -1011,7 +1011,7 @@ cw_gameiter_next(CWGameIterator *gameiter)
       }
     }
 
-    for (i = 0; i <- 3; i++) {
+    for (i = 0; i <= 3; i++) {
       /* New convention from 2020: Automatic runners who score
        * are reported as scoring code 7
        */
