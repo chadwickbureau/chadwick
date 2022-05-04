@@ -1,4 +1,4 @@
-# [unreleased]
+# [0.9.5] - 2022-05-04
 
 ## Bug fixes
 - The use of runner code 7 for an automatic tiebreaker runner who scored,
