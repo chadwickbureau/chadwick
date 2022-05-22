@@ -428,9 +428,11 @@ cw_box_find_player(CWBoxscore *boxscore, char *player_id, int batter)
  * entries from among players currently in the game.  This matters when
  * building the boxscore, in the case of an illegal (or sanctioned but
  * unorthodox) case of re-entry of a player in a different lineup slot.
+ *
+ * If 'batting_only' is nonzero, restricts search only to batting order slots.
  */
 static CWBoxPlayer *
-cw_box_find_current_player(CWBoxscore *boxscore, char *player_id)
+cw_box_find_current_player(CWBoxscore *boxscore, char *player_id, int batting_only)
 {
   int i, t;
 
@@ -438,7 +440,7 @@ cw_box_find_current_player(CWBoxscore *boxscore, char *player_id)
     return NULL;
   }
   for (t = 0; t <= 1; t++) {
-    for (i = 0; i <= 9; i++) {
+    for (i = (batting_only) ? 1 : 0; i <= 9; i++) {
       CWBoxPlayer *player = boxscore->slots[i][t];
       if (player != NULL && !strcmp(player->player_id, player_id)) {
 	return player;
@@ -554,7 +556,7 @@ cw_box_pitch_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
   if (gameiter->event->pitches[0] == '\0') {
     return;
   }
-  player = cw_box_find_current_player(boxscore, gameiter->event->batter);
+  player = cw_box_find_current_player(boxscore, gameiter->event->batter, 0);
   if (player == NULL) {
     fprintf(stderr, 
 	    "ERROR: In %s, no entry for batter at event %d.\n",
@@ -782,7 +784,7 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
   if (event_data->wp_flag) {
     CWBoxPlayer *catcher = 
       cw_box_find_current_player(boxscore, 
-				 gameiter->state->fielders[2][1-gameiter->state->batting_team]);
+				 gameiter->state->fielders[2][1-gameiter->state->batting_team], 0);
     if (catcher == NULL) {
       fprintf(stderr, 
 	      "ERROR: In %s, no entry for fielder at position 2 at event %d.\n",
@@ -873,7 +875,7 @@ cw_box_runner_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
     }
 
     player = cw_box_find_current_player(boxscore, 
-					gameiter->state->runners[base].runner);
+					gameiter->state->runners[base].runner, 1);
     if (player == NULL) {
       fprintf(stderr, 
 	      "ERROR: In %s, no entry for runner '%s' at event %d.\n",
@@ -905,7 +907,7 @@ cw_box_runner_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
      * we need to point to the player ID in the player's roster entry
      */
     catcher = cw_box_find_current_player(boxscore, 
-					 gameiter->state->fielders[2][1-gameiter->state->batting_team]);
+					 gameiter->state->fielders[2][1-gameiter->state->batting_team], 0);
     if (catcher == NULL) {
       fprintf(stderr, 
 	      "ERROR: In %s, no entry for catcher '%s' for base %d at event %d.\n",
@@ -999,7 +1001,7 @@ cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
   for (pos = 1; pos <= 9; pos++) {
     int accepted = 0;
     player = cw_box_find_current_player(boxscore, 
-					gameiter->state->fielders[pos][1-gameiter->state->batting_team]);
+					gameiter->state->fielders[pos][1-gameiter->state->batting_team], 0);
     if (player != NULL) {
       fielding = player->fielding[pos];
     }
@@ -1106,7 +1108,7 @@ cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       int pos = gameiter->event_data->touches[i];
       CWBoxPlayer *player = 
 	cw_box_find_current_player(boxscore, 
-				   gameiter->state->fielders[pos][1-gameiter->state->batting_team]); 
+				   gameiter->state->fielders[pos][1-gameiter->state->batting_team], 0); 
       event->players[i] = player->player_id;
     }
   }
@@ -1118,7 +1120,7 @@ cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       int pos = gameiter->event_data->touches[i];
       CWBoxPlayer *player = 
 	cw_box_find_current_player(boxscore, 
-				   gameiter->state->fielders[pos][1-gameiter->state->batting_team]); 
+				   gameiter->state->fielders[pos][1-gameiter->state->batting_team], 0); 
       event->players[i] = player->player_id;
     }
   }

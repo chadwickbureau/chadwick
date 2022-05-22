@@ -1,3 +1,10 @@
+# [unreleased]
+
+## Bug fixes
+- When a player has multiple identities in the game due to the DH+pitcher rule,
+  ensure his baserunning stats are credited to his identity in the batting order
+
+
 # [0.9.5] - 2022-05-04
 
 ## Bug fixes
