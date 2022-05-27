@@ -819,7 +819,7 @@ cw_box_batter_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
   if (event_data->advance[0] >= 4) {
     player->batting->r++;
     res_pitcher->pitching->r++;
-    if (event_data->advance[0] != 5) {
+    if ((event_data->advance[0] == 4) || (event_data->advance[0] == 6)) {
       res_pitcher->pitching->er++;
     }
     if (event_data->advance[0] == 4) {
@@ -924,7 +924,8 @@ cw_box_runner_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
     if (gameiter->event_data->advance[base] >= 4) {
       player->batting->r++;
       pitcher->pitching->r++;
-      if (gameiter->event_data->advance[base] != 5) {
+      if ((gameiter->event_data->advance[base] == 4) ||
+	  (gameiter->event_data->advance[base] == 6)) {
 	pitcher->pitching->er++;
       }
       if (gameiter->event_data->advance[base] == 4) {

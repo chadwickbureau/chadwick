@@ -2,7 +2,10 @@
 
 ## Bug fixes
 - When a player has multiple identities in the game due to the DH+pitcher rule,
-  ensure his baserunning stats are credited to his identity in the batting order
+  ensure his baserunning stats are credited to his identity in the
+  batting order
+- Corrects a regression in which pitchers were being charged with an earned
+  run when an automatic runner scored.
 
 
 # [0.9.5] - 2022-05-04
