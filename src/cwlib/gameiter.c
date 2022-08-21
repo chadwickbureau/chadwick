@@ -101,6 +101,7 @@ cw_gamestate_move_runner(CWGameState *state, int src, int dest)
   strcpy(state->runners[dest].catcher, state->runners[src].catcher);
   state->runners[dest].src_event = state->runners[src].src_event;
   state->runners[dest].is_auto = state->runners[src].is_auto;
+  state->runners[src].is_auto = 0;
 }
 
 /*

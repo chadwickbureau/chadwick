@@ -6,6 +6,10 @@
   batting order
 - Corrects a regression in which pitchers were being charged with an earned
   run when an automatic runner scored.
+- When an automatic runner was retired on a FC and the subsequent batter
+  homered (or otherwise scored on the ball he hit into play), the
+  batter would also be shown as an automatic runner.  This has been
+  corrected.
 
 
 # [0.9.5] - 2022-05-04
