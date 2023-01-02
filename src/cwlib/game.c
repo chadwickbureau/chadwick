@@ -882,7 +882,12 @@ cw_game_read(FILE *file)
 	strncpy(autoRunner, runner, 255);
 	autoBase = cw_atoi(base, NULL);
       }
-    }      
+    }
+    else {
+      fprintf(stderr,
+	      "WARNING: In %s, unrecognized record type '%s'\n",
+	      game->game_id, tok);
+    }
   }
 
   return game;
