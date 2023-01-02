@@ -13,7 +13,7 @@ DiamondWare format, as used by Retrosheet (http://www.retrosheet.org).
 Author
 -------
 
-Chadwick is written, maintained, and Copyright 2002-2022 by
+Chadwick is written, maintained, and Copyright 2002-2023 by
 Dr T. L. Turocy (ted.turocy <aht> gmail <daht> com) 
 at Chadwick Baseball Bureau (http://www.chadwick-bureau.com).
 

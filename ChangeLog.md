@@ -1,4 +1,11 @@
-# [unreleased]
+# [0.10.0] - 2023-01-02
+
+## New features
+- Provides support for the `presadj` record type introduced by
+  Retrosheet in the December 2022 release.  This record reassigns
+  responsibility for a runner to a specified pitcher, in cases in
+  which the pitcher charged with a runner scoring was different than
+  the one who would be under the modern rule.
 
 ## Bug fixes
 - When a player has multiple identities in the game due to the DH+pitcher rule,
