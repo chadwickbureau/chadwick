@@ -5,7 +5,7 @@
  *
  * FILE: src/cwlib/game.c
  * Implementation of game manipulation routines
- *
+press *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -110,6 +110,8 @@ static void cw_game_cleanup_starters(CWGame *game)
  */
 static void cw_game_cleanup_events(CWGame *game, CWEvent *event)
 {
+  int i;
+
   if (event->prev != NULL) {
     event->prev->next = NULL;
   }
@@ -131,6 +133,9 @@ static void cw_game_cleanup_events(CWGame *game, CWEvent *event)
     }
     if (event->auto_runner_id) {
       free(event->auto_runner_id);
+    }
+    for (i = 1; i <= 3; i++) {
+      XFREE(event->presadj[i]);
     }
     while (sub != NULL) {
       CWAppearance *next_sub = sub->next;
@@ -386,6 +391,10 @@ void cw_game_event_append(CWGame *game, int inning, int batting_team,
   event->auto_runner_id = NULL;
   event->prev = game->last_event;
   event->next = NULL;
+  event->presadj[0] = NULL;
+  event->presadj[1] = NULL;
+  event->presadj[2] = NULL;
+  event->presadj[3] = NULL;
   event->first_sub = NULL;
   event->last_sub = NULL;
   event->first_comment = NULL;
@@ -652,16 +661,29 @@ cw_game_replace_player(CWGame *game, char *key_old, char *key_new)
   }
 }
 
+static void
+cw_game_warn_invalid_record(CWGame *game, char *line)
+{
+  fprintf(stderr, "WARNING: In %s, skipping invalid record:\n",
+	  game->game_id);
+  /* The record will already have end-of-line included so no need for \n. */
+  fprintf(stderr, "         %s", line);
+}
+
 CWGame *
 cw_game_read(FILE *file)
 {
-  char buf[1024], *tok;
+  char line[1024], buf[1024], *tok;
   fpos_t filepos;
   char batHand = ' ', batHandBatter[1024], pitHand = ' ', pitHandPitcher[1024];
   char autoRunner[1024];
-  int ladjAlign = 0, ladjSlot = 0, autoBase = 0;
+  char presadj[4][1024];
+  int i, ladjAlign = 0, ladjSlot = 0, autoBase = 0;
   CWGame *game;
 
+  for (i = 1; i <= 3; i++) {
+    strcpy(presadj[i], "");
+  }
   if (fgets(buf, 1024, file) == NULL) {
     return NULL;
   }
@@ -697,6 +719,7 @@ cw_game_read(FILE *file)
       break;
     }
 
+    strcpy(line, buf);
     tok = cw_strtok(buf);
     if (!tok || !strcmp(tok, "id")) {
       fsetpos(file, &filepos);
@@ -772,6 +795,13 @@ cw_game_read(FILE *file)
 	XCOPY(game->last_event->auto_runner_id, autoRunner);
 	autoBase = 0;
 	strcpy(autoRunner, "");
+      }
+
+      for (i = 1; i <= 3; i++) {
+	if (strcmp(presadj[i], "")) {
+	  XCOPY(game->last_event->presadj[i], presadj[i]);
+	  strcpy(presadj[i], "");
+	}
       }
     }
     else if (!strcmp(tok, "sub")) {
@@ -883,10 +913,23 @@ cw_game_read(FILE *file)
 	autoBase = cw_atoi(base, NULL);
       }
     }
+    else if (!strcmp(tok, "presadj")) {
+      char *pitcher, *base_str;
+      int base;
+      pitcher = cw_strtok(NULL);
+      base_str = cw_strtok(NULL);
+      if (pitcher && base_str) {
+	base = cw_atoi(base_str, NULL);
+	if (base >= 1 && base <= 3) {
+	  strncpy(presadj[base], pitcher, 255);
+	}
+	else {
+	  cw_game_warn_invalid_record(game, line);
+	}
+      }
+    }
     else {
-      fprintf(stderr,
-	      "WARNING: In %s, unrecognized record type '%s'\n",
-	      game->game_id, tok);
+      cw_game_warn_invalid_record(game, line);
     }
   }
 

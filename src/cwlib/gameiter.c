@@ -930,6 +930,8 @@ cw_gameiter_process_comments(CWGameIterator *gameiter)
 void 
 cw_gameiter_next(CWGameIterator *gameiter)
 {
+  int base;
+
   if (strcmp(gameiter->event->event_text, "NP")) {
     cw_gamestate_update(gameiter->state, 
 			gameiter->event->batter, gameiter->event_data);
@@ -977,6 +979,14 @@ cw_gameiter_next(CWGameIterator *gameiter)
     cw_gamestate_place_runner(gameiter->state,
 			      gameiter->event->auto_base,
 			      gameiter->event->auto_runner_id);
+  }
+  if (gameiter->event) {
+    for (base = 1; base <= 3; base++) {
+      if (gameiter->event->presadj[base] != NULL) {
+	strncpy(gameiter->state->runners[base].pitcher,
+		gameiter->event->presadj[base], 49);
+      }
+    }
   }
   if (gameiter->event && strcmp(gameiter->event->event_text, "NP")) {
     int i;

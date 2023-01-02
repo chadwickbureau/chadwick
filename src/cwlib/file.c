@@ -145,7 +145,7 @@ cw_atoi(char *s, char *msg)
     fprintf(stderr, msg, s);
   }
   else {
-    fprintf(stderr, "Warning: Invalid integer value '%s'\n", s);
+    fprintf(stderr, "WARNING: Invalid integer value '%s'\n", s);
   }
   return -1;
 }

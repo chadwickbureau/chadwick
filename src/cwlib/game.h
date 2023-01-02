@@ -74,6 +74,8 @@ typedef struct cw_event_struct {
   /* These are used for radj */
   int auto_base;
   char *auto_runner_id;
+  /* These are used for presadj */
+  char *presadj[4];
   CWAppearance *first_sub, *last_sub;
   CWComment *first_comment, *last_comment;
   struct cw_event_struct *prev, *next;
