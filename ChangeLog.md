@@ -1,3 +1,10 @@
+# Unreleased
+	
+## Behaviour changes
+- Pitch types A (automatic strike) and V (automatic ball) are no longer
+  counted towards pitches/strikes.
+
+
 # [0.10.0] - 2023-01-02
 
 ## New features

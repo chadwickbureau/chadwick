@@ -591,8 +591,7 @@ cw_box_pitch_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
   }
   
   while (*pitch != '\0') {
-    if (*pitch == 'B' || *pitch == 'H' || *pitch == 'I' || *pitch == 'P' || 
-	*pitch == 'V') {
+    if (*pitch == 'B' || *pitch == 'H' || *pitch == 'I' || *pitch == 'P') {
       player->batting->pitches++;
       pitcher->pitching->pitches++;
     }
