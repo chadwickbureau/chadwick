@@ -3,6 +3,9 @@
 ## Behaviour changes
 - Pitch types A (automatic strike) and V (automatic ball) are no longer
   counted towards pitches/strikes.
+- In `cwevent`, the extended fields `UNKNOWN_OUT_EXC_FL` and
+  `UNKNOWN_PLAY_EXC_FL` are now quoted explicitly to be consistent with
+  all other flag fields.
 
 
 # [0.10.0] - 2023-01-02
