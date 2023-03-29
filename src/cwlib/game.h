@@ -232,6 +232,30 @@ int cw_game_lint(CWGame *game);
  */
 void cw_event_comment_append(CWEvent *event, char *comment);
 
+/*
+ * Pitch outcome classification functions:
+ * Returns 1 if pitch belongs to the category and 0 otherwise.
+ */
+int cw_pitch_thrown(char c);
+int cw_pitch_ball_thrown(char c);
+int cw_pitch_ball_called(char c);
+int cw_pitch_ball_intentional(char c);
+int cw_pitch_ball_pitchout(char c);
+int cw_pitch_ball_hit_batter(char c);
+int cw_pitch_ball_other(char c);
+int cw_pitch_strike_thrown(char c);
+int cw_pitch_strike_called(char c);
+int cw_pitch_strike_swinging(char c);
+int cw_pitch_strike_foul(char c);
+int cw_pitch_strike_inplay(char c);
+int cw_pitch_strike_other(char c);
+
+/*
+ * Count the number of pitches in a pitch string matching the criterion.
+ * The criterion function should return 1 if a pitch matches the criterion and 0 otherwise.
+ */
+int cw_pitch_count_pitches(char *pitches, int (*criterion)(char));
+
 #endif  /* CW_GAME_H */
 
 

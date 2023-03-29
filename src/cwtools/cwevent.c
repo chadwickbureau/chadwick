@@ -1422,197 +1422,85 @@ DECLARE_FIELDFUNC(cwevent_responsible_catcher3)
 /* Extended Field 33 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls)
 {
-  int balls = 0;
-  char *pitch = gameiter->event->pitches;
-
-  while (*pitch != '\0') {
-    if (*pitch == 'B' || *pitch == 'H' || *pitch == 'I' || *pitch == 'P' || 
-	*pitch == 'V') {
-      balls++;
-    }
-    pitch++;
-  }
-
-  return sprintf(buffer, (ascii) ? "%d" : "%02d", balls);
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_thrown));
 }
 
 /* Extended Field 34 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls_called)
 {
-  int balls = 0;
-  char *pitch = gameiter->event->pitches;
-
-  while (*pitch != '\0') {
-    if (*pitch == 'B') {
-      balls++;
-    }
-    pitch++;
-  }
-
-  return sprintf(buffer, (ascii) ? "%d" : "%02d", balls);
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_called));
 }
 
 /* Extended Field 35 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls_intentional)
 {
-  int balls = 0;
-  char *pitch = gameiter->event->pitches;
-
-  while (*pitch != '\0') {
-    if (*pitch == 'I') {
-      balls++;
-    }
-    pitch++;
-  }
-
-  return sprintf(buffer, (ascii) ? "%d" : "%02d", balls);
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_intentional));
 }
 
 /* Extended Field 36 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls_pitchout)
 {
-  int balls = 0;
-  char *pitch = gameiter->event->pitches;
-
-  while (*pitch != '\0') {
-    if (*pitch == 'P') {
-      balls++;
-    }
-    pitch++;
-  }
-
-  return sprintf(buffer, (ascii) ? "%d" : "%02d", balls);
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_pitchout));
 }
 
 /* Extended Field 37 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls_hit_batter)
 {
-  int balls = 0;
-  char *pitch = gameiter->event->pitches;
-
-  while (*pitch != '\0') {
-    if (*pitch == 'H') {
-      balls++;
-    }
-    pitch++;
-  }
-
-  return sprintf(buffer, (ascii) ? "%d" : "%02d", balls);
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_hit_batter));
 }
 
 /* Extended Field 38 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls_other)
 {
-  int balls = 0;
-  char *pitch = gameiter->event->pitches;
-
-  while (*pitch != '\0') {
-    if (*pitch == 'V') {
-      balls++;
-    }
-    pitch++;
-  }
-
-  return sprintf(buffer, (ascii) ? "%d" : "%02d", balls);
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_other));
 }
 
 /* Extended Field 39 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes)
 {
-  int strikes = 0;
-  char *pitch = gameiter->event->pitches;
-
-  while (*pitch != '\0') {
-    if (*pitch == 'C' || *pitch == 'F' || *pitch == 'K' || *pitch == 'L' ||
-	*pitch == 'M' || *pitch == 'O' || *pitch == 'Q' || *pitch == 'R' ||
-	*pitch == 'S' || *pitch == 'T' || *pitch == 'X' || *pitch == 'Y') {
-      strikes++;
-    }
-    pitch++;
-  }
-
-  return sprintf(buffer, (ascii) ? "%d" : "%02d", strikes);
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_thrown));
 }
 
 /* Extended Field 40 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_called)
 {
-  int strikes = 0;
-  char *pitch = gameiter->event->pitches;
-
-  while (*pitch != '\0') {
-    if (*pitch == 'C') {
-      strikes++;
-    }
-    pitch++;
-  }
-
-  return sprintf(buffer, (ascii) ? "%d" : "%02d", strikes);
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_called));
 }
 
 /* Extended Field 41 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_swinging)
 {
-  int strikes = 0;
-  char *pitch = gameiter->event->pitches;
-
-  while (*pitch != '\0') {
-    if (*pitch == 'S' || *pitch == 'M' || *pitch == 'Q') {
-      strikes++;
-    }
-    pitch++;
-  }
-
-  return sprintf(buffer, (ascii) ? "%d" : "%02d", strikes);
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_swinging));
 }
 
 /* Extended Field 42 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_foul)
 {
-  int strikes = 0;
-  char *pitch = gameiter->event->pitches;
-
-  while (*pitch != '\0') {
-    if (*pitch == 'F' || *pitch == 'L' || *pitch == 'O' || 
-	*pitch == 'T' || *pitch == 'R') {
-      strikes++;
-    }
-    pitch++;
-  }
-
-  return sprintf(buffer, (ascii) ? "%d" : "%02d", strikes);
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_foul));
 }
 
 /* Extended Field 43 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_inplay)
 {
-  int strikes = 0;
-  char *pitch = gameiter->event->pitches;
-
-  while (*pitch != '\0') {
-    if (*pitch == 'X' || *pitch == 'Y') {
-      strikes++;
-    }
-    pitch++;
-  }
-
-  return sprintf(buffer, (ascii) ? "%d" : "%02d", strikes);
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_inplay));
 }
 
 /* Extended Field 44 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_other)
 {
-  int strikes = 0;
-  char *pitch = gameiter->event->pitches;
-
-  while (*pitch != '\0') {
-    if (*pitch == 'K') {
-      strikes++;
-    }
-    pitch++;
-  }
-
-  return sprintf(buffer, (ascii) ? "%d" : "%02d", strikes);
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_other));
 }
 
 /* Extended Field 45 */
@@ -1819,7 +1707,7 @@ static field_struct ext_field_data[] = {
   /* 32 */ { cwevent_responsible_catcher3, "RUN3_RESP_CAT_ID", 
 	     "Responsible catcher for runner on 3rd" },
   /* 33 */ { cwevent_pitches_balls, "PA_BALL_CT", 
-	     "number of balls in plate appearance" },
+	     "number of balls thrown in plate appearance" },
   /* 34 */ { cwevent_pitches_balls_called, "PA_CALLED_BALL_CT", 
 	     "number of called balls in plate appearance" },
   /* 35 */ { cwevent_pitches_balls_intentional, "PA_INTENT_BALL_CT", 
@@ -1831,7 +1719,7 @@ static field_struct ext_field_data[] = {
   /* 38 */ { cwevent_pitches_balls_other, "PA_OTHER_BALL_CT", 
 	     "number of other balls in plate appearance" },
   /* 39 */ { cwevent_pitches_strikes, "PA_STRIKE_CT", 
-	     "number of strikes in plate appearance" },
+	     "number of strikes thrown in plate appearance" },
   /* 40 */ { cwevent_pitches_strikes_called, "PA_CALLED_STRIKE_CT", 
 	     "number of called strikes in plate appearance" },
   /* 41 */ { cwevent_pitches_strikes_swinging, "PA_SWINGMISS_STRIKE_CT", 

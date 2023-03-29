@@ -1114,6 +1114,68 @@ cw_event_comment_append(CWEvent *event, char *text)
   event->last_comment = comment;
 }
 
+int
+cw_pitch_thrown(char c)
+{ return (cw_pitch_ball_thrown(c) | cw_pitch_strike_thrown(c)) ? 1 : 0; }
+
+int
+cw_pitch_ball_thrown(char c)
+{ return (c == 'B' || c == 'H' || c == 'I' || c == 'P') ? 1 : 0; }
+
+int
+cw_pitch_ball_called(char c)
+{ return (c == 'B') ? 1 : 0; }
+
+int
+cw_pitch_ball_intentional(char c)
+{ return (c == 'I') ? 1 : 0; }
+
+int
+cw_pitch_ball_pitchout(char c)
+{ return (c == 'P') ? 1 : 0; }
+
+int
+cw_pitch_ball_hit_batter(char c)
+{ return (c == 'H') ? 1 : 0; }
+
+int
+cw_pitch_ball_other(char c)
+{ return (c == 'V') ? 1 : 0; }
+
+int
+cw_pitch_strike_thrown(char c)
+{ return (c == 'C' || c == 'F' || c == 'K' || c == 'L' ||
+          c == 'M' || c == 'O' || c == 'Q' || c == 'R' ||
+          c == 'S' || c == 'T' || c == 'X' || c == 'Y') ? 1 : 0; }
+
+int
+cw_pitch_strike_called(char c)
+{ return (c == 'C') ? 1 : 0; }
+
+int
+cw_pitch_strike_swinging(char c)
+{ return (c == 'S' || c == 'M' || c == 'Q') ? 1 : 0; }
+
+int
+cw_pitch_strike_foul(char c)
+{ return (c == 'F' || c == 'L' || c == 'O' || c == 'T' || c == 'R') ? 1 : 0; }
+
+int
+cw_pitch_strike_inplay(char c)
+{ return (c == 'X' || c == 'Y') ? 1 : 0; }
+
+int
+cw_pitch_strike_other(char c)
+{ return (c == 'A' || c == 'K') ? 1 : 0; }
+
+int
+cw_pitch_count_pitches(char *pitches, int (*criterion)(char))
+{
+  int count;
+  for (count = 0; *pitches; count += criterion(*pitches++));
+  return count;
+}
+
 
 
 

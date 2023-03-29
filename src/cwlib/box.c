@@ -591,13 +591,11 @@ cw_box_pitch_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
   }
   
   while (*pitch != '\0') {
-    if (*pitch == 'B' || *pitch == 'H' || *pitch == 'I' || *pitch == 'P') {
+    if (cw_pitch_ball_thrown(*pitch)) {
       player->batting->pitches++;
       pitcher->pitching->pitches++;
     }
-    else if (*pitch == 'C' || *pitch == 'F' || *pitch == 'K' || *pitch == 'L' ||
-	     *pitch == 'M' || *pitch == 'O' || *pitch == 'Q' || *pitch == 'R' ||
-	     *pitch == 'S' || *pitch == 'T' || *pitch == 'X' || *pitch == 'Y') {
+    else if (cw_pitch_strike_thrown(*pitch)) {
       player->batting->pitches++;
       player->batting->strikes++;
       pitcher->pitching->pitches++;
