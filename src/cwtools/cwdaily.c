@@ -752,9 +752,7 @@ void cwdaily_print_help(void)
   fprintf(stderr, "  -a        generate Ascii-delimited format files (default)\n");
   fprintf(stderr, "  -ft       generate Fortran format files\n");
   fprintf(stderr, "  -f flist  give list of fields to output\n");
-  fprintf(stderr, "              Default is 0-83\n");
-  fprintf(stderr, "  -x flist  give list of extended fields to output\n");
-  fprintf(stderr, "              Default is none\n");
+  fprintf(stderr, "              Default is 0-153\n");
   fprintf(stderr, "  -d        print list of field numbers and descriptions\n");
   fprintf(stderr, "  -q        operate quietly; do not output progress messages\n");
   fprintf(stderr, "  -n        print field names in first row of output\n\n");
