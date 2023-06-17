@@ -368,10 +368,10 @@ DECLARE_FIELDFUNC(cwgame_umpire_rf)
 /* Field 18 */
 DECLARE_FIELDFUNC(cwgame_attendance)
 {
-  char *tmp;
-  return sprintf(buffer, (ascii) ? "%d" : "%5d", 
-		 (tmp = cw_game_info_lookup(gameiter->game, "attendance")) ? 
-		 cw_atoi(tmp, "Warning: invalid value '%s' for info,attendance") : 0);
+  char *tmp = cw_game_info_lookup(gameiter->game, "attendance");
+  return sprintf(buffer, (ascii) ? "%d" : "%5d",
+                 (tmp && strcmp(tmp, "") != 0) ?
+		         cw_atoi(tmp, "Warning: invalid value '%s' for info,attendance\n") : 0);
 }
 
 /* Field 19 */
@@ -449,10 +449,10 @@ DECLARE_FIELDFUNC(cwgame_pitches)
 /* Field 26 */
 DECLARE_FIELDFUNC(cwgame_temperature)
 {
-  char *tmp;
+  char *tmp = cw_game_info_lookup(gameiter->game, "temp");
   return sprintf(buffer, (ascii) ? "%d" : "%3d",
-		 (tmp = cw_game_info_lookup(gameiter->game, "temp")) ? 
-		 cw_atoi(tmp, NULL) : 0);
+                 (tmp && strcmp(tmp, "") != 0 && strcmp(tmp, "unknown") != 0) ?
+                 cw_atoi(tmp, "Warning: invalid value '%s' for info,temp\n") : 0);
 }
 
 /* Field 27 */
@@ -520,10 +520,10 @@ DECLARE_FIELDFUNC(cwgame_sky)
 /* Field 32 */
 DECLARE_FIELDFUNC(cwgame_time_of_game)
 {
-  char *tmp;
-  return sprintf(buffer, (ascii) ? "%d" : "%3d",
-		 (tmp = cw_game_info_lookup(gameiter->game, "timeofgame")) ? 
-		 cw_atoi(tmp, NULL) : 0);
+  char *tmp = cw_game_info_lookup(gameiter->game, "timeofgame");
+  return sprintf(buffer, (ascii) ? "%d" : "%5d",
+                 (tmp && strcmp(tmp, "") != 0) ?
+                 cw_atoi(tmp, "Warning: invalid value '%s' for info,timeofgame\n") : 0);
 }
 
 /* Field 33 */
