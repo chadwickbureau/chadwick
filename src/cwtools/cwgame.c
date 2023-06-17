@@ -298,17 +298,17 @@ DECLARE_FIELDFUNC(cwgame_site)
 /* Field 10 */
 DECLARE_FIELDFUNC(cwgame_visitors_pitcher)
 {
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 cw_game_starter_find_by_position(gameiter->game,
-						  0, 1)->player_id);
+  CWAppearance *app = cw_game_starter_find_by_position(gameiter->game, 0, 1);
+  char *player_id = (app) ? app->player_id : "";
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s", player_id);
 }
 
 /* Field 11 */
 DECLARE_FIELDFUNC(cwgame_home_pitcher)
 {
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 cw_game_starter_find_by_position(gameiter->game,
-						  1, 1)->player_id);
+  CWAppearance *app = cw_game_starter_find_by_position(gameiter->game, 1, 1);
+  char *player_id = (app) ? app->player_id : "";
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s", player_id);
 }
 
 /* Field 12 */
@@ -640,9 +640,9 @@ DECLARE_FIELDFUNC(cwgame_gwrbi)
 int
 cwgame_final_pitcher(char *buffer, CWGame *game, CWBoxscore *box, int team)
 {
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 (box->pitchers[team]->prev != NULL) ?
-		 box->pitchers[team]->player_id : "");
+  CWBoxPitcher *pitcher = box->pitchers[team];
+  char *player_id = (pitcher && pitcher->prev) ? pitcher->prev->player_id : "";
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s", player_id);
 }
 
 /* Fields for starting lineups */

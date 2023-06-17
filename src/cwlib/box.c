@@ -1469,7 +1469,10 @@ cw_box_create(CWGame *game)
     cw_box_process_boxscore_file(boxscore, game);
   }
   
-  for (t = 0; t <= 1; t++) { 
+  for (t = 0; t <= 1; t++) {
+    if (boxscore->pitchers[t] == NULL) {
+      continue;
+    }
     if (boxscore->pitchers[t]->prev == NULL) {
       boxscore->pitchers[t]->pitching->cg = 1;
       if (boxscore->pitchers[t]->pitching->r == 0) {
@@ -1567,7 +1570,7 @@ CWBoxPitcher *cw_box_get_starting_pitcher(CWBoxscore *boxscore, int team)
 {
   CWBoxPitcher *pitcher = boxscore->pitchers[team];
 
-  while (pitcher->prev != NULL) {
+  while (pitcher != NULL && pitcher->prev != NULL) {
     pitcher = pitcher->prev;
   }
 
