@@ -769,7 +769,7 @@ static field_struct field_data[] = {
 	     "visiting finisher (NULL if complete game)" },
   /* 83 */ { NULL, "HOME_FINISH_PIT_ID", 
 	     "home finisher (NULL if complete game)" },
-  /* 84 */ { NULL, "GAME_TYPE_TX", "game type"}
+  /* 84 */ { cwgame_game_type, "GAME_TYPE_TX", "game type"}
 };
 
 /*************************************************************************
@@ -2181,7 +2181,19 @@ void cwgame_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
     }
     t++;
   }
-
+  
+  for (i = 84; i <= max_field; i++) {
+    if (fields[i]) {
+      if (ascii && comma) {
+	*(buf++) = ',';
+      }
+      else {
+	comma = 1;
+      }
+      buf += (*field_data[i].f)(buf, gameiter, box, visitors, home);
+    }
+  }
+    
   for (i = 0; i <= max_ext_field; i++) {
     if (ext_fields[i]) {
       if (ascii && comma) {
