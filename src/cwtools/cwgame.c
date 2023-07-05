@@ -37,7 +37,7 @@
 extern int ascii;
 
 /* Fields to display (-f) */
-int fields[84] = {
+int fields[85] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -46,10 +46,10 @@ int fields[84] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1
+  1, 1, 1, 1, 0
 };
 
-int max_field = 83;
+int max_field = 84;
 
 /* Extended fields to display (-x) */
 int ext_fields[97] = {
@@ -623,7 +623,7 @@ DECLARE_FIELDFUNC(cwgame_losing_pitcher)
 DECLARE_FIELDFUNC(cwgame_save)
 {
   char *tmp;
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-12s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "save")) ?
 		 tmp : "");
 }
@@ -669,6 +669,14 @@ cwgame_starting_position(char *buffer, CWGame *game, int team, int slot)
     return sprintf(buffer, "0");
   }
   return 0;
+}
+
+/* Field 84 */
+DECLARE_FIELDFUNC(cwgame_game_type)
+{
+  char *tmp = cw_game_info_lookup(gameiter->game, "gametype");
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-12s",
+                 (tmp && strcmp(tmp, "") != 0) ? tmp : "regular");
 }
 
 static field_struct field_data[] = {
@@ -760,7 +768,8 @@ static field_struct field_data[] = {
   /* 82 */ { NULL, "AWAY_FINISH_PIT_ID", 
 	     "visiting finisher (NULL if complete game)" },
   /* 83 */ { NULL, "HOME_FINISH_PIT_ID", 
-	     "home finisher (NULL if complete game)" }
+	     "home finisher (NULL if complete game)" },
+  /* 84 */ { NULL, "GAME_TYPE_TX", "game type"}
 };
 
 /*************************************************************************

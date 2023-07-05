@@ -289,6 +289,9 @@ The following table gives the contents of each of the 84 fields
    * - 83
      - Home finishing pitcher
      - ``HOME_FINISH_PIT_ID``
+   * - 84
+     - Game type
+     - ``GAME_TYPE_TX``
 
 .. list-table:: cwgame extended field numbers
    :header-rows: 1

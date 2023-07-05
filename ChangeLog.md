@@ -1,16 +1,14 @@
-# Unreleased
+# [0.11.0]
 	
 ## Behaviour changes
+- In `cwgame`, field 84 has been added to report the value of the new `info,gametype`
+  field.  To match `BGAME` behaviour this field is not reported by default.
+  Any game that does not have an `info,gametype` record is assumed to be "regular".
 - Pitch types A (automatic strike) and V (automatic ball) are no longer
   counted towards pitches/strikes.
 - In `cwevent`, the extended fields `UNKNOWN_OUT_EXC_FL` and
   `UNKNOWN_PLAY_EXC_FL` are now quoted explicitly to be consistent with
   all other flag fields.
-
-
-# [0.10.1]
-
-## Behaviour changes
 - In `cwgame`, warnings on empty values for attendance and timeofgame has been
   removed.  These are now output as 0 (instead of -1) to restore `BEVENT`
   compatibility.
