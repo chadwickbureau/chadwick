@@ -140,7 +140,7 @@ cw_game_lint_state(CWGameIterator *gameiter)
 int
 cw_game_lint(CWGame *game)
 {
-  int ok = 1;
+  int ok;
   CWGameIterator *gameiter = cw_gameiter_create(game);
 
   ok = cw_game_lint_starters(game);

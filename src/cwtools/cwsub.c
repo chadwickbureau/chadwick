@@ -151,7 +151,7 @@ static field_struct field_data[] = {
 };
 
 void
-cwsub_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
+cwsub_process_game(CWGame *game, CWRoster *_visitors, CWRoster *_home)
 {
   char *buf;
   char output_line[1024];
@@ -291,7 +291,6 @@ extern char year[5];
 extern char first_date[5];
 extern char last_date[5];
 extern char game_id[20];
-extern int ascii;
 extern int quiet;
 
 extern void

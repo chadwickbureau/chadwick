@@ -21,7 +21,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -504,9 +503,9 @@ static void cw_parse_flag(CWParserState *state)
   *c = '\0';
 }
 
-static int cw_parse_advance_modifier(CWParserState *state, 
-				     CWEventData *event,
-				     int safe, int baseFrom, int baseTo)
+static int cw_parse_advance_modifier(CWParserState *state,
+                                     CWEventData *event,
+                                     int safe, int baseFrom, int baseTo)
 {
   int i;
   int is_error = 0;
@@ -518,33 +517,33 @@ static int cw_parse_advance_modifier(CWParserState *state,
     if (cw_parse_fielding_credit(state, event, ' ')) {
       is_error = 1;
       if (!safe) {
-	safe = 1;
-	event->muff_flag[baseFrom] = 1;
-	if (event->advance[baseFrom] < 5) {
-	  /* This guards against things like 3XH(UR)(5E2).  The (UR)
-	   * already implies the runner must be safe, so the advancement
-	   * will already be set.
-	   */
-	  event->advance[baseFrom] = baseTo;
-	}
-	if (baseFrom == 0 && event->event_type == CW_EVENT_STRIKEOUT) {
-	  /* Special case: for K.BX1(2E3) and the like, need to remove
-	   * the implied putout for the catcher (which is always
-	   * listed first in the putout list 
-	   */
-	  event->putouts[0] = event->putouts[1];
-	  event->putouts[1] = event->putouts[2];
-	  event->putouts[2] = 0;
-	  event->num_putouts--;
+        safe = 1;
+        event->muff_flag[baseFrom] = 1;
+        if (event->advance[baseFrom] < 5) {
+          /* This guards against things like 3XH(UR)(5E2).  The (UR)
+           * already implies the runner must be safe, so the advancement
+           * will already be set.
+           */
+          event->advance[baseFrom] = baseTo;
+        }
+        if (baseFrom == 0 && event->event_type == CW_EVENT_STRIKEOUT) {
+          /* Special case: for K.BX1(2E3) and the like, need to remove
+           * the implied putout for the catcher (which is always
+           * listed first in the putout list
+           */
+          event->putouts[0] = event->putouts[1];
+          event->putouts[1] = event->putouts[2];
+          event->putouts[2] = 0;
+          event->num_putouts--;
 
-	  for (i = 0; i < event->num_touches - 1; i++) {
-	    event->touches[i] = event->touches[i+1];
-	  }
-	  event->touches[--event->num_touches] = 0;
-	}
-	for (i = baseFrom; i >= 0; i--) {
-	  event->rbi_flag[i] = -1;
-	}
+          for (i = 0; i < event->num_touches - 1; i++) {
+            event->touches[i] = event->touches[i + 1];
+          }
+          event->touches[--event->num_touches] = 0;
+        }
+        for (i = baseFrom; i >= 0; i--) {
+          event->rbi_flag[i] = -1;
+        }
       }
     }
     else if (baseFrom == 0 && event->event_type == CW_EVENT_STRIKEOUT) {
@@ -555,63 +554,59 @@ static int cw_parse_advance_modifier(CWParserState *state,
       event->num_putouts--;
 
       for (i = 0; i < event->num_touches - 1; i++) {
-	event->touches[i] = event->touches[i+1];
+        event->touches[i] = event->touches[i + 1];
       }
       event->touches[--event->num_touches] = 0;
     }
-    
+
     if (state->token[0] != 'E') {
       cw_event_set_play(event, baseFrom, state->token);
     }
     else {
       for (i = baseFrom; i >= 0; i--) {
-	event->rbi_flag[i] = -1;
+        event->rbi_flag[i] = -1;
       }
     }
 
     if (state->sym == '/') {
       cw_parse_flag(state);
       if (!strcmp(state->token, "TH") ||
-	  !strcmp(state->token, "TH1") ||
-	  !strcmp(state->token, "TH2") ||
-	  !strcmp(state->token, "TH3") ||
-	  !strcmp(state->token, "THH")) {
-	if (is_error) {
-	  /* /TH flag occasionally appears at the end of an out credit.
-	   * Without this check, an earlier error in the string would
-	   * get flagged incorrectly as a throwing error.
-	   */ 
-	  event->error_types[event->num_errors - 1] = 'T';
-	}
+          !strcmp(state->token, "TH1") ||
+          !strcmp(state->token, "TH2") ||
+          !strcmp(state->token, "TH3") ||
+          !strcmp(state->token, "THH")) {
+        if (is_error) {
+          /* /TH flag occasionally appears at the end of an out credit.
+           * Without this check, an earlier error in the string would
+           * get flagged incorrectly as a throwing error.
+           */
+          event->error_types[event->num_errors - 1] = 'T';
+        }
       }
       else if (!strcmp(state->token, "INT") ||
-	       !strcmp(state->token, "BINT") ||
-	       !strcmp(state->token, "OBS")) {
-	/* silently accept interference and obstruction flags */
-      }
-      else if (!strcmp(state->token, "G") ||
-	       !strcmp(state->token, "U")) {
-	/* a few fielder's choice plays have these modifiers on the putout */
-      }
-      else if (!strcmp(state->token, "AP")) {
-	/* 1X3(15/AP) appears in 2005SFN.EVN; appeal play? */
-      }	
-      else if (!strcmp(state->token, "BR")) {
-	/* 1X2(6/BR) appears in NYA195605132 */
-      }	
-      else if (!strcmp(state->token, "FO")) {
-	/* 1X2(6E4/FO) appears in LAN201509150 */
+               !strcmp(state->token, "BINT") ||
+               !strcmp(state->token, "OBS") ||
+        /* accept interference and obstruction flags */
+               !strcmp(state->token, "G") ||
+               !strcmp(state->token, "U") ||
+        /* a few fielder's choice plays have these modifiers on the putout */
+               !strcmp(state->token, "AP") ||
+        /* 1X3(15/AP) appears in 2005SFN.EVN; appeal play? */
+               !strcmp(state->token, "BR") ||
+        /* 1X2(6/BR) appears in NYA195605132 */
+               !strcmp(state->token, "FO")) {
+        /* 1X2(6E4/FO) appears in LAN201509150 */
       }
       else {
-	return cw_parse_invalid(state);
+        return cw_parse_invalid(state);
       }
     }
 
     if (state->sym == '(') {
       cw_parse_nextsym(state);
       if (!cw_parse_advance_modifier(state, event, safe,
-				     baseFrom, baseTo)) {
-	return 0;
+                                     baseFrom, baseTo)) {
+        return 0;
       }
     }
 
@@ -628,8 +623,8 @@ static int cw_parse_advance_modifier(CWParserState *state,
     if (!strcmp(state->token, "NR") || !strcmp(state->token, "NORBI")) {
       event->rbi_flag[baseFrom] = 0;
     }
-    else if (!strcmp(state->token, "RBI") && 
-	     event->advance[baseFrom] >= 4) {
+    else if (!strcmp(state->token, "RBI") &&
+             event->advance[baseFrom] >= 4) {
       /* rbi_flag == 2 means (RBI) is actually present, overriding some
        * rare cases of ambiguity */
       event->rbi_flag[baseFrom] = 2;
@@ -650,14 +645,12 @@ static int cw_parse_advance_modifier(CWParserState *state,
     }
     else if (!strcmp(state->token, "TH")) {
       if (state->sym >= '1' && state->sym <= '3') {
-	cw_parse_nextsym(state);
+        cw_parse_nextsym(state);
       }
       /* just silently accept throw flags for now */
     }
-    else if (!strcmp(state->token, "THH")) {
-      /* just silently accept throw flags for now */
-    }
-    else if (!strcmp(state->token, "INT")) {
+    else if (!strcmp(state->token, "THH") ||
+             !strcmp(state->token, "INT")) {
       /* silently accept interference flag */
     }
     else {
@@ -702,14 +695,14 @@ static void cw_parse_flags(CWParserState *state, CWEventData *event)
 
     do {
       cw_parse_nextsym(state);
-      if (state->sym != '/' && state->sym != '.' && 
-	  state->sym != '#' && state->sym != '!' && 
-	  state->sym != '+' && state->sym != '-' && state->sym != 0) {
-	strncat(flag, &(state->sym), 1); 
+      if (state->sym != '/' && state->sym != '.' &&
+          state->sym != '#' && state->sym != '!' &&
+          state->sym != '+' && state->sym != '-' && state->sym != 0) {
+        strncat(flag, &(state->sym), 1);
       }
-    } while (state->sym != '/' && state->sym != '.' && 
-	     state->sym != '#' && state->sym != '!' && 
-	     state->sym != '+' && state->sym != '-' && state->sym != 0);
+    } while (state->sym != '/' && state->sym != '.' &&
+             state->sym != '#' && state->sym != '!' &&
+             state->sym != '+' && state->sym != '-' && state->sym != 0);
 
     if (!strcmp(flag, "/SH") || !strcmp(flag, "/SAC")) {
       event->sh_flag = 1;
@@ -724,9 +717,9 @@ static void cw_parse_flags(CWParserState *state, CWEventData *event)
        * ball type.
        */
       if (event->batted_ball_type == ' ' ||
-	  (event->event_type == CW_EVENT_ERROR && 
-	   event->batted_ball_type == 'G')) {
-	event->batted_ball_type = 'F';
+          (event->event_type == CW_EVENT_ERROR &&
+           event->batted_ball_type == 'G')) {
+        event->batted_ball_type = 'F';
       }
     }
     else if (!strcmp(flag, "/DP")) {
@@ -781,14 +774,14 @@ static void cw_parse_flags(CWParserState *state, CWEventData *event)
     else if (!strcmp(flag, "/FO")) {
       event->force_flag = 1;
       if (event->batted_ball_type == ' ') {
-	event->batted_ball_type = 'G';
+        event->batted_ball_type = 'G';
       }
     }
     else if ((!strcmp(flag, "/TH") || !strcmp(flag, "/TH1") ||
-	      !strcmp(flag, "/TH2") || !strcmp(flag, "/TH3") ||
-	      !strcmp(flag, "/THH")) && 
-	     (event->event_type == CW_EVENT_ERROR ||
-	      event->event_type == CW_EVENT_PICKOFFERROR)) {
+              !strcmp(flag, "/TH2") || !strcmp(flag, "/TH3") ||
+              !strcmp(flag, "/THH")) &&
+             (event->event_type == CW_EVENT_ERROR ||
+              event->event_type == CW_EVENT_PICKOFFERROR)) {
       event->error_types[0] = 'T';
     }
     else if (!strcmp(flag, "/B")) {
@@ -810,9 +803,6 @@ static void cw_parse_flags(CWParserState *state, CWEventData *event)
       event->bunt_flag = 1;
       event->batted_ball_type = 'L';
     }
-    else if (!strcmp(flag, "/P")) {
-      event->batted_ball_type = 'P';
-    }
     else if (!strcmp(flag, "/F")) {
       event->batted_ball_type = 'F';
     }
@@ -822,54 +812,54 @@ static void cw_parse_flags(CWParserState *state, CWEventData *event)
     else if (!strcmp(flag, "/L")) {
       event->batted_ball_type = 'L';
     }
-    else if (!strcmp(flag, "/IF")) {
+    else if (!strcmp(flag, "/P") || !strcmp(flag, "/IF")) {
       /* Infield fly is assumed to be a popup */
       event->batted_ball_type = 'P';
     }
     else if (strlen(flag) >= 3) {
       char traj = (flag[1] == 'B') ? flag[2] : flag[1];
-      char *loc = (flag[1] == 'B') ? flag + 3 : flag + 2;
       if (traj == 'G' || traj == 'F' || traj == 'P' ||
-	  traj == 'L') {
-	int i = 0;
-	for (i = 0; strcmp(locations[i], ""); i++) {
-	  if (!strcmp(locations[i], loc)) {
-	    event->batted_ball_type = traj;
-	    strcpy(event->hit_location, locations[i]);
-	    if (locations[i][strlen(locations[i]) - 1] == 'F') {
-	      event->foul_flag = 1;
-	    }
-	    if (flag[1] == 'B') {
-	      event->bunt_flag = 1;
-	    }
-	    break;
-	  }
-	}
+          traj == 'L') {
+        char *loc = (flag[1] == 'B') ? flag + 3 : flag + 2;
+        int i = 0;
+        for (i = 0; strcmp(locations[i], "") != 0; i++) {
+          if (!strcmp(locations[i], loc)) {
+            event->batted_ball_type = traj;
+            strcpy(event->hit_location, locations[i]);
+            if (locations[i][strlen(locations[i]) - 1] == 'F') {
+              event->foul_flag = 1;
+            }
+            if (flag[1] == 'B') {
+              event->bunt_flag = 1;
+            }
+            break;
+          }
+        }
       }
       else {
-	char *loc = (flag[1] == 'B') ? flag + 2 : flag + 1;
-	int i = 0;
-	for (i = 0; strcmp(locations[i], ""); i++) {
-	  if (!strcmp(locations[i], loc)) {
-	    strcpy(event->hit_location, locations[i]);
-	    if (locations[i][strlen(locations[i]) - 1] == 'F') {
-	      event->foul_flag = 1;
-	    }
-	    if (flag[1] == 'B') {
-	      event->bunt_flag = 1;
-	    }
-	    break;
-	  }
-	}
+        char *loc = (flag[1] == 'B') ? flag + 2 : flag + 1;
+        int i = 0;
+        for (i = 0; strcmp(locations[i], "") != 0; i++) {
+          if (!strcmp(locations[i], loc)) {
+            strcpy(event->hit_location, locations[i]);
+            if (locations[i][strlen(locations[i]) - 1] == 'F') {
+              event->foul_flag = 1;
+            }
+            if (flag[1] == 'B') {
+              event->bunt_flag = 1;
+            }
+            break;
+          }
+        }
       }
     }
     else {
       int i = 0;
-      for (i = 0; strcmp(locations[i], ""); i++) {
-	if (!strcmp(locations[i], flag + 1)) {
-	  strcpy(event->hit_location, locations[i]);
-	  break;
-	}
+      for (i = 0; strcmp(locations[i], "") != 0; i++) {
+        if (!strcmp(locations[i], flag + 1)) {
+          strcpy(event->hit_location, locations[i]);
+          break;
+        }
       }
     }
   } while (state->sym != '.' && state->sym != 0);
@@ -988,34 +978,34 @@ static int cw_parse_caught_stealing(CWParserState *state, CWEventData *event,
   else {
     return cw_parse_invalid(state);
   }
-    
+
   while (cw_parse_nextsym(state) == '(') {
     cw_parse_nextsym(state);
     if (isfielder(state->sym)) {
       if (cw_parse_fielding_credit(state, event, ' ')) {
-	event->advance[runner] = runner + 1;
-	event->muff_flag[runner] = 1;
-	cw_event_set_play(event, runner, state->token);
+        event->advance[runner] = runner + 1;
+        event->muff_flag[runner] = 1;
+        cw_event_set_play(event, runner, state->token);
 
-	if (state->sym == '/') {
-	  cw_parse_flag(state);
-	  if (!strcmp(state->token, "TH") ||
-	      !strcmp(state->token, "TH1") ||
-	      !strcmp(state->token, "TH2") ||
-	      !strcmp(state->token, "TH3") ||
-	      !strcmp(state->token, "THH")) {
-	    event->error_types[event->num_errors - 1] = 'T';
-	  }
-	  else if (!strcmp(state->token, "INT")) {
-	    /* accept interference flag silently */
-	  }
-	  else {
-	    return cw_parse_invalid(state);
-	  }
-	}
+        if (state->sym == '/') {
+          cw_parse_flag(state);
+          if (!strcmp(state->token, "TH") ||
+              !strcmp(state->token, "TH1") ||
+              !strcmp(state->token, "TH2") ||
+              !strcmp(state->token, "TH3") ||
+              !strcmp(state->token, "THH")) {
+            event->error_types[event->num_errors - 1] = 'T';
+          }
+          else if (!strcmp(state->token, "INT")) {
+            /* accept interference flag silently */
+          }
+          else {
+            return cw_parse_invalid(state);
+          }
+        }
       }
       else {
-	cw_event_set_play(event, runner, state->token);
+        cw_event_set_play(event, runner, state->token);
       }
     }
     else if (state->sym == 'E') {
@@ -1025,38 +1015,38 @@ static int cw_parse_caught_stealing(CWParserState *state, CWEventData *event,
       cw_event_set_play(event, runner, state->token);
 
       if (state->sym == '/') {
-	cw_parse_flag(state);
-	if (!strcmp(state->token, "TH") ||
-	    !strcmp(state->token, "TH1") ||
-	    !strcmp(state->token, "TH2") ||
-	    !strcmp(state->token, "TH3") ||
-	    !strcmp(state->token, "THH")) {
-	  event->error_types[event->num_errors - 1] = 'T';
-	}
-	else if (!strcmp(state->token, "INT")) {
-	  /* accept interference flag silently */
-	}
-       	else {
-	  return cw_parse_invalid(state);
-	}
+        cw_parse_flag(state);
+        if (!strcmp(state->token, "TH") ||
+            !strcmp(state->token, "TH1") ||
+            !strcmp(state->token, "TH2") ||
+            !strcmp(state->token, "TH3") ||
+            !strcmp(state->token, "THH")) {
+          event->error_types[event->num_errors - 1] = 'T';
+        }
+        else if (!strcmp(state->token, "INT")) {
+          /* accept interference flag silently */
+        }
+        else {
+          return cw_parse_invalid(state);
+        }
       }
     }
     else if (isalpha(state->sym)) {
       cw_parse_primary_event(state);
 
       if (!strcmp(state->token, "UR") && event->advance[runner] == 4) {
-	event->advance[runner] = 5;
+        event->advance[runner] = 5;
       }
       else if (!strcmp(state->token, "TUR") &&
-	       event->advance[runner] == 4) {
-	event->advance[runner] = 6;
+               event->advance[runner] == 4) {
+        event->advance[runner] = 6;
       }
       else {
-	return cw_parse_invalid(state);
+        return cw_parse_invalid(state);
       }
 
       if (state->sym != ')') {
-	return cw_parse_invalid(state);
+        return cw_parse_invalid(state);
       }
     }
   }
@@ -1098,9 +1088,9 @@ static int cw_parse_caught_stealing(CWParserState *state, CWEventData *event,
 
     for (i = 0; i < event->num_errors; i++) {
       if (event->error_types[0] == 'F') {
-	event->error_types[0] = 'D';
+        event->error_types[0] = 'D';
       }
-    } 
+    }
   }
 
   return 1;
@@ -1413,53 +1403,53 @@ static int cw_parse_interference(CWParserState *state, CWEventData *event,
        * a batted ball! */
       event->batted_ball_type = 'G';
     }
-    /* Starting here, we check for batted ball location flags.
-     * This is essentially copied from cw_parse_flags() and probably should be
-     * refactored. */
+      /* Starting here, we check for batted ball location flags.
+       * This is essentially copied from cw_parse_flags() and probably should be
+       * refactored. */
     else if (strlen(state->token) >= 2) {
       char traj = (state->token[0] == 'B') ? state->token[1] : state->token[0];
-      char *loc = (state->token[0] == 'B') ? state->token + 2 : state->token + 1;
       if (traj == 'G' || traj == 'F' || traj == 'P' ||
-	  traj == 'L') {
-	int i = 0;
-	for (i = 0; strcmp(locations[i], ""); i++) {
-	  if (!strcmp(locations[i], loc)) {
-	    event->batted_ball_type = traj;
-	    strcpy(event->hit_location, locations[i]);
-	    if (locations[i][strlen(locations[i]) - 1] == 'F') {
-	      event->foul_flag = 1;
-	    }
-	    if (state->token[0] == 'B') {
-	      event->bunt_flag = 1;
-	    }
-	    break;
-	  }
-	}
+          traj == 'L') {
+        char *loc = (state->token[0] == 'B') ? state->token + 2 : state->token + 1;
+        int i = 0;
+        for (i = 0; strcmp(locations[i], "") != 0; i++) {
+          if (!strcmp(locations[i], loc)) {
+            event->batted_ball_type = traj;
+            strcpy(event->hit_location, locations[i]);
+            if (locations[i][strlen(locations[i]) - 1] == 'F') {
+              event->foul_flag = 1;
+            }
+            if (state->token[0] == 'B') {
+              event->bunt_flag = 1;
+            }
+            break;
+          }
+        }
       }
       else {
-	char *loc = (state->token[0] == 'B') ? state->token + 1 : state->token;
-	int i = 0;
-	for (i = 0; strcmp(locations[i], ""); i++) {
-	  if (!strcmp(locations[i], loc)) {
-	    strcpy(event->hit_location, locations[i]);
-	    if (locations[i][strlen(locations[i]) - 1] == 'F') {
-	      event->foul_flag = 1;
-	    }
-	    if (state->token[0] == 'B') {
-	      event->bunt_flag = 1;
-	    }
-	    break;
-	  }
-	}
+        char *loc = (state->token[0] == 'B') ? state->token + 1 : state->token;
+        int i = 0;
+        for (i = 0; strcmp(locations[i], "") != 0; i++) {
+          if (!strcmp(locations[i], loc)) {
+            strcpy(event->hit_location, locations[i]);
+            if (locations[i][strlen(locations[i]) - 1] == 'F') {
+              event->foul_flag = 1;
+            }
+            if (state->token[0] == 'B') {
+              event->bunt_flag = 1;
+            }
+            break;
+          }
+        }
       }
     }
     else {
       int i = 0;
-      for (i = 0; strcmp(locations[i], ""); i++) {
-	if (!strcmp(locations[i], state->token)) {
-	  strcpy(event->hit_location, locations[i]);
-	  break;
-	}
+      for (i = 0; strcmp(locations[i], "") != 0; i++) {
+        if (!strcmp(locations[i], state->token)) {
+          strcpy(event->hit_location, locations[i]);
+          break;
+        }
       }
     }
   }
@@ -1503,27 +1493,17 @@ static int cw_parse_other_advance(CWParserState *state, CWEventData *event,
   while (flags && state->sym == '/') {
     cw_parse_flag(state);
 
-    if (!strcmp(state->token, "BINT")) {
-      /* silently accept batter interference flag */
-    }
-    else if (!strcmp(state->token, "INT")) {
-      /* silently accept interference flag */
-    }
-    else if (!strcmp(state->token, "AP")) {
-      /* silently accept appeal play flag */
-    }
-    else if (!strcmp(state->token, "MREV") ||
-	     !strcmp(state->token, "UREV")) {
-      /* silently accept review flags */
-    }
-    else if (!strcmp(state->token, "DP")) {
+    if (!strcmp(state->token, "DP")) {
       event->dp_flag = 1;
     }
-    else if (!strcmp(state->token, "NDP")) {
-      /* silently accept flag indicating no double play */
-    }
-    else if (!strcmp(state->token, "OBS")) {
-      /* silently accept obstruction flag */
+    else if (!strcmp(state->token, "BINT") ||
+             !strcmp(state->token, "INT") ||
+             !strcmp(state->token, "AP") ||
+             !strcmp(state->token, "MREV") ||
+             !strcmp(state->token, "UREV") ||
+             !strcmp(state->token, "NDP") ||
+             !strcmp(state->token, "OBS")) {
+      /* no action required on these flags */
     }
     else if (!strcmp(state->token, "TP")) {
       event->tp_flag = 1;
@@ -1535,7 +1515,6 @@ static int cw_parse_other_advance(CWParserState *state, CWEventData *event,
       return cw_parse_invalid(state);
     }
   }
-
   return 1;
 }
 
@@ -1988,33 +1967,33 @@ static int cw_parse_advancement(CWParserState *state, CWEventData *event)
  */
 void cw_parse_sanity_check(CWEventData *event)
 {
-  int base, i;
+  int base;
 
   if (event->event_type == CW_EVENT_SINGLE &&
-      event->advance[0] == 0 && 
+      event->advance[0] == 0 &&
       !strcmp(event->play[0], "")) {
     event->advance[0] = 1;
   }
   else if (event->event_type == CW_EVENT_DOUBLE &&
-	   event->advance[0] == 0 && 
-	   !strcmp(event->play[0], "")) {
+           event->advance[0] == 0 &&
+           !strcmp(event->play[0], "")) {
     event->advance[0] = 2;
   }
   if (event->event_type == CW_EVENT_TRIPLE &&
-      event->advance[0] == 0 && 
+      event->advance[0] == 0 &&
       !strcmp(event->play[0], "")) {
     event->advance[0] = 3;
   }
   if (event->event_type == CW_EVENT_HOMERUN &&
-      event->advance[0] == 0 && 
+      event->advance[0] == 0 &&
       !strcmp(event->play[0], "")) {
     event->advance[0] = 4;
     event->rbi_flag[0] = 1;
   }
 
-  if (event->event_type == CW_EVENT_STRIKEOUT)  {
-    if (!strcmp(event->play[0], "2") && 
-	event->advance[0] > 0) {
+  if (event->event_type == CW_EVENT_STRIKEOUT) {
+    if (!strcmp(event->play[0], "2") &&
+        event->advance[0] > 0) {
       strcpy(event->play[0], "");
       event->putouts[0] = event->putouts[1];
       event->putouts[1] = event->putouts[2];
@@ -2033,19 +2012,18 @@ void cw_parse_sanity_check(CWEventData *event)
     event->foul_flag = 1;
     if (event->batted_ball_type == ' ') {
       if (event->errors[0] >= 7) {
-	event->batted_ball_type = 'F';
+        event->batted_ball_type = 'F';
       }
       else {
-	event->batted_ball_type = 'P';
+        event->batted_ball_type = 'P';
       }
     }
   }
   else if (!cw_event_is_batter(event)) {
     int i;
-
     for (i = 0; i < event->num_errors; i++) {
       if (event->error_types[i] == 'F') {
-	event->error_types[i] = 'D';
+        event->error_types[i] = 'D';
       }
     }
   }
@@ -2056,8 +2034,8 @@ void cw_parse_sanity_check(CWEventData *event)
       event->rbi_flag[base] = 0;
     }
 
-    if (strcmp(event->play[base], "") &&
-	!strstr(event->play[base], "E")) {
+    if (strcmp(event->play[base], "") != 0 &&
+        !strstr(event->play[base], "E")) {
       /* This patches up instances like BXH(832)(E8) */
       event->advance[base] = 0;
     }
@@ -2066,6 +2044,7 @@ void cw_parse_sanity_check(CWEventData *event)
       /* If fielding credits on any play are listed as unknown, then
        * no fielding credits should be awarded.
        */
+      int i;
       for (i = 0; i < event->num_putouts; event->putouts[i++] = 0);
       for (i = 0; i < event->num_assists; event->assists[i++] = 0);
       event->num_putouts = 0;
@@ -2077,12 +2056,12 @@ void cw_parse_sanity_check(CWEventData *event)
    * upon defensive fielding credit */
   if (event->event_type == CW_EVENT_GENERICOUT) {
     if (strlen(event->play[0]) == 1 &&
-	!event->dp_flag && !event->tp_flag && !event->bunt_flag &&
-	event->batted_ball_type == ' ') {
+        !event->dp_flag && !event->tp_flag && !event->bunt_flag &&
+        event->batted_ball_type == ' ') {
       event->batted_ball_type = 'F';
     }
-    else if (strlen(event->play[0]) >= 1 && 
-	     event->batted_ball_type == ' ') {
+    else if (strlen(event->play[0]) >= 1 &&
+             event->batted_ball_type == ' ') {
       event->batted_ball_type = 'G';
     }
   }
@@ -2106,34 +2085,34 @@ typedef struct {
 int cw_parse_event(char *text, CWEventData *event)
 {
   static cw_parse_table_entry primary_table[] = {
-    { CW_EVENT_BALK, "BK", cw_parse_balk },
-    { CW_EVENT_INTERFERENCE, "C", cw_parse_interference },
-    { CW_EVENT_CAUGHTSTEALING, "CS", cw_parse_caught_stealing },
-    { CW_EVENT_DOUBLE, "D", cw_parse_base_hit },
-    { CW_EVENT_DOUBLE, "DGR", cw_parse_ground_rule_double },
-    { CW_EVENT_INDIFFERENCE, "DI", cw_parse_indifference },
-    { CW_EVENT_ERROR, "E", cw_parse_safe_on_error },
-    { CW_EVENT_FIELDERSCHOICE, "FC", cw_parse_fielders_choice },
-    { CW_EVENT_FOULERROR, "FLE", cw_parse_foul_error },
-    { CW_EVENT_HOMERUN, "H", cw_parse_base_hit },
-    { CW_EVENT_HITBYPITCH, "HP", cw_parse_hit_by_pitch },
-    { CW_EVENT_HOMERUN, "HR", cw_parse_base_hit },
-    { CW_EVENT_INTENTIONALWALK, "I", cw_parse_walk },
-    { CW_EVENT_INTENTIONALWALK, "IW", cw_parse_walk },
-    { CW_EVENT_STRIKEOUT, "K", cw_parse_strikeout },
-    { CW_EVENT_OTHERADVANCE, "OA", cw_parse_other_advance },
-    { CW_EVENT_PASSEDBALL, "PB", cw_parse_passed_ball },
-    { CW_EVENT_PICKOFF, "PO", cw_parse_pickoff },
-    { CW_EVENT_PICKOFF, "POCS", cw_parse_pickoff_caught_stealing },
-    { CW_EVENT_STOLENBASE, "POSB", cw_parse_pickoff_stolen_base },
-    { CW_EVENT_SINGLE, "S", cw_parse_base_hit },
-    { CW_EVENT_STOLENBASE, "SB", cw_parse_stolen_base },
-    { CW_EVENT_TRIPLE, "T", cw_parse_base_hit },
-    { CW_EVENT_WALK, "W", cw_parse_walk },
-    { CW_EVENT_WILDPITCH, "WP", cw_parse_wild_pitch },
-    { CW_EVENT_GENERICOUT, "", cw_parse_generic_out },
+    {CW_EVENT_BALK,            "BK",   cw_parse_balk},
+    {CW_EVENT_INTERFERENCE,    "C",    cw_parse_interference},
+    {CW_EVENT_CAUGHTSTEALING,  "CS",   cw_parse_caught_stealing},
+    {CW_EVENT_DOUBLE,          "D",    cw_parse_base_hit},
+    {CW_EVENT_DOUBLE,          "DGR",  cw_parse_ground_rule_double},
+    {CW_EVENT_INDIFFERENCE,    "DI",   cw_parse_indifference},
+    {CW_EVENT_ERROR,           "E",    cw_parse_safe_on_error},
+    {CW_EVENT_FIELDERSCHOICE,  "FC",   cw_parse_fielders_choice},
+    {CW_EVENT_FOULERROR,       "FLE",  cw_parse_foul_error},
+    {CW_EVENT_HOMERUN,         "H",    cw_parse_base_hit},
+    {CW_EVENT_HITBYPITCH,      "HP",   cw_parse_hit_by_pitch},
+    {CW_EVENT_HOMERUN,         "HR",   cw_parse_base_hit},
+    {CW_EVENT_INTENTIONALWALK, "I",    cw_parse_walk},
+    {CW_EVENT_INTENTIONALWALK, "IW",   cw_parse_walk},
+    {CW_EVENT_STRIKEOUT,       "K",    cw_parse_strikeout},
+    {CW_EVENT_OTHERADVANCE,    "OA",   cw_parse_other_advance},
+    {CW_EVENT_PASSEDBALL,      "PB",   cw_parse_passed_ball},
+    {CW_EVENT_PICKOFF,         "PO",   cw_parse_pickoff},
+    {CW_EVENT_PICKOFF,         "POCS", cw_parse_pickoff_caught_stealing},
+    {CW_EVENT_STOLENBASE,      "POSB", cw_parse_pickoff_stolen_base},
+    {CW_EVENT_SINGLE,          "S",    cw_parse_base_hit},
+    {CW_EVENT_STOLENBASE,      "SB",   cw_parse_stolen_base},
+    {CW_EVENT_TRIPLE,          "T",    cw_parse_base_hit},
+    {CW_EVENT_WALK,            "W",    cw_parse_walk},
+    {CW_EVENT_WILDPITCH,       "WP",   cw_parse_wild_pitch},
+    {CW_EVENT_GENERICOUT,      "",     cw_parse_generic_out},
   };
-    
+
   int i;
   CWParserState state;
 
@@ -2149,14 +2128,14 @@ int cw_parse_event(char *text, CWEventData *event)
     }
   }
   else {
-    for (i = 0; strcmp(primary_table[i].event_string, ""); i++) {
+    for (i = 0; strcmp(primary_table[i].event_string, "") != 0; i++) {
       if (!strcmp(primary_table[i].event_string, state.token)) {
-	event->event_type = primary_table[i].event_code;
-	if (!(*primary_table[i].parse_func)(&state, event, 1)) {
-	  cw_parse_cleanup(&state);
-	  return 0;
-	}
-	break;
+        event->event_type = primary_table[i].event_code;
+        if (!(*primary_table[i].parse_func)(&state, event, 1)) {
+          cw_parse_cleanup(&state);
+          return 0;
+        }
+        break;
       }
     }
 

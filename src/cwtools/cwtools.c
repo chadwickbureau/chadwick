@@ -125,14 +125,14 @@ cwtools_read_rosters(CWLeague *league)
 }
 
 int
-cwtools_game_in_range(CWGame *game, char *first_date, char *last_date)
+cwtools_game_in_range(CWGame *game, char *first, char *last)
 {
-  int month, day, year;
+  int g_month, g_day, g_year;
   char date_string[5];
-  sscanf(cw_game_info_lookup(game, "date"), "%d/%d/%d", &year, &month, &day);
-  sprintf(date_string, "%02d%02d", month, day);
-  return (strcmp(date_string, first_date) >= 0 &&
-	  strcmp(date_string, last_date) <= 0);
+  sscanf(cw_game_info_lookup(game, "date"), "%d/%d/%d", &g_year, &g_month, &g_day);
+  sprintf(date_string, "%02d%02d", g_month, g_day);
+  return (strcmp(date_string, first) >= 0 &&
+          strcmp(date_string, last) <= 0);
 }
 
 int

@@ -944,72 +944,72 @@ cwbox_action_baseball_play(XMLNode *parent, CWGameIterator *gameiter,
   if (cw_game_info_lookup(gameiter->game, "htbf") &&
       !strcmp(cw_game_info_lookup(gameiter->game, "htbf"), "true")) {
     xml_node_attribute(node, "inning-half",
-		       ((gameiter->state->batting_team == 0) ? "bottom" : "top"));
+                       ((gameiter->state->batting_team == 0) ? "bottom" : "top"));
   }
   else {
     xml_node_attribute(node, "inning-half",
-		       ((gameiter->state->batting_team == 0) ? "top" : "bottom"));
+                       ((gameiter->state->batting_team == 0) ? "top" : "bottom"));
   }
   xml_node_attribute_int(node, "outs", gameiter->state->outs);
 
   if (gameiter->event_data->advance[0] >= 1 &&
       gameiter->event_data->advance[0] <= 3) {
     xml_node_attribute_int(node, "batter-advance",
-			   gameiter->event_data->advance[0]);
+                           gameiter->event_data->advance[0]);
   }
   else if (gameiter->event_data->advance[0] >= 4) {
     xml_node_attribute(node, "batter-advance", "home");
   }
-  else if (strcmp(gameiter->event_data->play[0], "") &&
-	   !strstr(gameiter->event_data->play[0], "E")) {
+  else if (strcmp(gameiter->event_data->play[0], "") != 0 &&
+           !strstr(gameiter->event_data->play[0], "E")) {
     xml_node_attribute(node, "batter-advance", "out");
   }
 
   if (cw_gamestate_base_occupied(gameiter->state, 1)) {
     xml_node_attribute_fmt(node, "runner-on-first-idref", "p.%s",
-			   gameiter->state->runners[1]);
+                           gameiter->state->runners[1]);
     if (gameiter->event_data->advance[1] >= 1 &&
-	gameiter->event_data->advance[1] <= 3) {
+        gameiter->event_data->advance[1] <= 3) {
       xml_node_attribute_int(node, "runner-on-first-advance",
-			     gameiter->event_data->advance[1]);
+                             gameiter->event_data->advance[1]);
     }
     else if (gameiter->event_data->advance[1] >= 4) {
       xml_node_attribute(node, "runner-on-first-advance", "home");
     }
-    else if (strcmp(gameiter->event_data->play[1], "") &&
-	     !strstr(gameiter->event_data->play[1], "E")) {
+    else if (strcmp(gameiter->event_data->play[1], "") != 0 &&
+             !strstr(gameiter->event_data->play[1], "E")) {
       xml_node_attribute(node, "runner-on-first-advance", "out");
     }
   }
   if (cw_gamestate_base_occupied(gameiter->state, 2)) {
     xml_node_attribute_fmt(node, "runner-on-second-idref", "p.%s",
-			   gameiter->state->runners[2]);
+                           gameiter->state->runners[2]);
     if (gameiter->event_data->advance[2] >= 1 &&
-	gameiter->event_data->advance[2] <= 3) {
+        gameiter->event_data->advance[2] <= 3) {
       xml_node_attribute_int(node, "runner-on-second-advance",
-			     gameiter->event_data->advance[2]);
+                             gameiter->event_data->advance[2]);
     }
     else if (gameiter->event_data->advance[2] >= 4) {
       xml_node_attribute(node, "runner-on-second-advance", "home");
     }
-    else if (strcmp(gameiter->event_data->play[2], "") &&
-	     !strstr(gameiter->event_data->play[2], "E")) {
+    else if (strcmp(gameiter->event_data->play[2], "") != 0 &&
+             !strstr(gameiter->event_data->play[2], "E")) {
       xml_node_attribute(node, "runner-on-second-advance", "out");
     }
   }
   if (cw_gamestate_base_occupied(gameiter->state, 3)) {
     xml_node_attribute_fmt(node, "runner-on-third-idref", "p.%s",
-			   gameiter->state->runners[3].runner);
+                           gameiter->state->runners[3].runner);
     if (gameiter->event_data->advance[3] >= 1 &&
-	gameiter->event_data->advance[3] <= 3) {
+        gameiter->event_data->advance[3] <= 3) {
       xml_node_attribute_int(node, "runner-on-third-advance",
-			     gameiter->event_data->advance[3]);
+                             gameiter->event_data->advance[3]);
     }
     else if (gameiter->event_data->advance[3] >= 4) {
       xml_node_attribute(node, "runner-on-third-advance", "home");
     }
-    else if (strcmp(gameiter->event_data->play[3], "") &&
-	     !strstr(gameiter->event_data->play[3], "E")) {
+    else if (strcmp(gameiter->event_data->play[3], "") != 0 &&
+             !strstr(gameiter->event_data->play[3], "E")) {
       xml_node_attribute(node, "runner-on-third-advance", "out");
     }
   }
@@ -1043,7 +1043,7 @@ cwbox_action_baseball_play(XMLNode *parent, CWGameIterator *gameiter,
 	     cwbox_sml_get_play_type(gameiter));
   
   battedBallType = cwbox_sml_get_hit_type(gameiter);
-  if (strcmp(battedBallType, "")) {
+  if (strcmp(battedBallType, "") != 0) {
     xml_node_attribute(node, "hit-type", battedBallType);
   }
   
@@ -1092,97 +1092,95 @@ cwbox_action_baseball_play(XMLNode *parent, CWGameIterator *gameiter,
 
     for (c = pitches; *c != '\0'; c++) {
       if (*c == '.' || *c == '>' ||
-	  *c == '1' || *c == '2' || *c == '3' || *c == '+') {
-	continue;
+          *c == '1' || *c == '2' || *c == '3' || *c == '+') {
+        continue;
       }
 
       pitch = xml_node_open(node, "action-baseball-pitch");
 
       switch (*c) {
-      case 'B':
-	xml_node_attribute(pitch, "umpire-call", "ball");
-	xml_node_attribute(pitch, "ball-type", "called");
-	break;
-      case 'C':
-	xml_node_attribute(pitch, "umpire-call", "strike");
-	xml_node_attribute(pitch, "strike-type", "called");
-	break;
-      case 'F':
-	xml_node_attribute(pitch, "umpire-call", "strike");
-	xml_node_attribute(pitch, "strike-type", "foul");
-	break;
-      case 'H':
-	xml_node_attribute(pitch, "umpire-call", "ball");
-	xml_node_attribute(pitch, "ball-type", "hit-by-pitch");
-	break;
-      case 'I':
-	xml_node_attribute(pitch, "umpire-call", "ball");
-	xml_node_attribute(pitch, "ball-type", "intentional");
-	break;
-      case 'K':
-	xml_node_attribute(pitch, "umpire-call", "strike");
-	xml_node_attribute(pitch, "strike-type", "unknown");
-	break;
-      case 'L':
-	xml_node_attribute(pitch, "umpire-call", "strike");
-	xml_node_attribute(pitch, "strike-type", "foul-bunt");
-	break;
-      case 'M':
-	xml_node_attribute(pitch, "umpire-call", "strike");
-	xml_node_attribute(pitch, "strike-type", "missed-bunt");
-	break;
-      case 'N':
-	xml_node_attribute(pitch, "umpire-call", "no-pitch");
-	break;
-      case 'O':
-	xml_node_attribute(pitch, "umpire-call", "strike");
-	xml_node_attribute(pitch, "strike-type", "foul-tip-on-bunt");
-	break;
-      case 'P':
-	xml_node_attribute(pitch, "umpire-call", "ball");
-	xml_node_attribute(pitch, "ball-type", "pitchout");
-	break;
-      case 'Q':
-	xml_node_attribute(pitch, "umpire-call", "strike");
-	xml_node_attribute(pitch, "strike-type", "swinging-on-pitchout");
-	break;
-      case 'R':
-	xml_node_attribute(pitch, "umpire-call", "strike");
-	xml_node_attribute(pitch, "strike-type", "foul-on-pitchout");
-	break;
-      case 'S':
-	xml_node_attribute(pitch, "umpire-call", "strike");
-	xml_node_attribute(pitch, "strike-type", "swinging");
-	break;
-      case 'T':
-	xml_node_attribute(pitch, "umpire-call", "strike");
-	xml_node_attribute(pitch, "strike-type", "foul-tip");
-	break;
-      case 'U':
-	break;
-      case 'V':
-	xml_node_attribute(pitch, "umpire-call", "ball");
-	xml_node_attribute(pitch, "ball-type", "automatic");
-	break;
-      case 'X':
-	xml_node_attribute(pitch, "umpire-call", "in-play");
-	break;
-      case 'Y':
-	xml_node_attribute(pitch, "umpire-call", "in-play");
-	break;
-      case '*':
-	c++;
-	if (*c == 'B') {
-	  xml_node_attribute(pitch, "umpire-call", "ball");
-	  xml_node_attribute(pitch, "ball-type", "blocked");
-	}
-	else if (*c == 'S') {
-	  xml_node_attribute(pitch, "umpire-call", "strike");
-	  xml_node_attribute(pitch, "strike-type", "swinging-blocked");
-	}
-	break;
-      default:
-	break;
+        case 'B':
+          xml_node_attribute(pitch, "umpire-call", "ball");
+          xml_node_attribute(pitch, "ball-type", "called");
+          break;
+        case 'C':
+          xml_node_attribute(pitch, "umpire-call", "strike");
+          xml_node_attribute(pitch, "strike-type", "called");
+          break;
+        case 'F':
+          xml_node_attribute(pitch, "umpire-call", "strike");
+          xml_node_attribute(pitch, "strike-type", "foul");
+          break;
+        case 'H':
+          xml_node_attribute(pitch, "umpire-call", "ball");
+          xml_node_attribute(pitch, "ball-type", "hit-by-pitch");
+          break;
+        case 'I':
+          xml_node_attribute(pitch, "umpire-call", "ball");
+          xml_node_attribute(pitch, "ball-type", "intentional");
+          break;
+        case 'K':
+          xml_node_attribute(pitch, "umpire-call", "strike");
+          xml_node_attribute(pitch, "strike-type", "unknown");
+          break;
+        case 'L':
+          xml_node_attribute(pitch, "umpire-call", "strike");
+          xml_node_attribute(pitch, "strike-type", "foul-bunt");
+          break;
+        case 'M':
+          xml_node_attribute(pitch, "umpire-call", "strike");
+          xml_node_attribute(pitch, "strike-type", "missed-bunt");
+          break;
+        case 'N':
+          xml_node_attribute(pitch, "umpire-call", "no-pitch");
+          break;
+        case 'O':
+          xml_node_attribute(pitch, "umpire-call", "strike");
+          xml_node_attribute(pitch, "strike-type", "foul-tip-on-bunt");
+          break;
+        case 'P':
+          xml_node_attribute(pitch, "umpire-call", "ball");
+          xml_node_attribute(pitch, "ball-type", "pitchout");
+          break;
+        case 'Q':
+          xml_node_attribute(pitch, "umpire-call", "strike");
+          xml_node_attribute(pitch, "strike-type", "swinging-on-pitchout");
+          break;
+        case 'R':
+          xml_node_attribute(pitch, "umpire-call", "strike");
+          xml_node_attribute(pitch, "strike-type", "foul-on-pitchout");
+          break;
+        case 'S':
+          xml_node_attribute(pitch, "umpire-call", "strike");
+          xml_node_attribute(pitch, "strike-type", "swinging");
+          break;
+        case 'T':
+          xml_node_attribute(pitch, "umpire-call", "strike");
+          xml_node_attribute(pitch, "strike-type", "foul-tip");
+          break;
+        case 'U':
+          break;
+        case 'V':
+          xml_node_attribute(pitch, "umpire-call", "ball");
+          xml_node_attribute(pitch, "ball-type", "automatic");
+          break;
+        case 'X':
+        case 'Y':
+          xml_node_attribute(pitch, "umpire-call", "in-play");
+          break;
+        case '*':
+          c++;
+          if (*c == 'B') {
+            xml_node_attribute(pitch, "umpire-call", "ball");
+            xml_node_attribute(pitch, "ball-type", "blocked");
+          }
+          else if (*c == 'S') {
+            xml_node_attribute(pitch, "umpire-call", "strike");
+            xml_node_attribute(pitch, "strike-type", "swinging-blocked");
+          }
+          break;
+        default:
+          break;
       }
 
       c = cwbox_print_sml_pitch(node, pitch, c);
@@ -1292,37 +1290,37 @@ cwbox_actions(XMLNode *parent, CWGame *game, CWBoxscore *boxscore,
 
   actionNode = xml_node_open(parent, "event-actions");
   node = xml_node_open(actionNode, "event-actions-baseball");
-  
+
   while (gameiter->event != NULL) {
     CWAppearance *sub = gameiter->event->first_sub;
 
     if (!gameiter->parse_ok) {
       fprintf(stderr, "Parse error in game %s at event %d:\n",
-	      game->game_id, gameiter->state->event_count+1);
+              game->game_id, gameiter->state->event_count + 1);
       fprintf(stderr, "Invalid play string \"%s\" (%s batting)\n",
-	      gameiter->event->event_text, gameiter->event->batter);
+              gameiter->event->event_text, gameiter->event->batter);
       exit(1);
     }
 
-    if (strcmp(gameiter->event->event_text, "NP")) {
-      cwbox_action_baseball_play(node, 
-				 gameiter, visitors, home, seq++, new_pa);
+    if (strcmp(gameiter->event->event_text, "NP") != 0) {
+      cwbox_action_baseball_play(node,
+                                 gameiter, visitors, home, seq++, new_pa);
 
       if (cw_event_is_batter(gameiter->event_data) ||
-	  gameiter->state->outs + cw_event_outs_on_play(gameiter->event_data) >= 3) {
-	new_pa = 1;
+          gameiter->state->outs + cw_event_outs_on_play(gameiter->event_data) >= 3) {
+        new_pa = 1;
       }
       else {
-	new_pa = 0;
+        new_pa = 0;
       }
     }
 
     while (sub != NULL) {
       cwbox_action_baseball_substitution(node,
-					 gameiter, sub, visitors, home, seq++);
+                                         gameiter, sub, visitors, home, seq++);
       sub = sub->next;
     }
-    
+
 
     cw_gameiter_next(gameiter);
   }

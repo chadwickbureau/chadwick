@@ -83,7 +83,7 @@ int cwevent_future_runs(CWGameIterator *orig_gameiter)
   while (gameiter->event != NULL &&
 	 gameiter->state->inning == orig_gameiter->state->inning &&
 	 gameiter->state->batting_team == orig_gameiter->state->batting_team) {
-    if (strcmp(gameiter->event->event_text, "NP")) {
+    if (strcmp(gameiter->event->event_text, "NP") != 0) {
       runs += cw_event_runs_on_play(gameiter->event_data);
     }
     cw_gameiter_next(gameiter);
@@ -188,7 +188,7 @@ DECLARE_FIELDFUNC(cwevent_pitches)
   /* This bit of code wipes out leading whitespace, which bevent
    * does not include in its output */
   char *foo = gameiter->event->pitches;
-  while (foo != '\0' && isspace(*foo)) {
+  while (foo && isspace(*foo)) {
     foo++;
   }
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-20s", foo);
@@ -1071,7 +1071,7 @@ DECLARE_FIELDFUNC(cwevent_start_half_inning)
 	event->batting_team != gameiter->event->batting_team) {
       return sprintf(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
     }
-    else if (strcmp(event->event_text, "NP")) {
+    else if (strcmp(event->event_text, "NP") != 0) {
       return sprintf(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
     }
     else {
@@ -1092,7 +1092,7 @@ DECLARE_FIELDFUNC(cwevent_end_half_inning)
 	event->batting_team != gameiter->event->batting_team) {
       return sprintf(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
     }
-    else if (strcmp(event->event_text, "NP")) {
+    else if (strcmp(event->event_text, "NP") != 0) {
       return sprintf(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
     }
     else {
@@ -1159,7 +1159,7 @@ DECLARE_FIELDFUNC(cwevent_truncated_pa_flag)
   while (gi->event != NULL &&
 	 gi->state->inning == gameiter->state->inning &&
 	 gi->state->batting_team == gameiter->state->batting_team) {
-    if (strcmp(gi->event->event_text, "NP")) {
+    if (strcmp(gi->event->event_text, "NP") != 0) {
       if (cw_event_is_batter(gi->event_data)) {
 	cw_gameiter_cleanup(gi);
 	free(gi);
@@ -1805,7 +1805,7 @@ cwevent_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 	}
 	buf += (*ext_field_data[i].f)(buf, gameiter, visitors, home);
       }
-    };
+    }
 
     printf("%s", output_line);
     printf("\n");
@@ -1946,7 +1946,6 @@ extern char year[5];
 extern char first_date[5];
 extern char last_date[5];
 extern char game_id[20];
-extern int ascii;
 extern int quiet;
 
 extern void

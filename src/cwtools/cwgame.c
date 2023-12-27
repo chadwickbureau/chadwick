@@ -668,7 +668,6 @@ cwgame_starting_position(char *buffer, CWGame *game, int team, int slot)
   else {
     return sprintf(buffer, "0");
   }
-  return 0;
 }
 
 /* Field 84 */
@@ -1723,7 +1722,7 @@ DECLARE_FIELDFUNC(cwgame_home_manager_name)
 DECLARE_FIELDFUNC(cwgame_winning_pitcher_name)
 {
   char *tmp = cw_game_info_lookup(gameiter->game, "wp");
-  if (tmp && strcmp(tmp, "")) {
+  if (tmp && strcmp(tmp, "") != 0) {
     return cwgame_find_player_name(gameiter->game, buffer, tmp, visitors, home);
   }
   else {
@@ -1735,7 +1734,7 @@ DECLARE_FIELDFUNC(cwgame_winning_pitcher_name)
 DECLARE_FIELDFUNC(cwgame_losing_pitcher_name)
 {
   char *tmp = cw_game_info_lookup(gameiter->game, "lp");
-  if (tmp && strcmp(tmp, "")) {
+  if (tmp && strcmp(tmp, "") != 0) {
     return cwgame_find_player_name(gameiter->game, buffer, tmp, visitors, home);
   }
   else {
@@ -1747,7 +1746,7 @@ DECLARE_FIELDFUNC(cwgame_losing_pitcher_name)
 DECLARE_FIELDFUNC(cwgame_save_pitcher_name)
 {
   char *tmp = cw_game_info_lookup(gameiter->game, "save");
-  if (tmp && strcmp(tmp, "")) {
+  if (tmp && strcmp(tmp, "") != 0) {
     return cwgame_find_player_name(gameiter->game, buffer, tmp, visitors, home);
   }
   else {
@@ -1766,7 +1765,7 @@ DECLARE_FIELDFUNC(cwgame_goahead_rbi_id)
 DECLARE_FIELDFUNC(cwgame_goahead_rbi_name)
 {
   char *tmp = gameiter->state->go_ahead_rbi;
-  if (tmp && strcmp(tmp, "")) {
+  if (tmp && strcmp(tmp, "") != 0) {
     return cwgame_find_player_name(gameiter->game, buffer, tmp, visitors, home);
   }
   else {
@@ -2340,7 +2339,6 @@ extern char year[5];
 extern char first_date[5];
 extern char last_date[5];
 extern char game_id[20];
-extern int ascii;
 extern int quiet;
 
 extern void

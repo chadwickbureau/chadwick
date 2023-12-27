@@ -318,7 +318,7 @@ DECLARE_FIELDFUNC(cwdaily_P_TB)
 	} 
 	else { 
 	  stat += pitcher->pitching->h + pitcher->pitching->b2 +
-    	          2*pitcher->pitching->b3 + 3*pitcher->pitching->hr;; 
+    	          2*pitcher->pitching->b3 + 3*pitcher->pitching->hr;
 	} 
       } 
       pitcher = pitcher->prev; 
@@ -694,7 +694,7 @@ void cwdaily_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 {
   char *buf;
   char output_line[4096];
-  int i, j, t, seq, comma = 0;
+  int i, j, t, seq, comma;
   CWGameIterator *gameiter = cw_gameiter_create(game);
   CWBoxscore *box = cw_box_create(game);
   CWBoxPlayer *player;
@@ -838,7 +838,6 @@ extern char year[5];
 extern char first_date[5];
 extern char last_date[5];
 extern char game_id[20];
-extern int ascii;
 extern int quiet;
 
 extern void
