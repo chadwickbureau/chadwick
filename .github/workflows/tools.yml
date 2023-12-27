@@ -1,0 +1,75 @@
+name: Build executables
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt-get install -y automake autoconf libtool
+      - name: Configure build with autotools
+        run: |
+          libtoolize
+          aclocal
+          automake --add-missing
+          autoconf
+          ./configure
+      - name: Make source tarball
+        run: make dist
+      - name: Build from source tarball
+        run: |
+          tar zxvf chadwick*.tar.gz
+          rm chadwick*.tar.gz
+          cd chadwick-*
+          ./configure
+          make
+
+  macos:
+    runs-on: macos-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: brew install automake autoconf libtool
+      - name: Configure build with autotools
+        run: |
+          glibtoolize
+          aclocal
+          automake --add-missing
+          autoconf
+          ./configure
+      - name: Build tools
+        run: make
+
+  windows:
+    runs-on: windows-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          install: mingw-w64-x86_64-toolchain make automake autoconf libtool
+      - name: Configure build with autotools
+        run: |
+          libtoolize
+          aclocal
+          automake --add-missing
+          autoconf
+          ./configure
+      - name: Build tools
+        run: |
+          make
+          make install
+          cp /mingw64/bin/cw*.exe .
+      - name: Store built Windows binaries
+        uses: actions/upload-artifact@v3
+        with:
+          path: cw*.exe

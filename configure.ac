@@ -48,8 +48,5 @@ AC_CHECK_DECL([_timezone],
 
 dnl Checks for library functions.
 
-AC_CONFIG_FILES([src/cwlib/Makefile \
-          src/cwtools/Makefile \
-          src/Makefile \
-  	  Makefile])
+AC_CONFIG_FILES([src/cwlib/Makefile src/cwtools/Makefile src/Makefile Makefile])
 AC_OUTPUT
