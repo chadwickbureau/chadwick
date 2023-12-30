@@ -12,8 +12,8 @@
 - In `cwgame`, warnings on empty values for attendance and timeofgame has been
   removed.  These are now output as 0 (instead of -1) to restore `BEVENT`
   compatibility.
-- In `cwgame`, "unknown" in now an accepted value for `info,temp`.  When present
-  the temperature is output as 0 for `BEVENT` compatibility.
+- In `cwgame`, "unknown" in now an accepted value for `info,temp` and `info,windspeed`.
+  "unknown" values are output as 0 for `BEVENT` compatibility.
 
 
 # [0.10.0] - 2023-01-02

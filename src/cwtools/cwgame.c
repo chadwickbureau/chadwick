@@ -449,10 +449,14 @@ DECLARE_FIELDFUNC(cwgame_pitches)
 /* Field 26 */
 DECLARE_FIELDFUNC(cwgame_temperature)
 {
-  char *tmp = cw_game_info_lookup(gameiter->game, "temp");
-  return sprintf(buffer, (ascii) ? "%d" : "%3d",
-                 (tmp && strcmp(tmp, "") != 0 && strcmp(tmp, "unknown") != 0) ?
-                 cw_atoi(tmp, "Warning: invalid value '%s' for info,temp\n") : 0);
+  char *value = cw_game_info_lookup(gameiter->game, "temp");
+  if (!value || !strcmp(value, "") || !strcmp(value, "unknown")) {
+    return sprintf(buffer, (ascii) ? "%d" : "%3d", 0);
+  }
+  else {
+    return sprintf(buffer, (ascii) ? "%d" : "%3d",
+                   cw_atoi(value, "Warning: invalid value '%s' for info,temp\n"));
+  }
 }
 
 /* Field 27 */
@@ -472,10 +476,13 @@ DECLARE_FIELDFUNC(cwgame_wind_direction)
 /* Field 28 */
 DECLARE_FIELDFUNC(cwgame_wind_speed)
 {
-  char *tmp;
-  return sprintf(buffer, "%d", 
-		 (tmp = cw_game_info_lookup(gameiter->game, "windspeed")) ? 
-		 cw_atoi(tmp, NULL) : 0);
+  char *value = cw_game_info_lookup(gameiter->game, "windspeed");
+  if (!value || !strcmp(value, "") || !strcmp(value, "unknown")) {
+    return sprintf(buffer, "%d", 0);
+  }
+  else {
+    return sprintf(buffer, "%d", cw_atoi(value, "Warning: invalid value '%s' for info,windspeed\n"));
+  }
 }
 
 /* Field 29 */
