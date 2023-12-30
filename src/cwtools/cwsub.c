@@ -35,11 +35,13 @@
 extern int ascii;
 
 /* Fields to display (-f) */
-int fields[10] = {
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+int fields[] = {
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1
 };
 
-int max_field = 9;
+int max_field = 24;
 
 char program_name[20] = "cwsub";
 
@@ -137,6 +139,128 @@ DECLARE_FIELDFUNC(cwsub_event_number)
 		 gameiter->state->event_count : gameiter->state->event_count + 1);
 }
 
+/* Field 10 */
+DECLARE_FIELDFUNC(cwsub_balls)
+{
+  if (strlen(gameiter->event->count) >= 2 &&
+      gameiter->event->count[0] != '?' &&
+      gameiter->event->count[1] != '?') {
+    return sprintf(buffer, "%c", gameiter->event->count[0]);
+  }
+  else {
+    return sprintf(buffer, "0");
+  }
+}
+
+/* Field 11 */
+DECLARE_FIELDFUNC(cwsub_strikes)
+{
+  if (strlen(gameiter->event->count) >= 2 &&
+      gameiter->event->count[0] != '?' &&
+      gameiter->event->count[1] != '?') {
+    return sprintf(buffer, "%c", gameiter->event->count[1]);
+  }
+  else {
+    return sprintf(buffer, "0");
+  }
+}
+
+/* Field 12 */
+DECLARE_FIELDFUNC(cwsub_pitches)
+{
+  /* This bit of code wipes out leading whitespace, which bevent
+   * does not include in its output */
+  char *foo = gameiter->event->pitches;
+  while (foo && isspace(*foo)) {
+    foo++;
+  }
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-20s", foo);
+}
+
+/* Field 13 */
+DECLARE_FIELDFUNC(cwsub_pitches_balls)
+{
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_thrown));
+}
+
+/* Field 14 */
+DECLARE_FIELDFUNC(cwsub_pitches_balls_called)
+{
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_called));
+}
+
+/* Field 15 */
+DECLARE_FIELDFUNC(cwsub_pitches_balls_intentional)
+{
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_intentional));
+}
+
+/* Field 16 */
+DECLARE_FIELDFUNC(cwsub_pitches_balls_pitchout)
+{
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_pitchout));
+}
+
+/* Field 17 */
+DECLARE_FIELDFUNC(cwsub_pitches_balls_hit_batter)
+{
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_hit_batter));
+}
+
+/* Field 18 */
+DECLARE_FIELDFUNC(cwsub_pitches_balls_other)
+{
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_other));
+}
+
+/* Field 19 */
+DECLARE_FIELDFUNC(cwsub_pitches_strikes)
+{
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_thrown));
+}
+
+/* Field 20 */
+DECLARE_FIELDFUNC(cwsub_pitches_strikes_called)
+{
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_called));
+}
+
+/* Field 21 */
+DECLARE_FIELDFUNC(cwsub_pitches_strikes_swinging)
+{
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_swinging));
+}
+
+/* Field 22 */
+DECLARE_FIELDFUNC(cwsub_pitches_strikes_foul)
+{
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_foul));
+}
+
+/* Field 23 */
+DECLARE_FIELDFUNC(cwsub_pitches_strikes_inplay)
+{
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_inplay));
+}
+
+/* Field 24 */
+DECLARE_FIELDFUNC(cwsub_pitches_strikes_other)
+{
+  return sprintf(buffer, (ascii) ? "%d" : "%02d",
+                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_other));
+}
+
 static field_struct field_data[] = {
   { cwsub_game_id, "GAME_ID", "game id" },
   { cwsub_inning, "INN_CT", "inning" },
@@ -147,7 +271,22 @@ static field_struct field_data[] = {
   { cwsub_position, "SUB_FLD_CD", "fielding position" },
   { cwsub_removed_player, "REMOVED_ID", "removed player" },
   { cwsub_removed_position, "REMOVED_FLD_CD", "position of removed player" },
-  { cwsub_event_number, "EVENT_ID", "event number" }
+  { cwsub_event_number, "EVENT_ID", "event number" },
+  { cwsub_balls, "BALLS_CT", "balls" },
+  { cwsub_strikes, "STRIKES_CT", "strikes" },
+  { cwsub_pitches, "PITCH_SEQ_TX", "pitch sequence" },
+  { cwsub_pitches_balls, "PA_BALL_CT", "number of balls thrown in plate appearance" },
+  { cwsub_pitches_balls_called, "PA_CALLED_BALL_CT", "number of called balls in plate appearance" },
+  { cwsub_pitches_balls_intentional, "PA_INTENT_BALL_CT", "number of intentional balls in plate appearance" },
+  { cwsub_pitches_balls_pitchout, "PA_PITCHOUT_BALL_CT", "number of pitchouts in plate appearance" },
+  { cwsub_pitches_balls_hit_batter, "PA_HITBATTER_BALL_CT", "number of pitches hitting batter in plate appearance" },
+  { cwsub_pitches_balls_other, "PA_OTHER_BALL_CT", "number of other balls in plate appearance" },
+  { cwsub_pitches_strikes, "PA_STRIKE_CT", "number of strikes thrown in plate appearance" },
+  { cwsub_pitches_strikes_called, "PA_CALLED_STRIKE_CT", "number of called strikes in plate appearance" },
+  { cwsub_pitches_strikes_swinging, "PA_SWINGMISS_STRIKE_CT", "number of swinging strikes in plate appearance" },
+  { cwsub_pitches_strikes_foul, "PA_FOUL_STRIKE_CT", "number of foul balls in plate appearance" },
+  { cwsub_pitches_strikes_inplay, "PA_INPLAY_STRIKE_CT", "number of balls in play in plate appearance" },
+  { cwsub_pitches_strikes_other, "PA_OTHER_STRIKE_CT", "number of other strikes in plate appearance" }
 };
 
 void
@@ -164,7 +303,7 @@ cwsub_process_game(CWGame *game, CWRoster *_visitors, CWRoster *_home)
       comma = 0;
       strcpy(output_line, "");
       buf = output_line;
-      for (i = 0; i < 10; i++) {
+      for (i = 0; i <= max_field; i++) {
 	if (fields[i]) {
 	  if (ascii && comma) {
 	    *(buf++) = ',';
