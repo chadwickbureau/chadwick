@@ -14,6 +14,8 @@
   compatibility.
 - In `cwgame`, "unknown" in now an accepted value for `info,temp` and `info,windspeed`.
   "unknown" values are output as 0 for `BEVENT` compatibility.
+- In `cwevent`, the implementation of the batter/runner "fate" extended fields was
+  entirely incorrect.  This has been corrected.  (#45)
 
 
 # [0.10.0] - 2023-01-02
