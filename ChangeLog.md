@@ -16,6 +16,8 @@
   "unknown" values are output as 0 for `BEVENT` compatibility.
 - In `cwevent`, the implementation of the batter/runner "fate" extended fields was
   entirely incorrect.  This has been corrected.  (#45)
+- In handling rosters, treat blank or null values for batting or throwing side
+  as if they were explicit question marks.
 
 
 # [0.10.0] - 2023-01-02

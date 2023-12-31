@@ -218,9 +218,9 @@ DECLARE_FIELDFUNC(cwevent_batter_hand)
 {
   char batterHand, pitcherHand;
   if (gameiter->event->batter_hand == ' ') {
-    batterHand = cw_roster_batting_hand((gameiter->event->batting_team == 0) ? 
-					visitors : home,
-					gameiter->event->batter);
+    batterHand = cw_roster_batting_hand((gameiter->event->batting_team == 0) ?
+                                        visitors : home,
+                                        gameiter->event->batter);
   }
   else {
     batterHand = gameiter->event->batter_hand;
@@ -230,11 +230,11 @@ DECLARE_FIELDFUNC(cwevent_batter_hand)
     if (gameiter->state->pitcher_hand != ' ') {
       pitcherHand = gameiter->state->pitcher_hand;
     }
-    else{
+    else {
       pitcherHand =
-	cw_roster_throwing_hand((gameiter->event->batting_team == 0) ?
-				home : visitors,
-				gameiter->state->fielders[1][1-gameiter->state->batting_team]);
+        cw_roster_throwing_hand((gameiter->event->batting_team == 0) ?
+                                home : visitors,
+                                gameiter->state->fielders[1][1 - gameiter->state->batting_team]);
     }
     if (pitcherHand == 'L') {
       batterHand = 'R';
