@@ -128,6 +128,9 @@ cwbox_parse_command_line(int argc, char *argv[])
 	strncpy(year, argv[i], 5);
       }
     }
+    else if (!strcmp(argv[i], "-sd")) {
+      printf("Hello\n!");
+    }
     /* This part is cwbox-specific */
     else if (!strcmp(argv[i], "-X")) {
       use_xml = 1;

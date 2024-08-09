@@ -28,6 +28,7 @@
 
 #include "cwlib/chadwick.h"
 
+
 /*************************************************************************
  * Global variables for command-line options
  *************************************************************************/
@@ -388,7 +389,7 @@ extern int quiet;
 extern void
 cwtools_parse_field_list(char *text, int max_field, int *fields);
 
-int
+/* int
 cwcomment_parse_command_line(int argc, char *argv[])
 {
   int i;
@@ -450,6 +451,6 @@ cwcomment_parse_command_line(int argc, char *argv[])
   }
 
   return i;
-}
+} 
 
-int (*cwtools_parse_command_line)(int, char *argv[]) = cwcomment_parse_command_line;
+int (*cwtools_parse_command_line)(int, char *argv[]) = cwtools_default_parse_command_line; */
