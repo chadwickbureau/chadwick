@@ -1254,220 +1254,109 @@ DECLARE_FIELDFUNC(cwgame_goahead_rbi_name)
   }
 }
 
-DECLARE_FIELDFUNC(cwgame_visitors_batter1_name)
+int cwgame_find_lineup_name(CWGame *game, char *buffer,
+                            int alignment, int slot,
+                            CWRoster *visitors, CWRoster *home)
 {
-  CWAppearance *starter = cw_game_starter_find(gameiter->game, 0, 1);
+  CWAppearance *starter = cw_game_starter_find(game, alignment, slot);
   if (starter) {
-    return cwgame_find_player_name(gameiter->game, buffer, starter->player_id,
-				   visitors, home);
+    return cwgame_find_player_name(game, buffer, starter->player_id,
+                                   visitors, home);
   }
   else {
-    return sprintf(buffer, "(null)"); 
+    return sprintf(buffer, "(null)");
   }
+
+}
+
+DECLARE_FIELDFUNC(cwgame_visitors_batter1_name)
+{
+  return cwgame_find_lineup_name(gameiter->game, buffer, 0, 1, visitors, home);
 }
 
 DECLARE_FIELDFUNC(cwgame_visitors_batter2_name)
 {
-  CWAppearance *starter = cw_game_starter_find(gameiter->game, 0, 2);
-  if (starter) {
-    return cwgame_find_player_name(gameiter->game, buffer, starter->player_id,
-				   visitors, home);
-  }
-  else {
-    return sprintf(buffer, "(null)"); 
-  }
+  return cwgame_find_lineup_name(gameiter->game, buffer, 0, 2, visitors, home);
 }
 
 DECLARE_FIELDFUNC(cwgame_visitors_batter3_name)
 {
-  CWAppearance *starter = cw_game_starter_find(gameiter->game, 0, 3);
-  if (starter) {
-    return cwgame_find_player_name(gameiter->game, buffer, starter->player_id,
-				   visitors, home);
-  }
-  else {
-    return sprintf(buffer, "(null)"); 
-  }
+  return cwgame_find_lineup_name(gameiter->game, buffer, 0, 3, visitors, home);
 }
 
 DECLARE_FIELDFUNC(cwgame_visitors_batter4_name)
 {
-  CWAppearance *starter = cw_game_starter_find(gameiter->game, 0, 4);
-  if (starter) {
-    return cwgame_find_player_name(gameiter->game, buffer, starter->player_id,
-				   visitors, home);
-  }
-  else {
-    return sprintf(buffer, "(null)"); 
-  }
+  return cwgame_find_lineup_name(gameiter->game, buffer, 0, 4, visitors, home);
 }
 
 DECLARE_FIELDFUNC(cwgame_visitors_batter5_name)
 {
-  CWAppearance *starter = cw_game_starter_find(gameiter->game, 0, 5);
-  if (starter) {
-    return cwgame_find_player_name(gameiter->game, buffer, starter->player_id,
-				   visitors, home);
-  }
-  else {
-    return sprintf(buffer, "(null)"); 
-  }
+  return cwgame_find_lineup_name(gameiter->game, buffer, 0, 5, visitors, home);
 }
 
 DECLARE_FIELDFUNC(cwgame_visitors_batter6_name)
 {
-  CWAppearance *starter = cw_game_starter_find(gameiter->game, 0, 6);
-  if (starter) {
-    return cwgame_find_player_name(gameiter->game, buffer, starter->player_id,
-				   visitors, home);
-  }
-  else {
-    return sprintf(buffer, "(null)"); 
-  }
+  return cwgame_find_lineup_name(gameiter->game, buffer, 0, 6, visitors, home);
 }
 
 DECLARE_FIELDFUNC(cwgame_visitors_batter7_name)
 {
-  CWAppearance *starter = cw_game_starter_find(gameiter->game, 0, 7);
-  if (starter) {
-    return cwgame_find_player_name(gameiter->game, buffer, starter->player_id,
-				   visitors, home);
-  }
-  else {
-    return sprintf(buffer, "(null)"); 
-  }
+  return cwgame_find_lineup_name(gameiter->game, buffer, 0, 7, visitors, home);
 }
 
 DECLARE_FIELDFUNC(cwgame_visitors_batter8_name)
 {
-  CWAppearance *starter = cw_game_starter_find(gameiter->game, 0, 8);
-  if (starter) {
-    return cwgame_find_player_name(gameiter->game, buffer, starter->player_id,
-				   visitors, home);
-  }
-  else {
-    return sprintf(buffer, "(null)"); 
-  }
+  return cwgame_find_lineup_name(gameiter->game, buffer, 0, 8, visitors, home);
 }
 
 DECLARE_FIELDFUNC(cwgame_visitors_batter9_name)
 {
-  CWAppearance *starter = cw_game_starter_find(gameiter->game, 0, 9);
-  if (starter) {
-    return cwgame_find_player_name(gameiter->game, buffer, starter->player_id,
-				   visitors, home);
-  }
-  else {
-    return sprintf(buffer, "(null)"); 
-  }
+  return cwgame_find_lineup_name(gameiter->game, buffer, 0, 9, visitors, home);
 }
 
 DECLARE_FIELDFUNC(cwgame_home_batter1_name)
 {
-  CWAppearance *starter = cw_game_starter_find(gameiter->game, 1, 1);
-  if (starter) {
-    return cwgame_find_player_name(gameiter->game, buffer, starter->player_id,
-				   visitors, home);
-  }
-  else {
-    return sprintf(buffer, "(null)"); 
-  }
+  return cwgame_find_lineup_name(gameiter->game, buffer, 1, 1, visitors, home);
 }
 
 DECLARE_FIELDFUNC(cwgame_home_batter2_name)
 {
-  CWAppearance *starter = cw_game_starter_find(gameiter->game, 1, 2);
-  if (starter) {
-    return cwgame_find_player_name(gameiter->game, buffer, starter->player_id,
-				   visitors, home);
-  }
-  else {
-    return sprintf(buffer, "(null)"); 
-  }
+  return cwgame_find_lineup_name(gameiter->game, buffer, 1, 2, visitors, home);
 }
 
 DECLARE_FIELDFUNC(cwgame_home_batter3_name)
 {
-  CWAppearance *starter = cw_game_starter_find(gameiter->game, 1, 3);
-  if (starter) {
-    return cwgame_find_player_name(gameiter->game, buffer, starter->player_id,
-				   visitors, home);
-  }
-  else {
-    return sprintf(buffer, "(null)"); 
-  }
+  return cwgame_find_lineup_name(gameiter->game, buffer, 1, 3, visitors, home);
 }
 
 DECLARE_FIELDFUNC(cwgame_home_batter4_name)
 {
-  CWAppearance *starter = cw_game_starter_find(gameiter->game, 1, 4);
-  if (starter) {
-    return cwgame_find_player_name(gameiter->game, buffer, starter->player_id,
-				   visitors, home);
-  }
-  else {
-    return sprintf(buffer, "(null)"); 
-  }
+  return cwgame_find_lineup_name(gameiter->game, buffer, 1, 4, visitors, home);
 }
 
 DECLARE_FIELDFUNC(cwgame_home_batter5_name)
 {
-  CWAppearance *starter = cw_game_starter_find(gameiter->game, 1, 5);
-  if (starter) {
-    return cwgame_find_player_name(gameiter->game, buffer, starter->player_id,
-				   visitors, home);
-  }
-  else {
-    return sprintf(buffer, "(null)"); 
-  }
+  return cwgame_find_lineup_name(gameiter->game, buffer, 1, 5, visitors, home);
 }
 
 DECLARE_FIELDFUNC(cwgame_home_batter6_name)
 {
-  CWAppearance *starter = cw_game_starter_find(gameiter->game, 1, 6);
-  if (starter) {
-    return cwgame_find_player_name(gameiter->game, buffer, starter->player_id,
-				   visitors, home);
-  }
-  else {
-    return sprintf(buffer, "(null)"); 
-  }
+  return cwgame_find_lineup_name(gameiter->game, buffer, 1, 6, visitors, home);
 }
 
 DECLARE_FIELDFUNC(cwgame_home_batter7_name)
 {
-  CWAppearance *starter = cw_game_starter_find(gameiter->game, 1, 7);
-  if (starter) {
-    return cwgame_find_player_name(gameiter->game, buffer, starter->player_id,
-				   visitors, home);
-  }
-  else {
-    return sprintf(buffer, "(null)"); 
-  }
+  return cwgame_find_lineup_name(gameiter->game, buffer, 1, 7, visitors, home);
 }
 
 DECLARE_FIELDFUNC(cwgame_home_batter8_name)
 {
-  CWAppearance *starter = cw_game_starter_find(gameiter->game, 1, 8);
-  if (starter) {
-    return cwgame_find_player_name(gameiter->game, buffer, starter->player_id,
-				   visitors, home);
-  }
-  else {
-    return sprintf(buffer, "(null)"); 
-  }
+  return cwgame_find_lineup_name(gameiter->game, buffer, 1, 8, visitors, home);
 }
 
 DECLARE_FIELDFUNC(cwgame_home_batter9_name)
 {
-  CWAppearance *starter = cw_game_starter_find(gameiter->game, 1, 9);
-  if (starter) {
-    return cwgame_find_player_name(gameiter->game, buffer, starter->player_id,
-				   visitors, home);
-  }
-  else {
-    return sprintf(buffer, "(null)"); 
-  }
+  return cwgame_find_lineup_name(gameiter->game, buffer, 1, 9, visitors, home);
 }
 
 /* Field 159 */

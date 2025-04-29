@@ -18,6 +18,8 @@
   entirely incorrect.  This has been corrected.  (#45)
 - In handling rosters, treat blank or null values for batting or throwing side
   as if they were explicit question marks.
+- In `cwgame`, output nulls for computed team totals from boxscore files whenever any
+  player's totals are null.
 
 
 # [0.10.0] - 2023-01-02
