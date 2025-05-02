@@ -81,6 +81,12 @@ int ascii = 1;
 /* If 'quiet', programs should write no status messages to stderr */
 int quiet = 0;
 
+/* Path to teamfile outside of current directory */
+char path_to_teamfile[256] = "";
+
+/* Search directory flag set -sd */
+int sd_flag = 0;
+
 void
 cwtools_read_rosters(CWLeague *league)
 {
@@ -88,20 +94,37 @@ cwtools_read_rosters(CWLeague *league)
   FILE *teamfile;
   CWRoster *roster;
 
-  sprintf(filename, "TEAM%s", year);
+  if (sd_flag) {
 
-  teamfile = fopen(filename, "r");
-
-  if (teamfile == NULL) {
-    /* Also try lowercase version */
-    sprintf(filename, "team%s", year);
+    sprintf(filename, path_to_teamfile, "TEAM%s", year);
 
     teamfile = fopen(filename, "r");
-    
+
     if (teamfile == NULL) {
-      fprintf(stderr, "Can't find teamfile (%s)\n", filename);
-      exit(1);
+      /* Also try lowercase version */
+      sprintf(filename, path_to_teamfile, "team%s", year);
+
+      teamfile = fopen(filename, "r");
     }
+  }
+
+  else if (!sd_flag) {
+
+    sprintf(filename, "TEAM%s", year);
+
+    teamfile = fopen(filename, "r");
+
+    if (teamfile == NULL) {
+      /* Also try lowercase version */
+      sprintf(filename, "team%s", year);
+
+      teamfile = fopen(filename, "r");
+    }
+  }
+
+  if (teamfile == NULL) {
+    fprintf(stderr, "Can't find teamfile (%s)\n", filename);
+    exit(1);
   }
 
   cw_league_read(league, teamfile);
@@ -277,7 +300,7 @@ cwtools_parse_field_list(char *text, int maxfield, int *field)
   }
 }
 
-int
+extern int
 cwtools_default_parse_command_line(int argc, char *argv[])
 {
   int i;
@@ -326,6 +349,12 @@ cwtools_default_parse_command_line(int argc, char *argv[])
 	strncpy(year, argv[i], 5);
       }
     }
+    else if (!strcmp(argv[i], "-sd")) {
+      sd_flag = 1;
+      if (++i < argc) {
+	strcpy(path_to_teamfile, argv[i]);
+      } 
+    }
     else if (argv[i][0] == '-') {
       fprintf(stderr, "*** Invalid option '%s'.\n", argv[i]);
       exit(1);
@@ -343,7 +372,7 @@ int main(int argc, char *argv[])
   int i;
   CWLeague *league = cw_league_create();
 
-  i = cwtools_parse_command_line(argc, argv);
+  i = cwtools_default_parse_command_line(argc, argv);
   if (!quiet) {
     (*cwtools_print_welcome_message)(argv[0]);
   }
