@@ -708,84 +708,72 @@ cw_gamestate_charged_pitcher(CWGameState *state, CWEventData *event_data)
 }
 
 /*
- * The "responsible pitcher" is usually the pitcher responsible
- * at the beginning of the play.  However, on a play like 32(3)/FO.2-H(E2),
- * the runner scoring should be charged to the pitcher who was initially
- * responsible for the runner on third, and so that pitcher is listed
- * as the responsible pitcher so that stats can be calculated directly
- * from the cwevent output without having to reparse the play.
+ * Generic logic for shifting pitcher responsibility on plays where a
+ * preceding runner is put out by batter action but a subsequent runner then
+ * scores.
  */
+static int
+cw_gamestate_responsible_base(CWGameState *state, CWEventData *event_data,
+                              int base)
+{
+  if (base == 3) {
+    return 3;
+  }
+  if (base == 2) {
+    if (cw_event_runner_put_out(event_data, 3) &&
+        event_data->fc_flag[3] && event_data->advance[2] >= 4) {
+      return 3;
+    }
+    return 2;
+  }
+  if (cw_event_runner_put_out(event_data, 3) &&
+      event_data->fc_flag[3] && event_data->advance[2] >= 4) {
+    return 2;
+  }
+  if (cw_event_runner_put_out(event_data, 3) &&
+      event_data->fc_flag[3] &&
+      !cw_gamestate_base_occupied(state, 2) &&
+      event_data->advance[1] >= 4) {
+    return 3;
+  }
+  return 1;
+}
+
 char *
 cw_gamestate_responsible_pitcher(CWGameState *state, CWEventData *event_data,
-				 int base)
+                                 int base)
 {
   if (!cw_gamestate_base_occupied(state, base)) {
     return "";
   }
-  if (base == 3) {
-    return state->runners[3].pitcher;
+  int orig_base = cw_gamestate_responsible_base(state, event_data, base);
+  return state->runners[orig_base].pitcher;
+}
+
+int
+cw_gamestate_runner_is_auto(CWGameState *state, CWEventData *event_data,
+                            int base)
+{
+  if (!cw_gamestate_base_occupied(state, base)) {
+    return 0;
   }
-  else if (base == 2) {
-    if (cw_event_runner_put_out(event_data, 3) &&
-	event_data->fc_flag[3] && event_data->advance[2] >= 4) {
-      return state->runners[3].pitcher;
-    }
-    else {
-      return state->runners[2].pitcher;
-    }
-  }
-  else {
-    if (cw_event_runner_put_out(event_data, 3) &&
-	event_data->fc_flag[3] && event_data->advance[2] >= 4) {
-      return state->runners[2].pitcher;
-    }
-    else if (cw_event_runner_put_out(event_data, 3) &&
-	     event_data->fc_flag[3] &&
-	     !cw_gamestate_base_occupied(state, 2) &&
-	     event_data->advance[1] >= 4) {
-      return state->runners[3].pitcher;
-    }
-    else {
-      return state->runners[1].pitcher;
-    }
-  }
+  int orig_base = cw_gamestate_responsible_base(state, event_data, base);
+  return state->runners[orig_base].is_auto;
 }
 
 /*
  * The "responsible catcher" (for catcher ERA) is computed using the
- * same rules as the "responsible pitcher."  See the above note for
- * cwevent_responsible_pitcher for how this is operationalized in cwevent.
+ * same rules as the "responsible pitcher."
  */
 char *
 cw_gamestate_responsible_catcher(CWGameState *state, CWEventData *event_data,
-				 int base)
+			                         	 int base)
 {
-  if (base == 3) {
-    return state->runners[3].catcher;
+  if (!cw_gamestate_base_occupied(state, base)) {
+    return "";
   }
-  else if (base == 2) {
-    if (cw_event_runner_put_out(event_data, 3) &&
-	event_data->fc_flag[3] && event_data->advance[2] >= 4) {
-      return state->runners[3].catcher;
-    }
-    else {
-      return state->runners[2].catcher;
-    }
-  }
-  else {
-    if (cw_event_runner_put_out(event_data, 3) &&
-	event_data->fc_flag[3] && event_data->advance[2] >= 4) {
-      return state->runners[2].catcher;
-    }
-    else if (cw_event_runner_put_out(event_data, 3) &&
-	     !cw_gamestate_base_occupied(state, 2) &&
-	     event_data->advance[1] >= 4) {
-      return state->runners[3].catcher;
-    }
-    else {
-      return state->runners[1].catcher;
-    }
-  }
+  int orig_base = cw_gamestate_responsible_base(state, event_data, base);
+  return state->runners[orig_base].catcher;
 }
 
 /*
@@ -1026,10 +1014,11 @@ cw_gameiter_next(CWGameIterator *gameiter)
       /* New convention from 2020: Automatic runners who score
        * are reported as scoring code 7
        */
-      if (gameiter->event_data->advance[i] >= 4 &&
+      /* if (gameiter->event_data->advance[i] >= 4 &&
           gameiter->state->runners[i].is_auto) {
         gameiter->event_data->advance[i] = 7;
       }
+      */
     }
   }
 }

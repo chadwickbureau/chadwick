@@ -53,17 +53,17 @@ int fields[97] = {
 int max_field = 96;
 
 /* Extended fields to display (-x) */
-int ext_fields[64] = {
+int ext_fields[67] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0
+  0, 0, 0, 0, 0, 0, 0
 };
 
-int max_ext_field = 63;
+int max_ext_field = 66;
 
 char program_name[20] = "cwevent";
 
@@ -1642,6 +1642,29 @@ DECLARE_FIELDFUNC(cwevent_count_text)
 		 gameiter->event->count);
 }
 
+/* Extended Field 64 */
+DECLARE_FIELDFUNC(cwevent_runner1_auto) {
+    return sprintf(buffer, (ascii) ? "\"%c\"" : "%c",
+        cw_gamestate_runner_is_auto(gameiter->state,
+                              gameiter->event_data, 1) ? 'T' : 'F');
+}
+
+/* Extended Field 65 */
+DECLARE_FIELDFUNC(cwevent_runner2_auto)
+{
+    return sprintf(buffer, (ascii) ? "\"%c\"" : "%c",
+        cw_gamestate_runner_is_auto(gameiter->state,
+                              gameiter->event_data, 2) ? 'T' : 'F');
+}
+
+/* Extended Field 66 */
+DECLARE_FIELDFUNC(cwevent_runner3_auto)
+{
+    return sprintf(buffer, (ascii) ? "\"%c\"" : "%c",
+        cw_gamestate_runner_is_auto(gameiter->state,
+                              gameiter->event_data, 3) ? 'T' : 'F');
+}
+
 static field_struct ext_field_data[] = {
   /*  0 */ { cwevent_home_team_id, "HOME_TEAM_ID", "home team id" },
   /*  1 */ { cwevent_batting_team_id, "BAT_TEAM_ID", "batting team id" },
@@ -1761,7 +1784,10 @@ static field_struct ext_field_data[] = {
   /* 62 */ { cwevent_uncertain_play_flag, "UNCERTAIN_PLAY_EXC_FL",
              "uncertain play flag" },
   /* 63 */ { cwevent_count_text, "COUNT_TX",
-	     "text of count as appears in event file" }
+	     "text of count as appears in event file" },
+  /* 64 */ { cwevent_runner1_auto, "RUN1_AUTO_FL", "whether runner on first is an automatic runner" },
+    /* 65 */ { cwevent_runner2_auto, "RUN2_AUTO_FL", "whether runner on second is an automatic runner" },
+    /* 66 */ { cwevent_runner3_auto, "RUN3_AUTO_FL", "whether runner on third is an automatic runner" }
 };
 
 void

@@ -119,20 +119,37 @@ char *cw_gamestate_charged_pitcher(CWGameState *state,
 
 
 /*
- * The pitcher who is charged with the scoring of the runner on base 'base'
+ * The pitcher who is charged with the scoring of the runner on base 'base'.
+ *
+ * The "responsible pitcher" is usually the pitcher responsible
+ * at the beginning of the play.  However, on a play like 32(3)/FO.2-H(E2),
+ * the runner scoring should be charged to the pitcher who was initially
+ * responsible for the runner on third, and so that pitcher is listed
+ * as the responsible pitcher so that stats can be calculated directly
+ * from the cwevent output without having to reparse the play.
  */
 char *cw_gamestate_responsible_pitcher(CWGameState *state, 
-				       CWEventData *event_data,
-				       int base);
+				                       CWEventData *event_data,
+				                       int base);
+
+/*
+ * Whether the runner on base `base` is the consequence of the placement of an
+ * automatic runner.
+ *
+ * This is determined using the same rules as the responsible pitcher.
+ */
+int cw_gamestate_runner_is_auto(CWGameState *state,
+					            CWEventData *event_data,
+					            int base);
 
 /*
  * The catcher who is charged with the scoring of the runner on base 'base'.
- * This is unofficial, but follows the same conventions as for those
+ * This is unofficial, and follows the same conventions as for those
  * of assigning pitcher responsibility.
  */
 char *cw_gamestate_responsible_catcher(CWGameState *state, 
-				       CWEventData *event_data,
-				       int base);
+				                       CWEventData *event_data,
+				                       int base);
 
 /*
  * TODO:
