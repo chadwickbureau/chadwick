@@ -1021,10 +1021,11 @@ cw_gameiter_next(CWGameIterator *gameiter)
       /* New convention from 2020: Automatic runners who score
        * are reported as scoring code 7
        */
-      if (gameiter->event_data->advance[i] >= 4 &&
+      /* if (gameiter->event_data->advance[i] >= 4 &&
           gameiter->state->runners[i].is_auto) {
         gameiter->event_data->advance[i] = 7;
       }
+      */
     }
   }
 }
