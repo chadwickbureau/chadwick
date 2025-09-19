@@ -126,6 +126,14 @@ char *cw_gamestate_responsible_pitcher(CWGameState *state,
 				       int base);
 
 /*
+ * Whether the runner on base `base` is the consequence of the placement of an
+ * automatic runner
+ */
+int cw_gamestate_runner_is_auto(CWGameState *state,
+					   CWEventData *event_data,
+					   int base);
+
+/*
  * The catcher who is charged with the scoring of the runner on base 'base'.
  * This is unofficial, but follows the same conventions as for those
  * of assigning pitcher responsibility.

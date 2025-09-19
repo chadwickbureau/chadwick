@@ -746,6 +746,42 @@ cw_gamestate_responsible_pitcher(CWGameState *state, CWEventData *event_data,
   }
 }
 
+int
+cw_gamestate_runner_is_auto(CWGameState *state, CWEventData *event_data,
+         int base)
+{
+  if (!cw_gamestate_base_occupied(state, base)) {
+    return 0;
+  }
+  if (base == 3) {
+    return state->runners[3].is_auto;
+  }
+  else if (base == 2) {
+    if (cw_event_runner_put_out(event_data, 3) &&
+  event_data->fc_flag[3] && event_data->advance[2] >= 4) {
+      return state->runners[3].is_auto;
+  }
+    else {
+      return state->runners[2].is_auto;
+    }
+  }
+  else {
+    if (cw_event_runner_put_out(event_data, 3) &&
+  event_data->fc_flag[3] && event_data->advance[2] >= 4) {
+      return state->runners[2].is_auto;
+  }
+    else if (cw_event_runner_put_out(event_data, 3) &&
+       event_data->fc_flag[3] &&
+       !cw_gamestate_base_occupied(state, 2) &&
+       event_data->advance[1] >= 4) {
+      return state->runners[3].is_auto;
+       }
+    else {
+      return state->runners[1].is_auto;
+    }
+  }
+}
+
 /*
  * The "responsible catcher" (for catcher ERA) is computed using the
  * same rules as the "responsible pitcher."  See the above note for
