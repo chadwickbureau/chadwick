@@ -75,10 +75,10 @@ cw_gamestate_place_batter(CWGameState *state, char *batter, int event_type)
   }
   else {
     CW_STRLCPY(state->runners[0].pitcher,
-	           state->fielders[1][1-state->batting_team]);
+	           state->fielders[DWARE_POS_P][1-state->batting_team]);
   }
   CW_STRLCPY(state->runners[0].catcher,
-	         state->fielders[2][1-state->batting_team]);
+	         state->fielders[DWARE_POS_C][1-state->batting_team]);
   state->runners[0].src_event = state->event_count;
   state->runners[0].is_auto = 0;
 }
@@ -142,11 +142,20 @@ cw_gamestate_clear_runner(CWGameState *state, int base)
 }
 
 static void
+cw_gamestate_clear_all_runners(CWGameState *state)
+{
+  int base;
+  for (base = DWARE_BASE_BATTER; base < DWARE_BASE_COUNT; base++) {
+    cw_gamestate_clear_runner(state, base);
+  }
+}
+
+static void
 cw_gamestate_copy_runners(CWGameState *dest, CWGameState *src)
 {
   int i;
 
-  for (i = 0; i <= 3; i++) {
+  for (i = DWARE_BASE_BATTER; i <= DWARE_BASE_THIRD; i++) {
     strcpy(dest->runners[i].runner, src->runners[i].runner);
     strcpy(dest->runners[i].pitcher, src->runners[i].pitcher);
     strcpy(dest->runners[i].catcher, src->runners[i].catcher);
@@ -182,9 +191,7 @@ cw_gamestate_initialize(CWGameState *state)
   state->is_new_pa = 1;
   state->ph_flag = 0;
 
-  for (i = 0; i <= 3; i++) {
-    cw_gamestate_clear_runner(state, i);
-  }
+  cw_gamestate_clear_all_runners(state);
 
   /* Make sure to set all these to null, so reset does not attempt
    * to free() non-malloc()ed memory
@@ -195,11 +202,11 @@ cw_gamestate_initialize(CWGameState *state)
   state->strikeout_batter_hand = ' ';
   state->go_ahead_rbi = NULL;
 
-  for (i = 0; i <= 3; i++) {
+  for (i = DWARE_BASE_BATTER; i <= DWARE_BASE_THIRD; i++) {
     state->removed_for_pr[i] = NULL;
   }
 
-  for (t = 0; t <= 1; t++) {
+  for (t = DWARE_TEAM_AWAY; t <= DWARE_TEAM_HOME; t++) {
     for (i = 0; i <= 9; i++) {
       state->lineups[i][t].player_id = NULL;
       state->lineups[i][t].name = NULL;
@@ -463,7 +470,7 @@ cw_gamestate_substitute(CWGameState *state,
       strcpy(state->walk_pitcher,
 	     state->fielders[1][team]);
     }
-    else if (pos == 11 && state->strikeout_batter == NULL &&
+    else if (pos == DWARE_POS_DH && state->strikeout_batter == NULL &&
 	     count[1] == '2') {
       state->strikeout_batter = 
 	(char *) malloc((strlen(batter) + 1) * sizeof(char));
@@ -472,7 +479,7 @@ cw_gamestate_substitute(CWGameState *state,
     }
   }
 
-  if (pos <= 9) {
+  if (pos <= DWARE_POS_MAX) {
     free(state->fielders[pos][team]);
     state->fielders[pos][team] =
       (char *) malloc(sizeof(char) * (strlen(player_id) + 1));
@@ -490,12 +497,12 @@ cw_gamestate_substitute(CWGameState *state,
       state->dh_slot[team] = 0;
     }
   }
-  else if (pos == 11) {
+  else if (pos == DWARE_POS_PH) {
     state->removed_for_ph = removedPlayer;
     state->ph_flag = 1;
     state->removed_position = removedPosition;
   }
-  else if (pos == 12) {
+  else if (pos == DWARE_POS_PR) {
     if (!strcmp(state->runners[1].runner, removedPlayer)) {
       state->removed_for_pr[1] = removedPlayer;
       cw_gamestate_replace_runner(state, 1, player_id);
@@ -540,9 +547,7 @@ cw_gamestate_change_sides(CWGameState *state, CWEvent *event)
   state->inning_batters = 0;
   state->inning_score = 0;
 
-  for (i = 0; i <= 3; i++) {
-    cw_gamestate_clear_runner(state, i);
-  }
+  cw_gamestate_clear_all_runners(state);
 
   /* Pinch-hitters or -runners for DH automatically become DH,
    * even though no sub record occurs */
@@ -993,7 +998,7 @@ cw_gameiter_next(CWGameIterator *gameiter)
     gameiter->state->pitcher_hand = gameiter->event->pitcher_hand;
     gameiter->parse_ok = cw_parse_event(gameiter->event->event_text,
                                         gameiter->event_data);
-    for (i = 1; i <= 3; i++) {
+    for (i = DWARE_BASE_FIRST; i <= DWARE_BASE_THIRD; i++) {
       if (gameiter->event_data->advance[i] == 0 &&
           cw_gamestate_base_occupied(gameiter->state, i) &&
           !cw_event_runner_put_out(gameiter->event_data, i)) {
@@ -1011,13 +1016,13 @@ cw_gameiter_next(CWGameIterator *gameiter)
       gameiter->event_data->rbi_flag[3] = 0;
     }
 
-    for (i = 0; i <= 3; i++) {
+    for (i = DWARE_BASE_BATTER; i <= DWARE_BASE_THIRD; i++) {
       if (gameiter->event_data->rbi_flag[i] == 2) {
         gameiter->event_data->rbi_flag[i] = 1;
       }
     }
 
-    for (i = 0; i <= 3; i++) {
+    for (i = DWARE_BASE_BATTER; i <= DWARE_BASE_THIRD; i++) {
       /* New convention from 2020: Automatic runners who score
        * are reported as scoring code 7
        */

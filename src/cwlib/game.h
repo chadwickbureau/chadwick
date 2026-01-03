@@ -256,6 +256,26 @@ int cw_pitch_strike_other(char c);
  */
 int cw_pitch_count_pitches(char *pitches, int (*criterion)(char));
 
+
+/*
+ * Some named constants to encode DiamondWare-specific conventions
+ */
+#define DWARE_TEAM_AWAY 0
+#define DWARE_TEAM_HOME 1
+
+#define DWARE_BASE_BATTER 0
+#define DWARE_BASE_FIRST 1
+#define DWARE_BASE_SECOND 2
+#define DWARE_BASE_THIRD 3
+#define DWARE_BASE_COUNT 4
+
+#define DWARE_POS_P 1
+#define DWARE_POS_C 2
+#define DWARE_POS_MAX 9
+#define DWARE_POS_DH 10
+#define DWARE_POS_PH 11
+#define DWARE_POS_PR 12
+
 #endif  /* CW_GAME_H */
 
 
