@@ -83,27 +83,28 @@ cw_league_roster_find(CWLeague *league, char *team)
 int
 cw_league_read(CWLeague *rosterList, FILE *file)
 {
-  char buf[256], *team_id, *league, *city, *nickname;
+  CWRecordReader r;
+  CWTokenizer tok;
+  char *team_id, *league, *city, *nickname;
 
   rewind(file);
+  cw_record_reader_init(&r, file);
 
-  while (!feof(file)) {
-    strcpy(buf, "");
-    if (fgets(buf, 256, file) == NULL) {
-      return 0;
-    }
-    team_id = cw_strtok(buf);
-    league = cw_strtok(NULL);
-    city = cw_strtok(NULL);
-    nickname = cw_strtok(NULL);
+  while (cw_record_reader_next(&r) == 1) {
+    char *line = (char *) cw_record_reader_line(&r);
+    cw_tokenizer_init(&tok, line);
+    team_id = cw_tokenizer_next(&tok);
+    league = cw_tokenizer_next(&tok);
+    city = cw_tokenizer_next(&tok);
+    nickname = cw_tokenizer_next(&tok);
     if (!team_id || !league || !city || !nickname) {
       continue;
     }
-
     cw_league_roster_append(rosterList, 
 			    cw_roster_create(team_id, 0, league,
 					     city, nickname));
   }
+  cw_record_reader_cleanup(&r);
   return 1;
 }
 

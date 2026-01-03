@@ -152,33 +152,41 @@ cw_scorebook_remove_game(CWScorebook *scorebook, char *game_id)
 static int
 cw_scorebook_read_comments(CWScorebook *scorebook, FILE *file)
 {
-  while (1) {
-    char buf[256], *tok, *com;
-    if (fgets(buf, 256, file) == NULL) {
-      return 0;
-    }
+  CWRecordReader r;
+  CWTokenizer tok;
 
-    tok = cw_strtok(buf);
-    com = cw_strtok(NULL);
+  cw_record_reader_init(&r, file);
+
+  while (cw_record_reader_next(&r) == 1) {
+    char *line = (char *) cw_record_reader_line(&r);
+    char *tag, *com;
+
+    cw_tokenizer_init(&tok, line);
+
+    tag = cw_tokenizer_next(&tok);
+    com = cw_tokenizer_next(&tok);
       
-    if (tok && !strcmp(tok, "com") && com) {
+    if (tag && !strcmp(tag, "com") && com) {
       CWComment *comment = (CWComment *) malloc(sizeof(CWComment));
       comment->text = (char *) malloc(sizeof(char) * (strlen(com) + 1));
       strcpy(comment->text, com);
       comment->prev = scorebook->last_comment;
       comment->next = NULL;
       if (scorebook->first_comment == NULL) {
-	scorebook->first_comment = comment;
+	      scorebook->first_comment = comment;
       }
       else {
-	scorebook->last_comment->next = comment;
+	      scorebook->last_comment->next = comment;
       }
       scorebook->last_comment = comment;
     }
     else {
+      cw_record_reader_cleanup(&r);
       return 1;
     }
   }
+  cw_record_reader_cleanup(&r);
+  return 0;
 }
 
 int

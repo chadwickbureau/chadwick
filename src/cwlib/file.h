@@ -24,11 +24,56 @@
 #ifndef CW_FILE_H
 #define CW_FILE_H
 
+
 /*
- * A replacement for C strtok(), using commas as the token separator,
- * and respecting quoted fields
+ * Record reader: Encapsulates reading files one line at a time, normalising
+ * line endings.
  */
-char *cw_strtok(char *strToken);
+typedef struct cw_record_reader {
+  FILE *fp;
+  char *line;
+  size_t capacity;
+} CWRecordReader;
+
+/*
+ * Initialise an existing record reader struct to read from `fp`
+ */
+void cw_record_reader_init(CWRecordReader *r, FILE *fp);
+
+/*
+ * Deallocate resources.
+ */
+void cw_record_reader_cleanup(CWRecordReader *r);
+
+/*
+ * Read the next record.  Returns 1 on success, 0 on EOF, -1 on error.
+ */
+int cw_record_reader_next(CWRecordReader *r);
+
+/*
+ * Access the current line (NULL-terminated)
+ */
+const char *cw_record_reader_line(const CWRecordReader *r);
+
+
+/*
+ * A slightly nicer tokenizer API, which removes the first-next call asymmetry.
+ * As with standard C `strtok`, mutates the provided buffer.
+ */
+typedef struct cw_tokenizer {
+  char *current;
+} CWTokenizer;
+
+/*
+ * Initialise the tokenizer for a line
+ */
+void cw_tokenizer_init(CWTokenizer *t, char *line);
+
+/*
+ * Return the next token, or NULL if none remain.
+ * This handles DiamondWare's pseudo-CSV quoted fields correctly.
+ */
+char *cw_tokenizer_next(CWTokenizer *t);
 
 /*
  * A replacement for C atoi(), which does validity checking and returns

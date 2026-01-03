@@ -31,102 +31,131 @@
 #include "file.h"
 
 /*
- * This adaptation of strtok() respects the quoted string fields in
- * Retrosheet files.  The function assumes that quotes appear at the
- * very beginning and end of a field, i.e., comma-quote-data-quote-comma.
- *
- * This function operates similarly to strtok() in that it maintains
- * static data.
- *
- * The implementation is based on ConsoleStrTok() by Chris Cookson,
- * <cjcookson@hotmail.com>, posted at
- * http://www.flipcode.com/cgi-bin/fcarticles.cgi?show=64037
+ * Internal helper: A portable version of `getline`.
  */
-char *cw_strtok(char *strToken)
+static ssize_t cw_getline(char **line, size_t *cap, FILE *fp)
 {
-  /* Where to start searching next */
-  static char *pNext;
-  /* Start of next token */
-  char *pStart;
-
-  /* If NULL is passed in, continue searching */
-  if (strToken == NULL) {
-    if (pNext != NULL) {
-      strToken = pNext;
-    } 
-    else {
-      /* Reached end of original string */
-      return NULL;
+  if (*line == NULL || *cap == 0) {
+    *cap = 256;
+    *line = malloc(*cap);
+    if (!*line) {
+      return -1;
     }
   }
 
-  /* Zero length string, so no more tokens to be found */
-  if (*strToken == 0) {
-    pNext = NULL;
-    return NULL;
-  }
+  size_t len = 0;
+  int c;
 
-  /* Skip leading whitespace before next token */
-  while ((*strToken != 0) &&
-	 ((*strToken == ' ') || (*strToken == '\t') || (*strToken == '\n'))) {
-    ++strToken;
-  }
-
-  if (*strToken == 0) {
-    pNext = NULL;
-    return NULL;
-  }
-
-  /* It's a quoted literal - skip the first quote char */
-  if (*strToken == '\"') {
-    ++strToken;
-
-    pStart = strToken;
-
-    /* Find ending quote or end of string */
-    while ((*strToken != '\"') && (*strToken != 0) && 
-	   (*strToken != '\n') && (*strToken != '\r')) {
-      ++strToken;
-    }
-
-    if (*strToken == 0) {
-      /* Reached end of original string */
-      pNext = NULL;
-    } 
-    else {
-      /* More to find, note where to continue searching */
-      *strToken = 0;
-      pNext = strToken + 1;
-      /* A comma immediately following a quote should be skipped past */
-      if (*pNext == ',') {
-	pNext++;
+  while ((c = fgetc(fp)) != EOF) {
+    if (len + 1 >= *cap) {
+      size_t newcap = *cap * 2;
+      char *tmp = realloc(*line, newcap);
+      if (!tmp) {
+        return -1;
       }
-    }
-    /* Return ptr to start of token */
-    return pStart;
-  } 
-  else {
-    /* Unquoted token */
-    pStart = strToken;
-
-    /* Find next comma or end of string */
-    while ((*strToken != 0) && (*strToken != ',') && 
-	   (*strToken != '\n') && (*strToken != '\r')) {
-      ++strToken;
+      *line = tmp;
+      *cap = newcap;
     }
 
-    /* Reached end of original string? */
-    if (*strToken == 0) {
-      pNext = NULL;
-    } 
-    else {
-      *strToken = 0;
-      pNext = strToken + 1;
+    if (c == '\n') {
+      break;
     }
-    /* Return ptr to start of token */
-    return pStart;
+    if (c != '\r') {
+      (*line)[len++] = (char) c;
+    }
   }
+
+  if (c == EOF && len == 0) {
+    return -1;
+  }
+
+  (*line)[len] = '\0';
+  return (ssize_t) len;
 }
+
+void cw_record_reader_init(CWRecordReader *r, FILE *fp)
+{
+  r->fp = fp;
+  r->line = NULL;
+  r->capacity = 0;
+}
+
+void cw_record_reader_cleanup(CWRecordReader *r)
+{
+  free(r->line);
+  r->line = NULL;
+  r->capacity = 0;
+}
+
+int cw_record_reader_next(CWRecordReader *r)
+{
+  ssize_t n = cw_getline(&r->line, &r->capacity, r->fp);
+  if (n < 0) {
+    return feof(r->fp) ? 0 : -1;
+  }
+  return 1;
+}
+
+const char *cw_record_reader_line(const CWRecordReader *r)
+{
+  return r->line;
+}
+
+
+void cw_tokenizer_init(CWTokenizer *t, char *line)
+{
+  t->current = line;
+};
+
+char *cw_tokenizer_next(CWTokenizer *t)
+{
+  char *s = t->current;
+  char *start;
+
+  if (!s || *s == '\0') {
+    return NULL;
+  }
+
+  /* Skip leading whitespace */
+  while (*s == ' ' || *s == '\t') {
+    s++;
+  }
+  if (*s == '\0') {
+    t->current = s;
+    return NULL;
+  }
+
+  /* Quoted field */
+  if (*s == '"') {
+    s++;  /* skip opening quote */
+    start = s;
+    while (*s && *s != '"') {
+      s++;
+    }
+    if (*s == '"') {
+      *s = '\0';
+      s++;
+    }
+    if (*s == ',') {
+      s++;
+    }
+    t->current = s;
+    return start;
+  }
+
+  /* Unquoted field */
+  start = s;
+  while (*s && *s != ',') {
+    s++;
+  }
+  if (*s == ',') {
+    *s = '\0';
+    s++;
+  }
+  t->current = s;
+  return start;
+}
+
 
 /*
  * This replacement for atoi() does validity checking on the input,
@@ -157,24 +186,31 @@ cw_atoi(char *s, char *msg)
  */
 int cw_file_find_game(char *game_id, FILE *file)
 {
-  char buf[1024], *tok, *game;
+  CWRecordReader r;
+  CWTokenizer tok;
   fpos_t filepos;
 
   rewind(file);
+  cw_record_reader_init(&r, file);
 
-  while (!feof(file)) {
+  while (1) {
     fgetpos(file, &filepos);
-    if (fgets(buf, 1023, file) == NULL) {
-      return 0;
+    if (cw_record_reader_next(&r) != 1) {
+      break;
     }
-    tok = cw_strtok(buf);
-    game = cw_strtok(NULL);
-    if (tok && !strcmp(tok, "id") && game && !strcmp(game, game_id)) {
+    char *line = (char *) cw_record_reader_line(&r);
+    char *tag, *game;
+
+    cw_tokenizer_init(&tok, line);
+    tag = cw_tokenizer_next(&tok);
+    game = cw_tokenizer_next(&tok);
+    if (tag && !strcmp(tag, "id") && game && !strcmp(game, game_id)) {
       fsetpos(file, &filepos);
+      cw_record_reader_cleanup(&r);
       return 1;
     }
   }
-
+  cw_record_reader_cleanup(&r);
   return 0;
 }
 
@@ -183,23 +219,31 @@ int cw_file_find_game(char *game_id, FILE *file)
  */
 int cw_file_find_first_game(FILE *file)
 {
-  char buf[256], *tok;
+  CWRecordReader r;
+  CWTokenizer tok;
   fpos_t filepos;
 
   rewind(file);
+  cw_record_reader_init(&r, file);
 
-  while (!feof(file)) {
+  while (1) {
     fgetpos(file, &filepos);
-    if (fgets(buf, 256, file) == NULL) {
-      return 0;
+    if (cw_record_reader_next(&r) != 1) {
+      break;
     }
-    tok = cw_strtok(buf);
-    if (tok && !strcmp(tok, "id")) {
+    char *line = (char *) cw_record_reader_line(&r);
+    char *tag;
+
+    cw_tokenizer_init(&tok, line);
+    tag = cw_tokenizer_next(&tok);
+
+    if (tag && !strcmp(tag, "id")) {
       fsetpos(file, &filepos);
+      cw_record_reader_cleanup(&r);
       return 1;
     }
   }
-
+  cw_record_reader_cleanup(&r);
   return 0;
 }
 

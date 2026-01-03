@@ -673,92 +673,91 @@ cw_game_warn_invalid_record(CWGame *game, char *line)
 CWGame *
 cw_game_read(FILE *file)
 {
-  char line[1024], buf[1024], *tok;
+  CWRecordReader r;
+  CWTokenizer tok;
+  char *tok0;
   fpos_t filepos;
   char batHand = ' ', batHandBatter[1024], pitHand = ' ', pitHandPitcher[1024];
   char autoRunner[1024];
   char presadj[4][1024];
   int i, ladjAlign = 0, ladjSlot = 0, autoBase = 0;
   CWGame *game;
+  char *line_copy;
 
   for (i = 1; i <= 3; i++) {
     strcpy(presadj[i], "");
   }
-  if (fgets(buf, 1024, file) == NULL) {
+
+  cw_record_reader_init(&r, file);
+  if (cw_record_reader_next(&r) != 1) {
     return NULL;
   }
-  tok = cw_strtok(buf);
-  if (tok && !strcmp(tok, "id")) {
-    char *game_id = cw_strtok(NULL);
-    if (game_id) {
-      game = cw_game_create(game_id);
+
+  {
+    char *line = (char *) cw_record_reader_line(&r);
+    cw_tokenizer_init(&tok, line);
+    tok0 = cw_tokenizer_next(&tok);
+    if (tok0 && !strcmp(tok0, "id")) {
+      char *game_id = cw_tokenizer_next(&tok);
+      if (game_id) {
+        game = cw_game_create(game_id);
+      }
+      else {
+        return NULL;
+      }
     }
     else {
       return NULL;
     }
   }
-  else {
-    return NULL;
-  }
 
-  while (!feof(file)) {
+  while (1) {
     fgetpos(file, &filepos);
-    if (fgets(buf, 1024, file) == NULL) {
-      if (feof(file)) {
-        break;
-      }
-      else {
-        cw_game_cleanup(game);
-        free(game);
-        return NULL;
-      }
-    }
-    if (feof(file)) {
+    if (cw_record_reader_next(&r) != 1) {
       break;
     }
+    char *line = (char *) cw_record_reader_line(&r);
+    line_copy = strdup(line);
+    cw_tokenizer_init(&tok, line);
+    tok0 = cw_tokenizer_next(&tok);
 
-    strcpy(line, buf);
-    tok = cw_strtok(buf);
-    if (!tok || !strcmp(tok, "id")) {
-      fsetpos(file, &filepos);
-      break;
+    if (!tok0 || !strcmp(tok0, "id")) {
+       fsetpos(file, &filepos);
+       free(line_copy);
+       break;
     }
-    else if (!strcmp(tok, "version")) {
-      char *version;
-      version = cw_strtok(NULL);
+    else if (!strcmp(tok0, "version")) {
+      char *version = cw_tokenizer_next(&tok);
       if (version) {
         cw_game_set_version(game, version);
       }
     }
-    else if (!strcmp(tok, "info")) {
-      char *field, *value;
-      field = cw_strtok(NULL);
-      value = cw_strtok(NULL);
+    else if (!strcmp(tok0, "info")) {
+      char *field = cw_tokenizer_next(&tok);
+      char *value = cw_tokenizer_next(&tok);
       if (field) {
         cw_game_info_append(game, field, (value) ? value : "");
       }
     }
-    else if (!strcmp(tok, "start")) {
-      char *player_id, *name, *team, *slot, *pos;
-      player_id = cw_strtok(NULL);
-      name = cw_strtok(NULL);
-      team = cw_strtok(NULL);
-      slot = cw_strtok(NULL);
-      pos = cw_strtok(NULL);
+    else if (!strcmp(tok0, "start")) {
+      char *player_id = cw_tokenizer_next(&tok);
+      char *name = cw_tokenizer_next(&tok);
+      char *team = cw_tokenizer_next(&tok);
+      char *slot = cw_tokenizer_next(&tok);
+      char *pos = cw_tokenizer_next(&tok);
       if (player_id && name && team && slot && pos) {
         cw_game_starter_append(game, player_id, name,
                                cw_atoi(team, NULL), cw_atoi(slot, NULL),
                                cw_atoi(pos, NULL));
       }
     }
-    else if (!strcmp(tok, "play")) {
-      char *inning, *batting_team, *batter, *count, *pitches, *play;
-      inning = cw_strtok(NULL);
-      batting_team = cw_strtok(NULL);
-      batter = cw_strtok(NULL);
-      count = cw_strtok(NULL);
-      pitches = cw_strtok(NULL);
-      play = cw_strtok(NULL);
+    else if (!strcmp(tok0, "play")) {
+      char *inning = cw_tokenizer_next(&tok);
+      char *batting_team = cw_tokenizer_next(&tok);
+      char *batter = cw_tokenizer_next(&tok);
+      char *count = cw_tokenizer_next(&tok);
+      char *pitches = cw_tokenizer_next(&tok);
+      char *play = cw_tokenizer_next(&tok);
       if (inning && batting_team && batter && count && pitches && play) {
         cw_game_event_append(game,
                              cw_atoi(inning, NULL),
@@ -802,114 +801,106 @@ cw_game_read(FILE *file)
         }
       }
     }
-    else if (!strcmp(tok, "sub")) {
-      char *player_id, *name, *team, *slot, *pos;
-      player_id = cw_strtok(NULL);
-      name = cw_strtok(NULL);
-      team = cw_strtok(NULL);
-      slot = cw_strtok(NULL);
-      pos = cw_strtok(NULL);
+    else if (!strcmp(tok0, "sub")) {
+      char *player_id = cw_tokenizer_next(&tok);
+      char *name = cw_tokenizer_next(&tok);
+      char *team = cw_tokenizer_next(&tok);
+      char *slot = cw_tokenizer_next(&tok);
+      char *pos = cw_tokenizer_next(&tok);
       if (player_id && name && team && slot && pos) {
         cw_game_substitute_append(game, player_id, name,
                                   cw_atoi(team, NULL), cw_atoi(slot, NULL),
                                   cw_atoi(pos, NULL));
       }
     }
-    else if (!strcmp(tok, "com")) {
-      char *comment;
-      comment = cw_strtok(NULL);
+    else if (!strcmp(tok0, "com")) {
+      char *comment = cw_tokenizer_next(&tok);
       if (comment) {
         cw_game_comment_append(game, comment);
       }
     }
-    else if (!strcmp(tok, "data")) {
+    else if (!strcmp(tok0, "data")) {
       char *data[256];
       for (i = 0; i < 256; i++) {
-        data[i] = cw_strtok(NULL);
+        data[i] = cw_tokenizer_next(&tok);
         if (!data[i]) {
           cw_game_data_append(game, i, data);
           break;
         }
       }
     }
-    else if (!strcmp(tok, "stat")) {
+    else if (!strcmp(tok0, "stat")) {
       char *data[256];
       for (i = 0; i < 256; i++) {
-        data[i] = cw_strtok(NULL);
+        data[i] = cw_tokenizer_next(&tok);
         if (!data[i] || isspace(data[i][0])) {
           cw_game_stat_append(game, i, data);
           break;
         }
       }
     }
-    else if (!strcmp(tok, "event")) {
+    else if (!strcmp(tok0, "event")) {
       char *data[256];
       for (i = 0; i < 256; i++) {
-        data[i] = cw_strtok(NULL);
+        data[i] = cw_tokenizer_next(&tok);
         if (!data[i] || isspace(data[i][0])) {
           cw_game_evdata_append(game, i, data);
           break;
         }
       }
     }
-    else if (!strcmp(tok, "line")) {
+    else if (!strcmp(tok0, "line")) {
       char *data[256];
       for (i = 0; i < 256; i++) {
-        data[i] = cw_strtok(NULL);
+        data[i] = cw_tokenizer_next(&tok);
         if (!data[i] || data[i][0] == '\0') {
           cw_game_line_append(game, i, data);
           break;
         }
       }
     }
-    else if (!strcmp(tok, "badj")) {
-      char *batter, *bats;
-      batter = cw_strtok(NULL);
-      bats = cw_strtok(NULL);
+    else if (!strcmp(tok0, "badj")) {
+      char *batter = cw_tokenizer_next(&tok);
+      char *bats = cw_tokenizer_next(&tok);
       if (batter && bats) {
         strncpy(batHandBatter, batter, 255);
         batHand = bats[0];
       }
     }
-    else if (!strcmp(tok, "padj")) {
-      char *pitcher, *throws;
-      pitcher = cw_strtok(NULL);
-      throws = cw_strtok(NULL);
+    else if (!strcmp(tok0, "padj")) {
+      char *pitcher = cw_tokenizer_next(&tok);
+      char *throws = cw_tokenizer_next(&tok);
       if (pitcher && throws) {
         strncpy(pitHandPitcher, pitcher, 255);
         pitHand = throws[0];
       }
     }
-    else if (!strcmp(tok, "ladj")) {
-      char *align, *slot;
-      align = cw_strtok(NULL);
-      slot = cw_strtok(NULL);
+    else if (!strcmp(tok0, "ladj")) {
+      char *align = cw_tokenizer_next(&tok);
+      char *slot = cw_tokenizer_next(&tok);
       if (align && slot) {
         ladjAlign = cw_atoi(align, NULL);
         ladjSlot = cw_atoi(slot, NULL);
       }
     }
-    else if (!strcmp(tok, "cw:itb") | !strcmp(tok, "radj")) {
+    else if (!strcmp(tok0, "cw:itb") | !strcmp(tok0, "radj")) {
       /* For backwards-compatibility, we also accept the old
        * Chadwick extension record for this.  It had the same
        * semantics as the radj record introduced by Dave Smith
        * for the 2020 season.
        */
-      char *runner, *base;
-      runner = cw_strtok(NULL);
-      base = cw_strtok(NULL);
+      char *runner = cw_tokenizer_next(&tok);
+      char *base = cw_tokenizer_next(&tok);
       if (runner && base) {
         strncpy(autoRunner, runner, 255);
         autoBase = cw_atoi(base, NULL);
       }
     }
-    else if (!strcmp(tok, "presadj")) {
-      char *pitcher, *base_str;
-      int base;
-      pitcher = cw_strtok(NULL);
-      base_str = cw_strtok(NULL);
+    else if (!strcmp(tok0, "presadj")) {
+      char *pitcher = cw_tokenizer_next(&tok);
+      char *base_str = cw_tokenizer_next(&tok);
       if (pitcher && base_str) {
-        base = cw_atoi(base_str, NULL);
+        int base = cw_atoi(base_str, NULL);
         if (base >= 1 && base <= 3) {
           strncpy(presadj[base], pitcher, 255);
         }
@@ -921,8 +912,9 @@ cw_game_read(FILE *file)
     else {
       cw_game_warn_invalid_record(game, line);
     }
+    free(line_copy);
   }
-
+  cw_record_reader_cleanup(&r);
   return game;
 }
 
