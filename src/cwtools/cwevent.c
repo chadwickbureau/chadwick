@@ -30,6 +30,7 @@
 #include <ctype.h>
 
 #include "cwlib/chadwick.h"
+#include "buffer.h"
 
 /*************************************************************************
  * Global variables for command-line options
@@ -73,134 +74,6 @@ int print_header = 0;
 /*************************************************************************
  * Writing to buffer abstraction
  *************************************************************************/
-
-typedef struct cw_buffer {
-  char *current;
-  char *end;
-  int truncated;
-  int need_sep;
-  int use_delimiter;
-  char delimiter;
-} CWBuffer;
-
-void
-cw_buffer_init(CWBuffer *buf, char *storage, size_t size, int use_delimiter, char delimiter)
-{
-  buf->current = storage;
-  buf->end = storage + size;
-  buf->truncated = 0;
-  buf->need_sep = 0;
-  buf->use_delimiter = use_delimiter;
-  buf->delimiter = delimiter;
-  if (size > 0) {
-    storage[0] = '\0';
-  }
-}
-
-int cw_buffer_emit(CWBuffer *buf, const char *fmt, ...)
-{
-  if (buf->current >= buf->end) {
-    buf->truncated = 1;
-    return 0;
-  }
-
-  /* Add delimiter if required */
-  if (buf->use_delimiter && buf->need_sep) {
-    if (buf->current < buf->end) {
-      *(buf->current++) = buf->delimiter;
-    }
-    else {
-      buf->truncated = 1;
-      return 0;
-    }
-  }
-  buf->need_sep = 1;
-
-  va_list ap;
-  va_start(ap, fmt);
-  int n = vsnprintf(buf->current, buf->end - buf->current, fmt, ap);
-  va_end(ap);
-  if (n < 0) {
-    buf->truncated = 1;
-    return 0;
-  }
-  if (buf->current + n >= buf->end) {
-    buf->current = buf->end;
-    buf->truncated = 1;
-    return (int)(buf->end - buf->current - 1);
-  }
-  buf->current += n;
-  return n;
-}
-
-inline int
-cw_buffer_emit_string(CWBuffer *buf, const char *s, int width)
-{
-  if (ascii) {
-    return cw_buffer_emit(buf, "\"%s\"", s ? s : "");
-  }
-  else {
-    return cw_buffer_emit(buf, "%-*s", width, s ? s : "");
-  }
-}
-
-inline int
-cw_buffer_emit_optional_string(CWBuffer *buf, const char *s, int width)
-{
-  return cw_buffer_emit_string(buf, s ? s : "", width);
-}
-
-inline int
-cw_buffer_emit_char(CWBuffer *buf, char c)
-{
-  if (ascii) {
-    return cw_buffer_emit(buf, "\"%c\"", c);
-  }
-  else {
-    return cw_buffer_emit(buf, "%c", c);
-  }
-}
-
-inline int
-cw_buffer_emit_char_unquoted(CWBuffer *buf, char c)
-{
-  return cw_buffer_emit(buf, "%c", c);
-}
-
-inline int
-cw_buffer_emit_char_rjust(CWBuffer *buf, char c, int width)
-{
-  if (ascii) {
-    return cw_buffer_emit(buf, "\"%c\"", c);
-  }
-  else {
-    return cw_buffer_emit(buf, "%*c", width, c);
-  }
-}
-
-inline int
-cw_buffer_emit_int(CWBuffer *buf, int value, int width)
-{
-  if (ascii || width == 0) {
-    return cw_buffer_emit(buf, "%d", value);
-  }
-  else {
-    return cw_buffer_emit(buf, "%*d", width, value);
-  }
-}
-
-inline int
-cw_buffer_emit_flag(CWBuffer *buf, int flag)
-{
-  return cw_buffer_emit_char(buf, flag ? 'T' : 'F');
-}
-
-inline int
-cw_buffer_emit_flag_rjust(CWBuffer *buf, int flag, int width)
-{
-  return cw_buffer_emit_char_rjust(buf, flag ? 'T' : 'F', width);
-}
-
 
 /*************************************************************************
  * Utility functions (in some cases, candidates for refactor to cwlib)
