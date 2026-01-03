@@ -36,3 +36,17 @@
     dest = NULL; \
   }
 
+
+/* Utility macro to implement copying to a fixed-size array
+ */
+#define CW_STRLCPY(dst, src) \
+  do { \
+    if ((src) != NULL) { \
+      strncpy((dst), (src), sizeof(dst) - 1); \
+      (dst)[sizeof(dst) - 1] = '\0'; \
+    } \
+    else { \
+      (dst)[0] = '\0'; \
+    } \
+  } while (0)
+

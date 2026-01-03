@@ -26,6 +26,7 @@
 #include <ctype.h>
 
 #include "parse.h"
+#include "util.h"
 
 /**************************************************************************
  * Data access on CWEventData objects
@@ -153,7 +154,7 @@ cw_event_rbi_on_play(CWEventData *event)
 void
 cw_event_set_play(CWEventData *event, int base, char *play)
 {
-  strncpy(event->play[base], play, 20);
+  CW_STRLCPY(event->play[base], play);
 }
 
 /*

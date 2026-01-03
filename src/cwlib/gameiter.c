@@ -51,11 +51,11 @@ cw_gamestate_base_occupied(CWGameState *state, int base)
 static void
 cw_gamestate_place_runner(CWGameState *state, int base, char *runner)
 {
-  strncpy(state->runners[base].runner, runner, 49);
-  strncpy(state->runners[base].pitcher,
-	  state->fielders[1][1-state->batting_team], 49);
-  strncpy(state->runners[base].catcher,
-	  state->fielders[2][1-state->batting_team], 49);
+  CW_STRLCPY(state->runners[base].runner, runner);
+  CW_STRLCPY(state->runners[base].pitcher,
+	         state->fielders[1][1-state->batting_team]);
+  CW_STRLCPY(state->runners[base].catcher,
+	         state->fielders[2][1-state->batting_team]);
   state->runners[base].is_auto = 1;
   state->num_auto_runners[state->batting_team]++;
 }
@@ -67,18 +67,18 @@ cw_gamestate_place_runner(CWGameState *state, int base, char *runner)
 static void
 cw_gamestate_place_batter(CWGameState *state, char *batter, int event_type)
 {
-  strncpy(state->runners[0].runner, batter, 49);
+  CW_STRLCPY(state->runners[0].runner, batter);
   if ((event_type == CW_EVENT_WALK ||
        event_type == CW_EVENT_INTENTIONALWALK) &&
       state->walk_pitcher) {
     strcpy(state->runners[0].pitcher, state->walk_pitcher);
   }
   else {
-    strncpy(state->runners[0].pitcher,
-	    state->fielders[1][1-state->batting_team], 49);
+    CW_STRLCPY(state->runners[0].pitcher,
+	           state->fielders[1][1-state->batting_team]);
   }
-  strncpy(state->runners[0].catcher,
-	  state->fielders[2][1-state->batting_team], 49);
+  CW_STRLCPY(state->runners[0].catcher,
+	         state->fielders[2][1-state->batting_team]);
   state->runners[0].src_event = state->event_count;
   state->runners[0].is_auto = 0;
 }
@@ -90,7 +90,7 @@ cw_gamestate_place_batter(CWGameState *state, char *batter, int event_type)
 static void
 cw_gamestate_replace_runner(CWGameState *state, int base, char *runner)
 {
-  strncpy(state->runners[base].runner, runner, 49);
+  CW_STRLCPY(state->runners[base].runner, runner);
 }
 
 static void
@@ -920,7 +920,7 @@ cw_gameiter_process_comments(CWGameIterator *gameiter)
     if (strstr(comment->text, "suspended,") == comment->text) {
       strtok(comment->text, ",");
       token = strtok(NULL, ",");
-      strncpy(gameiter->state->date, token, 8);
+      CW_STRLCPY(gameiter->state->date, token);
     }
     comment = comment->next;
   }
@@ -982,8 +982,8 @@ cw_gameiter_next(CWGameIterator *gameiter)
   if (gameiter->event) {
     for (base = 1; base <= 3; base++) {
       if (gameiter->event->presadj[base] != NULL) {
-        strncpy(gameiter->state->runners[base].pitcher,
-                gameiter->event->presadj[base], 49);
+        CW_STRLCPY(gameiter->state->runners[base].pitcher,
+                   gameiter->event->presadj[base]);
       }
     }
   }

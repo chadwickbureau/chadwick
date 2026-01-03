@@ -29,6 +29,7 @@
 #include <string.h>
 
 #include "chadwick.h"
+#include "util.h"
 
 /*
  * Create an initialize a batting statistic entry
@@ -279,8 +280,7 @@ cw_box_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
        * Try to do something reasonable here. 
        */
       CWBoxPlayer *player = cw_box_player_create(sub->player_id, sub->name);
-      strncpy(player->date, gameiter->state->date, 8);
-      player->date[8] = '\0';
+      CW_STRLCPY(player->date, gameiter->state->date);
       player->batting->g = 1;
       boxscore->slots[sub->slot][sub->team] = player;
     }
@@ -310,8 +310,7 @@ cw_box_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter)
     else if (strcmp(sub->player_id,
                     boxscore->slots[sub->slot][sub->team]->player_id) != 0) {
       CWBoxPlayer *player = cw_box_player_create(sub->player_id, sub->name);
-      strncpy(player->date, gameiter->state->date, 8);
-      player->date[8] = '\0';
+      CW_STRLCPY(player->date, gameiter->state->date);
       player->batting->g = 1;
       boxscore->slots[sub->slot][sub->team]->next = player;
       player->prev = boxscore->slots[sub->slot][sub->team];
