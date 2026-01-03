@@ -768,7 +768,7 @@ cw_gamestate_responsible_catcher(CWGameState *state, CWEventData *event_data,
     return "";
   }
   int orig_base = cw_gamestate_responsible_base(state, event_data, base);
-  return state->runners[orig_base].pitcher;
+  return state->runners[orig_base].catcher;
 }
 
 /*
