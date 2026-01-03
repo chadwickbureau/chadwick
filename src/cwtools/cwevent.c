@@ -1739,13 +1739,13 @@ cwevent_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
     cw_buffer_init(&buf, output_line, sizeof(output_line), ascii, ',');
     for (i = 0; i <= max_field; i++) {
       if (fields[i]) {
-	(*field_data[i].f)(&buf, gameiter, visitors, home);
+	    (*field_data[i].f)(&buf, gameiter, visitors, home);
       }
     }
 
     for (i = 0; i <= max_ext_field; i++) {
       if (ext_fields[i]) {
-	(*ext_field_data[i].f)(&buf, gameiter, visitors, home);
+	    (*ext_field_data[i].f)(&buf, gameiter, visitors, home);
       }
     }
 

@@ -29,6 +29,7 @@
 #include <ctype.h>
 
 #include "cwlib/chadwick.h"
+#include "buffer.h"
 
 /*************************************************************************
  * Global variables for command-line options
@@ -72,13 +73,13 @@ int print_header = 0;
 /* Auxiliary function: negative numbers in the boxscore structure
  * correspond to nulls, which should be rendered as blanks in output.
  */
-int cwgame_print_integer_or_null(char *buffer, int value)
+int cwgame_print_integer_or_null(CWBuffer *buffer, int value)
 {
   if (value >= 0) {
-    return sprintf(buffer, "%d", value);
+    return cw_buffer_emit(buffer, "%d", value);
   }
   else {
-    return sprintf(buffer, "%s", "");
+    return cw_buffer_emit(buffer, "%s", "");
   }
 }
 
@@ -157,7 +158,7 @@ cwgame_game_find_name(CWGame *game, char *player_id)
 /* Auxiliary function: find a player's bio entry and print his
  * first and last names to the buffer
  */
-int cwgame_find_player_name(CWGame *game, char *buffer, char *player_id,
+int cwgame_find_player_name(CWGame *game, CWBuffer *buffer, char *player_id,
 			    CWRoster *visitors, CWRoster *home)
 {
   CWPlayer *bio = NULL;
@@ -168,17 +169,17 @@ int cwgame_find_player_name(CWGame *game, char *buffer, char *player_id,
     bio = cw_roster_player_find(home, player_id);
   }
   if (bio) {
-    return sprintf(buffer, "\"%s %s\"", bio->first_name, bio->last_name);
+    return cw_buffer_emit(buffer, "\"%s %s\"", bio->first_name, bio->last_name);
   }
   else {
-    return sprintf(buffer, "\"%s\"", cwgame_game_find_name(game, player_id));
+    return cw_buffer_emit(buffer, "\"%s\"", cwgame_game_find_name(game, player_id));
   }
 }
 
 /*
  * typedef to declare the pointer-to-function type
  */
-typedef int (*field_func)(char *, CWGameIterator *, CWBoxscore *,
+typedef int (*field_func)(CWBuffer *, CWGameIterator *, CWBoxscore *,
 			  CWRoster *, CWRoster *);
 
 /*
@@ -195,13 +196,13 @@ typedef struct field_struct {
  */
 
 #define DECLARE_FIELDFUNC(funcname) \
-int funcname(char *buffer, CWGameIterator *gameiter, CWBoxscore *box, \
+int funcname(CWBuffer *buffer, CWGameIterator *gameiter, CWBoxscore *box, \
              CWRoster *visitors, CWRoster *home)
 
 /* Field 0 */
 DECLARE_FIELDFUNC(cwgame_game_id)
 {
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-12s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-12s",
 		 gameiter->game->game_id);
 }
 
@@ -209,7 +210,7 @@ DECLARE_FIELDFUNC(cwgame_game_id)
 DECLARE_FIELDFUNC(cwgame_date)
 {
   char *date = cw_game_info_lookup(gameiter->game, "date");
-  return sprintf(buffer, (ascii) ? "\"%c%c%c%c%c%c%c%c\"" : "%c%c%c%c%c%c%c%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c%c%c%c%c%c%c%c\"" : "%c%c%c%c%c%c%c%c",
 		 date[0], date[1], date[2], date[3],
 		 date[5], date[6], date[8], date[9]);
 }
@@ -218,7 +219,7 @@ DECLARE_FIELDFUNC(cwgame_date)
 DECLARE_FIELDFUNC(cwgame_number)
 {
   char *tmp;
-  return sprintf(buffer, (ascii) ? "%d" : "%5d",
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%5d",
 		 (tmp = cw_game_info_lookup(gameiter->game, "number")) ?
 		 cw_atoi(tmp, NULL) : 0);
 }
@@ -235,7 +236,7 @@ DECLARE_FIELDFUNC(cwgame_day_of_week)
   char *date = cw_game_info_lookup(gameiter->game, "date");
 
   if (date == NULL) {
-    strcpy(buffer, "");
+    cw_buffer_emit_string(buffer, "", 9);
     return 0;
   }
   sscanf(date, "%d/%d/%d", &year, &month, &day);
@@ -244,7 +245,7 @@ DECLARE_FIELDFUNC(cwgame_day_of_week)
     year += 1900;
   }
 
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%s",
 		 day_names[get_day_of_week(month, day, year)]);
 }
 
@@ -255,18 +256,18 @@ DECLARE_FIELDFUNC(cwgame_start_time)
   char *time = cw_game_info_lookup(gameiter->game, "starttime");
 
   if (time == NULL) {
-    return sprintf(buffer, (ascii) ? "0" : "   0");
+    return cw_buffer_emit(buffer, (ascii) ? "0" : "   0");
   }
 
   sscanf(time, "%d:%d", &hour, &min);
-  return sprintf(buffer, (ascii) ? "%d" : "%4d", hour * 100 + min);
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%4d", hour * 100 + min);
 }
 
 /* Field 5 */
 DECLARE_FIELDFUNC(cwgame_use_dh)
 {
   char *tmp;
-  return sprintf(buffer, (ascii) ? "\"%c\"" : "%c", 
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", 
 		 (tmp = cw_game_info_lookup(gameiter->game, "usedh")) ? 
 		 ((!strcmp(tmp, "true")) ? 'T' : 'F') : 'F');
 }
@@ -275,7 +276,7 @@ DECLARE_FIELDFUNC(cwgame_use_dh)
 DECLARE_FIELDFUNC(cwgame_day_night)
 {
   char *tmp;
-  return sprintf(buffer, (ascii) ? "\"%c\"" : "%c", 
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", 
 		 (tmp = cw_game_info_lookup(gameiter->game, "daynight")) ?
 		 ((!strcmp(tmp, "night")) ? 'N' : 'D') : 'D');
 }
@@ -284,7 +285,7 @@ DECLARE_FIELDFUNC(cwgame_day_night)
 DECLARE_FIELDFUNC(cwgame_visitors)
 {
   char *tmp;
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-3s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-3s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "visteam")) ?
 		 tmp : "");
 }
@@ -293,7 +294,7 @@ DECLARE_FIELDFUNC(cwgame_visitors)
 DECLARE_FIELDFUNC(cwgame_home)
 {
   char *tmp;
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-3s", 
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-3s", 
 		 (tmp = cw_game_info_lookup(gameiter->game, "hometeam")) ?
 		 tmp : "");
 }
@@ -302,7 +303,7 @@ DECLARE_FIELDFUNC(cwgame_home)
 DECLARE_FIELDFUNC(cwgame_site)
 {
   char *tmp;
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-5s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-5s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "site")) ?
 		 tmp : "");
 }
@@ -312,7 +313,7 @@ DECLARE_FIELDFUNC(cwgame_visitors_pitcher)
 {
   CWAppearance *app = cw_game_starter_find_by_position(gameiter->game, 0, 1);
   char *player_id = (app) ? app->player_id : "";
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s", player_id);
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s", player_id);
 }
 
 /* Field 11 */
@@ -320,14 +321,14 @@ DECLARE_FIELDFUNC(cwgame_home_pitcher)
 {
   CWAppearance *app = cw_game_starter_find_by_position(gameiter->game, 1, 1);
   char *player_id = (app) ? app->player_id : "";
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s", player_id);
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s", player_id);
 }
 
 /* Field 12 */
 DECLARE_FIELDFUNC(cwgame_umpire_home)
 {
   char *tmp;
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "umphome")) ?
 		 tmp : "");
 }
@@ -336,7 +337,7 @@ DECLARE_FIELDFUNC(cwgame_umpire_home)
 DECLARE_FIELDFUNC(cwgame_umpire_1b)
 {
   char *tmp;
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "ump1b")) ? 
 		 tmp : "");
 }
@@ -345,7 +346,7 @@ DECLARE_FIELDFUNC(cwgame_umpire_1b)
 DECLARE_FIELDFUNC(cwgame_umpire_2b)
 {
   char *tmp;
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "ump2b")) ?
 		 tmp : "");
 }
@@ -354,7 +355,7 @@ DECLARE_FIELDFUNC(cwgame_umpire_2b)
 DECLARE_FIELDFUNC(cwgame_umpire_3b)
 {
   char *tmp;
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "ump3b")) ? 
 		 tmp : "");
 }
@@ -363,7 +364,7 @@ DECLARE_FIELDFUNC(cwgame_umpire_3b)
 DECLARE_FIELDFUNC(cwgame_umpire_lf)
 {
   char *tmp;
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "umplf")) ?
 		 tmp : "");
 }
@@ -372,7 +373,7 @@ DECLARE_FIELDFUNC(cwgame_umpire_lf)
 DECLARE_FIELDFUNC(cwgame_umpire_rf)
 {
   char *tmp;
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "umprf")) ?
 		 tmp : "");
 }
@@ -381,7 +382,7 @@ DECLARE_FIELDFUNC(cwgame_umpire_rf)
 DECLARE_FIELDFUNC(cwgame_attendance)
 {
   char *tmp = cw_game_info_lookup(gameiter->game, "attendance");
-  return sprintf(buffer, (ascii) ? "%d" : "%5d",
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%5d",
                  (tmp && strcmp(tmp, "") != 0) ?
 		         cw_atoi(tmp, "Warning: invalid value '%s' for info,attendance\n") : 0);
 }
@@ -391,7 +392,7 @@ DECLARE_FIELDFUNC(cwgame_scorer)
 {
   char *tmp;
 
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "scorer")) ?
 		 tmp : "");
 }
@@ -400,7 +401,7 @@ DECLARE_FIELDFUNC(cwgame_scorer)
 DECLARE_FIELDFUNC(cwgame_translator)
 {
   char *tmp;
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "translator")) ?
 		 tmp : "");
 }
@@ -409,7 +410,7 @@ DECLARE_FIELDFUNC(cwgame_translator)
 DECLARE_FIELDFUNC(cwgame_inputter)
 {
   char *tmp;
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "inputter")) ?
 		 tmp : "");
 }
@@ -418,7 +419,7 @@ DECLARE_FIELDFUNC(cwgame_inputter)
 DECLARE_FIELDFUNC(cwgame_inputtime)
 {
   char *tmp;
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "inputtime")) ? 
 		 tmp : "");
 }
@@ -427,7 +428,7 @@ DECLARE_FIELDFUNC(cwgame_inputtime)
 DECLARE_FIELDFUNC(cwgame_edittime)
 {
   char *tmp;
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-30s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-30s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "edittime")) ? 
 		 tmp : "");
 }
@@ -440,7 +441,7 @@ DECLARE_FIELDFUNC(cwgame_howscored)
     { -1, "" }
   };
 
-  return sprintf(buffer, "%d", 
+  return cw_buffer_emit(buffer, "%d", 
 		 cwgame_lookup(cw_game_info_lookup(gameiter->game,
 						   "howscored"), table));
 }
@@ -453,7 +454,7 @@ DECLARE_FIELDFUNC(cwgame_pitches)
     { -1, "" }
   };
 
-  return sprintf(buffer, "%d", 
+  return cw_buffer_emit(buffer, "%d", 
 		 cwgame_lookup(cw_game_info_lookup(gameiter->game, "pitches"),
 			       table));
 }
@@ -463,10 +464,10 @@ DECLARE_FIELDFUNC(cwgame_temperature)
 {
   char *value = cw_game_info_lookup(gameiter->game, "temp");
   if (!value || !strcmp(value, "") || !strcmp(value, "unknown")) {
-    return sprintf(buffer, (ascii) ? "%d" : "%3d", 0);
+    return cw_buffer_emit(buffer, (ascii) ? "%d" : "%3d", 0);
   }
   else {
-    return sprintf(buffer, (ascii) ? "%d" : "%3d",
+    return cw_buffer_emit(buffer, (ascii) ? "%d" : "%3d",
                    cw_atoi(value, "Warning: invalid value '%s' for info,temp\n"));
   }
 }
@@ -480,7 +481,7 @@ DECLARE_FIELDFUNC(cwgame_wind_direction)
     { 8, "rtol" }, { -1, "" }
   };
 
-  return sprintf(buffer, "%d",
+  return cw_buffer_emit(buffer, "%d",
 		 cwgame_lookup(cw_game_info_lookup(gameiter->game, "winddir"),
 			       table));
 }
@@ -490,10 +491,10 @@ DECLARE_FIELDFUNC(cwgame_wind_speed)
 {
   char *value = cw_game_info_lookup(gameiter->game, "windspeed");
   if (!value || !strcmp(value, "") || !strcmp(value, "unknown")) {
-    return sprintf(buffer, "%d", 0);
+    return cw_buffer_emit(buffer, "%d", 0);
   }
   else {
-    return sprintf(buffer, "%d", cw_atoi(value, "Warning: invalid value '%s' for info,windspeed\n"));
+    return cw_buffer_emit(buffer, "%d", cw_atoi(value, "Warning: invalid value '%s' for info,windspeed\n"));
   }
 }
 
@@ -505,7 +506,7 @@ DECLARE_FIELDFUNC(cwgame_field_condition)
     { 3, "damp" }, { 4, "dry" }, { -1, "" }
   };
 
-  return sprintf(buffer, "%d",
+  return cw_buffer_emit(buffer, "%d",
 		 cwgame_lookup(cw_game_info_lookup(gameiter->game,
 						   "fieldcond"), table));
 }
@@ -518,7 +519,7 @@ DECLARE_FIELDFUNC(cwgame_precipitation)
     { 4, "rain" }, { 5, "snow" }, { -1, "" }
   };
 
-  return sprintf(buffer, "%d",
+  return cw_buffer_emit(buffer, "%d",
 		 cwgame_lookup(cw_game_info_lookup(gameiter->game,
 						   "precip"), table));
 }
@@ -531,7 +532,7 @@ DECLARE_FIELDFUNC(cwgame_sky)
     { 4, "night" }, { 5, "dome" }, { -1, "" }
   };
 
-  return sprintf(buffer, "%d",
+  return cw_buffer_emit(buffer, "%d",
 		 cwgame_lookup(cw_game_info_lookup(gameiter->game, "sky"),
 			       table));
 }
@@ -540,7 +541,7 @@ DECLARE_FIELDFUNC(cwgame_sky)
 DECLARE_FIELDFUNC(cwgame_time_of_game)
 {
   char *tmp = cw_game_info_lookup(gameiter->game, "timeofgame");
-  return sprintf(buffer, (ascii) ? "%d" : "%5d",
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%5d",
                  (tmp && strcmp(tmp, "") != 0) ?
                  cw_atoi(tmp, "Warning: invalid value '%s' for info,timeofgame\n") : 0);
 }
@@ -550,7 +551,7 @@ DECLARE_FIELDFUNC(cwgame_innings)
 {
   int i;
   if (gameiter->game->first_event != NULL) {
-    return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->state->inning);
+    return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", gameiter->state->inning);
   }
   else {
     for (i = 1; i < 50; i++) {
@@ -558,55 +559,55 @@ DECLARE_FIELDFUNC(cwgame_innings)
 	break;
       }
     }
-    return sprintf(buffer, (ascii) ? "%d" : "%2d", i-1);
+    return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", i-1);
   }
 }
 
 /* Field 34 */
 DECLARE_FIELDFUNC(cwgame_visitor_score)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", box->score[0]);
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", box->score[0]);
 }
 
 /* Field 35 */
 DECLARE_FIELDFUNC(cwgame_home_score)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", box->score[1]);
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", box->score[1]);
 }
 
 /* Field 36 */
 DECLARE_FIELDFUNC(cwgame_visitor_hits)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", box->hits[0]);
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", box->hits[0]);
 }
 
 /* Field 37 */
 DECLARE_FIELDFUNC(cwgame_home_hits)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", box->hits[1]);
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", box->hits[1]);
 }
 
 /* Field 38 */
 DECLARE_FIELDFUNC(cwgame_visitor_errors)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", box->errors[0]);
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", box->errors[0]);
 }
 
 /* Field 39 */
 DECLARE_FIELDFUNC(cwgame_home_errors)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", box->errors[1]);
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", box->errors[1]);
 }
 
 /* Field 40 */
 DECLARE_FIELDFUNC(cwgame_visitor_lob)
 {
   if (gameiter->game->first_event != NULL) {
-    return sprintf(buffer, (ascii) ? "%d" : "%2d",
+    return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d",
 		   cw_gamestate_left_on_base(gameiter->state, 0));
   }
   else {
-    return sprintf(buffer, (ascii) ? "%d" : "%2d", box->lob[0]);
+    return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", box->lob[0]);
   }
 }
 
@@ -614,11 +615,11 @@ DECLARE_FIELDFUNC(cwgame_visitor_lob)
 DECLARE_FIELDFUNC(cwgame_home_lob)
 {
   if (gameiter->game->first_event != NULL) {
-    return sprintf(buffer, (ascii) ? "%d" : "%2d",
+    return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d",
 		   cw_gamestate_left_on_base(gameiter->state, 1));
   }
   else {
-    return sprintf(buffer, (ascii) ? "%d" : "%2d", box->lob[1]);
+    return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", box->lob[1]);
   }
 }
 
@@ -626,7 +627,7 @@ DECLARE_FIELDFUNC(cwgame_home_lob)
 DECLARE_FIELDFUNC(cwgame_winning_pitcher)
 {
   char *tmp;
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s", 
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s", 
 		 (tmp = cw_game_info_lookup(gameiter->game, "wp")) ? tmp : "");
 }
 
@@ -634,7 +635,7 @@ DECLARE_FIELDFUNC(cwgame_winning_pitcher)
 DECLARE_FIELDFUNC(cwgame_losing_pitcher)
 {
   char *tmp;
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "lp")) ? tmp : "");
 }
 
@@ -642,7 +643,7 @@ DECLARE_FIELDFUNC(cwgame_losing_pitcher)
 DECLARE_FIELDFUNC(cwgame_save)
 {
   char *tmp;
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-12s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-12s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "save")) ?
 		 tmp : "");
 }
@@ -651,41 +652,41 @@ DECLARE_FIELDFUNC(cwgame_save)
 DECLARE_FIELDFUNC(cwgame_gwrbi)
 {
   char *tmp;
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "gwrbi")) ? 
 		 tmp : "");
 }
 
 int
-cwgame_final_pitcher(char *buffer, CWGame *game, CWBoxscore *box, int team)
+cwgame_final_pitcher(CWBuffer *buffer, CWGame *game, CWBoxscore *box, int team)
 {
   CWBoxPitcher *pitcher = box->pitchers[team];
   char *player_id = (pitcher && pitcher->prev) ? pitcher->prev->player_id : "";
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s", player_id);
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s", player_id);
 }
 
 /* Fields for starting lineups */
 int
-cwgame_starting_player(char *buffer, CWGame *game, int team, int slot)
+cwgame_starting_player(CWBuffer *buffer, CWGame *game, int team, int slot)
 {
   CWAppearance *starter = cw_game_starter_find(game, team, slot);
   if (starter) {
-    return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s", starter->player_id); 
+    return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s", starter->player_id); 
   }
   else {
-    return sprintf(buffer, "(null)"); 
+    return cw_buffer_emit(buffer, "(null)"); 
   }
 }
 
 int
-cwgame_starting_position(char *buffer, CWGame *game, int team, int slot)
+cwgame_starting_position(CWBuffer *buffer, CWGame *game, int team, int slot)
 {
   CWAppearance *starter = cw_game_starter_find(game, team, slot);
   if (starter) {
-    return sprintf(buffer, "%d", starter->pos);
+    return cw_buffer_emit(buffer, "%d", starter->pos);
   }
   else {
-    return sprintf(buffer, "0");
+    return cw_buffer_emit(buffer, "0");
   }
 }
 
@@ -693,7 +694,7 @@ cwgame_starting_position(char *buffer, CWGame *game, int team, int slot)
 DECLARE_FIELDFUNC(cwgame_game_type)
 {
   char *tmp = cw_game_info_lookup(gameiter->game, "gametype");
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-12s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-12s",
                  (tmp && strcmp(tmp, "") != 0) ? tmp : "regular");
 }
 
@@ -831,7 +832,7 @@ DECLARE_FIELDFUNC(funcname) \
       for (pos = frompos; pos <= topos; pos++) { \
          if (player->fielding[pos] != NULL) { \
             if (player->fielding[pos]->fieldname < 0) { \
-              return sprintf(buffer, "%d", -1); \
+              return cw_buffer_emit(buffer, "%d", -1); \
             } \
             tot += player->fielding[pos]->fieldname; \
          } \
@@ -849,25 +850,25 @@ DECLARE_FIELDFUNC(funcname) \
 /* Extended Field 0 */
 DECLARE_FIELDFUNC(cwgame_visitors_league)
 {
-  return sprintf(buffer, "\"%s\"", (visitors) ? visitors->league : "");
+  return cw_buffer_emit(buffer, "\"%s\"", (visitors) ? visitors->league : "");
 }
 
 /* Extended Field 1 */
 DECLARE_FIELDFUNC(cwgame_home_league)
 {
-  return sprintf(buffer, "\"%s\"", (home) ? home->league : "");
+  return cw_buffer_emit(buffer, "\"%s\"", (home) ? home->league : "");
 }
 
 /* Extended Field 2 */
 DECLARE_FIELDFUNC(cwgame_visitors_game)
 {
-  return sprintf(buffer, "%s", "");
+  return cw_buffer_emit(buffer, "%s", "");
 }
 
 /* Extended Field 3 */
 DECLARE_FIELDFUNC(cwgame_home_game)
 {
-  return sprintf(buffer, "%s", "");
+  return cw_buffer_emit(buffer, "%s", "");
 }
 
 /* Extended Field 4 */
@@ -884,77 +885,75 @@ DECLARE_FIELDFUNC(cwgame_length_outs)
     }
   }
   
-  return sprintf(buffer, "%d", outs);
+  return cw_buffer_emit(buffer, "%d", outs);
 }
 
 /* Extended Field 5 */
 DECLARE_FIELDFUNC(cwgame_completion_info)
 {
-  return sprintf(buffer, "%s", "");
+  return cw_buffer_emit(buffer, "%s", "");
 }
 
 /* Extended Field 6 */
 DECLARE_FIELDFUNC(cwgame_forfeit_info)
 {
-  return sprintf(buffer, "%s", "");
+  return cw_buffer_emit(buffer, "%s", "");
 }
 
 /* Extended Field 7 */
 DECLARE_FIELDFUNC(cwgame_protest_info)
 {
-  return sprintf(buffer, "%s", "");
+  return cw_buffer_emit(buffer, "%s", "");
 }
 
 /* Extended Field 8 */
 DECLARE_FIELDFUNC(cwgame_visitors_line)
 {
   int i;
-  char *c = buffer;
+  int count = 0;
   
   for (i = 1; i < 50; i++) {
-    if (box->linescore[i][0] < 0 &&
-	box->linescore[i][1] < 0) {
+    if (box->linescore[i][0] < 0 && box->linescore[i][1] < 0) {
       break;
     }
 
     if (box->linescore[i][0] >= 10) {
-      c += sprintf(c, "(%d)", box->linescore[i][0]);
+      count += cw_buffer_emit(buffer, "(%d)", box->linescore[i][0]);
     }
     else if (box->linescore[i][0] >= 0) {
-      c += sprintf(c, "%d", box->linescore[i][0]);
+      count += cw_buffer_emit(buffer, "%d", box->linescore[i][0]);
     }
     else {
-      c += sprintf(c, "x");
+      count += cw_buffer_emit(buffer, "%s", "x");
     }
   }
 
-  return c - buffer;
+  return count;
 }
 
 /* Extended Field 9 */
 DECLARE_FIELDFUNC(cwgame_home_line)
 {
   int i;
-  char *c = buffer;
+  int count = 0;
   
   for (i = 1; i < 50; i++) {
-    if (box->linescore[i][0] < 0 &&
-	box->linescore[i][1] < 0) {
+    if (box->linescore[i][0] < 0 && box->linescore[i][1] < 0) {
       break;
     }
 
     if (box->linescore[i][1] >= 10) {
-      c += sprintf(c, "(%d)", box->linescore[i][1]);
+      count += cw_buffer_emit(buffer, "(%d)", box->linescore[i][1]);
     }
     else if (box->linescore[i][1] >= 0) {
-      c += sprintf(c, "%d", box->linescore[i][1]);
+      count += cw_buffer_emit(buffer, "%d", box->linescore[i][1]);
     }
     else {
-      c += sprintf(c, "x");
+      count += cw_buffer_emit(buffer, "%s", "x");
     }
   }
 
-  return c - buffer;
+  return count;
 }
 
 /* Field 21 */
@@ -1009,7 +1008,7 @@ DECLARE_FIELDFUNC(cwgame_visitors_pitchers)
   int i = 0;
 
   for (; pitcher != NULL; pitcher = pitcher->next, i++);
-  return sprintf(buffer, "%d", i);
+  return cw_buffer_emit(buffer, "%d", i);
 }
 
 /* Field 39 */
@@ -1018,7 +1017,7 @@ DECLARE_TABULATED_PITCHER_FUNC(cwgame_visitors_er, 0, er)
 /* Field 40 */
 DECLARE_FIELDFUNC(cwgame_visitors_ter)
 {
-  return sprintf(buffer, "%d", box->er[0]);
+  return cw_buffer_emit(buffer, "%d", box->er[0]);
 }
 
 /* Field 41 */
@@ -1039,13 +1038,13 @@ DECLARE_TABULATED_FIELDER_FUNC(cwgame_visitors_pb, 0, pb, 2, 2)
 /* Field 47 */
 DECLARE_FIELDFUNC(cwgame_visitors_dp)
 {
-  return sprintf(buffer, "%d", box->dp[0]);
+  return cw_buffer_emit(buffer, "%d", box->dp[0]);
 }
 
 /* Field 48 */
 DECLARE_FIELDFUNC(cwgame_visitors_tp)
 {
-  return sprintf(buffer, "%d", box->tp[0]);
+  return cw_buffer_emit(buffer, "%d", box->tp[0]);
 }
 
 /* Field 49 */
@@ -1100,7 +1099,7 @@ DECLARE_FIELDFUNC(cwgame_home_pitchers)
   int i = 0;
 
   for (; pitcher != NULL; pitcher = pitcher->next, i++);
-  return sprintf(buffer, "%d", i);
+  return cw_buffer_emit(buffer, "%d", i);
 }
 
 /* Field 67 */
@@ -1109,7 +1108,7 @@ DECLARE_TABULATED_PITCHER_FUNC(cwgame_home_er, 1, er)
 /* Field 68 */
 DECLARE_FIELDFUNC(cwgame_home_ter)
 {
-  return sprintf(buffer, "%d", box->er[1]);
+  return cw_buffer_emit(buffer, "%d", box->er[1]);
 }
 
 /* Field 69 */
@@ -1130,73 +1129,73 @@ DECLARE_TABULATED_FIELDER_FUNC(cwgame_home_pb, 1, pb, 2, 2)
 /* Field 75 */
 DECLARE_FIELDFUNC(cwgame_home_dp)
 {
-  return sprintf(buffer, "%d", box->dp[1]);
+  return cw_buffer_emit(buffer, "%d", box->dp[1]);
 }
 
 /* Field 76 */
 DECLARE_FIELDFUNC(cwgame_home_tp)
 {
-  return sprintf(buffer, "%d", box->tp[1]);
+  return cw_buffer_emit(buffer, "%d", box->tp[1]);
 }
 
 /* Field 78 */
 DECLARE_FIELDFUNC(cwgame_umpire_home_name)
 {
-  return sprintf(buffer, "%s", "");
+  return cw_buffer_emit(buffer, "%s", "");
 }
 
 /* Field 78 */
 DECLARE_FIELDFUNC(cwgame_umpire_1b_name)
 {
-  return sprintf(buffer, "%s", "");
+  return cw_buffer_emit(buffer, "%s", "");
 }
 
 /* Field 78 */
 DECLARE_FIELDFUNC(cwgame_umpire_2b_name)
 {
-  return sprintf(buffer, "%s", "");
+  return cw_buffer_emit(buffer, "%s", "");
 }
 
 /* Field 78 */
 DECLARE_FIELDFUNC(cwgame_umpire_3b_name)
 {
-  return sprintf(buffer, "%s", "");
+  return cw_buffer_emit(buffer, "%s", "");
 }
 
 /* Field 78 */
 DECLARE_FIELDFUNC(cwgame_umpire_lf_name)
 {
-  return sprintf(buffer, "%s", "");
+  return cw_buffer_emit(buffer, "%s", "");
 }
 
 /* Field 78 */
 DECLARE_FIELDFUNC(cwgame_umpire_rf_name)
 {
-  return sprintf(buffer, "%s", "");
+  return cw_buffer_emit(buffer, "%s", "");
 }
 
 /* Field 89 */
 DECLARE_FIELDFUNC(cwgame_visitors_manager_id)
 {
-  return sprintf(buffer, "%s", "");
+  return cw_buffer_emit(buffer, "%s", "");
 }
 
 /* Field 90 */
 DECLARE_FIELDFUNC(cwgame_visitors_manager_name)
 {
-  return sprintf(buffer, "%s", "");
+  return cw_buffer_emit(buffer, "%s", "");
 }
 
 /* Field 91 */
 DECLARE_FIELDFUNC(cwgame_home_manager_id)
 {
-  return sprintf(buffer, "%s", "");
+  return cw_buffer_emit(buffer, "%s", "");
 }
 
 /* Field 92 */
 DECLARE_FIELDFUNC(cwgame_home_manager_name)
 {
-  return sprintf(buffer, "%s", "");
+  return cw_buffer_emit(buffer, "%s", "");
 }
 
 /* Field 94 */
@@ -1207,7 +1206,7 @@ DECLARE_FIELDFUNC(cwgame_winning_pitcher_name)
     return cwgame_find_player_name(gameiter->game, buffer, tmp, visitors, home);
   }
   else {
-    return sprintf(buffer, "\"(none)\"");
+    return cw_buffer_emit(buffer, "\"(none)\"");
   }
 }
 
@@ -1219,7 +1218,7 @@ DECLARE_FIELDFUNC(cwgame_losing_pitcher_name)
     return cwgame_find_player_name(gameiter->game, buffer, tmp, visitors, home);
   }
   else {
-    return sprintf(buffer, "\"(none)\"");
+    return cw_buffer_emit(buffer, "\"(none)\"");
   }
 }
 
@@ -1231,14 +1230,14 @@ DECLARE_FIELDFUNC(cwgame_save_pitcher_name)
     return cwgame_find_player_name(gameiter->game, buffer, tmp, visitors, home);
   }
   else {
-    return sprintf(buffer, "\"(none)\"");
+    return cw_buffer_emit(buffer, "\"(none)\"");
   }
 }
 
 /* Field 99 */
 DECLARE_FIELDFUNC(cwgame_goahead_rbi_id)
 {
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 (gameiter->state->go_ahead_rbi) ? gameiter->state->go_ahead_rbi : "");
 }
 
@@ -1250,11 +1249,11 @@ DECLARE_FIELDFUNC(cwgame_goahead_rbi_name)
     return cwgame_find_player_name(gameiter->game, buffer, tmp, visitors, home);
   }
   else {
-    return sprintf(buffer, "\"(none)\"");
+    return cw_buffer_emit(buffer, "\"(none)\"");
   }
 }
 
-int cwgame_find_lineup_name(CWGame *game, char *buffer,
+int cwgame_find_lineup_name(CWGame *game, CWBuffer *buffer,
                             int alignment, int slot,
                             CWRoster *visitors, CWRoster *home)
 {
@@ -1264,7 +1263,7 @@ int cwgame_find_lineup_name(CWGame *game, char *buffer,
                                    visitors, home);
   }
   else {
-    return sprintf(buffer, "(null)");
+    return cw_buffer_emit(buffer, "(null)");
   }
 
 }
@@ -1364,23 +1363,23 @@ DECLARE_FIELDFUNC(cwgame_additional_info)
 {
   if (cw_game_info_lookup(gameiter->game, "htbf") &&
       !strcmp(cw_game_info_lookup(gameiter->game, "htbf"), "true")) {
-    return sprintf(buffer, "%s", "HTBF");
+    return cw_buffer_emit(buffer, "%s", "HTBF");
   }
   else {
-    return sprintf(buffer, "%s", "");
+    return cw_buffer_emit(buffer, "%s", "");
   }
 }
 
 /* Field 160 */
 DECLARE_FIELDFUNC(cwgame_acquisition_info)
 {
-  return sprintf(buffer, "%s", "");
+  return cw_buffer_emit(buffer, "%s", "");
 }
 
 DECLARE_FIELDFUNC(cwgame_scheduled_innings)
 {
   char *tmp;
-  return sprintf(buffer, "%s",
+  return cw_buffer_emit(buffer, "%s",
 		 (tmp = cw_game_info_lookup(gameiter->game, "innings")) ?
 		 tmp : "9");
 }
@@ -1388,7 +1387,7 @@ DECLARE_FIELDFUNC(cwgame_scheduled_innings)
 DECLARE_FIELDFUNC(cwgame_tiebreaker)
 {
   char *tmp;
-  return sprintf(buffer, "\"%s\"",
+  return cw_buffer_emit(buffer, "\"%s\"",
 		 (tmp = cw_game_info_lookup(gameiter->game, "tiebreaker")) ?
 		 tmp : "");
 }
@@ -1496,9 +1495,9 @@ static field_struct ext_field_data[] = {
 
 void cwgame_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 {
-  char *buf;
   char output_line[4096];
-  int i, j, t, comma = 0;
+  CWBuffer buf;
+  int i, j, t;
   CWGameIterator *gameiter = cw_gameiter_create(game);
   CWBoxscore *box = cw_box_create(game);
 
@@ -1506,33 +1505,20 @@ void cwgame_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
     cw_gameiter_next(gameiter);
   }
 
-  strcpy(output_line, "");
-  buf = output_line;
+  cw_buffer_init(&buf, output_line, sizeof(output_line), ascii, ',');
   for (i = 0; i < 46; i++) {
     if (fields[i]) {
-      if (ascii && comma) {
-	*(buf++) = ',';
-      }
-      else {
-	comma = 1;
-      }
-      buf += (*field_data[i].f)(buf, gameiter, box, visitors, home);
+      (*field_data[i].f)(&buf, gameiter, box, visitors, home);
     }
   }
 
   for (t = 0; t <= 1; t++) {
     for (i = 1; i <= 9; i++) {
       for (j = 0; j <= 1; j++) {
-	if (fields[46 + t*18 + 2*(i-1) + j]) {
-	  if (ascii && comma) {
-	    *(buf++) = ',';
-	  }
-	  else {
-	    comma = 1;
-	  }
-	  buf += ((j == 0) ? cwgame_starting_player(buf, game, t, i) :
-		  cwgame_starting_position(buf, game, t, i));
-	}
+	      if (fields[46 + t*18 + 2*(i-1) + j]) {
+	         ((j == 0) ? cwgame_starting_player(&buf, game, t, i) :
+		       cwgame_starting_position(&buf, game, t, i));
+	      }
       }
     }
   }
@@ -1540,38 +1526,20 @@ void cwgame_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
   t = 0;
   for (i = 82; i < 84; i++) {
     if (fields[i]) {
-      if (ascii && comma) {
-        *(buf++) = ',';
-      }
-      else {
-        comma = 1;
-      }
-      buf += cwgame_final_pitcher(buf, game, box, t);
+      cwgame_final_pitcher(&buf, game, box, t);
     }
     t++;
   }
   
   for (i = 84; i <= max_field; i++) {
     if (fields[i]) {
-      if (ascii && comma) {
-	*(buf++) = ',';
-      }
-      else {
-	comma = 1;
-      }
-      buf += (*field_data[i].f)(buf, gameiter, box, visitors, home);
+      (*field_data[i].f)(&buf, gameiter, box, visitors, home);
     }
   }
     
   for (i = 0; i <= max_ext_field; i++) {
     if (ext_fields[i]) {
-      if (ascii && comma) {
-	*(buf++) = ',';
-      }
-      else {
-	comma = 1;
-      }
-      buf += (*ext_field_data[i].f)(buf, gameiter, box, visitors, home);
+      (*ext_field_data[i].f)(&buf, gameiter, box, visitors, home);
     }
   }
   
@@ -1657,38 +1625,24 @@ void (*cwtools_print_welcome_message)(char *) = cwgame_print_welcome_message;
 void
 cwgame_initialize(void)
 {
-  int i, comma = 0;
+  int i;
   char output_line[4096];
-  char *buf;
+  CWBuffer buf;
 
   if (!ascii || !print_header) {
     return;
   }
-
-  strcpy(output_line, "");
-  buf = output_line;
+  cw_buffer_init(&buf, output_line, sizeof(output_line), ascii, ',');
 
   for (i = 0; i <= max_field; i++) {
     if (fields[i]) {
-      if (ascii && comma) {
-	*(buf++) = ',';
-      }
-      else {
-	comma = 1;
-      }
-      buf += sprintf(buf, "\"%s\"", field_data[i].header);
+      cw_buffer_emit(&buf, "\"%s\"", field_data[i].header);
     }
   }
 
   for (i = 0; i <= max_ext_field; i++) {
     if (ext_fields[i]) {
-      if (ascii && comma) {
-	*(buf++) = ',';
-      }
-      else {
-	comma = 1;
-      }
-      buf += sprintf(buf, "\"%s\"", ext_field_data[i].header);
+      cw_buffer_emit(&buf, "\"%s\"", ext_field_data[i].header);
     }
   }
 
