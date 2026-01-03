@@ -78,25 +78,44 @@ typedef struct cw_buffer {
   char *current;
   char *end;
   int truncated;
+  int need_sep;
+  int use_delimiter;
+  char delimiter;
 } CWBuffer;
 
 void
-cw_buffer_init(CWBuffer *buf, char *storage, size_t size)
+cw_buffer_init(CWBuffer *buf, char *storage, size_t size, int use_delimiter, char delimiter)
 {
   buf->current = storage;
   buf->end = storage + size;
   buf->truncated = 0;
+  buf->need_sep = 0;
+  buf->use_delimiter = use_delimiter;
+  buf->delimiter = delimiter;
   if (size > 0) {
     storage[0] = '\0';
   }
 }
 
-int cw_buffer_printf(CWBuffer *buf, const char *fmt, ...)
+int cw_buffer_emit(CWBuffer *buf, const char *fmt, ...)
 {
   if (buf->current >= buf->end) {
     buf->truncated = 1;
     return 0;
   }
+
+  /* Add delimiter if required */
+  if (buf->use_delimiter && buf->need_sep) {
+    if (buf->current < buf->end) {
+      *(buf->current++) = buf->delimiter;
+    }
+    else {
+      buf->truncated = 1;
+      return 0;
+    }
+  }
+  buf->need_sep = 1;
+
   va_list ap;
   va_start(ap, fmt);
   int n = vsnprintf(buf->current, buf->end - buf->current, fmt, ap);
@@ -172,33 +191,33 @@ int funcname(CWBuffer *buffer, CWGameIterator *gameiter, \
 /* Field 0 */
 DECLARE_FIELDFUNC(cwevent_game_id)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-12s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-12s",
 		 gameiter->game->game_id);
 } 
 
 /* Field 1 */
 DECLARE_FIELDFUNC(cwevent_visiting_team)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-3s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-3s",
 		 cw_game_info_lookup(gameiter->game, "visteam"));
 }
 
 /* Field 2 */
 DECLARE_FIELDFUNC(cwevent_inning)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%4d", gameiter->event->inning);
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%4d", gameiter->event->inning);
 }
 
 /* Field 3 */
 DECLARE_FIELDFUNC(cwevent_batting_team)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event->batting_team);
+  return cw_buffer_emit(buffer, "%d", gameiter->event->batting_team);
 }
 
 /* Field 4 */
 DECLARE_FIELDFUNC(cwevent_outs)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->state->outs); 
+  return cw_buffer_emit(buffer, "%d", gameiter->state->outs); 
 }
 
 /* Field 5 */
@@ -207,10 +226,10 @@ DECLARE_FIELDFUNC(cwevent_balls)
   if (strlen(gameiter->event->count) >= 2 && 
       gameiter->event->count[0] != '?' &&
       gameiter->event->count[1] != '?') {
-    return cw_buffer_printf(buffer, "%c", gameiter->event->count[0]);
+    return cw_buffer_emit(buffer, "%c", gameiter->event->count[0]);
   }
   else {
-    return cw_buffer_printf(buffer, "0");
+    return cw_buffer_emit(buffer, "0");
   }
 }
 
@@ -220,10 +239,10 @@ DECLARE_FIELDFUNC(cwevent_strikes)
   if (strlen(gameiter->event->count) >= 2 &&
       gameiter->event->count[0] != '?' &&
       gameiter->event->count[1] != '?') {
-    return cw_buffer_printf(buffer, "%c", gameiter->event->count[1]);
+    return cw_buffer_emit(buffer, "%c", gameiter->event->count[1]);
   }
   else {
-    return cw_buffer_printf(buffer, "0");
+    return cw_buffer_emit(buffer, "0");
   }
 }
 
@@ -236,25 +255,25 @@ DECLARE_FIELDFUNC(cwevent_pitches)
   while (foo && isspace(*foo)) {
     foo++;
   }
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-20s", foo);
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-20s", foo);
 }
 
 /* Field 8 */
 DECLARE_FIELDFUNC(cwevent_visitor_score)
 { 
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%2d", gameiter->state->score[0]);
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", gameiter->state->score[0]);
 }
 
 /* Field 9 */
 DECLARE_FIELDFUNC(cwevent_home_score)
 { 
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%2d", gameiter->state->score[1]);
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", gameiter->state->score[1]);
 }
 
 /* Field 10 */
 DECLARE_FIELDFUNC(cwevent_batter)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s", 
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s", 
 		 gameiter->event->batter);
 }
 
@@ -292,13 +311,13 @@ DECLARE_FIELDFUNC(cwevent_batter_hand)
     }
   }
 
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c", batterHand);
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", batterHand);
 }
 
 /* Field 12 */
 DECLARE_FIELDFUNC(cwevent_res_batter)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 cw_gamestate_charged_batter(gameiter->state,
 					     gameiter->event->batter,
 					     gameiter->event_data));
@@ -307,7 +326,7 @@ DECLARE_FIELDFUNC(cwevent_res_batter)
 /* Field 13 */
 DECLARE_FIELDFUNC(cwevent_res_batter_hand)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 cw_gamestate_charged_batter_hand(gameiter->state,
 						  gameiter->event->batter,
 						  gameiter->event_data,
@@ -318,7 +337,7 @@ DECLARE_FIELDFUNC(cwevent_res_batter_hand)
 /* Field 14 */
 DECLARE_FIELDFUNC(cwevent_pitcher)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 	  gameiter->state->fielders[1][1-gameiter->state->batting_team]);
 }
 
@@ -337,13 +356,13 @@ DECLARE_FIELDFUNC(cwevent_pitcher_hand)
     pitcherHand = gameiter->event->pitcher_hand;
   }
 
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c", pitcherHand);
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", pitcherHand);
 }
 
 /* Field 16 */
 DECLARE_FIELDFUNC(cwevent_res_pitcher)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 cw_gamestate_charged_pitcher(gameiter->state,
 					      gameiter->event_data));
 }
@@ -364,111 +383,111 @@ DECLARE_FIELDFUNC(cwevent_res_pitcher_hand)
     resPitcherHand = gameiter->event->pitcher_hand;
   }
 
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c", resPitcherHand);
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", resPitcherHand);
 }
 
 /* Field 18 */
 DECLARE_FIELDFUNC(cwevent_catcher)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 gameiter->state->fielders[2][1-gameiter->state->batting_team]);
 }
 
 /* Field 19 */
 DECLARE_FIELDFUNC(cwevent_first_baseman)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 gameiter->state->fielders[3][1-gameiter->state->batting_team]);
 }
 
 /* Field 20 */
 DECLARE_FIELDFUNC(cwevent_second_baseman)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 gameiter->state->fielders[4][1-gameiter->state->batting_team]);
 }
 
 /* Field 21 */
 DECLARE_FIELDFUNC(cwevent_third_baseman)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 gameiter->state->fielders[5][1-gameiter->state->batting_team]);
 }
 
 /* Field 22 */
 DECLARE_FIELDFUNC(cwevent_shortstop)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 gameiter->state->fielders[6][1-gameiter->state->batting_team]);
 }
 
 /* Field 23 */
 DECLARE_FIELDFUNC(cwevent_left_fielder)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 gameiter->state->fielders[7][1-gameiter->state->batting_team]);
 }
 
 /* Field 24 */
 DECLARE_FIELDFUNC(cwevent_center_fielder)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 gameiter->state->fielders[8][1-gameiter->state->batting_team]);
 }
 
 /* Field 25 */
 DECLARE_FIELDFUNC(cwevent_right_fielder)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 	  gameiter->state->fielders[9][1-gameiter->state->batting_team]);
 }
 
 /* Field 26 */
 DECLARE_FIELDFUNC(cwevent_runner_first)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 gameiter->state->runners[1].runner);
 }
 
 /* Field 27 */
 DECLARE_FIELDFUNC(cwevent_runner_second)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 gameiter->state->runners[2].runner);
 }
 
 /* Field 28 */
 DECLARE_FIELDFUNC(cwevent_runner_third)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 gameiter->state->runners[3].runner);
 }
 
 /* Field 29 */
 DECLARE_FIELDFUNC(cwevent_event_text)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-20s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-20s",
 		 gameiter->event->event_text);
 }
 
 /* Field 30 */
 DECLARE_FIELDFUNC(cwevent_leadoff_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 (gameiter->state->is_leadoff) ? 'T' : 'F');
 }
 
 /* Field 31 */
 DECLARE_FIELDFUNC(cwevent_ph_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 (gameiter->state->ph_flag) ? 'T' : 'F');
 }
 
 /* Field 32 */
 DECLARE_FIELDFUNC(cwevent_defensive_position)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%2d", 
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", 
 		 cw_gamestate_player_position(gameiter->state,
 					      gameiter->state->batting_team,
 					      gameiter->event->batter));
@@ -484,7 +503,7 @@ DECLARE_FIELDFUNC(cwevent_lineup_position)
    * against DiamondWare output (and in regression testing).
    */
 
-  return cw_buffer_printf(buffer, "%d",
+  return cw_buffer_emit(buffer, "%d",
 		 cw_gamestate_lineup_slot(gameiter->state,
 					  gameiter->state->batting_team,
 					  gameiter->event->batter));
@@ -493,27 +512,27 @@ DECLARE_FIELDFUNC(cwevent_lineup_position)
 /* Field 34 */
 DECLARE_FIELDFUNC(cwevent_event_type)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%2d", gameiter->event_data->event_type);
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", gameiter->event_data->event_type);
 }
 
 /* Field 35 */
 DECLARE_FIELDFUNC(cwevent_batter_event_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 cw_event_is_batter(gameiter->event_data) ? 'T' : 'F');
 }
 
 /* Field 36 */
 DECLARE_FIELDFUNC(cwevent_ab_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 cw_event_is_official_ab(gameiter->event_data) ? 'T' : 'F');
 }
 
 /* Field 37 */
 DECLARE_FIELDFUNC(cwevent_hit_value)
 {
-  return cw_buffer_printf(buffer, "%d", 
+  return cw_buffer_emit(buffer, "%d", 
 		 (gameiter->event_data->event_type >= CW_EVENT_SINGLE &&
 		  gameiter->event_data->event_type <= CW_EVENT_HOMERUN) ?
 		 gameiter->event_data->event_type - CW_EVENT_SINGLE + 1 : 0);
@@ -522,260 +541,260 @@ DECLARE_FIELDFUNC(cwevent_hit_value)
 /* Field 38 */
 DECLARE_FIELDFUNC(cwevent_sh_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 gameiter->event_data->sh_flag ? 'T' : 'F');
 }
 
 /* Field 39 */
 DECLARE_FIELDFUNC(cwevent_sf_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 gameiter->event_data->sf_flag ? 'T' : 'F');
 }
 
 /* Field 40 */
 DECLARE_FIELDFUNC(cwevent_outs_on_play)
 {
-  return cw_buffer_printf(buffer, "%d", cw_event_outs_on_play(gameiter->event_data));
+  return cw_buffer_emit(buffer, "%d", cw_event_outs_on_play(gameiter->event_data));
 }
 
 /* Field 41 */
 DECLARE_FIELDFUNC(cwevent_dp_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 gameiter->event_data->dp_flag ? 'T' : 'F');
 }
 
 /* Field 42 */
 DECLARE_FIELDFUNC(cwevent_tp_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 gameiter->event_data->tp_flag ? 'T' : 'F');
 }
 
 /* Field 43 */
 DECLARE_FIELDFUNC(cwevent_rbi_on_play)
 {
-  return cw_buffer_printf(buffer, "%d", cw_event_rbi_on_play(gameiter->event_data));
+  return cw_buffer_emit(buffer, "%d", cw_event_rbi_on_play(gameiter->event_data));
 }
 
 /* Field 44 */
 DECLARE_FIELDFUNC(cwevent_wp_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 gameiter->event_data->wp_flag ? 'T' : 'F');
 }
 
 /* Field 45 */
 DECLARE_FIELDFUNC(cwevent_pb_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 gameiter->event_data->pb_flag ? 'T' : 'F');
 }
 
 /* Field 46 */
 DECLARE_FIELDFUNC(cwevent_fielded_by)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->fielded_by);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->fielded_by);
 }
 
 /* Field 47 */
 DECLARE_FIELDFUNC(cwevent_batted_ball_type)
 {
   if (gameiter->event_data->batted_ball_type != ' ') {
-    return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+    return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		   gameiter->event_data->batted_ball_type);
   }
   else {
-    return cw_buffer_printf(buffer, (ascii) ? "\"\"" : " ");
+    return cw_buffer_emit(buffer, (ascii) ? "\"\"" : " ");
   }
 }
 
 /* Field 48 */
 DECLARE_FIELDFUNC(cwevent_bunt_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 gameiter->event_data->bunt_flag ? 'T' : 'F');
 }
 
 /* Field 49 */
 DECLARE_FIELDFUNC(cwevent_foul_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 gameiter->event_data->foul_flag ? 'T' : 'F');
 }
 
 /* Field 50 */
 DECLARE_FIELDFUNC(cwevent_hit_location)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%4s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%4s",
 		 gameiter->event_data->hit_location);
 }
 
 /* Field 51 */
 DECLARE_FIELDFUNC(cwevent_num_errors)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->num_errors);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->num_errors);
 }
 
 /* Field 52 */
 DECLARE_FIELDFUNC(cwevent_error1_player)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->errors[0]);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->errors[0]);
 }
 
 /* Field 53 */
 DECLARE_FIELDFUNC(cwevent_error1_type)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "   %c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "   %c",
 		 gameiter->event_data->error_types[0]);
 }
 
 /* Field 54 */
 DECLARE_FIELDFUNC(cwevent_error2_player)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->errors[1]);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->errors[1]);
 }
 
 /* Field 55 */
 DECLARE_FIELDFUNC(cwevent_error2_type)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "   %c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "   %c",
 		 gameiter->event_data->error_types[1]);
 }
 
 /* Field 56 */
 DECLARE_FIELDFUNC(cwevent_error3_player)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->errors[2]);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->errors[2]);
 }
 
 /* Field 57 */
 DECLARE_FIELDFUNC(cwevent_error3_type)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "   %c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "   %c",
 		 gameiter->event_data->error_types[2]);
 }
 
 /* Field 58 */
 DECLARE_FIELDFUNC(cwevent_batter_advance)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->advance[0]);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->advance[0]);
 }
 
 /* Field 59 */
 DECLARE_FIELDFUNC(cwevent_runner1_advance)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->advance[1]);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->advance[1]);
 }
 
 /* Field 60 */
 DECLARE_FIELDFUNC(cwevent_runner2_advance)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->advance[2]);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->advance[2]);
 }
 
 /* Field 61 */
 DECLARE_FIELDFUNC(cwevent_runner3_advance)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->advance[3]);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->advance[3]);
 }
 
 /* Field 62 */
 DECLARE_FIELDFUNC(cwevent_play_on_batter)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%12s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%12s",
 		 gameiter->event_data->play[0]);
 }
 
 /* Field 63 */
 DECLARE_FIELDFUNC(cwevent_play_on_runner1)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%12s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%12s",
 		 gameiter->event_data->play[1]);
 }
 
 /* Field 64 */
 DECLARE_FIELDFUNC(cwevent_play_on_runner2)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%12s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%12s",
 		 gameiter->event_data->play[2]);
 }
 
 /* Field 65 */
 DECLARE_FIELDFUNC(cwevent_play_on_runner3)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%12s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%12s",
 		 gameiter->event_data->play[3]);
 }
 
 /* Field 66 */
 DECLARE_FIELDFUNC(cwevent_sb2_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 gameiter->event_data->sb_flag[1] ? 'T' : 'F');
 }
 
 /* Field 67 */
 DECLARE_FIELDFUNC(cwevent_sb3_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 gameiter->event_data->sb_flag[2] ? 'T' : 'F');
 }
 
 /* Field 68 */
 DECLARE_FIELDFUNC(cwevent_sbh_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 gameiter->event_data->sb_flag[3] ? 'T' : 'F');
 }
 
 /* Field 69 */
 DECLARE_FIELDFUNC(cwevent_cs2_flag)
 { 
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 gameiter->event_data->cs_flag[1] ? 'T' : 'F');
 }
 
 /* Field 70 */
 DECLARE_FIELDFUNC(cwevent_cs3_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 gameiter->event_data->cs_flag[2] ? 'T' : 'F');
 }
 
 /* Field 71 */
 DECLARE_FIELDFUNC(cwevent_csh_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 gameiter->event_data->cs_flag[3] ? 'T' : 'F');
 }
 
 /* Field 72 */
 DECLARE_FIELDFUNC(cwevent_po1_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 gameiter->event_data->po_flag[1] ? 'T' : 'F');
 }
 
 /* Field 73 */
 DECLARE_FIELDFUNC(cwevent_po2_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 gameiter->event_data->po_flag[2] ? 'T' : 'F');
 }
 
 /* Field 74 */
 DECLARE_FIELDFUNC(cwevent_po3_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 gameiter->event_data->po_flag[3] ? 'T' : 'F');
 }
 
 /* Field 75 */
 DECLARE_FIELDFUNC(cwevent_responsible_pitcher1)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 cw_gamestate_responsible_pitcher(gameiter->state, 
 						  gameiter->event_data, 1));
 }
@@ -783,7 +802,7 @@ DECLARE_FIELDFUNC(cwevent_responsible_pitcher1)
 /* Field 76 */
 DECLARE_FIELDFUNC(cwevent_responsible_pitcher2)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 cw_gamestate_responsible_pitcher(gameiter->state,
 						  gameiter->event_data, 2));
 }
@@ -791,7 +810,7 @@ DECLARE_FIELDFUNC(cwevent_responsible_pitcher2)
 /* Field 77 */
 DECLARE_FIELDFUNC(cwevent_responsible_pitcher3)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 cw_gamestate_responsible_pitcher(gameiter->state,
 						  gameiter->event_data, 3));
 }
@@ -803,7 +822,7 @@ DECLARE_FIELDFUNC(cwevent_new_game_flag)
   while (event && !strcmp(event->event_text, "NP")) {
     event = event->prev;
   }
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 (event == NULL) ? 'T' : 'F');
 }
 
@@ -814,35 +833,35 @@ DECLARE_FIELDFUNC(cwevent_end_game_flag)
   while (event && !strcmp(event->event_text, "NP")) {
     event = event->next;
   }
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 (event == NULL) ? 'T' : 'F');
 }
 
 /* Field 80 */
 DECLARE_FIELDFUNC(cwevent_pr1_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "       %c", 
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "       %c", 
 		 (gameiter->state->removed_for_pr[1]) ? 'T' : 'F');
 }
 
 /* Field 81 */
 DECLARE_FIELDFUNC(cwevent_pr2_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "       %c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "       %c",
 		 (gameiter->state->removed_for_pr[2]) ? 'T' : 'F');
 }
 
 /* Field 82 */
 DECLARE_FIELDFUNC(cwevent_pr3_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "       %c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "       %c",
 		 (gameiter->state->removed_for_pr[3]) ? 'T' : 'F');
 }
 
 /* Field 83 */
 DECLARE_FIELDFUNC(cwevent_removed_runner1)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s", 
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s", 
 		 ((gameiter->state->removed_for_pr[1]) ?
 		  gameiter->state->removed_for_pr[1] : ""));
 }
@@ -850,7 +869,7 @@ DECLARE_FIELDFUNC(cwevent_removed_runner1)
 /* Field 84 */
 DECLARE_FIELDFUNC(cwevent_removed_runner2)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s", 
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s", 
 		 ((gameiter->state->removed_for_pr[2]) ?
 		  gameiter->state->removed_for_pr[2] : ""));
 }
@@ -858,7 +877,7 @@ DECLARE_FIELDFUNC(cwevent_removed_runner2)
 /* Field 85 */
 DECLARE_FIELDFUNC(cwevent_removed_runner3)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s", 
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s", 
 		 ((gameiter->state->removed_for_pr[3]) ?
 		  gameiter->state->removed_for_pr[3] : ""));
 }
@@ -866,7 +885,7 @@ DECLARE_FIELDFUNC(cwevent_removed_runner3)
 /* Field 86 */
 DECLARE_FIELDFUNC(cwevent_removed_batter)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 ((gameiter->state->removed_for_ph) ? 
 		  gameiter->state->removed_for_ph : ""));
 }
@@ -874,7 +893,7 @@ DECLARE_FIELDFUNC(cwevent_removed_batter)
 /* Field 87 */
 DECLARE_FIELDFUNC(cwevent_removed_batter_position)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%2d", 
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", 
 		 ((gameiter->state->removed_for_ph) ? 
 		  gameiter->state->removed_position : 0));
 }
@@ -882,55 +901,55 @@ DECLARE_FIELDFUNC(cwevent_removed_batter_position)
 /* Field 88 */
 DECLARE_FIELDFUNC(cwevent_putout1)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->putouts[0]);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->putouts[0]);
 }
 
 /* Field 89 */
 DECLARE_FIELDFUNC(cwevent_putout2)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->putouts[1]);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->putouts[1]);
 }
 
 /* Field 90 */
 DECLARE_FIELDFUNC(cwevent_putout3)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->putouts[2]);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->putouts[2]);
 }
 
 /* Field 91 */
 DECLARE_FIELDFUNC(cwevent_assist1)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->assists[0]);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->assists[0]);
 }
 
 /* Field 92 */
 DECLARE_FIELDFUNC(cwevent_assist2)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->assists[1]);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->assists[1]);
 }
 
 /* Field 93 */
 DECLARE_FIELDFUNC(cwevent_assist3)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->assists[2]);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->assists[2]);
 }
 
 /* Field 94 */
 DECLARE_FIELDFUNC(cwevent_assist4)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->assists[3]);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->assists[3]);
 }
 
 /* Field 95 */
 DECLARE_FIELDFUNC(cwevent_assist5)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->assists[4]);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->assists[4]);
 }
 
 /* Field 96 */
 DECLARE_FIELDFUNC(cwevent_event_number)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%3d",		 
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%3d",		 
 		 gameiter->state->event_count + 1);
 }
 
@@ -1064,7 +1083,7 @@ static field_struct field_data[] = {
 /* Extended Field 0 */
 DECLARE_FIELDFUNC(cwevent_home_team_id)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-3s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-3s",
 		 cw_game_info_lookup(gameiter->game, "hometeam"));
 }
 
@@ -1072,11 +1091,11 @@ DECLARE_FIELDFUNC(cwevent_home_team_id)
 DECLARE_FIELDFUNC(cwevent_batting_team_id)
 {
   if (gameiter->state->batting_team == 0) {
-    return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-3s",
+    return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-3s",
 		   cw_game_info_lookup(gameiter->game, "visteam"));
   }
   else {
-    return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-3s",
+    return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-3s",
 		   cw_game_info_lookup(gameiter->game, "hometeam"));
   }
 }
@@ -1085,11 +1104,11 @@ DECLARE_FIELDFUNC(cwevent_batting_team_id)
 DECLARE_FIELDFUNC(cwevent_fielding_team_id)
 {
   if (gameiter->state->batting_team == 1) {
-    return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-3s",
+    return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-3s",
 		   cw_game_info_lookup(gameiter->game, "visteam"));
   }
   else {
-    return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-3s",
+    return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-3s",
 		   cw_game_info_lookup(gameiter->game, "hometeam"));
   }
 }
@@ -1099,10 +1118,10 @@ DECLARE_FIELDFUNC(cwevent_half_inning)
 {
   if (cw_game_info_lookup(gameiter->game, "htbf") &&
       !strcmp(cw_game_info_lookup(gameiter->game, "htbf"), "true")) {
-    return cw_buffer_printf(buffer, "%d", 1-gameiter->state->batting_team);
+    return cw_buffer_emit(buffer, "%d", 1-gameiter->state->batting_team);
   }
   else {
-    return cw_buffer_printf(buffer, "%d", gameiter->state->batting_team);
+    return cw_buffer_emit(buffer, "%d", gameiter->state->batting_team);
   }
 }
 
@@ -1114,17 +1133,17 @@ DECLARE_FIELDFUNC(cwevent_start_half_inning)
   while (event) {
     if (event->inning != gameiter->event->inning ||
 	event->batting_team != gameiter->event->batting_team) {
-      return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
+      return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
     }
     else if (strcmp(event->event_text, "NP") != 0) {
-      return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
+      return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
     }
     else {
       event = event->prev;
     }
   }
 
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
 }
 
 /* Extended Field 5 */
@@ -1135,58 +1154,58 @@ DECLARE_FIELDFUNC(cwevent_end_half_inning)
   while (event) {
     if (event->inning != gameiter->event->inning ||
 	event->batting_team != gameiter->event->batting_team) {
-      return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
+      return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
     }
     else if (strcmp(event->event_text, "NP") != 0) {
-      return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
+      return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
     }
     else {
       event = event->next;
     }
   }
 
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
 }
 
 /* Extended Field 6 */
 DECLARE_FIELDFUNC(cwevent_offense_score)
 { 
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%2d", 
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", 
 		 gameiter->state->score[gameiter->state->batting_team]);
 }
 
 /* Extended Field 7 */
 DECLARE_FIELDFUNC(cwevent_defense_score)
 { 
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%2d", 
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", 
 		 gameiter->state->score[1-gameiter->state->batting_team]);
 }
 
 /* Extended Field 8 */
 DECLARE_FIELDFUNC(cwevent_offense_score_inning)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%2d", 
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", 
 		 gameiter->state->inning_score);
 }
 
 /* Extended Field 9 */
 DECLARE_FIELDFUNC(cwevent_offense_batters_game)
 { 
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%3d", 
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%3d", 
 		 gameiter->state->num_batters[gameiter->state->batting_team]);
 }
 
 /* Extended Field 10 */
 DECLARE_FIELDFUNC(cwevent_offense_batters_inning)
 { 
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%2d", 
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", 
 		 gameiter->state->inning_batters);
 }
 
 /* Extended Field 11 */
 DECLARE_FIELDFUNC(cwevent_start_pa_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c", 
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", 
 		 ((gameiter->state->is_new_pa) ? 'T' : 'F'));
 }
 
@@ -1196,7 +1215,7 @@ DECLARE_FIELDFUNC(cwevent_truncated_pa_flag)
   CWGameIterator *gi;
 
   if (cw_event_is_batter(gameiter->event_data)) {
-    return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
+    return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
   }
 
   gi = cw_gameiter_copy(gameiter);
@@ -1208,7 +1227,7 @@ DECLARE_FIELDFUNC(cwevent_truncated_pa_flag)
       if (cw_event_is_batter(gi->event_data)) {
 	cw_gameiter_cleanup(gi);
 	free(gi);
-	return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
+	return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
       }
     }
     cw_gameiter_next(gi);
@@ -1216,13 +1235,13 @@ DECLARE_FIELDFUNC(cwevent_truncated_pa_flag)
 
   cw_gameiter_cleanup(gi);
   free(gi);
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
 }
 
 /* Extended Field 13 */
 DECLARE_FIELDFUNC(cwevent_base_state_start)
 {
-  return cw_buffer_printf(buffer, "%d",
+  return cw_buffer_emit(buffer, "%d",
 		 ((cw_gamestate_base_occupied(gameiter->state, 3) ? 4 : 0) +
 		  (cw_gamestate_base_occupied(gameiter->state, 2) ? 2 : 0) +
 		  (cw_gamestate_base_occupied(gameiter->state, 1) ? 1 : 0)));
@@ -1240,7 +1259,7 @@ DECLARE_FIELDFUNC(cwevent_base_state_end)
     if (gameiter->event_data->advance[base] == 1)  r1 = 1;
   }
 
-  return cw_buffer_printf(buffer, "%d", 4*r3 + 2*r2 + r1);
+  return cw_buffer_emit(buffer, "%d", 4*r3 + 2*r2 + r1);
 }
 
 /* Extended Field 15 */
@@ -1250,10 +1269,10 @@ DECLARE_FIELDFUNC(cwevent_batter_is_starter)
 
   for (app = gameiter->game->first_starter; app != NULL; app = app->next) {
     if (!strcmp(app->player_id, gameiter->event->batter)) {
-      return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
+      return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
     }
   }
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
 }
 
 /* Extended Field 16 */
@@ -1266,10 +1285,10 @@ DECLARE_FIELDFUNC(cwevent_res_batter_is_starter)
 		cw_gamestate_charged_batter(gameiter->state,
 					    gameiter->event->batter,
 					    gameiter->event_data))) {
-      return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
+      return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
     }
   }
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
 }
 
 /* For on deck and in the hold batters, the lineup slot of the current batter
@@ -1285,7 +1304,7 @@ DECLARE_FIELDFUNC(cwevent_batter_on_deck)
 					     gameiter->event->batter);
   /* remember that lineups are 1-based, not 0-based */
   int next_batter = lineup_slot % 9 + 1;
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s", 
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s", 
 		 gameiter->state->lineups[next_batter][gameiter->state->batting_team].player_id);
 }
 
@@ -1300,7 +1319,7 @@ DECLARE_FIELDFUNC(cwevent_batter_in_the_hold)
 					     gameiter->event->batter);
   /* remember that lineups are 1-based, not 0-based */
   int next_batter = (lineup_slot + 1) % 9 + 1;
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s", 
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s", 
 		 gameiter->state->lineups[next_batter][gameiter->state->batting_team].player_id);
 }
 
@@ -1315,9 +1334,9 @@ DECLARE_FIELDFUNC(cwevent_pitcher_is_starter)
   if (app &&
       !strcmp(app->player_id,
 	      gameiter->state->fielders[1][1-gameiter->state->batting_team])) {
-      return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
+      return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
   }
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
 }
 
 /* Extended Field 20 */
@@ -1332,19 +1351,19 @@ DECLARE_FIELDFUNC(cwevent_res_pitcher_is_starter)
       !strcmp(app->player_id,
 	      cw_gamestate_charged_pitcher(gameiter->state,
 					   gameiter->event_data))) {
-      return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
+      return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", 'T');
   }
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", 'F');
 }
 
 /* Extended Field 21 */
 DECLARE_FIELDFUNC(cwevent_runner1_defensive_position)
 {
   if (!cw_gamestate_base_occupied(gameiter->state, 1)) {
-    return cw_buffer_printf(buffer, "0");
+    return cw_buffer_emit(buffer, "0");
   }
   else {
-    return cw_buffer_printf(buffer, (ascii) ? "%d" : "%2d", 
+    return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", 
 		   cw_gamestate_player_position(gameiter->state,
 						gameiter->state->batting_team,
 						gameiter->state->runners[1].runner));
@@ -1355,10 +1374,10 @@ DECLARE_FIELDFUNC(cwevent_runner1_defensive_position)
 DECLARE_FIELDFUNC(cwevent_runner1_lineup_position)
 {
   if (!cw_gamestate_base_occupied(gameiter->state, 1)) {
-    return cw_buffer_printf(buffer, "0");
+    return cw_buffer_emit(buffer, "0");
   }
 
-  return cw_buffer_printf(buffer, "%d",
+  return cw_buffer_emit(buffer, "%d",
 		 cw_gamestate_lineup_slot(gameiter->state,
 					  gameiter->state->batting_team,
 					  gameiter->state->runners[1].runner));
@@ -1367,7 +1386,7 @@ DECLARE_FIELDFUNC(cwevent_runner1_lineup_position)
 /* Extended Field 23 */
 DECLARE_FIELDFUNC(cwevent_runner1_src_event)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%3d",
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%3d",
 		 gameiter->state->runners[1].src_event);
 }
 
@@ -1375,10 +1394,10 @@ DECLARE_FIELDFUNC(cwevent_runner1_src_event)
 DECLARE_FIELDFUNC(cwevent_runner2_defensive_position)
 {
   if (!cw_gamestate_base_occupied(gameiter->state, 2)) {
-    return cw_buffer_printf(buffer, "0");
+    return cw_buffer_emit(buffer, "0");
   }
   else {
-    return cw_buffer_printf(buffer, (ascii) ? "%d" : "%2d", 
+    return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", 
 		   cw_gamestate_player_position(gameiter->state,
 						gameiter->state->batting_team,
 						gameiter->state->runners[2].runner));
@@ -1389,10 +1408,10 @@ DECLARE_FIELDFUNC(cwevent_runner2_defensive_position)
 DECLARE_FIELDFUNC(cwevent_runner2_lineup_position)
 {
   if (!cw_gamestate_base_occupied(gameiter->state, 2)) {
-    return cw_buffer_printf(buffer, "0");
+    return cw_buffer_emit(buffer, "0");
   }
 
-  return cw_buffer_printf(buffer, "%d",
+  return cw_buffer_emit(buffer, "%d",
 		 cw_gamestate_lineup_slot(gameiter->state,
 					  gameiter->state->batting_team,
 					  gameiter->state->runners[2].runner));
@@ -1401,7 +1420,7 @@ DECLARE_FIELDFUNC(cwevent_runner2_lineup_position)
 /* Extended Field 26 */
 DECLARE_FIELDFUNC(cwevent_runner2_src_event)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%3d",
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%3d",
 		 gameiter->state->runners[2].src_event);
 }
 
@@ -1409,10 +1428,10 @@ DECLARE_FIELDFUNC(cwevent_runner2_src_event)
 DECLARE_FIELDFUNC(cwevent_runner3_defensive_position)
 {
   if (!cw_gamestate_base_occupied(gameiter->state, 3)) {
-    return cw_buffer_printf(buffer, "0");
+    return cw_buffer_emit(buffer, "0");
   }
   else {
-    return cw_buffer_printf(buffer, (ascii) ? "%d" : "%2d", 
+    return cw_buffer_emit(buffer, (ascii) ? "%d" : "%2d", 
 		   cw_gamestate_player_position(gameiter->state,
 						gameiter->state->batting_team,
 						gameiter->state->runners[3].runner));
@@ -1423,10 +1442,10 @@ DECLARE_FIELDFUNC(cwevent_runner3_defensive_position)
 DECLARE_FIELDFUNC(cwevent_runner3_lineup_position)
 {
   if (!cw_gamestate_base_occupied(gameiter->state, 3)) {
-    return cw_buffer_printf(buffer, "0");
+    return cw_buffer_emit(buffer, "0");
   }
 
-  return cw_buffer_printf(buffer, "%d",
+  return cw_buffer_emit(buffer, "%d",
 		 cw_gamestate_lineup_slot(gameiter->state,
 					  gameiter->state->batting_team,
 					  gameiter->state->runners[3].runner));
@@ -1435,7 +1454,7 @@ DECLARE_FIELDFUNC(cwevent_runner3_lineup_position)
 /* Extended Field 29 */
 DECLARE_FIELDFUNC(cwevent_runner3_src_event)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%3d",
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%3d",
 		 gameiter->state->runners[3].src_event);
 }
 
@@ -1443,7 +1462,7 @@ DECLARE_FIELDFUNC(cwevent_runner3_src_event)
 /* Extended Field 30 */
 DECLARE_FIELDFUNC(cwevent_responsible_catcher1)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 cw_gamestate_responsible_catcher(gameiter->state, 
 						  gameiter->event_data, 1));
 }
@@ -1451,7 +1470,7 @@ DECLARE_FIELDFUNC(cwevent_responsible_catcher1)
 /* Extended Field 31 */
 DECLARE_FIELDFUNC(cwevent_responsible_catcher2)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 cw_gamestate_responsible_catcher(gameiter->state,
 						  gameiter->event_data, 2));
 }
@@ -1459,7 +1478,7 @@ DECLARE_FIELDFUNC(cwevent_responsible_catcher2)
 /* Extended Field 32 */
 DECLARE_FIELDFUNC(cwevent_responsible_catcher3)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		 cw_gamestate_responsible_catcher(gameiter->state,
 						  gameiter->event_data, 3));
 }
@@ -1467,101 +1486,101 @@ DECLARE_FIELDFUNC(cwevent_responsible_catcher3)
 /* Extended Field 33 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%02d",
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
                  cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_thrown));
 }
 
 /* Extended Field 34 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls_called)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%02d",
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
                  cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_called));
 }
 
 /* Extended Field 35 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls_intentional)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%02d",
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
                  cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_intentional));
 }
 
 /* Extended Field 36 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls_pitchout)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%02d",
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
                  cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_pitchout));
 }
 
 /* Extended Field 37 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls_hit_batter)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%02d",
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
                  cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_hit_batter));
 }
 
 /* Extended Field 38 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls_other)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%02d",
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
                  cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_other));
 }
 
 /* Extended Field 39 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%02d",
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
                  cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_thrown));
 }
 
 /* Extended Field 40 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_called)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%02d",
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
                  cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_called));
 }
 
 /* Extended Field 41 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_swinging)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%02d",
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
                  cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_swinging));
 }
 
 /* Extended Field 42 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_foul)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%02d",
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
                  cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_foul));
 }
 
 /* Extended Field 43 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_inplay)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%02d",
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
                  cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_inplay));
 }
 
 /* Extended Field 44 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_other)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%02d",
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
                  cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_other));
 }
 
 /* Extended Field 45 */
 DECLARE_FIELDFUNC(cwevent_runs_on_play)
 {
-  return cw_buffer_printf(buffer, "%d", cw_event_runs_on_play(gameiter->event_data));
+  return cw_buffer_emit(buffer, "%d", cw_event_runs_on_play(gameiter->event_data));
 }
 
 /* Extended Field 46 */
 DECLARE_FIELDFUNC(cwevent_fielded_by_id)
 {
   if (gameiter->event_data->fielded_by == 0) {
-    return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s", "");
+    return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s", "");
   }
   else {
-    return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-8s",
+    return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-8s",
 		   gameiter->state->fielders[gameiter->event_data->fielded_by][1-gameiter->state->batting_team]);
   }
 }
@@ -1569,7 +1588,7 @@ DECLARE_FIELDFUNC(cwevent_fielded_by_id)
 /* Extended Field 47 */
 DECLARE_FIELDFUNC(cwevent_force_second_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 (gameiter->event_data->fc_flag[1] &&
 		  (gameiter->event_data->gdp_flag || 
 		   gameiter->event_data->force_flag)) ? 'T' : 'F');
@@ -1578,7 +1597,7 @@ DECLARE_FIELDFUNC(cwevent_force_second_flag)
 /* Extended Field 48 */
 DECLARE_FIELDFUNC(cwevent_force_third_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 (gameiter->event_data->fc_flag[2] &&
 		  (gameiter->event_data->gdp_flag || 
 		   gameiter->event_data->force_flag)) ? 'T' : 'F');
@@ -1587,7 +1606,7 @@ DECLARE_FIELDFUNC(cwevent_force_third_flag)
 /* Extended Field 49 */
 DECLARE_FIELDFUNC(cwevent_force_home_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 (gameiter->event_data->fc_flag[3] &&
 		  (gameiter->event_data->gdp_flag || 
 		   gameiter->event_data->force_flag)) ? 'T' : 'F');
@@ -1596,7 +1615,7 @@ DECLARE_FIELDFUNC(cwevent_force_home_flag)
 /* Extended Field 50 */
 DECLARE_FIELDFUNC(cwevent_safe_on_error_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 (gameiter->event_data->event_type == CW_EVENT_ERROR ||
 		  (gameiter->event_data->event_type == CW_EVENT_GENERICOUT &&
 		   gameiter->event_data->muff_flag[0])) ? 'T' : 'F');
@@ -1605,68 +1624,68 @@ DECLARE_FIELDFUNC(cwevent_safe_on_error_flag)
 /* Extended Field 51 */
 DECLARE_FIELDFUNC(cwevent_batter_fate)
 {
-  return cw_buffer_printf(buffer, "%d", cw_gameiter_runner_fate(gameiter, 0));
+  return cw_buffer_emit(buffer, "%d", cw_gameiter_runner_fate(gameiter, 0));
 }
 
 /* Extended Field 52 */
 DECLARE_FIELDFUNC(cwevent_runner1_fate)
 {
-  return cw_buffer_printf(buffer, "%d", cw_gameiter_runner_fate(gameiter, 1));
+  return cw_buffer_emit(buffer, "%d", cw_gameiter_runner_fate(gameiter, 1));
 }
 
 /* Extended Field 53 */
 DECLARE_FIELDFUNC(cwevent_runner2_fate)
 {
-  return cw_buffer_printf(buffer, "%d", cw_gameiter_runner_fate(gameiter, 2));
+  return cw_buffer_emit(buffer, "%d", cw_gameiter_runner_fate(gameiter, 2));
 }
 
 /* Extended Field 54 */
 DECLARE_FIELDFUNC(cwevent_runner3_fate)
 {
-  return cw_buffer_printf(buffer, "%d", cw_gameiter_runner_fate(gameiter, 3));
+  return cw_buffer_emit(buffer, "%d", cw_gameiter_runner_fate(gameiter, 3));
 }
 
 /* Extended Field 55 */
 DECLARE_FIELDFUNC(cwevent_inning_future_runs)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "%d" : "%02d",
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
 		 cwevent_future_runs(gameiter));
 }
 
 /* Extended Field 56 */
 DECLARE_FIELDFUNC(cwevent_assist6)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->assists[5]);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->assists[5]);
 }
 
 /* Extended Field 57 */
 DECLARE_FIELDFUNC(cwevent_assist7)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->assists[6]);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->assists[6]);
 }
 
 /* Extended Field 58 */
 DECLARE_FIELDFUNC(cwevent_assist8)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->assists[7]);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->assists[7]);
 }
 
 /* Extended Field 59 */
 DECLARE_FIELDFUNC(cwevent_assist9)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->assists[8]);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->assists[8]);
 }
 
 /* Extended Field 60 */
 DECLARE_FIELDFUNC(cwevent_assist10)
 {
-  return cw_buffer_printf(buffer, "%d", gameiter->event_data->assists[9]);
+  return cw_buffer_emit(buffer, "%d", gameiter->event_data->assists[9]);
 }
 
 /* Extended Field 61 */
 DECLARE_FIELDFUNC(cwevent_unknown_out_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 (!strcmp(gameiter->event_data->play[0], "99") ||
 		  !strcmp(gameiter->event_data->play[1], "99") ||
 		  !strcmp(gameiter->event_data->play[2], "99") ||
@@ -1676,14 +1695,14 @@ DECLARE_FIELDFUNC(cwevent_unknown_out_flag)
 /* Extended Field 62 */
 DECLARE_FIELDFUNC(cwevent_uncertain_play_flag)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%c\"" : "%c",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
 		 (gameiter->event->event_text[strlen(gameiter->event->event_text)-1] == '#') ? 'T' : 'F');
 }
 
 /* Extended Field 63 */
 DECLARE_FIELDFUNC(cwevent_count_text)
 {
-  return cw_buffer_printf(buffer, (ascii) ? "\"%s\"" : "%-2s",
+  return cw_buffer_emit(buffer, (ascii) ? "\"%s\"" : "%-2s",
 		 gameiter->event->count);
 }
 
@@ -1814,7 +1833,7 @@ cwevent_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 {
   char output_line[4096];
   CWBuffer buf;
-  int i, comma;
+  int i;
 
   CWGameIterator *gameiter = cw_gameiter_create(game);
 
@@ -1826,28 +1845,15 @@ cwevent_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
       continue;
     }
 
-    comma = 0;
-    cw_buffer_init(&buf, output_line, sizeof(output_line));
+    cw_buffer_init(&buf, output_line, sizeof(output_line), ascii, ',');
     for (i = 0; i <= max_field; i++) {
       if (fields[i]) {
-	if (ascii && comma) {
-	  cw_buffer_printf(&buf, ",");
-	}
-	else {
-	  comma = 1;
-	}
 	(*field_data[i].f)(&buf, gameiter, visitors, home);
       }
     }
 
     for (i = 0; i <= max_ext_field; i++) {
       if (ext_fields[i]) {
-	if (ascii && comma) {
-	  cw_buffer_printf(&buf, ",");
-	}
-	else {
-	  comma = 1;
-	}
 	(*ext_field_data[i].f)(&buf, gameiter, visitors, home);
       }
     }
@@ -1939,39 +1945,24 @@ void (*cwtools_print_welcome_message)(char *) = cwevent_print_welcome_message;
 void
 cwevent_initialize(void)
 {
-  int i, comma = 0;
+  int i;
   char output_line[4096];
   CWBuffer buf;
-
-  cw_buffer_init(&buf, output_line, sizeof(output_line));
 
   if (!ascii || !print_header) {
     return;
   }
 
-  strcpy(output_line, "");
-
+  cw_buffer_init(&buf, output_line, sizeof(output_line), ascii, ',');
   for (i = 0; i <= max_field; i++) {
     if (fields[i]) {
-      if (ascii && comma) {
-	cw_buffer_printf(&buf, ",");
-      }
-      else {
-	comma = 1;
-      }
-      cw_buffer_printf(&buf, "\"%s\"", field_data[i].header);
+      cw_buffer_emit(&buf, "\"%s\"", field_data[i].header);
     }
   }
 
   for (i = 0; i <= max_ext_field; i++) {
     if (ext_fields[i]) {
-      if (ascii && comma) {
-	cw_buffer_printf(&buf, ",");
-      }
-      else {
-	comma = 1;
-      }
-      cw_buffer_printf(&buf, "\"%s\"", ext_field_data[i].header);
+      cw_buffer_emit(&buf, "\"%s\"", ext_field_data[i].header);
     }
   }
 
