@@ -88,6 +88,26 @@ static inline int cw_buffer_emit(CWBuffer *buf, const char *fmt, ...)
   return n;
 }
 
+static inline void
+cw_buffer_begin_field(CWBuffer *buf)
+{
+  if (buf->use_delimiter && buf->need_sep) {
+    if (buf->current < buf->end) {
+      *(buf->current++) = buf->delimiter;
+    }
+    else {
+      buf->truncated = 1;
+    }
+  }
+  buf->need_sep = 0;  /* suppress further delimiters */
+}
+
+static inline void
+cw_buffer_end_field(CWBuffer *buf)
+{
+  buf->need_sep = 1;
+}
+
 static inline int
 cw_buffer_emit_string(CWBuffer *buf, const char *s, int width)
 {
