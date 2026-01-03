@@ -26,31 +26,31 @@ bin_PROGRAMS = cwbox cwcomment cwevent cwgame cwsub cwdaily
 AM_CPPFLAGS = -I$(top_srcdir)/src
 
 
-cwbox_SOURCES = cwbox.c cwtools.c cwboxxml.c cwboxsml.c xmlwrite.c xmlwrite.h
+cwbox_SOURCES = buffer.h cwbox.c cwtools.c cwboxxml.c cwboxsml.c xmlwrite.c xmlwrite.h
 
 cwbox_LDADD = $(top_builddir)/src/cwlib/libchadwick.la 
 
 
-cwcomment_SOURCES = cwcomment.c cwtools.c
+cwcomment_SOURCES = buffer.h cwcomment.c cwtools.c
 
 cwcomment_LDADD = $(top_builddir)/src/cwlib/libchadwick.la
 
 
-cwevent_SOURCES = cwevent.c cwtools.c
+cwevent_SOURCES = buffer.h cwevent.c cwtools.c
 
 cwevent_LDADD = $(top_builddir)/src/cwlib/libchadwick.la
 
 
-cwgame_SOURCES = cwgame.c cwtools.c
+cwgame_SOURCES = buffer.h cwgame.c cwtools.c
 
 cwgame_LDADD = $(top_builddir)/src/cwlib/libchadwick.la
 
 
-cwsub_SOURCES = cwsub.c cwtools.c
+cwsub_SOURCES = buffer.h cwsub.c cwtools.c
 
 cwsub_LDADD = $(top_builddir)/src/cwlib/libchadwick.la
 
 
-cwdaily_SOURCES = cwdaily.c cwtools.c
+cwdaily_SOURCES = buffer.h cwdaily.c cwtools.c
 
 cwdaily_LDADD = $(top_builddir)/src/cwlib/libchadwick.la
