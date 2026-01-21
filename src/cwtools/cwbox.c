@@ -46,8 +46,11 @@ char program_name[] = "cwbox";
 extern char year[], first_date[], last_date[], game_id[];
 extern int ascii;
 extern int quiet;
+extern int sd_flag;
+extern char path_to_teamfile[];
 
 XMLDoc *doc = NULL;
+
 
 void
 cwbox_print_field_list(void)
@@ -126,6 +129,12 @@ cwbox_parse_command_line(int argc, char *argv[])
     else if (!strcmp(argv[i], "-y")) {
       if (++i < argc) {
 	strncpy(year, argv[i], 5);
+      }
+    }
+    else if (!strcmp(argv[i], "-sd")) {
+      sd_flag = 1;
+      if (++i < argc) {
+        strcpy(path_to_teamfile, argv[i]);
       }
     }
     /* This part is cwbox-specific */
