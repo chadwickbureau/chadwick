@@ -470,7 +470,7 @@ cw_gamestate_substitute(CWGameState *state,
       strcpy(state->walk_pitcher,
 	     state->fielders[1][team]);
     }
-    else if (pos == DWARE_POS_DH && state->strikeout_batter == NULL &&
+    else if (pos == DWARE_POS_PH && state->strikeout_batter == NULL &&
 	     count[1] == '2') {
       state->strikeout_batter = 
 	(char *) malloc((strlen(batter) + 1) * sizeof(char));
