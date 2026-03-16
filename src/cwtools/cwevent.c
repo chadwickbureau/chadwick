@@ -1977,7 +1977,7 @@ extern int quiet;
 extern void
 cwtools_parse_field_list(char *text, int max_field, int *fields);
 
-int
+/* int
 cwevent_parse_command_line(int argc, char *argv[])
 {
   int i;
@@ -2046,4 +2046,4 @@ cwevent_parse_command_line(int argc, char *argv[])
   return i;
 }
 
-int (*cwtools_parse_command_line)(int, char *argv[]) = cwevent_parse_command_line;
+int (*cwtools_parse_command_line)(int, char *argv[]) = cwevent_parse_command_line; */
