@@ -24,6 +24,7 @@
  */
 
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>   /* for isdigit() */
@@ -185,12 +186,13 @@ cwtools_process_scorebook(CWLeague *league, char *filename)
 void
 cwtools_process_filespec(CWLeague *league, char *filespec)
 {
-  int handle;
+  intptr_t handle;
   struct _finddata_t state;
-  if ((handle = _findfirst(filespec, &state)) > 0) {
+  if ((handle = _findfirst(filespec, &state)) != -1) {
     do {
       cwtools_process_scorebook(league, state.name);
     } while (!_findnext(handle, &state));
+    _findclose(handle);
   }
 }
 #elif defined(MSDOS)
