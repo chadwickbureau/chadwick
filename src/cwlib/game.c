@@ -863,7 +863,7 @@ cw_game_read(FILE *file)
       char *batter = cw_tokenizer_next(&tok);
       char *bats = cw_tokenizer_next(&tok);
       if (batter && bats) {
-        strncpy(batHandBatter, batter, 255);
+        CW_STRLCPY(batHandBatter, batter);
         batHand = bats[0];
       }
     }
@@ -871,7 +871,7 @@ cw_game_read(FILE *file)
       char *pitcher = cw_tokenizer_next(&tok);
       char *throws = cw_tokenizer_next(&tok);
       if (pitcher && throws) {
-        strncpy(pitHandPitcher, pitcher, 255);
+        CW_STRLCPY(pitHandPitcher, pitcher);
         pitHand = throws[0];
       }
     }
@@ -892,7 +892,7 @@ cw_game_read(FILE *file)
       char *runner = cw_tokenizer_next(&tok);
       char *base = cw_tokenizer_next(&tok);
       if (runner && base) {
-        strncpy(autoRunner, runner, 255);
+        CW_STRLCPY(autoRunner, runner);
         autoBase = cw_atoi(base, NULL);
       }
     }
@@ -902,7 +902,7 @@ cw_game_read(FILE *file)
       if (pitcher && base_str) {
         int base = cw_atoi(base_str, NULL);
         if (base >= 1 && base <= 3) {
-          strncpy(presadj[base], pitcher, 255);
+          CW_STRLCPY(presadj[base], pitcher);
         }
         else {
           cw_game_warn_invalid_record(game, line);

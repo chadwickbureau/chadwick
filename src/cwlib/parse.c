@@ -26,6 +26,7 @@
 #include <ctype.h>
 
 #include "parse.h"
+#include "util.h"
 
 /**************************************************************************
  * Data access on CWEventData objects
@@ -153,7 +154,7 @@ cw_event_rbi_on_play(CWEventData *event)
 void
 cw_event_set_play(CWEventData *event, int base, char *play)
 {
-  strncpy(event->play[base], play, 20);
+  CW_STRLCPY(event->play[base], play);
 }
 
 /*
@@ -1354,110 +1355,41 @@ static int cw_parse_hit_by_pitch(CWParserState *state, CWEventData *event,
  * at exit:  p-state->sym points to '.' or end of string, as appropriate
  *
  * Notes:
- * - 'C/E1', 'C/4E1' and 'C/E3' are considered legal strings (per David W. Smith);
- *   these are for cases where batter was awarded first due to interference
- *   by the pitcher or first baseman, respectively, event though these
- *   are not truly "catcher's" interference.  DWS says these are the only
- *   legal exceptions currently in the DiamondWare engine, so we will
- *   follow along with that convention here.  While in principle
- *   any legal fielding credit string ending in En could appear, the chances
- *   of occurrence in an actual game are small, while the chances that they could
- *   be incorrect input would be large.
+ * - An explicit fielding credit may be C/En or C/mEn, as this code is
+ *   used as a catchall for batters being awarded first (per the guidance in
+ *   OBR rule 9).
+ * - The fielding credit must be the first flag.  Subsequent flags use the
+ *   standard flag parser.
  */
 static int cw_parse_interference(CWParserState *state, CWEventData *event,
 				 int flags)
 {
   event->advance[0] = 1;
 
-  while (state->sym == '/') {
-    cw_parse_flag(state);
-
-    if (state->token[0] == 'E' && event->num_errors > 0) {
-      return cw_parse_invalid(state);
-    }
-
-    if (!strcmp(state->token, "E2")) {
-      event->errors[event->num_errors++] = 2;
-    }
-    else if (!strcmp(state->token, "E1")) {
-      event->errors[event->num_errors++] = 1;
-    }
-    else if (!strcmp(state->token, "4E1")) {
-      event->errors[event->num_errors++] = 1;
-      event->assists[event->num_assists++] = 4;
-    }
-    else if (!strcmp(state->token, "E3")) {
-      event->errors[event->num_errors++] = 3;
-    }
-    else if (!strcmp(state->token, "E4")) {
-      event->errors[event->num_errors++] = 4;
-    }
-    else if (!strcmp(state->token, "E6")) {
-      event->errors[event->num_errors++] = 6;
-    }
-    else if (!strcmp(state->token, "INT")) {
-      /* silently accept redundant /INT flag */
-    }
-    else if (!strcmp(state->token, "G")) {
-      /* Remember that this type of interference can also occur on
-       * a batted ball! */
-      event->batted_ball_type = 'G';
-    }
-      /* Starting here, we check for batted ball location flags.
-       * This is essentially copied from cw_parse_flags() and probably should be
-       * refactored. */
-    else if (strlen(state->token) >= 2) {
-      char traj = (state->token[0] == 'B') ? state->token[1] : state->token[0];
-      if (traj == 'G' || traj == 'F' || traj == 'P' ||
-          traj == 'L') {
-        char *loc = (state->token[0] == 'B') ? state->token + 2 : state->token + 1;
-        int i = 0;
-        for (i = 0; strcmp(locations[i], "") != 0; i++) {
-          if (!strcmp(locations[i], loc)) {
-            event->batted_ball_type = traj;
-            strcpy(event->hit_location, locations[i]);
-            if (locations[i][strlen(locations[i]) - 1] == 'F') {
-              event->foul_flag = 1;
-            }
-            if (state->token[0] == 'B') {
-              event->bunt_flag = 1;
-            }
-            break;
-          }
-        }
-      }
-      else {
-        char *loc = (state->token[0] == 'B') ? state->token + 1 : state->token;
-        int i = 0;
-        for (i = 0; strcmp(locations[i], "") != 0; i++) {
-          if (!strcmp(locations[i], loc)) {
-            strcpy(event->hit_location, locations[i]);
-            if (locations[i][strlen(locations[i]) - 1] == 'F') {
-              event->foul_flag = 1;
-            }
-            if (state->token[0] == 'B') {
-              event->bunt_flag = 1;
-            }
-            break;
-          }
-        }
-      }
-    }
-    else {
-      int i = 0;
-      for (i = 0; strcmp(locations[i], "") != 0; i++) {
-        if (!strcmp(locations[i], state->token)) {
-          strcpy(event->hit_location, locations[i]);
-          break;
-        }
-      }
-    }
+  if (state->sym != '/') {
+    return cw_parse_invalid(state);
   }
 
-  if (event->num_errors == 0) {
-    event->errors[event->num_errors++] = 2;
+  cw_parse_flag(state);
+  if (strlen(state->token) == 2 && state->token[0] == 'E' &&
+      state->token[1] >= '1' && state->token[1] <= '9') {
+    event->errors[event->num_errors++] = state->token[1] - '0';
+  }
+  else if (strlen(state->token) == 3 &&
+           state->token[0] >= '1' && state->token[0] <= '9' &&
+           state->token[1] == 'E' &&
+           state->token[2] >= '1' && state->token[2] <= '9') {
+    event->assists[event->num_assists++] = state->token[0] - '0';
+    event->errors[event->num_errors++] = state->token[2] - '0';
+  }
+  else {
+    return cw_parse_invalid(state);
   }
   event->error_types[0] = 'F';
+
+  if (flags && state->sym == '/') {
+    cw_parse_flags(state, event);
+  }
 
   return 1;
 }
@@ -2167,4 +2099,3 @@ int cw_parse_event(char *text, CWEventData *event)
   cw_parse_cleanup(&state);
   return 1;
 }
-

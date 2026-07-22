@@ -1,6 +1,9 @@
 # [0.11.0]
 	
 ## Behaviour changes
+- In `cwevent`, runner advancement types 6 and 7 (for automatic runners) have been
+  removed.  Instead, new flags for whether a runner is the result of an autoamtic runner
+  placement are now provided.
 - In `cwgame`, field 84 has been added to report the value of the new `info,gametype`
   field.  To match `BGAME` behaviour this field is not reported by default.
   Any game that does not have an `info,gametype` record is assumed to be "regular".
@@ -20,6 +23,9 @@
   as if they were explicit question marks.
 - In `cwgame`, output nulls for computed team totals from boxscore files whenever any
   player's totals are null.
+- Parsing of C/ now accepts additional flags, to account for the fact this is used for
+  runners reading first on obstruction and also for shift/positioning violations.
+
 
 
 # [0.10.0] - 2023-01-02
