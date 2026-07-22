@@ -23,6 +23,9 @@
   as if they were explicit question marks.
 - In `cwgame`, output nulls for computed team totals from boxscore files whenever any
   player's totals are null.
+- Parsing of C/ now accepts additional flags, to account for the fact this is used for
+  runners reading first on obstruction and also for shift/positioning violations.
+
 
 
 # [0.10.0] - 2023-01-02
