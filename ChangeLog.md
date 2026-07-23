@@ -4,8 +4,9 @@
 - In `cwevent`, runner advancement types 6 and 7 (for automatic runners) have been
   removed.  Instead, new flags for whether a runner is the result of an autoamtic runner
   placement are now provided.
-- In `cwgame`, field 84 has been added to report the value of the new `info,gametype`
-  field.  To match `BGAME` behaviour this field is not reported by default.
+- In `cwgame`, field 84 has been added to report the value of `info,oscorer`, and
+  field 85 has been added to report the value of the new `info,gametype` field.
+  To match current `BGAME` behaviour, game type is not reported by default.
   Any game that does not have an `info,gametype` record is assumed to be "regular".
 - Pitch types A (automatic strike) and V (automatic ball) are no longer
   counted towards pitches/strikes.
@@ -194,4 +195,3 @@
   
 
    
-

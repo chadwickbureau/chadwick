@@ -38,7 +38,7 @@
 extern int ascii;
 
 /* Fields to display (-f) */
-int fields[85] = {
+int fields[86] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -47,10 +47,10 @@ int fields[85] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 0
+  1, 1, 1, 1, 1, 0
 };
 
-int max_field = 84;
+int max_field = 85;
 
 /* Extended fields to display (-x) */
 int ext_fields[97] = {
@@ -642,6 +642,13 @@ cwgame_starting_position(CWBuffer *buffer, CWGame *game, int team, int slot)
 }
 
 /* Field 84 */
+DECLARE_FIELDFUNC(cwgame_official_scorer)
+{
+  return cwgame_print_string_or_null(buffer,
+                     cw_game_info_lookup(gameiter->game, "oscorer"), 8);
+}
+
+/* Field 85 */
 DECLARE_FIELDFUNC(cwgame_game_type)
 {
   char *tmp = cw_game_info_lookup(gameiter->game, "gametype");
@@ -739,7 +746,9 @@ static field_struct field_data[] = {
 	     "visiting finisher (NULL if complete game)" },
   /* 83 */ { NULL, "HOME_FINISH_PIT_ID", 
 	     "home finisher (NULL if complete game)" },
-  /* 84 */ { cwgame_game_type, "GAME_TYPE_TX", "game type"}
+  /* 84 */ { cwgame_official_scorer, "OFFICIAL_SCORER_ID",
+	     "official scorer" },
+  /* 85 */ { cwgame_game_type, "GAME_TYPE_TX", "game type"}
 };
 
 #define DECLARE_TABULATED_BATTER_FUNC(funcname, alignment, fieldname) \
@@ -1510,7 +1519,7 @@ void cwgame_print_help(void)
   fprintf(stderr, "  -a        generate Ascii-delimited format files (default)\n");
   fprintf(stderr, "  -ft       generate Fortran format files\n");
   fprintf(stderr, "  -f flist  give list of fields to output\n");
-  fprintf(stderr, "              Default is 0-83\n");
+  fprintf(stderr, "              Default is 0-84\n");
   fprintf(stderr, "  -x flist  give list of extended fields to output\n");
   fprintf(stderr, "              Default is none\n");
   fprintf(stderr, "  -d        print list of field numbers and descriptions\n");

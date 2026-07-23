@@ -5,8 +5,8 @@ cwgame: Game information extractor
 
 :program:`cwgame` is a command-line tool which extracts summary
 information about each game in the data file.  
-These fields 
-are grouped into two categories. There are 83 fields which are
+These fields
+are grouped into two categories. There are 86 fields which are
 compatible with the Retrosheet BGAME game descriptor tool.  These
 are specified using the ``-f`` command-line flag. In addition, cwgame
 offers a number "extended" fields which expand upon or give more
@@ -27,7 +27,7 @@ in the Retrosheet gamelogs.
    labels instead in writing scripts to process the output of
    :program:`cwgame` extended fields.
  
-The following table gives the contents of each of the 84 fields
+The following table gives the contents of each of the 86 fields
 :program:`cwgame` outputs.
 
 .. list-table:: cwgame standard field numbers
@@ -290,6 +290,9 @@ The following table gives the contents of each of the 84 fields
      - Home finishing pitcher
      - ``HOME_FINISH_PIT_ID``
    * - 84
+     - Official scorer
+     - ``OFFICIAL_SCORER_ID``
+   * - 85
      - Game type
      - ``GAME_TYPE_TX``
 
@@ -787,4 +790,3 @@ This field indicates games in which an extra-innings tiebreaker
 rule was in use.  The only valid value for this field currently
 is `2`, indicating that extra innings began with a runner on
 second base.
-
