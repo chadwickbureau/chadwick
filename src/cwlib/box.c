@@ -1187,6 +1187,18 @@ cw_box_iterate_game(CWBoxscore *boxscore, CWGame *game)
  * Process a boxscore event file.  In these files, all the statistical
  * information is stored in extended stat records.
  */
+static void
+cw_box_validate_boxscore_value(CWGame *game, char *record, char *field,
+                               int value, int min, int max)
+{
+  if (value < min || value > max) {
+    fprintf(stderr,
+            "ERROR: In %s, invalid %s %d in %s record (valid values are %d-%d).\n",
+            game->game_id, field, value, record, min, max);
+    exit(1);
+  }
+}
+
 void
 cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
 {
@@ -1206,6 +1218,8 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
       slot = cw_data_get_item_int(stat, 3);
       team = cw_data_get_item_int(stat, 2);
       seq = cw_data_get_item_int(stat, 4);
+      cw_box_validate_boxscore_value(game, "bline", "team", team, 0, 1);
+      cw_box_validate_boxscore_value(game, "bline", "slot", slot, 0, 9);
 
       /* Some generated boxscore event files give every slot-zero bline a
        * sequence number of zero, including the starting pitcher, contrary
@@ -1289,6 +1303,7 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
     else if (!strcmp(stat->data[0], "pline")) {
       team = cw_data_get_item_int(stat, 2);
       seq = cw_data_get_item_int(stat, 3);
+      cw_box_validate_boxscore_value(game, "pline", "team", team, 0, 1);
 
       if (seq == 1) {
         /* Record for starter */
@@ -1332,6 +1347,9 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
       team = cw_data_get_item_int(stat, 2);
       seq = cw_data_get_item_int(stat, 3);
       pos = cw_data_get_item_int(stat, 4);
+      cw_box_validate_boxscore_value(game, "dline", "team", team, 0, 1);
+      cw_box_validate_boxscore_value(game, "dline", "sequence", seq, 1, 40);
+      cw_box_validate_boxscore_value(game, "dline", "position", pos, 1, 9);
       player = cw_box_find_player(boxscore, stat->data[1],
                                   (pos != 1) ? 1 : 0);
       if (player == NULL) {
@@ -1362,6 +1380,7 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
     }
     else if (!strcmp(stat->data[0], "phline")) {
       team = cw_data_get_item_int(stat, 3);
+      cw_box_validate_boxscore_value(game, "phline", "team", team, 0, 1);
       player = cw_box_find_player(boxscore, stat->data[1], 1);
       if (player == NULL) {
         fprintf(stderr,
@@ -1373,6 +1392,7 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
     }
     else if (!strcmp(stat->data[0], "prline")) {
       team = cw_data_get_item_int(stat, 3);
+      cw_box_validate_boxscore_value(game, "prline", "team", team, 0, 1);
       player = cw_box_find_player(boxscore, stat->data[1], 1);
       if (player == NULL) {
         fprintf(stderr,
@@ -1384,6 +1404,7 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
     }
     else if (!strcmp(stat->data[0], "tline")) {
       team = cw_data_get_item_int(stat, 1);
+      cw_box_validate_boxscore_value(game, "tline", "team", team, 0, 1);
       boxscore->lob[team] = cw_data_get_item_int(stat, 2);
       boxscore->er[team] = cw_data_get_item_int(stat, 3);
       boxscore->dp[team] = cw_data_get_item_int(stat, 4);
@@ -1393,6 +1414,7 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
 
   for (stat = game->first_line; stat; stat = stat->next) {
     team = cw_data_get_item_int(stat, 0);
+    cw_box_validate_boxscore_value(game, "line", "team", team, 0, 1);
     for (i = 1; i < stat->num_data; i++) {
       boxscore->linescore[i][team] = cw_data_get_item_int(stat, i);
     }
@@ -1400,15 +1422,19 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
 
   for (stat = game->first_evdata; stat; stat = stat->next) {
     if (!strcmp(stat->data[0], "dpline")) {
+      team = cw_data_get_item_int(stat, 1);
+      cw_box_validate_boxscore_value(game, "dpline event", "team", team, 0, 1);
       event = cw_box_add_event(&(boxscore->dp_list), -1,
-                               1 - cw_data_get_item_int(stat, 1), 0);
+                               1 - team, 0);
       for (i = 2; i < stat->num_data; i++) {
         event->players[i - 2] = stat->data[i];
       }
     }
     else if (!strcmp(stat->data[0], "tpline")) {
+      team = cw_data_get_item_int(stat, 1);
+      cw_box_validate_boxscore_value(game, "tpline event", "team", team, 0, 1);
       event = cw_box_add_event(&(boxscore->tp_list), -1,
-                               1 - cw_data_get_item_int(stat, 1), 0);
+                               1 - team, 0);
       for (i = 2; i < stat->num_data; i++) {
         event->players[i - 2] = stat->data[i];
       }
