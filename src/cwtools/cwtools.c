@@ -81,27 +81,64 @@ int ascii = 1;
 /* If 'quiet', programs should write no status messages to stderr */
 int quiet = 0;
 
+static char *
+cwtools_teamfile_filename(int lowercase)
+{
+  size_t size = strlen(year) + sizeof("TEAM");
+  char *filename;
+
+  filename = malloc(size);
+  if (filename == NULL) {
+    fprintf(stderr, "Error: could not allocate memory for filename\n");
+    exit(1);
+  }
+
+  snprintf(filename, size, "%s%s", lowercase ? "team" : "TEAM", year);
+
+  return filename;
+}
+
+static char *
+cwtools_roster_filename(const char *team_id)
+{
+  size_t size = strlen(team_id) + strlen(year) + sizeof(".ROS");
+  char *filename;
+
+  filename = malloc(size);
+  if (filename == NULL) {
+    fprintf(stderr, "Error: could not allocate memory for filename\n");
+    exit(1);
+  }
+
+  snprintf(filename, size, "%s%s.ROS", team_id, year);
+
+  return filename;
+}
+
 void
 cwtools_read_rosters(CWLeague *league)
 {
-  char filename[256];
+  char *filename;
   FILE *teamfile;
   CWRoster *roster;
 
-  sprintf(filename, "TEAM%s", year);
+  filename = cwtools_teamfile_filename(0);
 
   teamfile = fopen(filename, "r");
+  free(filename);
 
   if (teamfile == NULL) {
     /* Also try lowercase version */
-    sprintf(filename, "team%s", year);
+    filename = cwtools_teamfile_filename(1);
 
     teamfile = fopen(filename, "r");
     
     if (teamfile == NULL) {
       fprintf(stderr, "Can't find teamfile (%s)\n", filename);
+      free(filename);
       exit(1);
     }
+    free(filename);
   }
 
   cw_league_read(league, teamfile);
@@ -110,8 +147,9 @@ cwtools_read_rosters(CWLeague *league)
   for (roster = league->first_roster; roster; roster = roster->next) {
     FILE *file;
 
-    sprintf(filename, "%s%s.ROS", roster->team_id, year);
+    filename = cwtools_roster_filename(roster->team_id);
     file = fopen(filename, "r");
+    free(filename);
 
     if (file == NULL) {
       /* bevent silently ignores missing roster files and generates
