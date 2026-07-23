@@ -174,27 +174,36 @@ typedef struct {
 
 /*
  * Private auxiliary function to initialize parser state
+ *
+ * This performs pre-processing normalisation on the input play string:
+ *   - All letters are converted to uppercase
+ *   - The symbols '#' and '!' have no semantic meaning for parsing purposes
+ *     and so are stripped
+ *   - The strings SBH and CSH are mapped to SB4 and CS4 for subsequent
+ *     processing convenience.
  */
 static void
-cw_parse_initialize(CWParserState *state, char *input)
+cw_parse_initialize(CWParserState *state, const char *input)
 {
-  unsigned int i;
+  size_t read_pos;
+  size_t write_pos = 0;
   char *c;
 
-  state->inputString = (char *) malloc(sizeof(char) * (strlen(input) + 1));
-  strcpy(state->inputString, input);
-  for (i = 0; i <= strlen(state->inputString); i++) {
-    if (islower(state->inputString[i]))  {
-      state->inputString[i] = toupper(state->inputString[i]);
+  state->inputString = (char *) malloc(strlen(input) + 1);
+  for (read_pos = 0; input[read_pos] != '\0'; read_pos++) {
+    unsigned char ch = (unsigned char) input[read_pos];
+
+    if (ch != '#' && ch != '!') {
+      state->inputString[write_pos++] = (char) toupper(ch);
     }
   }
+  state->inputString[write_pos] = '\0';
 
   /* Preprocessing to turn SBH and CSH strings into SB4 and CS4 */
   if ((c = strstr(state->inputString, "SBH"))) {
     *(c+2) = '4';
   }
-  if ((c = strstr(state->inputString, "CSH")) &&
-      !strstr(state->inputString, "FCSH")) {
+  if ((c = strstr(state->inputString, "CSH"))) {
     *(c+2) = '4';
   }
      
@@ -218,18 +227,8 @@ cw_parse_cleanup(CWParserState *state)
 static char 
 cw_parse_nextsym(CWParserState *state)
 {
-  if (state->inputPos > strlen(state->inputString)) {
-    state->sym = 0;
-  }
-  else {
-    /* There are instances of the uncertain play character '#'
-     * or the great play character '!' appearing inside play strings.
-     * Since these are largely for human consumption (and the program
-     * doesn't do anything with the data), we ignore them here.
-     */
-    do {
-      state->sym = state->inputString[state->inputPos++];
-    } while (state->sym == '#' || state->sym == '!');
+  if (state->sym != '\0') {
+    state->sym = state->inputString[state->inputPos++];
   }
   return state->sym;
 }
@@ -697,12 +696,10 @@ static void cw_parse_flags(CWParserState *state, CWEventData *event)
     do {
       cw_parse_nextsym(state);
       if (state->sym != '/' && state->sym != '.' &&
-          state->sym != '#' && state->sym != '!' &&
           state->sym != '+' && state->sym != '-' && state->sym != 0) {
         strncat(flag, &(state->sym), 1);
       }
     } while (state->sym != '/' && state->sym != '.' &&
-             state->sym != '#' && state->sym != '!' &&
              state->sym != '+' && state->sym != '-' && state->sym != 0);
 
     if (!strcmp(flag, "/SH") || !strcmp(flag, "/SAC")) {
