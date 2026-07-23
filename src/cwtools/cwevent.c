@@ -1259,7 +1259,7 @@ DECLARE_FIELDFUNC(cwevent_runner1_defensive_position)
   }
   else {
     return cw_buffer_emit_int(buffer,
-		   cw_gamestate_player_position(gameiter->state,
+		   cw_gamestate_runner_position(gameiter->state,
 						gameiter->state->batting_team,
 						gameiter->state->runners[1].runner), 2);
   }
@@ -1293,7 +1293,7 @@ DECLARE_FIELDFUNC(cwevent_runner2_defensive_position)
   }
   else {
     return cw_buffer_emit_int(buffer,
-		   cw_gamestate_player_position(gameiter->state,
+		   cw_gamestate_runner_position(gameiter->state,
 						gameiter->state->batting_team,
 						gameiter->state->runners[2].runner), 2);
   }
@@ -1326,7 +1326,7 @@ DECLARE_FIELDFUNC(cwevent_runner3_defensive_position)
   }
   else {
     return cw_buffer_emit_int(buffer,
-		   cw_gamestate_player_position(gameiter->state,
+		   cw_gamestate_runner_position(gameiter->state,
 						gameiter->state->batting_team,
 						gameiter->state->runners[3].runner), 2);
   }

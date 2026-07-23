@@ -596,7 +596,7 @@ cw_gamestate_lineup_slot(CWGameState *state, int team, char *player_id)
 }
 
 int
-cw_gamestate_player_position(CWGameState *state,
+cw_gamestate_runner_position(CWGameState *state,
 			     int team, char *player_id)
 {
   int i;
@@ -609,12 +609,6 @@ cw_gamestate_player_position(CWGameState *state,
 	/* Bit of a special case: bevent considers PH for DH to be
 	 * a DH right away, issuing position code 10 instead of 11 */
 	return 10;
-      }
-      else if (state->lineups[i][team].position > 10 &&
-	       !state->ph_flag) {
-	/* Pinch-hitters and pinch-runners are assigned a position
-	 * of 0 ("no position") if they come up again in the same inning */
-	return 0;
       }
       else {
 	return state->lineups[i][team].position;
@@ -630,6 +624,21 @@ cw_gamestate_player_position(CWGameState *state,
   }
 
   return -1;
+}
+
+int
+cw_gamestate_player_position(CWGameState *state,
+			     int team, char *player_id)
+{
+  int position = cw_gamestate_runner_position(state, team, player_id);
+
+  if (position > 10 && !state->ph_flag) {
+    /* Pinch-hitters and pinch-runners are assigned a position
+     * of 0 ("no position") if they come up again in the same inning */
+    return 0;
+  }
+
+  return position;
 }
 
 char *
@@ -1049,4 +1058,3 @@ int cw_gameiter_runner_fate(CWGameIterator *orig_gameiter, int base)
   free(gameiter);
   return base;
 }		
-

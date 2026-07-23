@@ -31,6 +31,8 @@
   This handles cases where a /GDP is not awarded due to interferences.  (#13)
 - With boxscore event files, pinch-hitting and pinch-running are correctly added to the list
   of a player's positions. (#7)
+- The extended `cwevent` fields reporting runner position correct report pinch-runners as
+  position 12 instead of position 0.  (#11)
 
 
 # [0.10.0] - 2023-01-02

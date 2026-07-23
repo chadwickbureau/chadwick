@@ -85,6 +85,13 @@ int cw_gamestate_lineup_slot(CWGameState *state,
 int cw_gamestate_player_position(CWGameState *state,
 				 int team, char *player_id);
 
+/*
+ * Returns the position associated with a runner, without applying the
+ * batted-around adjustment used for the batter's PH/PR statistics.
+ */
+int cw_gamestate_runner_position(CWGameState *state,
+				 int team, char *player_id);
+
 
 /*
  * Returns nonzero if and only if 'base' is currently occupied.
@@ -200,6 +207,5 @@ int cw_gameiter_runner_fate(CWGameIterator *gameiter, int base);
 
 
 #endif   /* CW_GAMEITER_H */
-
 
 
