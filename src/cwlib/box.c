@@ -189,6 +189,8 @@ cw_box_pitcher_create(char *player_id, char *name)
   return pitcher;
 }
 
+
+
 static void
 cw_box_pitcher_cleanup(CWBoxPitcher *pitcher)
 {
@@ -1203,8 +1205,16 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
     if (!strcmp(stat->data[0], "bline")) {
       slot = cw_data_get_item_int(stat, 3);
       team = cw_data_get_item_int(stat, 2);
+      seq = cw_data_get_item_int(stat, 4);
 
-      if (cw_data_get_item_int(stat, 4) == 1) {
+      /* Some generated boxscore event files give every slot-zero bline a
+       * sequence number of zero, including the starting pitcher, contrary
+       * to the documented bline format.  Tolerate this by matching the
+       * player already entered for the same team and batting-order slot. */
+      if (seq == 1 ||
+          (slot == 0 && seq == 0 &&
+           boxscore->slots[slot][team] != NULL &&
+           !strcmp(boxscore->slots[slot][team]->player_id, stat->data[1]))) {
         /* Record for starter */
         player = cw_box_get_starter(boxscore, team, slot);
       }
@@ -1574,5 +1584,3 @@ CWBoxPitcher *cw_box_get_starting_pitcher(CWBoxscore *boxscore, int team)
 
   return pitcher;
 }
-
-
