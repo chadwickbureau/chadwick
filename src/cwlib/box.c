@@ -1199,6 +1199,26 @@ cw_box_validate_boxscore_value(CWGame *game, char *record, char *field,
   }
 }
 
+static void
+cw_box_prepend_position(CWBoxPlayer *player, int position)
+{
+  int i;
+  int capacity = sizeof(player->positions) / sizeof(int);
+
+  if (player->num_positions > 0 && player->positions[0] == position) {
+    return;
+  }
+
+  i = (player->num_positions < capacity) ? player->num_positions : capacity - 1;
+  for (; i > 0; i--) {
+    player->positions[i] = player->positions[i - 1];
+  }
+  player->positions[0] = position;
+  if (player->num_positions < capacity) {
+    player->num_positions++;
+  }
+}
+
 void
 cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
 {
@@ -1389,6 +1409,7 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
         exit(1);
       }
       player->ph_inn = cw_data_get_item_int(stat, 2);
+      cw_box_prepend_position(player, DWARE_POS_PH);
     }
     else if (!strcmp(stat->data[0], "prline")) {
       team = cw_data_get_item_int(stat, 3);
@@ -1401,6 +1422,7 @@ cw_box_process_boxscore_file(CWBoxscore *boxscore, CWGame *game)
         exit(1);
       }
       player->pr_inn = cw_data_get_item_int(stat, 2);
+      cw_box_prepend_position(player, DWARE_POS_PR);
     }
     else if (!strcmp(stat->data[0], "tline")) {
       team = cw_data_get_item_int(stat, 1);

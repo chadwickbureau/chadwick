@@ -29,6 +29,8 @@
 - The `cwevent` extended fields indicating force outs also treat as a force any out reported
   in the primary portion of the event string if marked as a double play with /DP.
   This handles cases where a /GDP is not awarded due to interferences.  (#13)
+- With boxscore event files, pinch-hitting and pinch-running are correctly added to the list
+  of a player's positions. (#7)
 
 
 # [0.10.0] - 2023-01-02

@@ -214,15 +214,7 @@ cwbox_print_player(CWBoxPlayer *player, CWRoster *roster)
     sprintf(name, "%s", player->name);
   }
 
-  if (player->ph_inn > 0 && player->positions[0] != 11) {
-    strcpy(posstr, "ph");
-  }
-  else if (player->pr_inn > 0 && player->positions[0] != 12) {
-    strcpy(posstr, "pr");
-  }
-  else {
-    strcpy(posstr, "");
-  }
+  strcpy(posstr, "");
   for (pos = 0; pos < player->num_positions; pos++) {
     if (strlen(posstr) > 0) {
       strcat(posstr, "-");
