@@ -73,17 +73,17 @@ information from Retrosheet play-by-play event files:
   extractor, which replaces and extends the DiamondWare program
   BGAME.
 
-- :program:`cwbox`, a boxscore generator, which
+- :ref:`cwbox <cwtools.cwbox>`, a boxscore generator, which
   replaces and extends the DiamondWare program BOX.
 
-- :program:`cwdaily`, which produces day-by-day player statistical
-  totals.  This program is unique to Chadwick.
+- :ref:`cwdaily <cwtools.cwdaily>`, which produces per-game player
+  statistical records. This program is unique to Chadwick.
   
 - :ref:`cwsub <cwtools.cwsub>`, which extracts information
   about in-game player substitutions. This program is unique to
   Chadwick.
 
-- :program:`cwcomment`, which extracts comment
+- :ref:`cwcomment <cwtools.cwcomment>`, which extracts comment
   fields from event files. This program is unique to Chadwick.
 
 This documentation is intended to be read in conjunction with the 
@@ -111,7 +111,8 @@ available for every tool are noted in their descriptions.
    * - Switch
      - Description
    * - ``-a``
-     - Generate ASCII comma-delimited files (default)
+     - Generate ASCII comma-delimited files (default). This option
+       does not affect :program:`cwbox`.
    * - ``-d``
      - Print a list of the available fields and descriptions (for use
        with ``-f``). Not available for :program:`cwbox`.
@@ -122,7 +123,8 @@ available for every tool are noted in their descriptions.
        ``-h``; the list of available fields can be viewed with ``-d``.
        Not available for :program:`cwbox`.
    * - ``-ft``
-     - Generate FORTRAN format files.
+     - Generate FORTRAN format files. This option does not affect
+       :program:`cwbox`.
    * - ``-h``
      - Prints description and usage information for the tool.
    * - ``-i *gameid*``
@@ -147,7 +149,10 @@ Documentation of individual tools
 
     cwevent
     cwgame
+    cwbox
+    cwdaily
     cwsub
+    cwcomment
 
 
 .. Indices and tables

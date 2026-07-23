@@ -15,6 +15,10 @@ fields. These are specified using the ``-x`` command-line flag.
 Many of these extended fields are defined to match fields which appear
 in the Retrosheet gamelogs.  
 
+The batting, pitching, and fielding totals reported by
+:program:`cwgame` are team totals. For per-game statistics for
+individual players, use :ref:`cwdaily <cwtools.cwdaily>`.
+
 .. note::
    :program:`cwgame` guarantees that the standard field numbers will
    match those used by BGAME.  Standard field numbers therefore can
