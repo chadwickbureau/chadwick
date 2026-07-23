@@ -549,16 +549,22 @@ static int cw_parse_advance_modifier(CWParserState *state,
       }
     }
     else if (baseFrom == 0 && event->event_type == CW_EVENT_STRIKEOUT) {
-      /* Special case: batter put out listed explicitly in advancement */
-      event->putouts[0] = event->putouts[1];
-      event->putouts[1] = event->putouts[2];
-      event->putouts[2] = 0;
-      event->num_putouts--;
+      /* Special case: batter put out listed explicitly in advancement.
+       * If an earlier modifier made the batter safe, the implied catcher
+       * putout has already been removed; this credit is a subsequent,
+       * actual putout (as in K+WP.BX3(E2/TH)(2)). */
+      if (!safe) {
+        event->putouts[0] = event->putouts[1];
+        event->putouts[1] = event->putouts[2];
+        event->putouts[2] = 0;
+        event->num_putouts--;
 
-      for (i = 0; i < event->num_touches - 1; i++) {
-        event->touches[i] = event->touches[i + 1];
+        for (i = 0; i < event->num_touches - 1; i++) {
+          event->touches[i] = event->touches[i + 1];
+        }
+        event->touches[--event->num_touches] = 0;
       }
-      event->touches[--event->num_touches] = 0;
+      event->advance[baseFrom] = 0;
     }
 
     if (state->token[0] != 'E') {
@@ -1885,6 +1891,10 @@ static int cw_parse_runner_advance(CWParserState *state, CWEventData *event)
     if (!cw_parse_advance_modifier(state, event, safe, baseFrom, baseTo)) {
       return 0;
     }
+    /* A modifier can change an attempted out into a safe advance.  Carry
+     * that result into a following modifier so an explicit later out is
+     * not confused with the strikeout's implied catcher putout. */
+    safe = (event->advance[baseFrom] != 0);
   }
   return 1;
 }
