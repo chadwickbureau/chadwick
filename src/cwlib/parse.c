@@ -42,6 +42,7 @@ cw_event_data_copy(CWEventData *dest, CWEventData *src)
     dest->advance[i] = src->advance[i];
     dest->rbi_flag[i] = src->rbi_flag[i];
     dest->fc_flag[i] = src->fc_flag[i];
+    dest->primary_out_flag[i] = src->primary_out_flag[i];
     dest->muff_flag[i] = src->muff_flag[i];
     strcpy(dest->play[i], src->play[i]);
   }
@@ -279,6 +280,7 @@ cw_parse_event_initialize(CWEventData *event)
     event->advance[i] = 0;
     event->rbi_flag[i] = 0;
     event->fc_flag[i] = 0;
+    event->primary_out_flag[i] = 0;
     event->muff_flag[i] = 0;
     strcpy(event->play[i], "");
   }
@@ -1265,6 +1267,7 @@ static int cw_parse_generic_out(CWParserState *state, CWEventData *event,
 	event->muff_flag[base] = 1;
       }
       event->fc_flag[base] = 1;
+      event->primary_out_flag[base] = 1;
       if (event->batted_ball_type == ' ') {
 	if (strlen(state->token) > 1 || base > 0) {
 	  /* Assumption: more than one fielder implies ground ball,
@@ -1319,6 +1322,7 @@ static int cw_parse_generic_out(CWParserState *state, CWEventData *event,
 
     for (i = 1; i <= 3; i++) {
       event->fc_flag[i] = 0;
+      event->primary_out_flag[i] = 0;
     }
   }
 

@@ -26,7 +26,9 @@
 - Parsing of C/ now accepts additional flags, to account for the fact this is used for
   runners reading first on obstruction and also for shift/positioning violations.
 - Support for archaic flag /SAC (as a synonym for /SH) has been removed.
-
+- The `cwevent` extended fields indicating force outs also treat as a force any out reported
+  in the primary portion of the event string if marked as a double play with /DP.
+  This handles cases where a /GDP is not awarded due to interferences.  (#13)
 
 
 # [0.10.0] - 2023-01-02

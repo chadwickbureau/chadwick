@@ -1484,6 +1484,8 @@ DECLARE_FIELDFUNC(cwevent_force_second_flag)
   return cw_buffer_emit_flag(buffer,
 		 gameiter->event_data->fc_flag[1] &&
 		  (gameiter->event_data->gdp_flag || 
+		   (gameiter->event_data->dp_flag &&
+		    gameiter->event_data->primary_out_flag[1]) ||
 		   gameiter->event_data->force_flag));
 }
 
@@ -1493,6 +1495,8 @@ DECLARE_FIELDFUNC(cwevent_force_third_flag)
   return cw_buffer_emit_flag(buffer,
 		 gameiter->event_data->fc_flag[2] &&
 		  (gameiter->event_data->gdp_flag ||
+		   (gameiter->event_data->dp_flag &&
+		    gameiter->event_data->primary_out_flag[2]) ||
 		   gameiter->event_data->force_flag));
 }
 
@@ -1502,6 +1506,8 @@ DECLARE_FIELDFUNC(cwevent_force_home_flag)
   return cw_buffer_emit_flag(buffer,
 		 gameiter->event_data->fc_flag[3] &&
 		  (gameiter->event_data->gdp_flag ||
+		   (gameiter->event_data->dp_flag &&
+		    gameiter->event_data->primary_out_flag[3]) ||
 		   gameiter->event_data->force_flag));
 }
 
