@@ -12,7 +12,7 @@ Author and License
 ==================
 
 Chadwick is written and maintained by T L Turocy
-(ted.turocy@gmail.com), and is Copyright (C) 2002-2023 by
+(ted.turocy@gmail.com), and is Copyright (C) 2002-2026 by
 T L Turocy and Chadwick Baseball Bureau.
 
 Chadwick is Open Source software, distributed under the terms of the 

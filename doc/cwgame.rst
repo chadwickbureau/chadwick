@@ -11,7 +11,7 @@ compatible with the Retrosheet BGAME game descriptor tool.  These
 are specified using the ``-f`` command-line flag. In addition, cwgame
 offers a number "extended" fields which expand upon or give more
 detailed information not easily accessed via the standard
-fields. These are are specified using the ``-x`` command-line flag.
+fields. These are specified using the ``-x`` command-line flag.
 Many of these extended fields are defined to match fields which appear
 in the Retrosheet gamelogs.  
 
@@ -422,7 +422,7 @@ The following table gives the contents of each of the 86 fields
      - ``HOME_HR_CT``
    * - 39
      - home team RBI
-     - ``HOME_RBI_CT``
+     - ``HOME_BI_CT``
    * - 40 
      - home team SH
      - ``HOME_SH_CT``
@@ -635,13 +635,11 @@ pitch detail in the file.
    * - Code
      - Description
    * - 0
-     - unknown
+     - unknown or none
    * - 1
      - pitches
    * - 2
      - count
-   * - 3
-     - none
 
 .. note:: This field reports the contents of the
    info,pitches field in the game file. Some games
@@ -695,8 +693,9 @@ of the wind.
 Wind speed (field 28)
 ---------------------
 
-The game time wind speed, in miles per hour. The value
--1 is used when the wind speed is unknown.
+The game-time wind speed, in miles per hour. The value 0 is used when
+the ``info,windspeed`` record is absent or its value is blank or
+``unknown``. Otherwise, the numeric value of the record is output.
 
 .. _cwtools.cwgame.fieldcondition:
 
@@ -786,7 +785,9 @@ Numeric codes for sky field.
 Tiebreaker rule type in use (extended field 96)
 -----------------------------------------------
 
-This field indicates games in which an extra-innings tiebreaker
-rule was in use.  The only valid value for this field currently
-is `2`, indicating that extra innings began with a runner on
-second base.
+This field reports the value of the ``info,tiebreaker`` record, which
+identifies the base on which a runner is placed at the start of an
+extra inning. It is blank when the record is absent.
+
+The only tiebreaker rule used in MLB through 2026 is ``2``, meaning
+that an extra inning starts with a runner on second base only.

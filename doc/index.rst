@@ -13,7 +13,7 @@ DiamondWare format, as used by Retrosheet (http://www.retrosheet.org).
 Author
 -------
 
-Chadwick is written, maintained, and Copyright 2002-2023 by
+Chadwick is written, maintained, and Copyright 2002-2026 by
 Dr T. L. Turocy (ted.turocy <aht> gmail <daht> com) 
 at Chadwick Baseball Bureau (http://www.chadwick-bureau.com).
 
@@ -93,16 +93,16 @@ summarizing the contents of
 play-by-play files and operation of the DiamondWare versions of these
 tools.  The Chadwick documentation focuses on filling in gaps in the
 Retrosheet documentation, and on detailing Chadwick-specific
-extensions the toolset.
+extensions to the toolset.
 
 .. _cwtools.commandline:
 
 Command-line options
 --------------------
 
-Each of the command-line tools shares a common set of options
-controlling their behavior. These are detailed in the following
-table.
+The command-line tools share many options controlling their behavior.
+These are detailed in the following table. Options which are not
+available for every tool are noted in their descriptions.
 
 .. list-table:: Common command-line options and their effects
    :header-rows: 1
@@ -113,11 +113,14 @@ table.
    * - ``-a``
      - Generate ASCII comma-delimited files (default)
    * - ``-d``
-     - Print a list of the available fields and descriptions (for use with ``-f``)
+     - Print a list of the available fields and descriptions (for use
+       with ``-f``). Not available for :program:`cwbox`.
    * - ``-e mmdd``
      - The latest date to process (inclusive)
    * - ``-f flist``
-     - List of fields to output. The default list can be viewed with ``-h``; the list of available fields can be viewed with ``-d``
+     - List of fields to output. The default list can be viewed with
+       ``-h``; the list of available fields can be viewed with ``-d``.
+       Not available for :program:`cwbox`.
    * - ``-ft``
      - Generate FORTRAN format files.
    * - ``-h``
@@ -125,7 +128,11 @@ table.
    * - ``-i *gameid*``
      - Only process the game with ID ``gameid``
    * - ``-n``
-     - If in ASCII mode (the default), the first row of the output is a comma-separated list of column headers.
+     - If in ASCII mode (the default), the first row of the output is
+       a comma-separated list of column headers. Not available for
+       :program:`cwbox`.
+   * - ``-q``
+     - Operate quietly; do not print progress messages.
    * - ``-s mmdd``
      - The earliest date to process (inclusive)
    * - ``-y``
@@ -149,4 +156,3 @@ Documentation of individual tools
 .. * :ref:`genindex`
 .. * :ref:`modindex`
 .. * :ref:`search`
-

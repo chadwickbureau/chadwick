@@ -10,7 +10,7 @@ compatible with the Retrosheet BEVENT event descriptor tool.  These
 are specified using the ``-f`` command-line flag. In addition, cwevent
 offers a number "extended" fields which expand upon or give more
 detailed information not easily accessed via the standard
-fields. These are are specified using the ``-x`` command-line flag.
+fields. These are specified using the ``-x`` command-line flag.
 
 .. note::
 
@@ -424,13 +424,16 @@ fields. These are are specified using the ``-x`` command-line flag.
      - event number on which runner on third reached base
      - ``RUN3_ORIGIN_EVENT_ID``
    * - 30
-     - responsible catcher for runner on first
+     - :ref:`Responsible catcher <cwtools.cwevent.catcherresponsibility>`
+       for runner on first
      - ``RUN1_RESP_CAT_ID``
    * - 31
-     - responsible catcher for runner on second
+     - :ref:`Responsible catcher <cwtools.cwevent.catcherresponsibility>`
+       for runner on second
      - ``RUN2_RESP_CAT_ID``
    * - 32
-     - responsible catcher for runner on third
+     - :ref:`Responsible catcher <cwtools.cwevent.catcherresponsibility>`
+       for runner on third
      - ``RUN3_RESP_CAT_ID``
    * - 33
      - number of balls in plate appearance
@@ -525,6 +528,15 @@ fields. These are are specified using the ``-x`` command-line flag.
    * - 63
      - :ref:`text of count as appears in event file <cwtools.cwevent.count>`
      - ``COUNT_TX``
+   * - 64
+     - whether runner on first is an automatic runner
+     - ``RUN1_AUTO_FL``
+   * - 65
+     - whether runner on second is an automatic runner
+     - ``RUN2_AUTO_FL``
+   * - 66
+     - whether runner on third is an automatic runner
+     - ``RUN3_AUTO_FL``
     
 
 .. _cwtools.cwevent.resplayers:
@@ -532,17 +544,14 @@ fields. These are are specified using the ``-x`` command-line flag.
 Result batters and pitchers (fields 10-17)
 ------------------------------------------
 
-In most cases, the pitcher and batter charged or credited with
-the event (when a batter event) are the ones in the game when the
-event occurs. However, Rules 10.17 and 10.18 have special clauses
-discussing how to charge walks to pitchers when a relief pitcher
-enters in the middle of the plate appearance, and how to charge
-strikeouts to batters when a pinch hitter enters in the middle of the
-plate appearance. The batter and
-pitcher fields always give the identity of the
-batter and pitcher in the game at the time of the event; the
-result batter and result pitcher
-give the batter and pitcher credited or charged with the event.
+In most cases, the pitcher and batter charged or credited with an
+event are the players in the game when the event occurs. However, Rule
+9.15(b) governs how a strikeout is charged when a substitute batter
+enters with two strikes, and Rule 9.16(h) governs how a walk is charged
+when a relief pitcher enters during a plate appearance. The batter and
+pitcher fields identify the players in the game at the time of the
+event; the result batter and result pitcher fields identify the players
+credited or charged with the event.
 
 There is one known bug in the Retrosheet-provided tools
 regarding the result pitcher. When a relief pitcher enters the game,
@@ -590,7 +599,7 @@ list of all types and the corresponding codes used in this
 field.  Codes marked "obsolete" are no longer used, or no longer appear
 in Retrosheet-produced play-by-play files.
 
-.. list-table:: cwevent extended field numbers
+.. list-table:: cwevent event type codes
    :header-rows: 1
    :widths: 5,20
 
@@ -675,18 +684,16 @@ many cases there is insufficient information, or the situation
 requires the judgment of the official scorer. Runners which are put
 out are reported as having an advancement of 0.
 
-*New in 0.8.1*: With the introduction of the automatic runner
-placement in extra innings as a tiebreaker for the 2020 season in
-MLB (and earlier in the minor leagues and other leagues), a new
-code 7 is used for runner advancement in the case in which an
-automatic runner scores.  The scoring rule for automatic runners is
-that they are charged to the pitcher who starts the inning, as an
-unearned run.  For the purposes of determining whether a run
-scored is due to the automatic runner, Chadwick follows the same
-convention as is used for assigning responsibility for runners to
-pitchers: in the event that an automatic runner is put out by
-batter action, then the subsequent runner becomes marked as an
-automatic runner.
+Automatic runners are reported using the extended fields
+``RUN1_AUTO_FL``, ``RUN2_AUTO_FL``, and ``RUN3_AUTO_FL``.  Each flag
+indicates whether the runner occupying that base at the start of the
+play is the result of an automatic-runner placement.  Automatic
+runners use the same destination codes as other runners.
+
+For the purposes of tracking automatic runners, Chadwick follows the
+same convention as is used for assigning responsibility for runners to
+pitchers: in the event that an automatic runner is put out by batter
+action, the subsequent runner becomes marked as an automatic runner.
 
 In most cases, the play on a runner indicates the fielding
 credits involved in putting him out. Chadwick also reports a fielding
@@ -699,11 +706,11 @@ Fielding errors (fields 51-57)
 ------------------------------
 
 Up to three errors can be indicated in
-:program:`cwevent` output. Supported error types are
-F for generic fielding errors, and
-T for throwing errors; no distinction is made
-between bobbled batted balls, muffed throws or fly balls, and so
-forth.
+:program:`cwevent` output. Supported error types are:
+
+- ``F`` for generic fielding errors;
+- ``D`` for dropped or muffed balls; and
+- ``T`` for throwing errors.
 
 .. _cwtools.cwevent.responsibility:
 
@@ -714,10 +721,10 @@ The Official Rules for charging runs to pitchers stipulate that if a
 pitcher is relieved in the middle of an inning with runners left on
 base, he is charged with runs if those runners (or the ones who
 replace them in the event of fielder's choices) subsequently score in
-the inning.  The current rule is Rule 10.16(g), the comment on which
+the inning.  The current rule is Rule 9.16(g), the comment on which
 in the rules states:
 
-   It is the intent of Rule 10.16(g) to charge each pitcher with the
+   It is the intent of Rule 9.16(g) to charge each pitcher with the
    number of runners he put on base, rather than with the individual
    runners. When a pitcher puts runners on base and is relieved, such
    pitcher  shall be charged with all runs subsequently scored up to
@@ -755,6 +762,33 @@ including those which try to track what happens to inherited runners,
 if one does not take appropriate care to handle this very unusual case.
 
 
+.. _cwtools.cwevent.catcherresponsibility:
+
+Catcher responsibility (extended fields 30-32)
+-----------------------------------------------
+
+Catcher responsibility is not an official statistic. Chadwick defines
+it as an analogue of pitcher responsibility, intended to support
+calculations such as catcher ERA.
+
+When a batter becomes a runner, responsibility is assigned to the
+catcher who was in the game at the end of the batter's plate
+appearance. Chadwick does not implement an analogue of the special
+pitcher-responsibility rule for a pitching change during a plate
+appearance. An automatically placed runner is assigned to the catcher
+in the game when the runner is placed. Subsequent catcher
+substitutions do not change responsibility for existing runners, and
+replacing a runner with a pinch-runner or courtesy runner also
+preserves the assignment.
+
+On fielder's choices, catcher responsibility shifts between runners
+using the same rules Chadwick applies to pitcher responsibility.
+Consequently, ``RUN1_RESP_CAT_ID``, ``RUN2_RESP_CAT_ID``, and
+``RUN3_RESP_CAT_ID`` report the catcher currently associated with each
+runner under this convention; they do not represent an official
+scoring credit or charge.
+
+
 .. _cwtools.cwevent.fielding:
 
 Fielding credits (fields 88-95)
@@ -779,7 +813,7 @@ for a game was one of all pitches, count only, or no pitches
 (see the ``info,pitches`` metadata field).  However, many Retrosheet
 files contain count data for selected plate appearances, where known.
 In event files, a question mark is used when either the count of balls
-or strikes (or both) is unknown.  ``BEVENT``` renders nulls in the
+or strikes (or both) is unknown.  ``BEVENT`` renders nulls in the
 number of balls or strikes as zero in fields 5 and 6
 (``BALLS_CT`` and ``STRIKES_CT``), making it impossible to discern
 whether a play is marked as occurring on a count of 0-0 (even if ``info,pitches``
@@ -788,6 +822,4 @@ is set to ``none``), or on an unknown count.
 Extended field 63, ``COUNT_TX``, remedies this by reporting the count
 string as it appears in the file, as a parallel facility to ``PITCH_SEQ_TX``
 and ``EVENT_TX``.  With ``COUNT_TX``, all three of the main elements
-of the `play`  record are accessible in :program:`cwevent` output.
-
-
+of the ``play`` record are accessible in :program:`cwevent` output.

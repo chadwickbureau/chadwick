@@ -18,7 +18,7 @@ extending :program:`cwevent` by treating substitutions as events in
 their own right.  In particular, the count and pitch counts are cumulative
 counts for the plate appearance up to the point of the substitution.
 
-.. list-table:: cwevent standard field numbers
+.. list-table:: cwsub field numbers
    :header-rows: 1
    :widths: 5,20,10
 
@@ -100,5 +100,4 @@ counts for the plate appearance up to the point of the substitution.
    * - 24
      - number of other strikes in plate appearance
      - ``PA_OTHER_STRIKE_CT``
-
 
