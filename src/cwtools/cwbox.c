@@ -172,7 +172,7 @@ cwbox_print_header(CWGame *game, CWRoster *visitors, CWRoster *home)
   }
   
   if (cw_game_info_lookup(game, "daynight")) {
-    if (!strcmp(cw_game_info_lookup(game, "daynight"), "g_day")) {
+    if (!strcmp(cw_game_info_lookup(game, "daynight"), "day")) {
       printf(" (D)\n");
     }
     else if (!strcmp(cw_game_info_lookup(game, "daynight"), "night")) {
