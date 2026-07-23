@@ -686,180 +686,184 @@ static char locations[][20] = {
   ""
 };
 
-static void cw_parse_flags(CWParserState *state, CWEventData *event)
+static void cw_apply_event_flag(CWEventData *event, const char *flag)
 {
-  char flag[256];
-
-  do {
-    strcpy(flag, "/");
-
-    do {
-      cw_parse_nextsym(state);
-      if (state->sym != '/' && state->sym != '.' &&
-          state->sym != '+' && state->sym != '-' && state->sym != 0) {
-        strncat(flag, &(state->sym), 1);
-      }
-    } while (state->sym != '/' && state->sym != '.' &&
-             state->sym != '+' && state->sym != '-' && state->sym != 0);
-
-    if (!strcmp(flag, "/SH") || !strcmp(flag, "/SAC")) {
-      event->sh_flag = 1;
-      event->bunt_flag = 1;
-    }
-    else if (!strcmp(flag, "/SF")) {
-      event->sf_flag = 1;
-      /* Unless marked otherwise, a /SF is considered a fly ball.
-       * Special case: there are a handful of plays like E4/SF, where
-       * a sac fly is awarded when an infielder drops a fly.  In these
-       * cases, we override the default assumption about the batted
-       * ball type.
-       */
-      if (event->batted_ball_type == ' ' ||
-          (event->event_type == CW_EVENT_ERROR &&
-           event->batted_ball_type == 'G')) {
-        event->batted_ball_type = 'F';
-      }
-    }
-    else if (!strcmp(flag, "/DP")) {
-      event->dp_flag = 1;
-    }
-    else if (!strcmp(flag, "/GDP")) {
-      event->dp_flag = 1;
-      event->gdp_flag = 1;
-      event->batted_ball_type = 'G';
-    }
-    else if (!strcmp(flag, "/LDP")) {
-      event->dp_flag = 1;
-      event->batted_ball_type = 'L';
-    }
-    else if (!strcmp(flag, "/FDP")) {
-      event->dp_flag = 1;
+  if (!strcmp(flag, "/SH")) {
+    event->sh_flag = 1;
+    event->bunt_flag = 1;
+  }
+  else if (!strcmp(flag, "/SF")) {
+    event->sf_flag = 1;
+    /* Unless marked otherwise, a /SF is considered a fly ball.
+     * Special case: there are a handful of plays like E4/SF, where
+     * a sac fly is awarded when an infielder drops a fly.  In these
+     * cases, we override the default assumption about the batted
+     * ball type.
+     */
+    if (event->batted_ball_type == ' ' ||
+        (event->event_type == CW_EVENT_ERROR &&
+         event->batted_ball_type == 'G')) {
       event->batted_ball_type = 'F';
     }
-    else if (!strcmp(flag, "/BGDP")) {
-      event->bunt_flag = 1;
-      event->dp_flag = 1;
-      event->gdp_flag = 1;
+  }
+  else if (!strcmp(flag, "/DP")) {
+    event->dp_flag = 1;
+  }
+  else if (!strcmp(flag, "/GDP")) {
+    event->dp_flag = 1;
+    event->gdp_flag = 1;
+    event->batted_ball_type = 'G';
+  }
+  else if (!strcmp(flag, "/LDP")) {
+    event->dp_flag = 1;
+    event->batted_ball_type = 'L';
+  }
+  else if (!strcmp(flag, "/FDP")) {
+    event->dp_flag = 1;
+    event->batted_ball_type = 'F';
+  }
+  else if (!strcmp(flag, "/BGDP")) {
+    event->bunt_flag = 1;
+    event->dp_flag = 1;
+    event->gdp_flag = 1;
+    event->batted_ball_type = 'G';
+  }
+  else if (!strcmp(flag, "/BPDP")) {
+    event->bunt_flag = 1;
+    event->dp_flag = 1;
+    event->batted_ball_type = 'P';
+  }
+  else if (!strcmp(flag, "/BFDP")) {
+    /* grammatically this would be bunt-fly double play, but it is
+       interpreted as bunt-foul double play */
+    event->bunt_flag = 1;
+    event->dp_flag = 1;
+    event->batted_ball_type = 'P';
+    event->foul_flag = 1;
+  }
+  else if (!strcmp(flag, "/TP")) {
+    event->tp_flag = 1;
+  }
+  else if (!strcmp(flag, "/GTP")) {
+    event->tp_flag = 1;
+    event->batted_ball_type = 'G';
+  }
+  else if (!strcmp(flag, "/LTP")) {
+    event->tp_flag = 1;
+    event->batted_ball_type = 'L';
+  }
+  else if (!strcmp(flag, "/FL")) {
+    event->foul_flag = 1;
+  }
+  else if (!strcmp(flag, "/FO")) {
+    event->force_flag = 1;
+    if (event->batted_ball_type == ' ') {
       event->batted_ball_type = 'G';
     }
-    else if (!strcmp(flag, "/BPDP")) {
-      event->bunt_flag = 1;
-      event->dp_flag = 1;
-      event->batted_ball_type = 'P';
-    }
-    else if (!strcmp(flag, "/BFDP")) {
-      /* grammatically this would be bunt-fly double play, but it is
-	 interpreted as bunt-foul double play */
-      event->bunt_flag = 1;
-      event->dp_flag = 1;
-      event->batted_ball_type = 'P';
-      event->foul_flag = 1;
-    }
-    else if (!strcmp(flag, "/TP")) {
-      event->tp_flag = 1;
-    }
-    else if (!strcmp(flag, "/GTP")) {
-      event->tp_flag = 1;
-      event->batted_ball_type = 'G';
-    }
-    else if (!strcmp(flag, "/LTP")) {
-      event->tp_flag = 1;
-      event->batted_ball_type = 'L';
-    }
-    else if (!strcmp(flag, "/FL")) {
-      event->foul_flag = 1;
-    }
-    else if (!strcmp(flag, "/FO")) {
-      event->force_flag = 1;
-      if (event->batted_ball_type == ' ') {
-        event->batted_ball_type = 'G';
-      }
-    }
-    else if ((!strcmp(flag, "/TH") || !strcmp(flag, "/TH1") ||
-              !strcmp(flag, "/TH2") || !strcmp(flag, "/TH3") ||
-              !strcmp(flag, "/THH")) &&
-             (event->event_type == CW_EVENT_ERROR ||
-              event->event_type == CW_EVENT_PICKOFFERROR)) {
-      event->error_types[0] = 'T';
-    }
-    else if (!strcmp(flag, "/B")) {
-      event->bunt_flag = 1;
-    }
-    else if (!strcmp(flag, "/BG")) {
-      event->bunt_flag = 1;
-      event->batted_ball_type = 'G';
-    }
-    else if (!strcmp(flag, "/BP")) {
-      event->bunt_flag = 1;
-      event->batted_ball_type = 'P';
-    }
-    else if (!strcmp(flag, "/BF")) {
-      event->bunt_flag = 1;
-      event->batted_ball_type = 'F';
-    }
-    else if (!strcmp(flag, "/BL")) {
-      event->bunt_flag = 1;
-      event->batted_ball_type = 'L';
-    }
-    else if (!strcmp(flag, "/F")) {
-      event->batted_ball_type = 'F';
-    }
-    else if (!strcmp(flag, "/G")) {
-      event->batted_ball_type = 'G';
-    }
-    else if (!strcmp(flag, "/L")) {
-      event->batted_ball_type = 'L';
-    }
-    else if (!strcmp(flag, "/P") || !strcmp(flag, "/IF")) {
-      /* Infield fly is assumed to be a popup */
-      event->batted_ball_type = 'P';
-    }
-    else if (strlen(flag) >= 3) {
-      char traj = (flag[1] == 'B') ? flag[2] : flag[1];
-      if (traj == 'G' || traj == 'F' || traj == 'P' ||
-          traj == 'L') {
-        char *loc = (flag[1] == 'B') ? flag + 3 : flag + 2;
-        int i = 0;
-        for (i = 0; strcmp(locations[i], "") != 0; i++) {
-          if (!strcmp(locations[i], loc)) {
-            event->batted_ball_type = traj;
-            strcpy(event->hit_location, locations[i]);
-            if (locations[i][strlen(locations[i]) - 1] == 'F') {
-              event->foul_flag = 1;
-            }
-            if (flag[1] == 'B') {
-              event->bunt_flag = 1;
-            }
-            break;
-          }
-        }
-      }
-      else {
-        char *loc = (flag[1] == 'B') ? flag + 2 : flag + 1;
-        int i = 0;
-        for (i = 0; strcmp(locations[i], "") != 0; i++) {
-          if (!strcmp(locations[i], loc)) {
-            strcpy(event->hit_location, locations[i]);
-            if (locations[i][strlen(locations[i]) - 1] == 'F') {
-              event->foul_flag = 1;
-            }
-            if (flag[1] == 'B') {
-              event->bunt_flag = 1;
-            }
-            break;
-          }
-        }
-      }
-    }
-    else {
+  }
+  else if ((!strcmp(flag, "/TH") || !strcmp(flag, "/TH1") ||
+            !strcmp(flag, "/TH2") || !strcmp(flag, "/TH3") ||
+            !strcmp(flag, "/THH")) &&
+           (event->event_type == CW_EVENT_ERROR ||
+            event->event_type == CW_EVENT_PICKOFFERROR)) {
+    event->error_types[0] = 'T';
+  }
+  else if (!strcmp(flag, "/B")) {
+    event->bunt_flag = 1;
+  }
+  else if (!strcmp(flag, "/BG")) {
+    event->bunt_flag = 1;
+    event->batted_ball_type = 'G';
+  }
+  else if (!strcmp(flag, "/BP")) {
+    event->bunt_flag = 1;
+    event->batted_ball_type = 'P';
+  }
+  else if (!strcmp(flag, "/BF")) {
+    event->bunt_flag = 1;
+    event->batted_ball_type = 'F';
+  }
+  else if (!strcmp(flag, "/BL")) {
+    event->bunt_flag = 1;
+    event->batted_ball_type = 'L';
+  }
+  else if (!strcmp(flag, "/F")) {
+    event->batted_ball_type = 'F';
+  }
+  else if (!strcmp(flag, "/G")) {
+    event->batted_ball_type = 'G';
+  }
+  else if (!strcmp(flag, "/L")) {
+    event->batted_ball_type = 'L';
+  }
+  else if (!strcmp(flag, "/P") || !strcmp(flag, "/IF")) {
+    /* Infield fly is assumed to be a popup */
+    event->batted_ball_type = 'P';
+  }
+  else if (strlen(flag) >= 3) {
+    char traj = (flag[1] == 'B') ? flag[2] : flag[1];
+    if (traj == 'G' || traj == 'F' || traj == 'P' || traj == 'L') {
+      const char *loc = (flag[1] == 'B') ? flag + 3 : flag + 2;
       int i = 0;
       for (i = 0; strcmp(locations[i], "") != 0; i++) {
-        if (!strcmp(locations[i], flag + 1)) {
+        if (!strcmp(locations[i], loc)) {
+          event->batted_ball_type = traj;
           strcpy(event->hit_location, locations[i]);
+          if (locations[i][strlen(locations[i]) - 1] == 'F') {
+            event->foul_flag = 1;
+          }
+          if (flag[1] == 'B') {
+            event->bunt_flag = 1;
+          }
           break;
         }
       }
     }
+    else {
+      const char *loc = (flag[1] == 'B') ? flag + 2 : flag + 1;
+      int i = 0;
+      for (i = 0; strcmp(locations[i], "") != 0; i++) {
+        if (!strcmp(locations[i], loc)) {
+          strcpy(event->hit_location, locations[i]);
+          if (locations[i][strlen(locations[i]) - 1] == 'F') {
+            event->foul_flag = 1;
+          }
+          if (flag[1] == 'B') {
+            event->bunt_flag = 1;
+          }
+          break;
+        }
+      }
+    }
+  }
+  else {
+    int i = 0;
+    for (i = 0; strcmp(locations[i], "") != 0; i++) {
+      if (!strcmp(locations[i], flag + 1)) {
+        strcpy(event->hit_location, locations[i]);
+        break;
+      }
+    }
+  }
+}
+
+static void cw_parse_flags(CWParserState *state, CWEventData *event)
+{
+  do {
+    char *flag = &state->inputString[state->inputPos - 1];
+    char *flag_end;
+    char delimiter;
+
+    do {
+      cw_parse_nextsym(state);
+    } while (state->sym != '/' && state->sym != '.' && state->sym != '+' &&
+             state->sym != '-' && state->sym != 0);
+
+    flag_end = &state->inputString[state->inputPos - 1];
+    delimiter = *flag_end;
+    *flag_end = '\0';
+    cw_apply_event_flag(event, flag);
+    *flag_end = delimiter;
   } while (state->sym != '.' && state->sym != 0);
 }
 

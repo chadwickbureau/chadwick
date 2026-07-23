@@ -25,6 +25,7 @@
   player's totals are null.
 - Parsing of C/ now accepts additional flags, to account for the fact this is used for
   runners reading first on obstruction and also for shift/positioning violations.
+- Support for archaic flag /SAC (as a synonym for /SH) has been removed.
 
 
 
