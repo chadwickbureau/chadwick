@@ -12,6 +12,11 @@ offers a number "extended" fields which expand upon or give more
 detailed information not easily accessed via the standard
 fields. These are specified using the ``-x`` command-line flag.
 
+Player substitutions are not events and therefore do not produce
+:program:`cwevent` records. Use :ref:`cwsub <cwtools.cwsub>` alongside
+:program:`cwevent` when substitution data is needed, including changes
+made during a plate appearance.
+
 .. note::
 
    :program:`cwevent` guarantees that the standard field numbers will
@@ -49,13 +54,13 @@ fields. These are specified using the ``-x`` command-line flag.
      - Outs
      - ``OUTS_CT``
    * - 5
-     - Balls
+     - :ref:`Balls <cwtools.cwevent.count>`
      - ``BALLS_CT``
    * - 6
-     - Strikes
+     - :ref:`Strikes <cwtools.cwevent.count>`
      - ``STRIKES_CT``
    * - 7
-     - Pitch sequence
+     - :ref:`Pitch sequence <cwtools.cwevent.count>`
      - ``PITCH_SEQ_TX``
    * - 8
      - Visitor score
@@ -436,40 +441,52 @@ fields. These are specified using the ``-x`` command-line flag.
        for runner on third
      - ``RUN3_RESP_CAT_ID``
    * - 33
-     - number of balls in plate appearance
+     - :ref:`number of balls in plate appearance
+       <cwtools.cwevent.pitchcounts>`
      - ``PA_BALL_CT``
    * - 34
-     - number of called balls in plate appearance
+     - :ref:`number of called balls in plate appearance
+       <cwtools.cwevent.pitchcounts>`
      - ``PA_CALLED_BALL_CT``
    * - 35
-     - number of intentional balls in plate appearance
+     - :ref:`number of intentional balls in plate appearance
+       <cwtools.cwevent.pitchcounts>`
      - ``PA_INTENT_BALL_CT``
    * - 36
-     - number of pitchouts in plate appearance
+     - :ref:`number of pitchouts in plate appearance
+       <cwtools.cwevent.pitchcounts>`
      - ``PA_PITCHOUT_BALL_CT``
    * - 37
-     - number of pitches hitting batter in plate appearance
+     - :ref:`number of pitches hitting batter in plate appearance
+       <cwtools.cwevent.pitchcounts>`
      - ``PA_HITBATTER_BALL_CT``
    * - 38
-     - number of other balls in plate appearance
+     - :ref:`number of other balls in plate appearance
+       <cwtools.cwevent.pitchcounts>`
      - ``PA_OTHER_BALL_CT``
    * - 39
-     - number of strikes in plate appearance
+     - :ref:`number of strikes in plate appearance
+       <cwtools.cwevent.pitchcounts>`
      - ``PA_STRIKE_CT``
    * - 40
-     - number of called strikes in plate appearance
+     - :ref:`number of called strikes in plate appearance
+       <cwtools.cwevent.pitchcounts>`
      - ``PA_CALLED_STRIKE_CT``
    * - 41
-     - number of swinging strikes in plate appearance
+     - :ref:`number of swinging strikes in plate appearance
+       <cwtools.cwevent.pitchcounts>`
      - ``PA_SWINGMISS_STRIKE_CT``
    * - 42
-     - number of foul balls in plate appearance
+     - :ref:`number of foul balls in plate appearance
+       <cwtools.cwevent.pitchcounts>`
      - ``PA_FOUL_STRIKE_CT``
    * - 43
-     - number of balls in play in plate appearance
+     - :ref:`number of balls in play in plate appearance
+       <cwtools.cwevent.pitchcounts>`
      - ``PA_INPLAY_STRIKE_CT``
    * - 44
-     - number of other strikes in plate appearance
+     - :ref:`number of other strikes in plate appearance
+       <cwtools.cwevent.pitchcounts>`
      - ``PA_OTHER_STRIKE_CT``
    * - 45
      - number of runs on play
@@ -552,6 +569,12 @@ when a relief pitcher enters during a plate appearance. The batter and
 pitcher fields identify the players in the game at the time of the
 event; the result batter and result pitcher fields identify the players
 credited or charged with the event.
+
+Because a mid-plate-appearance substitution is not itself an event,
+:program:`cwevent` does not emit a record at the point when the batter
+or pitcher changes. :ref:`cwsub <cwtools.cwsub>` reports these
+substitutions together with the count and pitch sequence accumulated
+through the time of the change.
 
 There is one known bug in the Retrosheet-provided tools
 regarding the result pitcher. When a relief pitcher enters the game,
@@ -802,24 +825,105 @@ The words "first", "second" and so on do not necessarily indicate
 chronological order of the credits, though in most cases they
 do.
 
-
 .. _cwtools.cwevent.count:
 
 Reporting of counts
 -------------------
 
-The DiamondWare data model originally assumed that pitch-level data
-for a game was one of all pitches, count only, or no pitches
-(see the ``info,pitches`` metadata field).  However, many Retrosheet
-files contain count data for selected plate appearances, where known.
-In event files, a question mark is used when either the count of balls
-or strikes (or both) is unknown.  ``BEVENT`` renders nulls in the
-number of balls or strikes as zero in fields 5 and 6
-(``BALLS_CT`` and ``STRIKES_CT``), making it impossible to discern
-whether a play is marked as occurring on a count of 0-0 (even if ``info,pitches``
-is set to ``none``), or on an unknown count.
+The ``count`` element of a ``play`` record gives the ball-strike count
+at the beginning of its pitch sequence. Standard fields 5 and 6,
+``BALLS_CT`` and ``STRIKES_CT``, report the first and second characters
+of this element, respectively, provided that it contains at least two
+characters and neither character is ``?``. If either part of the count
+is unknown, or the element is otherwise too short, both fields report
+zero. Thus these fields cannot distinguish an unknown count from a
+genuine count of 0-0.
 
-Extended field 63, ``COUNT_TX``, remedies this by reporting the count
-string as it appears in the file, as a parallel facility to ``PITCH_SEQ_TX``
-and ``EVENT_TX``.  With ``COUNT_TX``, all three of the main elements
-of the ``play`` record are accessible in :program:`cwevent` output.
+The DiamondWare data model originally assumed that pitch-level data
+for a game was one of all pitches, count only, or no pitches (see the
+``info,pitches`` metadata field). However, many Retrosheet files
+contain count data for selected plate appearances, where known, and
+use ``?`` for an unknown number of balls or strikes.
+
+Extended field 63, ``COUNT_TX``, reports the count element verbatim,
+including question marks. It therefore preserves the distinction
+between an unknown count and 0-0. Together with ``PITCH_SEQ_TX`` and
+``EVENT_TX``, it makes all three of the main elements of the ``play``
+record accessible in :program:`cwevent` output.
+
+For substitutions during a plate appearance,
+:ref:`cwsub <cwtools.cwsub>` reports the count, pitch sequence, and
+cumulative pitch-type counts at the point of the substitution.
+
+.. _cwtools.cwevent.pitchcounts:
+
+Pitch-type counts (extended fields 33-44)
+-----------------------------------------
+
+These fields count pitch codes in ``PITCH_SEQ_TX`` for the plate
+appearance represented by the event record. Each pitch code is
+classified as follows:
+
+.. list-table:: Pitch-type classifications
+   :header-rows: 1
+   :widths: 20,20,10
+
+   * - Field
+     - Category
+     - Pitch codes
+   * - ``PA_BALL_CT``
+     - balls
+     - ``B``, ``H``, ``I``, ``P``
+   * - ``PA_CALLED_BALL_CT``
+     - called balls
+     - ``B``
+   * - ``PA_INTENT_BALL_CT``
+     - intentional balls
+     - ``I``
+   * - ``PA_PITCHOUT_BALL_CT``
+     - pitchouts
+     - ``P``
+   * - ``PA_HITBATTER_BALL_CT``
+     - hit batters
+     - ``H``
+   * - ``PA_OTHER_BALL_CT``
+     - other balls
+     - ``V``
+   * - ``PA_STRIKE_CT``
+     - strikes
+     - ``C``, ``F``, ``K``, ``L``, ``M``, ``O``, ``Q``, ``R``,
+       ``S``, ``T``, ``X``, ``Y``
+   * - ``PA_CALLED_STRIKE_CT``
+     - called strikes
+     - ``C``
+   * - ``PA_SWINGMISS_STRIKE_CT``
+     - swinging strikes
+     - ``M``, ``Q``, ``S``
+   * - ``PA_FOUL_STRIKE_CT``
+     - foul balls
+     - ``F``, ``L``, ``O``, ``R``, ``T``
+   * - ``PA_INPLAY_STRIKE_CT``
+     - balls in play
+     - ``X``, ``Y``
+   * - ``PA_OTHER_STRIKE_CT``
+     - other strikes
+     - ``A``, ``K``
+
+The fields count pitch-sequence entries, not changes to the official
+ball-strike count. For example, a foul with two strikes is still
+counted in ``PA_FOUL_STRIKE_CT``. Codes in the pitch sequence which
+are not listed above, such as pickoff attempts and other non-pitch
+markers, are not counted.
+
+Automatic balls (``V``) and automatic strikes (``A``) are classified
+in the corresponding ``PA_OTHER_*`` fields, but are not included in
+``PA_BALL_CT`` or ``PA_STRIKE_CT`` because no pitch was thrown.
+Consequently, the component fields do not necessarily sum to the ball
+and strike totals.
+
+These counts are only as complete as the pitch sequence in the source
+event file. A missing or partial pitch sequence produces zero or
+partial counts; the fields do not reconstruct pitches from the
+reported ball-strike count. For a substitution during a plate
+appearance, :ref:`cwsub <cwtools.cwsub>` reports the same pitch-type
+counts as accumulated at the time of the substitution.
