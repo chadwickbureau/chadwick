@@ -14,7 +14,7 @@ Author
 -------
 
 Chadwick is written, maintained, and Copyright 2002-2026 by
-Dr T. L. Turocy (ted.turocy <aht> gmail <daht> com) 
+Dr T. L. Turocy (ted.turocy <aht> gmail <daht> com)
 at Chadwick Baseball Bureau (http://www.chadwick-bureau.com).
 
 License
@@ -54,7 +54,7 @@ The author thanks `Sports Reference, LLC <http://www.sports-reference.com>`_,
 the `Society for American Baseball Research <http://www.sabr.org>`_,
 and `XMLTeam, Inc. <http://www.xmlteam.com>`_
 for support in the development of portions of
-Chadwick. The author also thanks David Smith of 
+Chadwick. The author also thanks David Smith of
 `Retrosheet <http://www.retrosheet.org>`_ for his
 always-gracious assistance and guidance.
 
@@ -78,7 +78,7 @@ information from Retrosheet play-by-play event files:
 
 - :ref:`cwdaily <cwtools.cwdaily>`, which produces per-game player
   statistical records. This program is unique to Chadwick.
-  
+
 - :ref:`cwsub <cwtools.cwsub>`, which extracts information
   about in-game player substitutions. This program is unique to
   Chadwick.
@@ -86,7 +86,7 @@ information from Retrosheet play-by-play event files:
 - :ref:`cwcomment <cwtools.cwcomment>`, which extracts comment
   fields from event files. This program is unique to Chadwick.
 
-This documentation is intended to be read in conjunction with the 
+This documentation is intended to be read in conjunction with the
 materials provided by Retrosheet (see
 https://www.retrosheet.org/game.htm)
 summarizing the contents of
@@ -157,7 +157,7 @@ Documentation of individual tools
 
 .. Indices and tables
 .. ------------------
-.. 
+..
 .. * :ref:`genindex`
 .. * :ref:`modindex`
 .. * :ref:`search`

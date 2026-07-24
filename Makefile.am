@@ -26,3 +26,7 @@ SUBDIRS = src
 EXTRA_DIST = README.md ChangeLog.md
 
 ACLOCAL_AMFLAGS = -I m4
+
+clang-tidy:
+	clang-tidy ${top_srcdir}/src/cwlib/*.c -- -I ${top_srcdir}/src -DVERSION="" -DHAVE_STRUCT_TM_TM_GMTOFF=1
+	clang-tidy ${top_srcdir}/src/cwtools/*.c -- -I ${top_srcdir}/src -DVERSION="" -DHAVE_STRUCT_TM_TM_GMTOFF=1

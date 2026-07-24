@@ -69,4 +69,4 @@ int cw_league_read(CWLeague *league, FILE *file);
  */
 void cw_league_write(CWLeague *league, FILE *file);
 
-#endif  /* CW_LEAGUE_H */
+#endif /* CW_LEAGUE_H */

@@ -38,7 +38,7 @@ class EventData(dict):
             if self[key] != other[key]:
                 diffkeys.append(key)
         return diffkeys
-        
+
 
 class EventToolProcess(tool.ToolProcess):
     def __init__(self, tool_path, tool_name, year):
@@ -85,7 +85,7 @@ class EventDiff(object):
         self.t1 = t1
         self.t2 = t2
         self.key = key
-        
+
     @property
     def context(self):
         return "%s %2s %s %s" % (self.t1["GameID"], self.t1["Inning"],
@@ -98,23 +98,20 @@ class EventDiff(object):
     @property
     def tool2(self):
         return self.t2[self.key]
-        
+
 
 class EventDiffEngine(tool.DiffEngine):
     @property
     def diff_object(self):  return EventDiff
-    
+
 
 def run_diff(tool1_path, tool2_path, data_path, year):
     tool1 = EventToolProcess(tool1_path, "Chadwick", year)
     tool2 = EventToolProcess(tool2_path, "BEVENT", year)
     engine = EventDiffEngine()
     tool.run_diff(engine, tool1, tool2, data_path)
-    
+
 if __name__ == "__main__":
     import sys
     run_diff(sys.argv[1], sys.argv[2], "/home/dataczar/git/retrosheet/event/regular",
              sys.argv[3])
-
-    
-

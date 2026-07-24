@@ -83,7 +83,6 @@ typedef enum {
   CW_EVENT_PITCH_PICKOFF_CATCHER_THIRD = 123
 } CWEventType;
 
-
 typedef struct cw_parsed_event_struct {
   CWEventType event_type;
   /* rbi_flag: 2 == (RBI) actually in play text */
@@ -99,7 +98,7 @@ typedef struct cw_parsed_event_struct {
    * intended for listing players involved in DP or TP */
   int num_putouts, num_assists, num_errors, num_touches;
   int putouts[3], assists[10], errors[10], touches[20];
-  /* Error types are 'N' for none, 'T' for throwing, 
+  /* Error types are 'N' for none, 'T' for throwing,
    * 'F' for fumbled, and 'D' for dropped throw. */
   char error_types[10];
   char batted_ball_type;
@@ -117,9 +116,4 @@ int cw_event_outs_on_play(CWEventData *event);
 int cw_event_runs_on_play(CWEventData *event);
 int cw_event_rbi_on_play(CWEventData *event);
 
-#endif  /* CW_PARSE_H */
-
-
-
-
-
+#endif /* CW_PARSE_H */

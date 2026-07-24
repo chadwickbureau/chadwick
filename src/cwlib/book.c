@@ -29,8 +29,7 @@
 #include "game.h"
 #include "book.h"
 
-CWScorebook *
-cw_scorebook_create(void)
+CWScorebook *cw_scorebook_create(void)
 {
   CWScorebook *scorebook = (CWScorebook *) malloc(sizeof(CWScorebook));
   scorebook->first_comment = scorebook->last_comment = NULL;
@@ -38,12 +37,11 @@ cw_scorebook_create(void)
   return scorebook;
 }
 
-void
-cw_scorebook_cleanup(CWScorebook *scorebook)
+void cw_scorebook_cleanup(CWScorebook *scorebook)
 {
   CWGame *game = scorebook->first_game;
   CWComment *comment = scorebook->first_comment;
-  
+
   while (game != NULL) {
     CWGame *next_game = game->next;
     cw_game_cleanup(game);
@@ -59,8 +57,7 @@ cw_scorebook_cleanup(CWScorebook *scorebook)
   }
 }
 
-int
-cw_scorebook_append_game(CWScorebook *scorebook, CWGame *game)
+int cw_scorebook_append_game(CWScorebook *scorebook, CWGame *game)
 {
   if (game == NULL) {
     return 0;
@@ -78,8 +75,7 @@ cw_scorebook_append_game(CWScorebook *scorebook, CWGame *game)
   return 1;
 }
 
-int
-cw_scorebook_insert_game(CWScorebook *scorebook, CWGame *game)
+int cw_scorebook_insert_game(CWScorebook *scorebook, CWGame *game)
 {
   if (game == NULL) {
     return 0;
@@ -92,12 +88,9 @@ cw_scorebook_insert_game(CWScorebook *scorebook, CWGame *game)
   else {
     CWGame *g = scorebook->first_game;
     while (g != NULL &&
-	   (strcmp(cw_game_info_lookup(g, "date"),
-		   cw_game_info_lookup(game, "date")) < 0 ||
-	    (strcmp(cw_game_info_lookup(g, "date"),
-		    cw_game_info_lookup(game, "date")) == 0 &&
-	     strcmp(cw_game_info_lookup(g, "number"),
-		    cw_game_info_lookup(game, "number")) < 0))) {
+           (strcmp(cw_game_info_lookup(g, "date"), cw_game_info_lookup(game, "date")) < 0 ||
+            (strcmp(cw_game_info_lookup(g, "date"), cw_game_info_lookup(game, "date")) == 0 &&
+             strcmp(cw_game_info_lookup(g, "number"), cw_game_info_lookup(game, "number")) < 0))) {
       g = g->next;
     }
 
@@ -121,24 +114,23 @@ cw_scorebook_insert_game(CWScorebook *scorebook, CWGame *game)
   return 1;
 }
 
-CWGame *
-cw_scorebook_remove_game(CWScorebook *scorebook, char *game_id)
+CWGame *cw_scorebook_remove_game(CWScorebook *scorebook, char *game_id)
 {
   CWGame *game = scorebook->first_game;
 
   while (game != NULL) {
     if (!strcmp(game->game_id, game_id)) {
       if (game->prev != NULL) {
-	game->prev->next = game->next;
+        game->prev->next = game->next;
       }
       if (game->next != NULL) {
-	game->next->prev = game->prev;
+        game->next->prev = game->prev;
       }
       if (scorebook->first_game == game) {
-	scorebook->first_game = game->next;
+        scorebook->first_game = game->next;
       }
       if (scorebook->last_game == game) {
-	scorebook->last_game = game->prev;
+        scorebook->last_game = game->prev;
       }
 
       game->prev = game->next = NULL;
@@ -149,8 +141,7 @@ cw_scorebook_remove_game(CWScorebook *scorebook, char *game_id)
   return NULL;
 }
 
-static int
-cw_scorebook_read_comments(CWScorebook *scorebook, FILE *file)
+static int cw_scorebook_read_comments(CWScorebook *scorebook, FILE *file)
 {
   while (1) {
     char buf[256], *tok, *com;
@@ -160,7 +151,7 @@ cw_scorebook_read_comments(CWScorebook *scorebook, FILE *file)
 
     tok = cw_strtok(buf);
     com = cw_strtok(NULL);
-      
+
     if (tok && !strcmp(tok, "com") && com) {
       CWComment *comment = (CWComment *) malloc(sizeof(CWComment));
       comment->text = (char *) malloc(sizeof(char) * (strlen(com) + 1));
@@ -168,10 +159,10 @@ cw_scorebook_read_comments(CWScorebook *scorebook, FILE *file)
       comment->prev = scorebook->last_comment;
       comment->next = NULL;
       if (scorebook->first_comment == NULL) {
-	scorebook->first_comment = comment;
+        scorebook->first_comment = comment;
       }
       else {
-	scorebook->last_comment->next = comment;
+        scorebook->last_comment->next = comment;
       }
       scorebook->last_comment = comment;
     }
@@ -181,8 +172,7 @@ cw_scorebook_read_comments(CWScorebook *scorebook, FILE *file)
   }
 }
 
-int
-cw_scorebook_read(CWScorebook *scorebook, FILE *file)
+int cw_scorebook_read(CWScorebook *scorebook, FILE *file)
 {
   int game_count = 0;
 
@@ -193,10 +183,10 @@ cw_scorebook_read(CWScorebook *scorebook, FILE *file)
     cw_file_find_first_game(file);
     while (!feof(file)) {
       if (!cw_scorebook_append_game(scorebook, cw_game_read(file))) {
-	break;
+        break;
       }
       else {
-	game_count++;
+        game_count++;
       }
     }
     return game_count;
@@ -206,19 +196,17 @@ cw_scorebook_read(CWScorebook *scorebook, FILE *file)
   }
 }
 
-static void
-cw_scorebook_write_comments(CWScorebook *scorebook, FILE *file)
+static void cw_scorebook_write_comments(CWScorebook *scorebook, FILE *file)
 {
   CWComment *comment = scorebook->first_comment;
-  
+
   while (comment != NULL) {
     fprintf(file, "com,\"%s\"\n", comment->text);
     comment = comment->next;
   }
 }
 
-void
-cw_scorebook_write(CWScorebook *scorebook, FILE *file)
+void cw_scorebook_write(CWScorebook *scorebook, FILE *file)
 {
   CWGame *game = scorebook->first_game;
 
@@ -230,19 +218,15 @@ cw_scorebook_write(CWScorebook *scorebook, FILE *file)
   }
 }
 
-CWScorebookIterator *
-cw_scorebook_iterate(CWScorebook *scorebook,
-		     int (*f)(CWGame *))
+CWScorebookIterator *cw_scorebook_iterate(CWScorebook *scorebook, int (*f)(CWGame *))
 {
-  CWScorebookIterator *iter =
-    (CWScorebookIterator *) malloc(sizeof(CWScorebookIterator));
+  CWScorebookIterator *iter = (CWScorebookIterator *) malloc(sizeof(CWScorebookIterator));
   iter->current = scorebook->first_game;
   iter->f = f;
   return iter;
 }
 
-void
-cw_scorebook_iterator_cleanup(CWScorebookIterator *iterator)
+void cw_scorebook_iterator_cleanup(CWScorebookIterator *iterator)
 {
   /* For now, no actions need to be taken.
    * This is provided now for possible future extensions and
@@ -250,8 +234,7 @@ cw_scorebook_iterator_cleanup(CWScorebookIterator *iterator)
    */
 }
 
-CWGame *
-cw_scorebook_iterator_next(CWScorebookIterator *iterator)
+CWGame *cw_scorebook_iterator_next(CWScorebookIterator *iterator)
 {
   if (!iterator->current) {
     return NULL;

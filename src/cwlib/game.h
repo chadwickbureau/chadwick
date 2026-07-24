@@ -97,12 +97,11 @@ typedef struct cw_game_struct {
   CWAppearance *first_starter, *last_starter;
   CWEvent *first_event, *last_event;
   CWData *first_data, *last_data, *first_stat, *last_stat;
-  CWData *first_line, *last_line;  /* linescores, for boxscore event files */
-  CWData *first_evdata, *last_evdata;  /* event detail, for boxscore event files */
+  CWData *first_line, *last_line;          /* linescores, for boxscore event files */
+  CWData *first_evdata, *last_evdata;      /* event detail, for boxscore event files */
   CWComment *first_comment, *last_comment; /* for comments before first evt */
   struct cw_game_struct *prev, *next;
 } CWGame;
-
 
 /*
  * Allocates and initializes a new game with id 'game_id'.  Caller is
@@ -154,8 +153,8 @@ char *cw_game_info_lookup(CWGame *game, char *label);
 /*
  * Add a starter record to the game
  */
-void cw_game_starter_append(CWGame *game, char *player_id, char *name,
-			    int team, int slot, int pos);
+void cw_game_starter_append(CWGame *game, char *player_id, char *name, int team, int slot,
+                            int pos);
 
 /*
  * Find the starter record for the 'slot' in the batting order for 'team'
@@ -165,26 +164,24 @@ CWAppearance *cw_game_starter_find(CWGame *game, int team, int slot);
 /*
  * Find the starter record for the player at position 'pos'
  */
-CWAppearance *cw_game_starter_find_by_position(CWGame *game, 
-					       int team, int pos);
+CWAppearance *cw_game_starter_find_by_position(CWGame *game, int team, int pos);
 
 /*
  * Add an event record to the game
  */
-void cw_game_event_append(CWGame *game, int inning, int batting_team,
-			  char *batter, char *count, char *pitches,
-			  char *event_text);
+void cw_game_event_append(CWGame *game, int inning, int batting_team, char *batter, char *count,
+                          char *pitches, char *event_text);
 
 /*
  * Truncate the game before an event
  */
-void cw_game_truncate(CWGame *game, CWEvent *event); 
+void cw_game_truncate(CWGame *game, CWEvent *event);
 
 /*
  * Add a substitute record to the game
  */
-void cw_game_substitute_append(CWGame *game, char *playerID, char *name,
-			       int team, int slot, int pos);
+void cw_game_substitute_append(CWGame *game, char *playerID, char *name, int team, int slot,
+                               int pos);
 
 /*
  * Add a data record to the game
@@ -256,7 +253,6 @@ int cw_pitch_strike_other(char c);
  */
 int cw_pitch_count_pitches(char *pitches, int (*criterion)(char));
 
-
 /*
  * Some named constants to encode DiamondWare-specific conventions
  */
@@ -276,8 +272,4 @@ int cw_pitch_count_pitches(char *pitches, int (*criterion)(char));
 #define DWARE_POS_PH 11
 #define DWARE_POS_PR 12
 
-#endif  /* CW_GAME_H */
-
-
-
-
+#endif /* CW_GAME_H */

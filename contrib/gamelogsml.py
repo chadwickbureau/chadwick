@@ -14,7 +14,7 @@ def add_content_code(doc, parent, name=None, key=None, type=None):
         sCC.xml_set_attribute(u'code-key', unicode(key))
     if type is not None:
         sCC.xml_set_attribute(u'code-type', unicode(type))
-        
+
 
 def build_metadata(doc, game):
     metadata = doc.xml_create_element(u'sports-metadata')
@@ -34,7 +34,7 @@ def build_metadata(doc, game):
     metadata.xml_set_attribute(u'fixture-key', u'event-score')
     metadata.xml_set_attribute(u'document-class', u'event-summary')
     metadata.xml_set_attribute(u'fixture-name', u'Scoring Update')
-                               
+
     # TODO: add sports-title
 
     sCC = doc.xml_create_element(u'sports-content-codes')
@@ -49,8 +49,8 @@ def build_metadata(doc, game):
     add_content_code(doc, sCC, type="priority", key="normal")
     add_content_code(doc, sCC, type="team", key=game[3])
     add_content_code(doc, sCC, type="team", key=game[6])
-    
-def build_event(doc, game):    
+
+def build_event(doc, game):
     event = doc.xml_create_element(u'sports-event')
 
     doc.sports_content.xml_append(event)
@@ -62,7 +62,7 @@ def build_event(doc, game):
     metadata.xml_set_attribute(u'event-key',
                                u'l.mlb.com-%s-e.%s%s%s' %
                                (game[0][:4], game[6], game[0], game[1]))
-    metadata.xml_set_attribute(u'date-coverage-value', 
+    metadata.xml_set_attribute(u'date-coverage-value',
                                u'l.mlb.com-%s-e.%s%s%s' %
                                (game[0][:4], game[6], game[0], game[1]))
     metadata.xml_set_attribute(u'start-date-time',
@@ -101,7 +101,7 @@ def build_player(doc, team, key=None, full=None, event_credit=None):
         sBP.xml_set_attribute(u'event-credit', unicode(event_credit))
         if event_credit == "save":
             sBP.xml_set_attribute(u'save-credit', unicode(event_credit))
-                              
+
 
     return player
 
@@ -140,8 +140,8 @@ def build_team(doc, event, game, alignment):
 
     else:
         stats.xml_set_attribute(u'event-outcome', u'tie')
-    
-    
+
+
 
 
 def build_document(game):

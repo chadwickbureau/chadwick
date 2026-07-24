@@ -4,7 +4,7 @@ cwgame: Game information extractor
 ==================================
 
 :program:`cwgame` is a command-line tool which extracts summary
-information about each game in the data file.  
+information about each game in the data file.
 These fields
 are grouped into two categories. There are 86 fields which are
 compatible with the Retrosheet BGAME game descriptor tool.  These
@@ -13,7 +13,7 @@ offers a number "extended" fields which expand upon or give more
 detailed information not easily accessed via the standard
 fields. These are specified using the ``-x`` command-line flag.
 Many of these extended fields are defined to match fields which appear
-in the Retrosheet gamelogs.  
+in the Retrosheet gamelogs.
 
 The batting, pitching, and fielding totals reported by
 :program:`cwgame` are team totals. For per-game statistics for
@@ -30,7 +30,7 @@ individual players, use :ref:`cwdaily <cwtools.cwdaily>`.
    are not promised to be stable.  It is recommended to use the field
    labels instead in writing scripts to process the output of
    :program:`cwgame` extended fields.
- 
+
 The following table gives the contents of each of the 86 fields
 :program:`cwgame` outputs.
 
@@ -316,14 +316,14 @@ The following table gives the contents of each of the 86 fields
    * - 2
      - visiting team game number
      - ``AWAY_TEAM_GAME_CT``
-   * - 3 
+   * - 3
      - home team game number
      - ``HOME_TEAM_GAME_CT``
    * - 4
      - length of game in outs
      - ``OUTS_CT``
    * - 5
-     - information on completion of game 
+     - information on completion of game
      - ``COMPLETION_TX``
    * - 6
      - information on forfeit of game
@@ -331,7 +331,7 @@ The following table gives the contents of each of the 86 fields
    * - 7
      - information on protest of game
      - ``PROTEST_TX``
-   * - 8 
+   * - 8
      - visiting team linescore
      - ``AWAY_LINE_TX``
    * - 9
@@ -349,7 +349,7 @@ The following table gives the contents of each of the 86 fields
    * - 13
      - visiting team HR
      - ``AWAY_HR_CT``
-   * - 14 
+   * - 14
      - visiting team RBI
      - ``AWAY_BI_CT``
    * - 15
@@ -358,7 +358,7 @@ The following table gives the contents of each of the 86 fields
    * - 16
      - visiting team SF
      - ``AWAY_SF_CT``
-   * - 17 
+   * - 17
      - visiting team HP
      - ``AWAY_HP_CT``
    * - 18
@@ -367,7 +367,7 @@ The following table gives the contents of each of the 86 fields
    * - 19
      - visiting team IBB
      - ``AWAY_IBB_CT``
-   * - 20 
+   * - 20
      - visiting team SO
      - ``AWAY_SO_CT``
    * - 21
@@ -394,7 +394,7 @@ The following table gives the contents of each of the 86 fields
    * - 28
      - visiting team WP
      - ``AWAY_WP_CT``
-   * - 29 
+   * - 29
      - visiting team BK
      - ``AWAY_BK_CT``
    * - 30
@@ -427,7 +427,7 @@ The following table gives the contents of each of the 86 fields
    * - 39
      - home team RBI
      - ``HOME_BI_CT``
-   * - 40 
+   * - 40
      - home team SH
      - ``HOME_SH_CT``
    * - 41
@@ -686,10 +686,10 @@ of the wind.
      - fromlf
    * - 6
      - fromcf
-   * - 7 
+   * - 7
      - fromrf
-   * - 8 
-     - rtol 
+   * - 8
+     - rtol
 
 
 .. _cwtools.cwgame.windspeed:
@@ -737,7 +737,7 @@ precipitation level.
 .. list-table:: Numeric codes for precipitation field
    :header-rows: 1
    :widths: 5,20
-  
+
    * - Code
      - Description
    * - 0
@@ -767,14 +767,14 @@ Numeric codes for sky field.
 .. list-table:: Numeric codes for sky field
    :header-rows: 1
    :widths: 5,20
-  
+
    * - Code
      - Description
    * - 0
      - unknown
    * - 1
      - sunny
-   * - 2 
+   * - 2
      - cloudy
    * - 3
      - overcast

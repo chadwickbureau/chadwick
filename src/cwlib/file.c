@@ -53,7 +53,7 @@ char *cw_strtok(char *strToken)
   if (strToken == NULL) {
     if (pNext != NULL) {
       strToken = pNext;
-    } 
+    }
     else {
       /* Reached end of original string */
       return NULL;
@@ -67,8 +67,7 @@ char *cw_strtok(char *strToken)
   }
 
   /* Skip leading whitespace before next token */
-  while ((*strToken != 0) &&
-	 ((*strToken == ' ') || (*strToken == '\t') || (*strToken == '\n'))) {
+  while ((*strToken != 0) && ((*strToken == ' ') || (*strToken == '\t') || (*strToken == '\n'))) {
     ++strToken;
   }
 
@@ -84,41 +83,39 @@ char *cw_strtok(char *strToken)
     pStart = strToken;
 
     /* Find ending quote or end of string */
-    while ((*strToken != '\"') && (*strToken != 0) && 
-	   (*strToken != '\n') && (*strToken != '\r')) {
+    while ((*strToken != '\"') && (*strToken != 0) && (*strToken != '\n') && (*strToken != '\r')) {
       ++strToken;
     }
 
     if (*strToken == 0) {
       /* Reached end of original string */
       pNext = NULL;
-    } 
+    }
     else {
       /* More to find, note where to continue searching */
       *strToken = 0;
       pNext = strToken + 1;
       /* A comma immediately following a quote should be skipped past */
       if (*pNext == ',') {
-	pNext++;
+        pNext++;
       }
     }
     /* Return ptr to start of token */
     return pStart;
-  } 
+  }
   else {
     /* Unquoted token */
     pStart = strToken;
 
     /* Find next comma or end of string */
-    while ((*strToken != 0) && (*strToken != ',') && 
-	   (*strToken != '\n') && (*strToken != '\r')) {
+    while ((*strToken != 0) && (*strToken != ',') && (*strToken != '\n') && (*strToken != '\r')) {
       ++strToken;
     }
 
     /* Reached end of original string? */
     if (*strToken == 0) {
       pNext = NULL;
-    } 
+    }
     else {
       *strToken = 0;
       pNext = strToken + 1;
@@ -133,8 +130,7 @@ char *cw_strtok(char *strToken)
  * and returns -1 (which is used by Retrosheet as the null value)
  * for invalid values.
  */
-int
-cw_atoi(char *s, char *msg)
+int cw_atoi(char *s, char *msg)
 {
   char *end = NULL;
   long temp = strtol(s, &end, 10);
@@ -149,7 +145,6 @@ cw_atoi(char *s, char *msg)
   }
   return -1;
 }
-
 
 /*
  * Find the position in the file of the specified gameID.
@@ -202,5 +197,3 @@ int cw_file_find_first_game(FILE *file)
 
   return 0;
 }
-
-

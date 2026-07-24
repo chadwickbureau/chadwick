@@ -28,7 +28,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src
 
 cwbox_SOURCES = buffer.h cwbox.c cwtools.c cwboxxml.c cwboxsml.c xmlwrite.c xmlwrite.h
 
-cwbox_LDADD = $(top_builddir)/src/cwlib/libchadwick.la 
+cwbox_LDADD = $(top_builddir)/src/cwlib/libchadwick.la
 
 
 cwcomment_SOURCES = buffer.h cwcomment.c cwtools.c

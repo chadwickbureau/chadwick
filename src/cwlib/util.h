@@ -23,30 +23,32 @@
 
 /* This macro is a convenient shorthand for free()ing and NULLing a pointer
  * if it's not currently NULL. */
-#define XFREE(var)    if (var) { free((var)); (var) = NULL; }
+#define XFREE(var)                                                                                \
+  if (var) {                                                                                      \
+    free((var));                                                                                  \
+    (var) = NULL;                                                                                 \
+  }
 
 /* This macro is a convenient shortland for malloc()ing and copying a
  * pointer to a string, if it's not currently NULL */
-#define XCOPY(dest, src) \
-  if (src) {  \
-    dest = (char *) malloc(sizeof(char) * (strlen(src) + 1)); \
-    strcpy(dest, src); \
-  } \
-  else { \
-    dest = NULL; \
+#define XCOPY(dest, src)                                                                          \
+  if (src) {                                                                                      \
+    dest = (char *) malloc(sizeof(char) * (strlen(src) + 1));                                     \
+    strcpy(dest, src);                                                                            \
+  }                                                                                               \
+  else {                                                                                          \
+    dest = NULL;                                                                                  \
   }
-
 
 /* Utility macro to implement copying to a fixed-size array
  */
-#define CW_STRLCPY(dst, src) \
-  do { \
-    if ((src) != NULL) { \
-      strncpy((dst), (src), sizeof(dst) - 1); \
-      (dst)[sizeof(dst) - 1] = '\0'; \
-    } \
-    else { \
-      (dst)[0] = '\0'; \
-    } \
+#define CW_STRLCPY(dst, src)                                                                      \
+  do {                                                                                            \
+    if ((src) != NULL) {                                                                          \
+      strncpy((dst), (src), sizeof(dst) - 1);                                                     \
+      (dst)[sizeof(dst) - 1] = '\0';                                                              \
+    }                                                                                             \
+    else {                                                                                        \
+      (dst)[0] = '\0';                                                                            \
+    }                                                                                             \
   } while (0)
-

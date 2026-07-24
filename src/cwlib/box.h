@@ -29,7 +29,8 @@
 #include "game.h"
 
 typedef struct cw_box_batting_struct {
-  int g, pa, ab, r, h, b2, b3, hr, hrslam, bi, bi2out, gw, bb, ibb, so, gdp, hp, sh, sf, sb, cs, xi;
+  int g, pa, ab, r, h, b2, b3, hr, hrslam, bi, bi2out, gw, bb, ibb, so, gdp, hp, sh, sf, sb, cs,
+    xi;
   int lisp, movedup, pitches, strikes;
 } CWBoxBatting;
 
@@ -43,7 +44,7 @@ typedef struct cw_box_fielding_struct {
 typedef struct cw_box_player_struct {
   char *player_id, *name;
   /* The "appearance date" - taking into account resumed games */
-  char date[9];  
+  char date[9];
   CWBoxBatting *batting;
   int ph_inn, pr_inn, num_positions;
   /* The position the player was listed at in the starting lineup;
@@ -111,7 +112,8 @@ typedef struct cw_box_event_struct {
 typedef struct cw_boxscore_struct {
   CWBoxPlayer *slots[10][2];
   CWBoxPitcher *pitchers[2];
-  int linescore[50][2], score[2], hits[2], errors[2], dp[2], tp[2], lob[2], er[2], risp_ab[2], risp_h[2];
+  int linescore[50][2], score[2], hits[2], errors[2], dp[2], tp[2], lob[2], er[2], risp_ab[2],
+    risp_h[2];
   /* This is a bit of a hack... really, should be able to track a full
      vector of situationals? */
   /* outs_at_end is how many outs there were when the game ended.
@@ -149,14 +151,11 @@ CWBoxPitcher *cw_box_get_starting_pitcher(CWBoxscore *boxscore, int team);
 /*
  * Find the player entry for player with ID player_id
  */
-CWBoxPlayer *cw_box_find_player(CWBoxscore *boxscore, char *player_id,
-				int batter);
+CWBoxPlayer *cw_box_find_player(CWBoxscore *boxscore, char *player_id, int batter);
 
 /*
  * Find the pitching entry for player with ID player_id
  */
 CWBoxPitcher *cw_box_find_pitcher(CWBoxscore *boxscore, char *player_id);
 
-#endif  /* CW_BOX_H */
-
-
+#endif /* CW_BOX_H */

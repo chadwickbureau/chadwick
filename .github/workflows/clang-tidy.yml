@@ -1,0 +1,38 @@
+name: clang-tidy
+
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  clang-tidy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes autoconf automake bear clang-tidy libtool
+
+      - name: Generate build system
+        run: autoreconf --install
+
+      - name: Generate compilation database
+        run: |
+          mkdir build
+          cd build
+          ../configure CC=clang
+          bear -- make --jobs=2
+
+      - name: Run clang-tidy
+        run: |
+          run-clang-tidy \
+            -p build \
+            -header-filter="$GITHUB_WORKSPACE/src/.*" \
+            -warnings-as-errors='*' \
+            "$GITHUB_WORKSPACE/src/.*\.c$"

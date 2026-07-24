@@ -39,31 +39,17 @@
 extern int ascii;
 
 /* Fields to display (-f) */
-int fields[97] = {
-  1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-  0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 
-  0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 0, 0, 1, 1, 1, 0, 0, 0, 0,
-  0, 1, 0, 0, 0, 0, 0, 0, 1, 1,
-  1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0
-};
+int fields[97] = {1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                  0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0,
+                  0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 int max_field = 96;
 
 /* Extended fields to display (-x) */
-int ext_fields[67] = {
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0
-};
+int ext_fields[67] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 int max_ext_field = 66;
 
@@ -85,20 +71,18 @@ int cwevent_future_runs(CWGameIterator *orig_gameiter)
   int runs = 0;
   CWGameIterator *gameiter = cw_gameiter_copy(orig_gameiter);
   cw_gameiter_next(gameiter);
-  while (gameiter->event != NULL &&
-	 gameiter->state->inning == orig_gameiter->state->inning &&
-	 gameiter->state->batting_team == orig_gameiter->state->batting_team) {
+  while (gameiter->event != NULL && gameiter->state->inning == orig_gameiter->state->inning &&
+         gameiter->state->batting_team == orig_gameiter->state->batting_team) {
     if (strcmp(gameiter->event->event_text, "NP") != 0) {
       runs += cw_event_runs_on_play(gameiter->event_data);
     }
     cw_gameiter_next(gameiter);
   }
-  
+
   cw_gameiter_cleanup(gameiter);
   free(gameiter);
   return runs;
 }
-
 
 /*************************************************************************
  * Functions to output fields
@@ -107,9 +91,7 @@ int cwevent_future_runs(CWGameIterator *orig_gameiter)
 /*
  * typedef to declare the pointer-to-function type
  */
-typedef int (*field_func)(CWBuffer *, CWGameIterator *,
-			  CWRoster *, CWRoster *);
-
+typedef int (*field_func)(CWBuffer *, CWGameIterator *, CWRoster *, CWRoster *);
 
 /*
  * convenient structure to hold all information relating to a field
@@ -120,20 +102,18 @@ typedef struct field_struct {
   char *header, *description;
 } field_struct;
 
-
 /*
  * preprocessor directive for conveniently declaring function signature
  */
 
-#define DECLARE_FIELDFUNC(funcname) \
-int funcname(CWBuffer *buffer, CWGameIterator *gameiter, \
-	     CWRoster *visitors, CWRoster *home)
+#define DECLARE_FIELDFUNC(funcname)                                                               \
+  int funcname(CWBuffer *buffer, CWGameIterator *gameiter, CWRoster *visitors, CWRoster *home)
 
 /* Field 0 */
 DECLARE_FIELDFUNC(cwevent_game_id)
 {
   return cw_buffer_emit_string(buffer, gameiter->game->game_id, 12);
-} 
+}
 
 /* Field 1 */
 DECLARE_FIELDFUNC(cwevent_visiting_team)
@@ -162,8 +142,7 @@ DECLARE_FIELDFUNC(cwevent_outs)
 /* Field 5 */
 DECLARE_FIELDFUNC(cwevent_balls)
 {
-  if (strlen(gameiter->event->count) >= 2 && 
-      gameiter->event->count[0] != '?' &&
+  if (strlen(gameiter->event->count) >= 2 && gameiter->event->count[0] != '?' &&
       gameiter->event->count[1] != '?') {
     return cw_buffer_emit_char_unquoted(buffer, gameiter->event->count[0]);
   }
@@ -175,8 +154,7 @@ DECLARE_FIELDFUNC(cwevent_balls)
 /* Field 6 */
 DECLARE_FIELDFUNC(cwevent_strikes)
 {
-  if (strlen(gameiter->event->count) >= 2 &&
-      gameiter->event->count[0] != '?' &&
+  if (strlen(gameiter->event->count) >= 2 && gameiter->event->count[0] != '?' &&
       gameiter->event->count[1] != '?') {
     return cw_buffer_emit_char_unquoted(buffer, gameiter->event->count[1]);
   }
@@ -187,7 +165,7 @@ DECLARE_FIELDFUNC(cwevent_strikes)
 
 /* Field 7 */
 DECLARE_FIELDFUNC(cwevent_pitches)
-{  
+{
   /* This bit of code wipes out leading whitespace, which bevent
    * does not include in its output */
   char *foo = gameiter->event->pitches;
@@ -199,13 +177,13 @@ DECLARE_FIELDFUNC(cwevent_pitches)
 
 /* Field 8 */
 DECLARE_FIELDFUNC(cwevent_visitor_score)
-{ 
+{
   return cw_buffer_emit_int(buffer, gameiter->state->score[0], 2);
 }
 
 /* Field 9 */
 DECLARE_FIELDFUNC(cwevent_home_score)
-{ 
+{
   return cw_buffer_emit_int(buffer, gameiter->state->score[1], 2);
 }
 
@@ -220,8 +198,7 @@ DECLARE_FIELDFUNC(cwevent_batter_hand)
 {
   char batterHand, pitcherHand;
   if (gameiter->event->batter_hand == ' ') {
-    batterHand = cw_roster_batting_hand((gameiter->event->batting_team == 0) ?
-                                        visitors : home,
+    batterHand = cw_roster_batting_hand((gameiter->event->batting_team == 0) ? visitors : home,
                                         gameiter->event->batter);
   }
   else {
@@ -234,8 +211,7 @@ DECLARE_FIELDFUNC(cwevent_batter_hand)
     }
     else {
       pitcherHand =
-        cw_roster_throwing_hand((gameiter->event->batting_team == 0) ?
-                                home : visitors,
+        cw_roster_throwing_hand((gameiter->event->batting_team == 0) ? home : visitors,
                                 gameiter->state->fielders[1][1 - gameiter->state->batting_team]);
     }
     if (pitcherHand == 'L') {
@@ -255,31 +231,27 @@ DECLARE_FIELDFUNC(cwevent_batter_hand)
 /* Field 12 */
 DECLARE_FIELDFUNC(cwevent_res_batter)
 {
-  return cw_buffer_emit_string(buffer,
-		 cw_gamestate_charged_batter(gameiter->state,
-					     gameiter->event->batter,
-					     gameiter->event_data),
-          8);
+  return cw_buffer_emit_string(
+    buffer,
+    cw_gamestate_charged_batter(gameiter->state, gameiter->event->batter, gameiter->event_data),
+    8);
 }
 
 /* Field 13 */
 DECLARE_FIELDFUNC(cwevent_res_batter_hand)
 {
   return cw_buffer_emit_char(buffer,
-		 cw_gamestate_charged_batter_hand(gameiter->state,
-						  gameiter->event->batter,
-						  gameiter->event_data,
-						  (gameiter->event->batting_team == 0) ? visitors : home,
-						  (gameiter->event->batting_team == 0) ? home : visitors));
+                             cw_gamestate_charged_batter_hand(
+                               gameiter->state, gameiter->event->batter, gameiter->event_data,
+                               (gameiter->event->batting_team == 0) ? visitors : home,
+                               (gameiter->event->batting_team == 0) ? home : visitors));
 }
-
 
 inline int cwevent_fielder_id(CWBuffer *buffer, CWGameIterator *gameiter, int position)
 {
-  return cw_buffer_emit_string(buffer,
-	  gameiter->state->fielders[position][1-gameiter->state->batting_team], 8);
+  return cw_buffer_emit_string(
+    buffer, gameiter->state->fielders[position][1 - gameiter->state->batting_team], 8);
 }
-
 
 /* Field 14 */
 DECLARE_FIELDFUNC(cwevent_pitcher)
@@ -293,10 +265,9 @@ DECLARE_FIELDFUNC(cwevent_pitcher_hand)
   char pitcherHand;
 
   if (gameiter->event->pitcher_hand == ' ') {
-    pitcherHand = 
-      cw_roster_throwing_hand((gameiter->event->batting_team == 0) ?
-			      home : visitors,
-			      gameiter->state->fielders[1][1-gameiter->state->batting_team]);
+    pitcherHand =
+      cw_roster_throwing_hand((gameiter->event->batting_team == 0) ? home : visitors,
+                              gameiter->state->fielders[1][1 - gameiter->state->batting_team]);
   }
   else {
     pitcherHand = gameiter->event->pitcher_hand;
@@ -308,9 +279,8 @@ DECLARE_FIELDFUNC(cwevent_pitcher_hand)
 /* Field 16 */
 DECLARE_FIELDFUNC(cwevent_res_pitcher)
 {
-  return cw_buffer_emit_string(buffer,
-		 cw_gamestate_charged_pitcher(gameiter->state,
-					      gameiter->event_data), 8);
+  return cw_buffer_emit_string(
+    buffer, cw_gamestate_charged_pitcher(gameiter->state, gameiter->event_data), 8);
 }
 
 /* Field 17 */
@@ -319,11 +289,9 @@ DECLARE_FIELDFUNC(cwevent_res_pitcher_hand)
   char resPitcherHand;
 
   if (gameiter->event->pitcher_hand == ' ') {
-    resPitcherHand = 
-      cw_roster_throwing_hand((gameiter->event->batting_team == 0) ?
-			      home : visitors,
-			      cw_gamestate_charged_pitcher(gameiter->state,
-							   gameiter->event_data));
+    resPitcherHand =
+      cw_roster_throwing_hand((gameiter->event->batting_team == 0) ? home : visitors,
+                              cw_gamestate_charged_pitcher(gameiter->state, gameiter->event_data));
   }
   else {
     resPitcherHand = gameiter->event->pitcher_hand;
@@ -380,7 +348,6 @@ DECLARE_FIELDFUNC(cwevent_right_fielder)
   return cwevent_fielder_id(buffer, gameiter, 9);
 }
 
-
 inline int cwevent_runner_id(CWBuffer *buffer, CWGameIterator *gameiter, int base)
 {
   return cw_buffer_emit_string(buffer, gameiter->state->runners[base].runner, 8);
@@ -426,18 +393,20 @@ DECLARE_FIELDFUNC(cwevent_ph_flag)
 DECLARE_FIELDFUNC(cwevent_defensive_position)
 {
   return cw_buffer_emit_int(buffer,
-		 cw_gamestate_player_position(gameiter->state,
-					      gameiter->state->batting_team,
-					      gameiter->event->batter), 2);
+                            cw_gamestate_player_position(gameiter->state,
+                                                         gameiter->state->batting_team,
+                                                         gameiter->event->batter),
+                            2);
 }
 
 /* Field 33 */
 DECLARE_FIELDFUNC(cwevent_lineup_position)
 {
   return cw_buffer_emit_int(buffer,
-		 cw_gamestate_lineup_slot(gameiter->state,
-					  gameiter->state->batting_team,
-					  gameiter->event->batter), 1);
+                            cw_gamestate_lineup_slot(gameiter->state,
+                                                     gameiter->state->batting_team,
+                                                     gameiter->event->batter),
+                            1);
 }
 
 /* Field 34 */
@@ -461,10 +430,14 @@ DECLARE_FIELDFUNC(cwevent_ab_flag)
 /* Field 37 */
 DECLARE_FIELDFUNC(cwevent_hit_value)
 {
-  return cw_buffer_emit_int(buffer,
-		 (gameiter->event_data->event_type >= CW_EVENT_SINGLE &&
-		  gameiter->event_data->event_type <= CW_EVENT_HOMERUN) ?
-		 gameiter->event_data->event_type - CW_EVENT_SINGLE + 1 : 0, 1);
+  int hit_value = 0;
+
+  if (gameiter->event_data->event_type >= CW_EVENT_SINGLE &&
+      gameiter->event_data->event_type <= CW_EVENT_HOMERUN) {
+    hit_value = (int) gameiter->event_data->event_type - (int) CW_EVENT_SINGLE + 1;
+  }
+
+  return cw_buffer_emit_int(buffer, hit_value, 1);
 }
 
 /* Field 38 */
@@ -660,7 +633,7 @@ DECLARE_FIELDFUNC(cwevent_sbh_flag)
 
 /* Field 69 */
 DECLARE_FIELDFUNC(cwevent_cs2_flag)
-{ 
+{
   return cw_buffer_emit_flag(buffer, gameiter->event_data->cs_flag[1]);
 }
 
@@ -697,25 +670,22 @@ DECLARE_FIELDFUNC(cwevent_po3_flag)
 /* Field 75 */
 DECLARE_FIELDFUNC(cwevent_responsible_pitcher1)
 {
-  return cw_buffer_emit_string(buffer,
-		 cw_gamestate_responsible_pitcher(gameiter->state, 
-						  gameiter->event_data, 1), 8);
+  return cw_buffer_emit_string(
+    buffer, cw_gamestate_responsible_pitcher(gameiter->state, gameiter->event_data, 1), 8);
 }
 
 /* Field 76 */
 DECLARE_FIELDFUNC(cwevent_responsible_pitcher2)
 {
-  return cw_buffer_emit_string(buffer,
-		 cw_gamestate_responsible_pitcher(gameiter->state,
-						  gameiter->event_data, 2), 8);
+  return cw_buffer_emit_string(
+    buffer, cw_gamestate_responsible_pitcher(gameiter->state, gameiter->event_data, 2), 8);
 }
 
 /* Field 77 */
 DECLARE_FIELDFUNC(cwevent_responsible_pitcher3)
 {
-  return cw_buffer_emit_string(buffer,
-		 cw_gamestate_responsible_pitcher(gameiter->state,
-						  gameiter->event_data, 3), 8);
+  return cw_buffer_emit_string(
+    buffer, cw_gamestate_responsible_pitcher(gameiter->state, gameiter->event_data, 3), 8);
 }
 
 /* Field 78 */
@@ -759,41 +729,36 @@ DECLARE_FIELDFUNC(cwevent_pr3_flag)
 /* Field 83 */
 DECLARE_FIELDFUNC(cwevent_removed_runner1)
 {
-  return cw_buffer_emit_string(buffer,
-		 ((gameiter->state->removed_for_pr[1]) ?
-		  gameiter->state->removed_for_pr[1] : ""), 8);
+  return cw_buffer_emit_string(
+    buffer, ((gameiter->state->removed_for_pr[1]) ? gameiter->state->removed_for_pr[1] : ""), 8);
 }
 
 /* Field 84 */
 DECLARE_FIELDFUNC(cwevent_removed_runner2)
 {
-  return cw_buffer_emit_string(buffer,
-		 ((gameiter->state->removed_for_pr[2]) ?
-		  gameiter->state->removed_for_pr[2] : ""), 8);
+  return cw_buffer_emit_string(
+    buffer, ((gameiter->state->removed_for_pr[2]) ? gameiter->state->removed_for_pr[2] : ""), 8);
 }
 
 /* Field 85 */
 DECLARE_FIELDFUNC(cwevent_removed_runner3)
 {
-  return cw_buffer_emit_string(buffer,
-		 ((gameiter->state->removed_for_pr[3]) ?
-		  gameiter->state->removed_for_pr[3] : ""), 8);
+  return cw_buffer_emit_string(
+    buffer, ((gameiter->state->removed_for_pr[3]) ? gameiter->state->removed_for_pr[3] : ""), 8);
 }
 
 /* Field 86 */
 DECLARE_FIELDFUNC(cwevent_removed_batter)
 {
-  return cw_buffer_emit_string(buffer,
-		 ((gameiter->state->removed_for_ph) ? 
-		  gameiter->state->removed_for_ph : ""), 8);
+  return cw_buffer_emit_string(
+    buffer, ((gameiter->state->removed_for_ph) ? gameiter->state->removed_for_ph : ""), 8);
 }
 
 /* Field 87 */
 DECLARE_FIELDFUNC(cwevent_removed_batter_position)
 {
-  return cw_buffer_emit_int(buffer,
-		 ((gameiter->state->removed_for_ph) ? 
-		  gameiter->state->removed_position : 0), 2);
+  return cw_buffer_emit_int(
+    buffer, ((gameiter->state->removed_for_ph) ? gameiter->state->removed_position : 0), 2);
 }
 
 /* Field 88 */
@@ -847,131 +812,123 @@ DECLARE_FIELDFUNC(cwevent_assist5)
 /* Field 96 */
 DECLARE_FIELDFUNC(cwevent_event_number)
 {
-  return cw_buffer_emit_int(buffer,	gameiter->state->event_count + 1, 3);
+  return cw_buffer_emit_int(buffer, gameiter->state->event_count + 1, 3);
 }
 
 static field_struct field_data[] = {
-  /*  0 */ { cwevent_game_id, "GAME_ID", "game id*" },
-  /*  1 */ { cwevent_visiting_team, "AWAY_TEAM_ID", "visiting team*" },
-  /*  2 */ { cwevent_inning, "INN_CT", "inning*" },
-  /*  3 */ { cwevent_batting_team, "BAT_HOME_ID", "batting_team*" },
-  /*  4 */ { cwevent_outs, "OUTS_CT", "outs*" },
-  /*  5 */ { cwevent_balls, "BALLS_CT", "balls*" },
-  /*  6 */ { cwevent_strikes, "STRIKES_CT", "strikes*" },
-  /*  7 */ { cwevent_pitches, "PITCH_SEQ_TX", "pitch sequence" },
-  /*  8 */ { cwevent_visitor_score, "AWAY_SCORE_CT", "vis score*" },
-  /*  9 */ { cwevent_home_score, "HOME_SCORE_CT", "home score*" },
-  /* 10 */ { cwevent_batter, "BAT_ID", "batter" },
-  /* 11 */ { cwevent_batter_hand, "BAT_HAND_CD", "batter hand" },
-  /* 12 */ { cwevent_res_batter, "RESP_BAT_ID", "res batter*" },
-  /* 13 */ { cwevent_res_batter_hand, "RESP_BAT_HAND_CD", "res batter hand*" },
-  /* 14 */ { cwevent_pitcher, "PIT_ID", "pitcher" },
-  /* 15 */ { cwevent_pitcher_hand, "PIT_HAND_CD", "pitcher hand" },
-  /* 16 */ { cwevent_res_pitcher, "RESP_PIT_ID", "res pitcher*" },
-  /* 17 */ { cwevent_res_pitcher_hand, "RESP_PIT_HAND_CD", "res pitcher hand*" },
-  /* 18 */ { cwevent_catcher, "POS2_FLD_ID", "catcher" },
-  /* 19 */ { cwevent_first_baseman, "POS3_FLD_ID", "first base" },
-  /* 20 */ { cwevent_second_baseman, "POS4_FLD_ID", "second base" },
-  /* 21 */ { cwevent_third_baseman, "POS5_FLD_ID", "third base" },
-  /* 22 */ { cwevent_shortstop, "POS6_FLD_ID", "shortstop" },
-  /* 23 */ { cwevent_left_fielder, "POS7_FLD_ID", "left field" },
-  /* 24 */ { cwevent_center_fielder, "POS8_FLD_ID", "center field" },
-  /* 25 */ { cwevent_right_fielder, "POS9_FLD_ID", "right field" },
-  /* 26 */ { cwevent_runner_first, "BASE1_RUN_ID", "first runner*" },
-  /* 27 */ { cwevent_runner_second, "BASE2_RUN_ID", "second runner*" },
-  /* 28 */ { cwevent_runner_third, "BASE3_RUN_ID", "third runner*" },
-  /* 29 */ { cwevent_event_text, "EVENT_TX", "event text*" },
-  /* 30 */ { cwevent_leadoff_flag, "LEADOFF_FL", "leadoff flag*" },
-  /* 31 */ { cwevent_ph_flag, "PH_FL", "pinchhit flag*" },
-  /* 32 */ { cwevent_defensive_position, "BAT_FLD_CD", "defensive position*" },
-  /* 33 */ { cwevent_lineup_position, "BAT_LINEUP_ID", "lineup position*" },
-  /* 34 */ { cwevent_event_type, "EVENT_CD", "event type*" },
-  /* 35 */ { cwevent_batter_event_flag, "BAT_EVENT_FL", "batter event flag*" },
-  /* 36 */ { cwevent_ab_flag, "AB_FL", "ab flag*" },
-  /* 37 */ { cwevent_hit_value, "H_CD", "hit value*" },
-  /* 38 */ { cwevent_sh_flag, "SH_FL", "SH flag*" },
-  /* 39 */ { cwevent_sf_flag, "SF_FL", "SF flag*" },
-  /* 40 */ { cwevent_outs_on_play, "EVENT_OUTS_CT", "outs on play*" },
-  /* 41 */ { cwevent_dp_flag, "DP_FL", "double play flag" },
-  /* 42 */ { cwevent_tp_flag, "TP_FL", "triple play flag" },
-  /* 43 */ { cwevent_rbi_on_play, "RBI_CT", "RBI on play*" },
-  /* 44 */ { cwevent_wp_flag, "WP_FL", "wild pitch flag*" },
-  /* 45 */ { cwevent_pb_flag, "PB_FL", "passed ball flag*" },
-  /* 46 */ { cwevent_fielded_by, "FLD_CD", "fielded by" },
-  /* 47 */ { cwevent_batted_ball_type, "BATTEDBALL_CD", "batted ball type" },
-  /* 48 */ { cwevent_bunt_flag, "BUNT_FL", "bunt flag" },
-  /* 49 */ { cwevent_foul_flag, "FOUL_FL", "foul flag" },
-  /* 50 */ { cwevent_hit_location, "BATTEDBALL_LOC_TX", "hit location" },
-  /* 51 */ { cwevent_num_errors, "ERR_CT", "num errors*" },
-  /* 52 */ { cwevent_error1_player, "ERR1_FLD_CD", "1st error player" },
-  /* 53 */ { cwevent_error1_type, "ERR1_CD", "1st error type" },
-  /* 54 */ { cwevent_error2_player, "ERR2_FLD_CD", "2nd error player" },
-  /* 55 */ { cwevent_error2_type, "ERR2_CD", "2nd error type" },
-  /* 56 */ { cwevent_error3_player, "ERR3_FLD_CD", "3rd error player" },
-  /* 57 */ { cwevent_error3_type, "ERR3_CD", "3rd error type" },
-  /* 58 */ { cwevent_batter_advance, "BAT_DEST_ID", 
-	     "batter dest* (5 if scores and unearned, 6 if team unearned)" },
-  /* 59 */ { cwevent_runner1_advance, "RUN1_DEST_ID",
-	     "runner on 1st dest* (5 if scores and unearned, 6 if team unearned)" },
-  /* 60 */ { cwevent_runner2_advance, "RUN2_DEST_ID",
-	     "runner on 2nd dest* (5 if scores and unearned, 6 if team unearned)" },
-  /* 61 */ { cwevent_runner3_advance, "RUN3_DEST_ID",
-	     "runner on 3rd dest* (5 if scores and unearned, 6 if team unearned)" },
-  /* 62 */ { cwevent_play_on_batter, "BAT_PLAY_TX", "play on batter" },
-  /* 63 */ { cwevent_play_on_runner1, "RUN1_PLAY_TX", 
-	     "play on runner on first" },
-  /* 64 */ { cwevent_play_on_runner2, "RUN2_PLAY_TX", 
-	     "play on runner on second" },
-  /* 65 */ { cwevent_play_on_runner3, "RUN3_PLAY_TX", 
-	     "play on runner on third" },
-  /* 66 */ { cwevent_sb2_flag, "RUN1_SB_FL", "SB for runner on 1st flag" },
-  /* 67 */ { cwevent_sb3_flag, "RUN2_SB_FL", "SB for runner on 2nd flag" },
-  /* 68 */ { cwevent_sbh_flag, "RUN3_SB_FL", "SB for runner on 3rd flag" },
-  /* 69 */ { cwevent_cs2_flag, "RUN1_CS_FL", "CS for runner on 1st flag" },
-  /* 70 */ { cwevent_cs3_flag, "RUN2_CS_FL", "CS for runner on 2nd flag" },
-  /* 71 */ { cwevent_csh_flag, "RUN3_CS_FL", "CS for runner on 3rd flag" },
-  /* 72 */ { cwevent_po1_flag, "RUN1_PK_FL", "PO for runner on 1st flag" },
-  /* 73 */ { cwevent_po2_flag, "RUN2_PK_FL", "PO for runner on 2nd flag" },
-  /* 74 */ { cwevent_po3_flag, "RUN3_PK_FL", "PO for runner on 3rd flag" },
-  /* 75 */ { cwevent_responsible_pitcher1, "RUN1_RESP_PIT_ID", 
-	     "Responsible pitcher for runner on 1st" },
-  /* 76 */ { cwevent_responsible_pitcher2, "RUN2_RESP_PIT_ID", 
-	     "Responsible pitcher for runner on 2nd" },
-  /* 77 */ { cwevent_responsible_pitcher3, "RUN3_RESP_PIT_ID", 
-	     "Responsible pitcher for runner on 3rd" },
-  /* 78 */ { cwevent_new_game_flag, "GAME_NEW_FL", "New Game Flag" },
-  /* 79 */ { cwevent_end_game_flag, "GAME_END_FL", "End Game Flag" },
-  /* 80 */ { cwevent_pr1_flag, "PR_RUN1_FL", "Pinch-runner on 1st" },
-  /* 81 */ { cwevent_pr2_flag, "PR_RUN2_FL", "Pinch-runner on 2nd" },
-  /* 82 */ { cwevent_pr3_flag, "PR_RUN3_FL", "Pinch-runner on 3rd" },
-  /* 83 */ { cwevent_removed_runner1, "REMOVED_FOR_PR_RUN1_ID",
-	     "Runner removed for pinch-runner on 1st" },
-  /* 84 */ { cwevent_removed_runner2, "REMOVED_FOR_PR_RUN2_ID",
-	     "Runner removed for pinch-runner on 2nd" },
-  /* 85 */ { cwevent_removed_runner3, "REMOVED_FOR_PR_RUN3_ID",
-	     "Runner removed for pinch-runner on 3rd" },
-  /* 86 */ { cwevent_removed_batter, "REMOVED_FOR_PH_BAT_ID",
-	     "Batter removed for pinch-hitter " },
-  /* 87 */ { cwevent_removed_batter_position, "REMOVED_FOR_PH_BAT_FLD_CD",
-	     "Position of batter removed for pinch-hitter" },
-  /* 88 */ { cwevent_putout1, "PO1_FLD_CD",
-	     "Fielder with First Putout (0 if none)" },
-  /* 89 */ { cwevent_putout2, "PO2_FLD_CD",
-	     "Fielder with Second Putout (0 if none)" },
-  /* 90 */ { cwevent_putout3, "PO3_FLD_CD",
-	     "Fielder with Third Putout (0 if none)" },
-  /* 91 */ { cwevent_assist1, "ASS1_FLD_CD",
-	     "Fielder with First Assist (0 if none)" },
-  /* 92 */ { cwevent_assist2, "ASS2_FLD_CD",
-	     "Fielder with Second Assist (0 if none)" },
-  /* 93 */ { cwevent_assist3, "ASS3_FLD_CD",
-	     "Fielder with Third Assist (0 if none)" },
-  /* 94 */ { cwevent_assist4, "ASS4_FLD_CD",
-	     "Fielder with Fourth Assist (0 if none)" },
-  /* 95 */ { cwevent_assist5, "ASS5_FLD_CD",
-	     "Fielder with Fifth Assist (0 if none)" },
-  /* 96 */ { cwevent_event_number, "EVENT_ID", "event num" }
-};
+  /*  0 */ {cwevent_game_id, "GAME_ID", "game id*"},
+  /*  1 */ {cwevent_visiting_team, "AWAY_TEAM_ID", "visiting team*"},
+  /*  2 */ {cwevent_inning, "INN_CT", "inning*"},
+  /*  3 */ {cwevent_batting_team, "BAT_HOME_ID", "batting_team*"},
+  /*  4 */ {cwevent_outs, "OUTS_CT", "outs*"},
+  /*  5 */ {cwevent_balls, "BALLS_CT", "balls*"},
+  /*  6 */ {cwevent_strikes, "STRIKES_CT", "strikes*"},
+  /*  7 */ {cwevent_pitches, "PITCH_SEQ_TX", "pitch sequence"},
+  /*  8 */ {cwevent_visitor_score, "AWAY_SCORE_CT", "vis score*"},
+  /*  9 */ {cwevent_home_score, "HOME_SCORE_CT", "home score*"},
+  /* 10 */ {cwevent_batter, "BAT_ID", "batter"},
+  /* 11 */ {cwevent_batter_hand, "BAT_HAND_CD", "batter hand"},
+  /* 12 */ {cwevent_res_batter, "RESP_BAT_ID", "res batter*"},
+  /* 13 */ {cwevent_res_batter_hand, "RESP_BAT_HAND_CD", "res batter hand*"},
+  /* 14 */ {cwevent_pitcher, "PIT_ID", "pitcher"},
+  /* 15 */ {cwevent_pitcher_hand, "PIT_HAND_CD", "pitcher hand"},
+  /* 16 */ {cwevent_res_pitcher, "RESP_PIT_ID", "res pitcher*"},
+  /* 17 */ {cwevent_res_pitcher_hand, "RESP_PIT_HAND_CD", "res pitcher hand*"},
+  /* 18 */ {cwevent_catcher, "POS2_FLD_ID", "catcher"},
+  /* 19 */ {cwevent_first_baseman, "POS3_FLD_ID", "first base"},
+  /* 20 */ {cwevent_second_baseman, "POS4_FLD_ID", "second base"},
+  /* 21 */ {cwevent_third_baseman, "POS5_FLD_ID", "third base"},
+  /* 22 */ {cwevent_shortstop, "POS6_FLD_ID", "shortstop"},
+  /* 23 */ {cwevent_left_fielder, "POS7_FLD_ID", "left field"},
+  /* 24 */ {cwevent_center_fielder, "POS8_FLD_ID", "center field"},
+  /* 25 */ {cwevent_right_fielder, "POS9_FLD_ID", "right field"},
+  /* 26 */ {cwevent_runner_first, "BASE1_RUN_ID", "first runner*"},
+  /* 27 */ {cwevent_runner_second, "BASE2_RUN_ID", "second runner*"},
+  /* 28 */ {cwevent_runner_third, "BASE3_RUN_ID", "third runner*"},
+  /* 29 */ {cwevent_event_text, "EVENT_TX", "event text*"},
+  /* 30 */ {cwevent_leadoff_flag, "LEADOFF_FL", "leadoff flag*"},
+  /* 31 */ {cwevent_ph_flag, "PH_FL", "pinchhit flag*"},
+  /* 32 */ {cwevent_defensive_position, "BAT_FLD_CD", "defensive position*"},
+  /* 33 */ {cwevent_lineup_position, "BAT_LINEUP_ID", "lineup position*"},
+  /* 34 */ {cwevent_event_type, "EVENT_CD", "event type*"},
+  /* 35 */ {cwevent_batter_event_flag, "BAT_EVENT_FL", "batter event flag*"},
+  /* 36 */ {cwevent_ab_flag, "AB_FL", "ab flag*"},
+  /* 37 */ {cwevent_hit_value, "H_CD", "hit value*"},
+  /* 38 */ {cwevent_sh_flag, "SH_FL", "SH flag*"},
+  /* 39 */ {cwevent_sf_flag, "SF_FL", "SF flag*"},
+  /* 40 */ {cwevent_outs_on_play, "EVENT_OUTS_CT", "outs on play*"},
+  /* 41 */ {cwevent_dp_flag, "DP_FL", "double play flag"},
+  /* 42 */ {cwevent_tp_flag, "TP_FL", "triple play flag"},
+  /* 43 */ {cwevent_rbi_on_play, "RBI_CT", "RBI on play*"},
+  /* 44 */ {cwevent_wp_flag, "WP_FL", "wild pitch flag*"},
+  /* 45 */ {cwevent_pb_flag, "PB_FL", "passed ball flag*"},
+  /* 46 */ {cwevent_fielded_by, "FLD_CD", "fielded by"},
+  /* 47 */ {cwevent_batted_ball_type, "BATTEDBALL_CD", "batted ball type"},
+  /* 48 */ {cwevent_bunt_flag, "BUNT_FL", "bunt flag"},
+  /* 49 */ {cwevent_foul_flag, "FOUL_FL", "foul flag"},
+  /* 50 */ {cwevent_hit_location, "BATTEDBALL_LOC_TX", "hit location"},
+  /* 51 */ {cwevent_num_errors, "ERR_CT", "num errors*"},
+  /* 52 */ {cwevent_error1_player, "ERR1_FLD_CD", "1st error player"},
+  /* 53 */ {cwevent_error1_type, "ERR1_CD", "1st error type"},
+  /* 54 */ {cwevent_error2_player, "ERR2_FLD_CD", "2nd error player"},
+  /* 55 */ {cwevent_error2_type, "ERR2_CD", "2nd error type"},
+  /* 56 */ {cwevent_error3_player, "ERR3_FLD_CD", "3rd error player"},
+  /* 57 */ {cwevent_error3_type, "ERR3_CD", "3rd error type"},
+  /* 58 */
+  {cwevent_batter_advance, "BAT_DEST_ID",
+   "batter dest* (5 if scores and unearned, 6 if team unearned)"},
+  /* 59 */
+  {cwevent_runner1_advance, "RUN1_DEST_ID",
+   "runner on 1st dest* (5 if scores and unearned, 6 if team unearned)"},
+  /* 60 */
+  {cwevent_runner2_advance, "RUN2_DEST_ID",
+   "runner on 2nd dest* (5 if scores and unearned, 6 if team unearned)"},
+  /* 61 */
+  {cwevent_runner3_advance, "RUN3_DEST_ID",
+   "runner on 3rd dest* (5 if scores and unearned, 6 if team unearned)"},
+  /* 62 */ {cwevent_play_on_batter, "BAT_PLAY_TX", "play on batter"},
+  /* 63 */ {cwevent_play_on_runner1, "RUN1_PLAY_TX", "play on runner on first"},
+  /* 64 */ {cwevent_play_on_runner2, "RUN2_PLAY_TX", "play on runner on second"},
+  /* 65 */ {cwevent_play_on_runner3, "RUN3_PLAY_TX", "play on runner on third"},
+  /* 66 */ {cwevent_sb2_flag, "RUN1_SB_FL", "SB for runner on 1st flag"},
+  /* 67 */ {cwevent_sb3_flag, "RUN2_SB_FL", "SB for runner on 2nd flag"},
+  /* 68 */ {cwevent_sbh_flag, "RUN3_SB_FL", "SB for runner on 3rd flag"},
+  /* 69 */ {cwevent_cs2_flag, "RUN1_CS_FL", "CS for runner on 1st flag"},
+  /* 70 */ {cwevent_cs3_flag, "RUN2_CS_FL", "CS for runner on 2nd flag"},
+  /* 71 */ {cwevent_csh_flag, "RUN3_CS_FL", "CS for runner on 3rd flag"},
+  /* 72 */ {cwevent_po1_flag, "RUN1_PK_FL", "PO for runner on 1st flag"},
+  /* 73 */ {cwevent_po2_flag, "RUN2_PK_FL", "PO for runner on 2nd flag"},
+  /* 74 */ {cwevent_po3_flag, "RUN3_PK_FL", "PO for runner on 3rd flag"},
+  /* 75 */
+  {cwevent_responsible_pitcher1, "RUN1_RESP_PIT_ID", "Responsible pitcher for runner on 1st"},
+  /* 76 */
+  {cwevent_responsible_pitcher2, "RUN2_RESP_PIT_ID", "Responsible pitcher for runner on 2nd"},
+  /* 77 */
+  {cwevent_responsible_pitcher3, "RUN3_RESP_PIT_ID", "Responsible pitcher for runner on 3rd"},
+  /* 78 */ {cwevent_new_game_flag, "GAME_NEW_FL", "New Game Flag"},
+  /* 79 */ {cwevent_end_game_flag, "GAME_END_FL", "End Game Flag"},
+  /* 80 */ {cwevent_pr1_flag, "PR_RUN1_FL", "Pinch-runner on 1st"},
+  /* 81 */ {cwevent_pr2_flag, "PR_RUN2_FL", "Pinch-runner on 2nd"},
+  /* 82 */ {cwevent_pr3_flag, "PR_RUN3_FL", "Pinch-runner on 3rd"},
+  /* 83 */
+  {cwevent_removed_runner1, "REMOVED_FOR_PR_RUN1_ID", "Runner removed for pinch-runner on 1st"},
+  /* 84 */
+  {cwevent_removed_runner2, "REMOVED_FOR_PR_RUN2_ID", "Runner removed for pinch-runner on 2nd"},
+  /* 85 */
+  {cwevent_removed_runner3, "REMOVED_FOR_PR_RUN3_ID", "Runner removed for pinch-runner on 3rd"},
+  /* 86 */ {cwevent_removed_batter, "REMOVED_FOR_PH_BAT_ID", "Batter removed for pinch-hitter "},
+  /* 87 */
+  {cwevent_removed_batter_position, "REMOVED_FOR_PH_BAT_FLD_CD",
+   "Position of batter removed for pinch-hitter"},
+  /* 88 */ {cwevent_putout1, "PO1_FLD_CD", "Fielder with First Putout (0 if none)"},
+  /* 89 */ {cwevent_putout2, "PO2_FLD_CD", "Fielder with Second Putout (0 if none)"},
+  /* 90 */ {cwevent_putout3, "PO3_FLD_CD", "Fielder with Third Putout (0 if none)"},
+  /* 91 */ {cwevent_assist1, "ASS1_FLD_CD", "Fielder with First Assist (0 if none)"},
+  /* 92 */ {cwevent_assist2, "ASS2_FLD_CD", "Fielder with Second Assist (0 if none)"},
+  /* 93 */ {cwevent_assist3, "ASS3_FLD_CD", "Fielder with Third Assist (0 if none)"},
+  /* 94 */ {cwevent_assist4, "ASS4_FLD_CD", "Fielder with Fourth Assist (0 if none)"},
+  /* 95 */ {cwevent_assist5, "ASS5_FLD_CD", "Fielder with Fifth Assist (0 if none)"},
+  /* 96 */ {cwevent_event_number, "EVENT_ID", "event num"}};
 
 /*************************************************************************
  * Implementation of "extended" fields
@@ -980,20 +937,17 @@ static field_struct field_data[] = {
 /* Extended Field 0 */
 DECLARE_FIELDFUNC(cwevent_home_team_id)
 {
-  return cw_buffer_emit_string(buffer,
-		 cw_game_info_lookup(gameiter->game, "hometeam"), 3);
+  return cw_buffer_emit_string(buffer, cw_game_info_lookup(gameiter->game, "hometeam"), 3);
 }
 
 /* Extended Field 1 */
 DECLARE_FIELDFUNC(cwevent_batting_team_id)
 {
   if (gameiter->state->batting_team == 0) {
-    return cw_buffer_emit_string(buffer,
-		   cw_game_info_lookup(gameiter->game, "visteam"), 3);
+    return cw_buffer_emit_string(buffer, cw_game_info_lookup(gameiter->game, "visteam"), 3);
   }
   else {
-    return cw_buffer_emit_string(buffer,
-		   cw_game_info_lookup(gameiter->game, "hometeam"), 3);
+    return cw_buffer_emit_string(buffer, cw_game_info_lookup(gameiter->game, "hometeam"), 3);
   }
 }
 
@@ -1001,12 +955,10 @@ DECLARE_FIELDFUNC(cwevent_batting_team_id)
 DECLARE_FIELDFUNC(cwevent_fielding_team_id)
 {
   if (gameiter->state->batting_team == 1) {
-    return cw_buffer_emit_string(buffer,
-		   cw_game_info_lookup(gameiter->game, "visteam"), 3);
+    return cw_buffer_emit_string(buffer, cw_game_info_lookup(gameiter->game, "visteam"), 3);
   }
   else {
-    return cw_buffer_emit(buffer,
-		   cw_game_info_lookup(gameiter->game, "hometeam"), 3);
+    return cw_buffer_emit(buffer, cw_game_info_lookup(gameiter->game, "hometeam"), 3);
   }
 }
 
@@ -1015,7 +967,7 @@ DECLARE_FIELDFUNC(cwevent_half_inning)
 {
   if (cw_game_info_lookup(gameiter->game, "htbf") &&
       !strcmp(cw_game_info_lookup(gameiter->game, "htbf"), "true")) {
-    return cw_buffer_emit_int(buffer, 1-gameiter->state->batting_team, 1);
+    return cw_buffer_emit_int(buffer, 1 - gameiter->state->batting_team, 1);
   }
   else {
     return cw_buffer_emit_int(buffer, gameiter->state->batting_team, 1);
@@ -1029,7 +981,7 @@ DECLARE_FIELDFUNC(cwevent_start_half_inning)
 
   while (event) {
     if (event->inning != gameiter->event->inning ||
-	event->batting_team != gameiter->event->batting_team) {
+        event->batting_team != gameiter->event->batting_team) {
       return cw_buffer_emit_flag(buffer, 1);
     }
     else if (strcmp(event->event_text, "NP") != 0) {
@@ -1050,7 +1002,7 @@ DECLARE_FIELDFUNC(cwevent_end_half_inning)
 
   while (event) {
     if (event->inning != gameiter->event->inning ||
-	event->batting_team != gameiter->event->batting_team) {
+        event->batting_team != gameiter->event->batting_team) {
       return cw_buffer_emit_flag(buffer, 1);
     }
     else if (strcmp(event->event_text, "NP") != 0) {
@@ -1066,35 +1018,32 @@ DECLARE_FIELDFUNC(cwevent_end_half_inning)
 
 /* Extended Field 6 */
 DECLARE_FIELDFUNC(cwevent_offense_score)
-{ 
-  return cw_buffer_emit_int(buffer,
-		 gameiter->state->score[gameiter->state->batting_team], 2);
+{
+  return cw_buffer_emit_int(buffer, gameiter->state->score[gameiter->state->batting_team], 2);
 }
 
 /* Extended Field 7 */
 DECLARE_FIELDFUNC(cwevent_defense_score)
-{ 
-  return cw_buffer_emit_int(buffer,
-		 gameiter->state->score[1-gameiter->state->batting_team], 2);
+{
+  return cw_buffer_emit_int(buffer, gameiter->state->score[1 - gameiter->state->batting_team], 2);
 }
 
 /* Extended Field 8 */
 DECLARE_FIELDFUNC(cwevent_offense_score_inning)
 {
-  return cw_buffer_emit_int(buffer,
-		 gameiter->state->inning_score, 2);
+  return cw_buffer_emit_int(buffer, gameiter->state->inning_score, 2);
 }
 
 /* Extended Field 9 */
 DECLARE_FIELDFUNC(cwevent_offense_batters_game)
-{ 
-  return cw_buffer_emit_int(buffer,
-		 gameiter->state->num_batters[gameiter->state->batting_team], 3);
+{
+  return cw_buffer_emit_int(buffer, gameiter->state->num_batters[gameiter->state->batting_team],
+                            3);
 }
 
 /* Extended Field 10 */
 DECLARE_FIELDFUNC(cwevent_offense_batters_inning)
-{ 
+{
   return cw_buffer_emit_int(buffer, gameiter->state->inning_batters, 2);
 }
 
@@ -1115,14 +1064,13 @@ DECLARE_FIELDFUNC(cwevent_truncated_pa_flag)
 
   gi = cw_gameiter_copy(gameiter);
   cw_gameiter_next(gi);
-  while (gi->event != NULL &&
-	 gi->state->inning == gameiter->state->inning &&
-	 gi->state->batting_team == gameiter->state->batting_team) {
+  while (gi->event != NULL && gi->state->inning == gameiter->state->inning &&
+         gi->state->batting_team == gameiter->state->batting_team) {
     if (strcmp(gi->event->event_text, "NP") != 0) {
       if (cw_event_is_batter(gi->event_data)) {
-	cw_gameiter_cleanup(gi);
-	free(gi);
-	return cw_buffer_emit_flag(buffer, 0);
+        cw_gameiter_cleanup(gi);
+        free(gi);
+        return cw_buffer_emit_flag(buffer, 0);
       }
     }
     cw_gameiter_next(gi);
@@ -1137,9 +1085,10 @@ DECLARE_FIELDFUNC(cwevent_truncated_pa_flag)
 DECLARE_FIELDFUNC(cwevent_base_state_start)
 {
   return cw_buffer_emit_int(buffer,
-		 ((cw_gamestate_base_occupied(gameiter->state, 3) ? 4 : 0) +
-		  (cw_gamestate_base_occupied(gameiter->state, 2) ? 2 : 0) +
-		  (cw_gamestate_base_occupied(gameiter->state, 1) ? 1 : 0)), 1);
+                            ((cw_gamestate_base_occupied(gameiter->state, 3) ? 4 : 0) +
+                             (cw_gamestate_base_occupied(gameiter->state, 2) ? 2 : 0) +
+                             (cw_gamestate_base_occupied(gameiter->state, 1) ? 1 : 0)),
+                            1);
 }
 
 /* Extended Field 14 */
@@ -1149,12 +1098,18 @@ DECLARE_FIELDFUNC(cwevent_base_state_end)
   int base;
 
   for (base = 0; base <= 3; base++) {
-    if (gameiter->event_data->advance[base] == 3)  r3 = 1;
-    if (gameiter->event_data->advance[base] == 2)  r2 = 1;
-    if (gameiter->event_data->advance[base] == 1)  r1 = 1;
+    if (gameiter->event_data->advance[base] == 3) {
+      r3 = 1;
+    }
+    if (gameiter->event_data->advance[base] == 2) {
+      r2 = 1;
+    }
+    if (gameiter->event_data->advance[base] == 1) {
+      r1 = 1;
+    }
   }
 
-  return cw_buffer_emit_int(buffer, 4*r3 + 2*r2 + r1, 1);
+  return cw_buffer_emit_int(buffer, 4 * r3 + 2 * r2 + r1, 1);
 }
 
 /* Extended Field 15 */
@@ -1176,10 +1131,9 @@ DECLARE_FIELDFUNC(cwevent_res_batter_is_starter)
   CWAppearance *app;
 
   for (app = gameiter->game->first_starter; app != NULL; app = app->next) {
-    if (!strcmp(app->player_id, 
-		cw_gamestate_charged_batter(gameiter->state,
-					    gameiter->event->batter,
-					    gameiter->event_data))) {
+    if (!strcmp(app->player_id,
+                cw_gamestate_charged_batter(gameiter->state, gameiter->event->batter,
+                                            gameiter->event_data))) {
       return cw_buffer_emit_flag(buffer, 1);
     }
   }
@@ -1194,42 +1148,37 @@ DECLARE_FIELDFUNC(cwevent_res_batter_is_starter)
 /* Extended Field 17 */
 DECLARE_FIELDFUNC(cwevent_batter_on_deck)
 {
-  int lineup_slot = cw_gamestate_lineup_slot(gameiter->state,
-					     gameiter->state->batting_team,
-					     gameiter->event->batter);
+  int lineup_slot = cw_gamestate_lineup_slot(gameiter->state, gameiter->state->batting_team,
+                                             gameiter->event->batter);
   /* remember that lineups are 1-based, not 0-based */
   int next_batter = lineup_slot % 9 + 1;
-  return cw_buffer_emit_string(buffer,
-		 gameiter->state->lineups[next_batter][gameiter->state->batting_team].player_id, 8);
+  return cw_buffer_emit_string(
+    buffer, gameiter->state->lineups[next_batter][gameiter->state->batting_team].player_id, 8);
 }
 
-/* Dickson's encyclopedia is somewhat on the fence as to whether 
+/* Dickson's encyclopedia is somewhat on the fence as to whether
  * "in the hold" is more proper than "in the hole."
  */
 /* Extended Field 18 */
 DECLARE_FIELDFUNC(cwevent_batter_in_the_hold)
 {
-  int lineup_slot = cw_gamestate_lineup_slot(gameiter->state,
-					     gameiter->state->batting_team,
-					     gameiter->event->batter);
+  int lineup_slot = cw_gamestate_lineup_slot(gameiter->state, gameiter->state->batting_team,
+                                             gameiter->event->batter);
   /* remember that lineups are 1-based, not 0-based */
   int next_batter = (lineup_slot + 1) % 9 + 1;
-  return cw_buffer_emit_string(buffer,
-		 gameiter->state->lineups[next_batter][gameiter->state->batting_team].player_id, 8);
+  return cw_buffer_emit_string(
+    buffer, gameiter->state->lineups[next_batter][gameiter->state->batting_team].player_id, 8);
 }
 
 /* Extended Field 19 */
 DECLARE_FIELDFUNC(cwevent_pitcher_is_starter)
 {
-  CWAppearance *app = 
-    cw_game_starter_find_by_position(gameiter->game,
-				     1-gameiter->state->batting_team,
-				     1);
+  CWAppearance *app =
+    cw_game_starter_find_by_position(gameiter->game, 1 - gameiter->state->batting_team, 1);
 
   if (app &&
-      !strcmp(app->player_id,
-	      gameiter->state->fielders[1][1-gameiter->state->batting_team])) {
-      return cw_buffer_emit_flag(buffer, 1);
+      !strcmp(app->player_id, gameiter->state->fielders[1][1 - gameiter->state->batting_team])) {
+    return cw_buffer_emit_flag(buffer, 1);
   }
   return cw_buffer_emit_flag(buffer, 0);
 }
@@ -1237,16 +1186,12 @@ DECLARE_FIELDFUNC(cwevent_pitcher_is_starter)
 /* Extended Field 20 */
 DECLARE_FIELDFUNC(cwevent_res_pitcher_is_starter)
 {
-  CWAppearance *app = 
-    cw_game_starter_find_by_position(gameiter->game,
-				     1-gameiter->state->batting_team,
-				     1);
+  CWAppearance *app =
+    cw_game_starter_find_by_position(gameiter->game, 1 - gameiter->state->batting_team, 1);
 
-  if (app &&
-      !strcmp(app->player_id,
-	      cw_gamestate_charged_pitcher(gameiter->state,
-					   gameiter->event_data))) {
-      return cw_buffer_emit_flag(buffer, 1);
+  if (app && !strcmp(app->player_id,
+                     cw_gamestate_charged_pitcher(gameiter->state, gameiter->event_data))) {
+    return cw_buffer_emit_flag(buffer, 1);
   }
   return cw_buffer_emit_flag(buffer, 0);
 }
@@ -1259,9 +1204,10 @@ DECLARE_FIELDFUNC(cwevent_runner1_defensive_position)
   }
   else {
     return cw_buffer_emit_int(buffer,
-		   cw_gamestate_runner_position(gameiter->state,
-						gameiter->state->batting_team,
-						gameiter->state->runners[1].runner), 2);
+                              cw_gamestate_runner_position(gameiter->state,
+                                                           gameiter->state->batting_team,
+                                                           gameiter->state->runners[1].runner),
+                              2);
   }
 }
 
@@ -1273,16 +1219,16 @@ DECLARE_FIELDFUNC(cwevent_runner1_lineup_position)
   }
 
   return cw_buffer_emit_int(buffer,
-		 cw_gamestate_lineup_slot(gameiter->state,
-					  gameiter->state->batting_team,
-					  gameiter->state->runners[1].runner), 1);
+                            cw_gamestate_lineup_slot(gameiter->state,
+                                                     gameiter->state->batting_team,
+                                                     gameiter->state->runners[1].runner),
+                            1);
 }
 
 /* Extended Field 23 */
 DECLARE_FIELDFUNC(cwevent_runner1_src_event)
 {
-  return cw_buffer_emit_int(buffer,
-		 gameiter->state->runners[1].src_event, 3);
+  return cw_buffer_emit_int(buffer, gameiter->state->runners[1].src_event, 3);
 }
 
 /* Extended Field 24 */
@@ -1293,9 +1239,10 @@ DECLARE_FIELDFUNC(cwevent_runner2_defensive_position)
   }
   else {
     return cw_buffer_emit_int(buffer,
-		   cw_gamestate_runner_position(gameiter->state,
-						gameiter->state->batting_team,
-						gameiter->state->runners[2].runner), 2);
+                              cw_gamestate_runner_position(gameiter->state,
+                                                           gameiter->state->batting_team,
+                                                           gameiter->state->runners[2].runner),
+                              2);
   }
 }
 
@@ -1307,9 +1254,10 @@ DECLARE_FIELDFUNC(cwevent_runner2_lineup_position)
   }
 
   return cw_buffer_emit_int(buffer,
-		 cw_gamestate_lineup_slot(gameiter->state,
-					  gameiter->state->batting_team,
-					  gameiter->state->runners[2].runner), 1);
+                            cw_gamestate_lineup_slot(gameiter->state,
+                                                     gameiter->state->batting_team,
+                                                     gameiter->state->runners[2].runner),
+                            1);
 }
 
 /* Extended Field 26 */
@@ -1326,9 +1274,10 @@ DECLARE_FIELDFUNC(cwevent_runner3_defensive_position)
   }
   else {
     return cw_buffer_emit_int(buffer,
-		   cw_gamestate_runner_position(gameiter->state,
-						gameiter->state->batting_team,
-						gameiter->state->runners[3].runner), 2);
+                              cw_gamestate_runner_position(gameiter->state,
+                                                           gameiter->state->batting_team,
+                                                           gameiter->state->runners[3].runner),
+                              2);
   }
 }
 
@@ -1340,9 +1289,10 @@ DECLARE_FIELDFUNC(cwevent_runner3_lineup_position)
   }
 
   return cw_buffer_emit_int(buffer,
-		 cw_gamestate_lineup_slot(gameiter->state,
-					  gameiter->state->batting_team,
-					  gameiter->state->runners[3].runner), 1);
+                            cw_gamestate_lineup_slot(gameiter->state,
+                                                     gameiter->state->batting_team,
+                                                     gameiter->state->runners[3].runner),
+                            1);
 }
 
 /* Extended Field 29 */
@@ -1351,113 +1301,109 @@ DECLARE_FIELDFUNC(cwevent_runner3_src_event)
   return cw_buffer_emit_int(buffer, gameiter->state->runners[3].src_event, 3);
 }
 
-
 /* Extended Field 30 */
 DECLARE_FIELDFUNC(cwevent_responsible_catcher1)
 {
-  return cw_buffer_emit_string(buffer,
-		 cw_gamestate_responsible_catcher(gameiter->state, 
-						  gameiter->event_data, 1), 8);
+  return cw_buffer_emit_string(
+    buffer, cw_gamestate_responsible_catcher(gameiter->state, gameiter->event_data, 1), 8);
 }
 
 /* Extended Field 31 */
 DECLARE_FIELDFUNC(cwevent_responsible_catcher2)
 {
-  return cw_buffer_emit_string(buffer,
-		 cw_gamestate_responsible_catcher(gameiter->state,
-						  gameiter->event_data, 2), 8);
+  return cw_buffer_emit_string(
+    buffer, cw_gamestate_responsible_catcher(gameiter->state, gameiter->event_data, 2), 8);
 }
 
 /* Extended Field 32 */
 DECLARE_FIELDFUNC(cwevent_responsible_catcher3)
 {
-  return cw_buffer_emit_string(buffer,
-		 cw_gamestate_responsible_catcher(gameiter->state,
-						  gameiter->event_data, 3), 8);
+  return cw_buffer_emit_string(
+    buffer, cw_gamestate_responsible_catcher(gameiter->state, gameiter->event_data, 3), 8);
 }
 
 /* Extended Field 33 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls)
 {
-  return cw_buffer_emit_int(buffer,
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_thrown), 2);
+  return cw_buffer_emit_int(
+    buffer, cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_thrown), 2);
 }
 
 /* Extended Field 34 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls_called)
 {
-  return cw_buffer_emit_int(buffer,
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_called), 2);
+  return cw_buffer_emit_int(
+    buffer, cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_called), 2);
 }
 
 /* Extended Field 35 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls_intentional)
 {
-  return cw_buffer_emit_int(buffer,
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_intentional), 2);
+  return cw_buffer_emit_int(
+    buffer, cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_intentional), 2);
 }
 
 /* Extended Field 36 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls_pitchout)
 {
-  return cw_buffer_emit_int(buffer,
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_pitchout), 2);
+  return cw_buffer_emit_int(
+    buffer, cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_pitchout), 2);
 }
 
 /* Extended Field 37 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls_hit_batter)
 {
-  return cw_buffer_emit_int(buffer,
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_hit_batter), 2);
+  return cw_buffer_emit_int(
+    buffer, cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_hit_batter), 2);
 }
 
 /* Extended Field 38 */
 DECLARE_FIELDFUNC(cwevent_pitches_balls_other)
 {
-  return cw_buffer_emit_int(buffer,
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_other), 2);
+  return cw_buffer_emit_int(
+    buffer, cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_other), 2);
 }
 
 /* Extended Field 39 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes)
 {
-  return cw_buffer_emit_int(buffer,
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_thrown), 2);
+  return cw_buffer_emit_int(
+    buffer, cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_thrown), 2);
 }
 
 /* Extended Field 40 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_called)
 {
-  return cw_buffer_emit_int(buffer,
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_called), 2);
+  return cw_buffer_emit_int(
+    buffer, cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_called), 2);
 }
 
 /* Extended Field 41 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_swinging)
 {
-  return cw_buffer_emit_int(buffer,
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_swinging), 2);
+  return cw_buffer_emit_int(
+    buffer, cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_swinging), 2);
 }
 
 /* Extended Field 42 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_foul)
 {
-  return cw_buffer_emit_int(buffer,
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_foul), 2);
+  return cw_buffer_emit_int(
+    buffer, cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_foul), 2);
 }
 
 /* Extended Field 43 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_inplay)
 {
-  return cw_buffer_emit_int(buffer,
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_inplay), 2);
+  return cw_buffer_emit_int(
+    buffer, cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_inplay), 2);
 }
 
 /* Extended Field 44 */
 DECLARE_FIELDFUNC(cwevent_pitches_strikes_other)
 {
-  return cw_buffer_emit_int(buffer,
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_other), 2);
+  return cw_buffer_emit_int(
+    buffer, cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_other), 2);
 }
 
 /* Extended Field 45 */
@@ -1474,50 +1420,48 @@ DECLARE_FIELDFUNC(cwevent_fielded_by_id)
   }
   else {
     return cw_buffer_emit_string(buffer,
-		   gameiter->state->fielders[gameiter->event_data->fielded_by][1-gameiter->state->batting_team], 8);
+                                 gameiter->state->fielders[gameiter->event_data->fielded_by]
+                                                          [1 - gameiter->state->batting_team],
+                                 8);
   }
 }
 
 /* Extended Field 47 */
 DECLARE_FIELDFUNC(cwevent_force_second_flag)
 {
-  return cw_buffer_emit_flag(buffer,
-		 gameiter->event_data->fc_flag[1] &&
-		  (gameiter->event_data->gdp_flag || 
-		   (gameiter->event_data->dp_flag &&
-		    gameiter->event_data->primary_out_flag[1]) ||
-		   gameiter->event_data->force_flag));
+  return cw_buffer_emit_flag(
+    buffer, gameiter->event_data->fc_flag[1] &&
+              (gameiter->event_data->gdp_flag ||
+               (gameiter->event_data->dp_flag && gameiter->event_data->primary_out_flag[1]) ||
+               gameiter->event_data->force_flag));
 }
 
 /* Extended Field 48 */
 DECLARE_FIELDFUNC(cwevent_force_third_flag)
 {
-  return cw_buffer_emit_flag(buffer,
-		 gameiter->event_data->fc_flag[2] &&
-		  (gameiter->event_data->gdp_flag ||
-		   (gameiter->event_data->dp_flag &&
-		    gameiter->event_data->primary_out_flag[2]) ||
-		   gameiter->event_data->force_flag));
+  return cw_buffer_emit_flag(
+    buffer, gameiter->event_data->fc_flag[2] &&
+              (gameiter->event_data->gdp_flag ||
+               (gameiter->event_data->dp_flag && gameiter->event_data->primary_out_flag[2]) ||
+               gameiter->event_data->force_flag));
 }
 
 /* Extended Field 49 */
 DECLARE_FIELDFUNC(cwevent_force_home_flag)
 {
-  return cw_buffer_emit_flag(buffer,
-		 gameiter->event_data->fc_flag[3] &&
-		  (gameiter->event_data->gdp_flag ||
-		   (gameiter->event_data->dp_flag &&
-		    gameiter->event_data->primary_out_flag[3]) ||
-		   gameiter->event_data->force_flag));
+  return cw_buffer_emit_flag(
+    buffer, gameiter->event_data->fc_flag[3] &&
+              (gameiter->event_data->gdp_flag ||
+               (gameiter->event_data->dp_flag && gameiter->event_data->primary_out_flag[3]) ||
+               gameiter->event_data->force_flag));
 }
 
 /* Extended Field 50 */
 DECLARE_FIELDFUNC(cwevent_safe_on_error_flag)
 {
-  return cw_buffer_emit_flag(buffer,
-		  gameiter->event_data->event_type == CW_EVENT_ERROR ||
-		  (gameiter->event_data->event_type == CW_EVENT_GENERICOUT &&
-		   gameiter->event_data->muff_flag[0]));
+  return cw_buffer_emit_flag(buffer, gameiter->event_data->event_type == CW_EVENT_ERROR ||
+                                       (gameiter->event_data->event_type == CW_EVENT_GENERICOUT &&
+                                        gameiter->event_data->muff_flag[0]));
 }
 
 /* Extended Field 51 */
@@ -1583,18 +1527,17 @@ DECLARE_FIELDFUNC(cwevent_assist10)
 /* Extended Field 61 */
 DECLARE_FIELDFUNC(cwevent_unknown_out_flag)
 {
-  return cw_buffer_emit_flag(buffer,
-		  !strcmp(gameiter->event_data->play[0], "99") ||
-		  !strcmp(gameiter->event_data->play[1], "99") ||
-		  !strcmp(gameiter->event_data->play[2], "99") ||
-		  !strcmp(gameiter->event_data->play[3], "99"));
+  return cw_buffer_emit_flag(buffer, !strcmp(gameiter->event_data->play[0], "99") ||
+                                       !strcmp(gameiter->event_data->play[1], "99") ||
+                                       !strcmp(gameiter->event_data->play[2], "99") ||
+                                       !strcmp(gameiter->event_data->play[3], "99"));
 }
 
 /* Extended Field 62 */
 DECLARE_FIELDFUNC(cwevent_uncertain_play_flag)
 {
-  return cw_buffer_emit_flag(buffer,
-		  gameiter->event->event_text[strlen(gameiter->event->event_text)-1] == '#');
+  return cw_buffer_emit_flag(
+    buffer, gameiter->event->event_text[strlen(gameiter->event->event_text) - 1] == '#');
 }
 
 /* Extended Field 63 */
@@ -1607,156 +1550,137 @@ DECLARE_FIELDFUNC(cwevent_count_text)
 DECLARE_FIELDFUNC(cwevent_runner1_auto)
 {
   return cw_buffer_emit_flag(
-      buffer,
-      cw_gamestate_runner_is_auto(
-          gameiter->state, gameiter->event_data, 1));
+    buffer, cw_gamestate_runner_is_auto(gameiter->state, gameiter->event_data, 1));
 }
 
 /* Extended Field 65 */
 DECLARE_FIELDFUNC(cwevent_runner2_auto)
 {
   return cw_buffer_emit_flag(
-      buffer,
-      cw_gamestate_runner_is_auto(
-          gameiter->state, gameiter->event_data, 2));
+    buffer, cw_gamestate_runner_is_auto(gameiter->state, gameiter->event_data, 2));
 }
 
 /* Extended Field 66 */
 DECLARE_FIELDFUNC(cwevent_runner3_auto)
 {
   return cw_buffer_emit_flag(
-      buffer,
-      cw_gamestate_runner_is_auto(
-          gameiter->state, gameiter->event_data, 3));
+    buffer, cw_gamestate_runner_is_auto(gameiter->state, gameiter->event_data, 3));
 }
 
 static field_struct ext_field_data[] = {
-  /*  0 */ { cwevent_home_team_id, "HOME_TEAM_ID", "home team id" },
-  /*  1 */ { cwevent_batting_team_id, "BAT_TEAM_ID", "batting team id" },
-  /*  2 */ { cwevent_fielding_team_id, "FLD_TEAM_ID", "fielding team id" },    
-  /*  3 */ { cwevent_half_inning, "BAT_LAST_ID", 
-	     "half inning (differs from batting team if home team bats first" },
-  /*  4 */ { cwevent_start_half_inning, "INN_NEW_FL", 
-	     "start of half inning flag" },
-  /*  5 */ { cwevent_end_half_inning, "INN_END_FL", 
-	     "end of half inning flag" },
-  /*  6 */ { cwevent_offense_score, "START_BAT_SCORE_CT", 
-	     "score for team on offense" },
-  /*  7 */ { cwevent_defense_score, "START_FLD_SCORE_CT", 
-	     "score for team on defense" },
-  /*  8 */ { cwevent_offense_score_inning, "INN_RUNS_CT", 
-	     "runs scored in this half inning" },
-  /*  9 */ { cwevent_offense_batters_game, "GAME_PA_CT", 
-	     "number of plate appearances in game for team on offense" },
-  /* 10 */ { cwevent_offense_batters_inning, "INN_PA_CT", 
-	     "number of plate appearances in inning for team on offense" },
-  /* 11 */ { cwevent_start_pa_flag, "PA_NEW_FL", 
-	     "start of plate appearance flag" },
-  /* 12 */ { cwevent_truncated_pa_flag, "PA_TRUNC_FL", 
-	     "truncated plate appearance flag" },
-  /* 13 */ { cwevent_base_state_start, "START_BASES_CD", 
-	     "base state at start of play" },
-  /* 14 */ { cwevent_base_state_end, "END_BASES_CD", 
-	     "base state at end of play" },
-  /* 15 */ { cwevent_batter_is_starter, "BAT_START_FL",
-	     "batter is starter flag" },
-  /* 16 */ { cwevent_res_batter_is_starter, "RESP_BAT_START_FL",
-	     "result batter is starter flag" }, 
-  /* 17 */ { cwevent_batter_on_deck, "BAT_ON_DECK_ID",
-	     "ID of batter on deck" },
-  /* 18 */ { cwevent_batter_in_the_hold, "BAT_IN_HOLD_ID",
-	     "ID of batter in the hold" },
-  /* 19 */ { cwevent_pitcher_is_starter, "PIT_START_FL",
-	     "pitcher is starter flag" },
-  /* 20 */ { cwevent_res_pitcher_is_starter, "RESP_PIT_START_FL",
-	     "result pitcher is starter flag" },
-  /* 21 */ { cwevent_runner1_defensive_position, "RUN1_FLD_CD", 
-	     "defensive position of runner on first" },
-  /* 22 */ { cwevent_runner1_lineup_position, "RUN1_LINEUP_CD", 
-	     "lineup position of runner on first" },
-  /* 23 */ { cwevent_runner1_src_event, "RUN1_ORIGIN_EVENT_ID",
-	     "event number on which runner on first reached base" },
-  /* 24 */ { cwevent_runner2_defensive_position, "RUN2_FLD_CD", 
-	     "defensive position of runner on second" },
-  /* 25 */ { cwevent_runner2_lineup_position, "RUN2_LINEUP_CD", 
-	     "lineup position of runner on second" },
-  /* 26 */ { cwevent_runner2_src_event, "RUN2_ORIGIN_EVENT_ID",
-	     "event number on which runner on second reached base" },
-  /* 27 */ { cwevent_runner3_defensive_position, "RUN3_FLD_CD", 
-	     "defensive position of runner on third" },
-  /* 28 */ { cwevent_runner3_lineup_position, "RUN3_LINEUP_CD", 
-	     "lineup position of runner on third" },
-  /* 29 */ { cwevent_runner3_src_event, "RUN3_ORIGIN_EVENT_ID",
-	     "event number on which runner on third reached base" },
-  /* 30 */ { cwevent_responsible_catcher1, "RUN1_RESP_CAT_ID", 
-	     "Responsible catcher for runner on 1st" },
-  /* 31 */ { cwevent_responsible_catcher2, "RUN2_RESP_CAT_ID", 
-	     "Responsible catcher for runner on 2nd" },
-  /* 32 */ { cwevent_responsible_catcher3, "RUN3_RESP_CAT_ID", 
-	     "Responsible catcher for runner on 3rd" },
-  /* 33 */ { cwevent_pitches_balls, "PA_BALL_CT", 
-	     "number of balls thrown in plate appearance" },
-  /* 34 */ { cwevent_pitches_balls_called, "PA_CALLED_BALL_CT", 
-	     "number of called balls in plate appearance" },
-  /* 35 */ { cwevent_pitches_balls_intentional, "PA_INTENT_BALL_CT", 
-	     "number of intentional balls in plate appearance" },
-  /* 36 */ { cwevent_pitches_balls_pitchout, "PA_PITCHOUT_BALL_CT", 
-	     "number of pitchouts in plate appearance" },
-  /* 37 */ { cwevent_pitches_balls_hit_batter, "PA_HITBATTER_BALL_CT", 
-	     "number of pitches hitting batter in plate appearance" },
-  /* 38 */ { cwevent_pitches_balls_other, "PA_OTHER_BALL_CT", 
-	     "number of other balls in plate appearance" },
-  /* 39 */ { cwevent_pitches_strikes, "PA_STRIKE_CT", 
-	     "number of strikes thrown in plate appearance" },
-  /* 40 */ { cwevent_pitches_strikes_called, "PA_CALLED_STRIKE_CT", 
-	     "number of called strikes in plate appearance" },
-  /* 41 */ { cwevent_pitches_strikes_swinging, "PA_SWINGMISS_STRIKE_CT", 
-	     "number of swinging strikes in plate appearance" },
-  /* 42 */ { cwevent_pitches_strikes_foul, "PA_FOUL_STRIKE_CT", 
-	     "number of foul balls in plate appearance" },
-  /* 43 */ { cwevent_pitches_strikes_inplay, "PA_INPLAY_STRIKE_CT", 
-	     "number of balls in play in plate appearance" },
-  /* 44 */ { cwevent_pitches_strikes_other, "PA_OTHER_STRIKE_CT", 
-	     "number of other strikes in plate appearance" },
-  /* 45 */ { cwevent_runs_on_play, "EVENT_RUNS_CT", "number of runs on play" },
-  /* 46 */ { cwevent_fielded_by_id, "FLD_ID", 
-	     "id of player fielding batted ball" },
-  /* 47 */ { cwevent_force_second_flag, "BASE2_FORCE_FL", 
-	     "force play at second flag" },
-  /* 48 */ { cwevent_force_third_flag, "BASE3_FORCE_FL", 
-	     "force play at third flag" },
-  /* 49 */ { cwevent_force_home_flag, "BASE4_FORCE_FL", 
-	     "force play at home flag" },
-  /* 50 */ { cwevent_safe_on_error_flag, "BAT_SAFE_ERR_FL", 
-	     "batter safe on error flag" },
-  /* 51 */ { cwevent_batter_fate, "BAT_FATE_ID", 
-	     "fate of batter (base ultimately advanced to)" },
-  /* 52 */ { cwevent_runner1_fate, "RUN1_FATE_ID", 
-	     "fate of runner on first" },
-  /* 53 */ { cwevent_runner2_fate, "RUN2_FATE_ID", 
-	     "fate of runner on second" },
-  /* 54 */ { cwevent_runner3_fate, "RUN3_FATE_ID", 
-	     "fate of runner on third" },
-  /* 55 */ { cwevent_inning_future_runs, "FATE_RUNS_CT", 
-	     "runs scored in half inning after this event" },
-  /* 56 */ { cwevent_assist6, "ASS6_FLD_CD", "fielder with sixth assist" },
-  /* 57 */ { cwevent_assist7, "ASS7_FLD_CD", "fielder with seventh assist" },
-  /* 58 */ { cwevent_assist8, "ASS8_FLD_CD", "fielder with eighth assist" },
-  /* 59 */ { cwevent_assist9, "ASS9_FLD_CD", "fielder with ninth assist" },
-  /* 60 */ { cwevent_assist10, "ASS10_FLD_CD", "fielder with tenth assist" },
-  /* 61 */ { cwevent_unknown_out_flag, "UNKNOWN_OUT_EXC_FL",
-             "unknown fielding credit flag" },
-  /* 62 */ { cwevent_uncertain_play_flag, "UNCERTAIN_PLAY_EXC_FL",
-             "uncertain play flag" },
-  /* 63 */ { cwevent_count_text, "COUNT_TX",
-	     "text of count as appears in event file" },
-  /* 64 */ { cwevent_runner1_auto, "RUN1_AUTO_FL", "whether runner on first is an automatic runner" },
-    /* 65 */ { cwevent_runner2_auto, "RUN2_AUTO_FL", "whether runner on second is an automatic runner" },
-    /* 66 */ { cwevent_runner3_auto, "RUN3_AUTO_FL", "whether runner on third is an automatic runner" }
-};
+  /*  0 */ {cwevent_home_team_id, "HOME_TEAM_ID", "home team id"},
+  /*  1 */ {cwevent_batting_team_id, "BAT_TEAM_ID", "batting team id"},
+  /*  2 */ {cwevent_fielding_team_id, "FLD_TEAM_ID", "fielding team id"},
+  /*  3 */
+  {cwevent_half_inning, "BAT_LAST_ID",
+   "half inning (differs from batting team if home team bats first"},
+  /*  4 */ {cwevent_start_half_inning, "INN_NEW_FL", "start of half inning flag"},
+  /*  5 */ {cwevent_end_half_inning, "INN_END_FL", "end of half inning flag"},
+  /*  6 */ {cwevent_offense_score, "START_BAT_SCORE_CT", "score for team on offense"},
+  /*  7 */ {cwevent_defense_score, "START_FLD_SCORE_CT", "score for team on defense"},
+  /*  8 */ {cwevent_offense_score_inning, "INN_RUNS_CT", "runs scored in this half inning"},
+  /*  9 */
+  {cwevent_offense_batters_game, "GAME_PA_CT",
+   "number of plate appearances in game for team on offense"},
+  /* 10 */
+  {cwevent_offense_batters_inning, "INN_PA_CT",
+   "number of plate appearances in inning for team on offense"},
+  /* 11 */ {cwevent_start_pa_flag, "PA_NEW_FL", "start of plate appearance flag"},
+  /* 12 */ {cwevent_truncated_pa_flag, "PA_TRUNC_FL", "truncated plate appearance flag"},
+  /* 13 */ {cwevent_base_state_start, "START_BASES_CD", "base state at start of play"},
+  /* 14 */ {cwevent_base_state_end, "END_BASES_CD", "base state at end of play"},
+  /* 15 */ {cwevent_batter_is_starter, "BAT_START_FL", "batter is starter flag"},
+  /* 16 */ {cwevent_res_batter_is_starter, "RESP_BAT_START_FL", "result batter is starter flag"},
+  /* 17 */ {cwevent_batter_on_deck, "BAT_ON_DECK_ID", "ID of batter on deck"},
+  /* 18 */ {cwevent_batter_in_the_hold, "BAT_IN_HOLD_ID", "ID of batter in the hold"},
+  /* 19 */ {cwevent_pitcher_is_starter, "PIT_START_FL", "pitcher is starter flag"},
+  /* 20 */ {cwevent_res_pitcher_is_starter, "RESP_PIT_START_FL", "result pitcher is starter flag"},
+  /* 21 */
+  {cwevent_runner1_defensive_position, "RUN1_FLD_CD", "defensive position of runner on first"},
+  /* 22 */
+  {cwevent_runner1_lineup_position, "RUN1_LINEUP_CD", "lineup position of runner on first"},
+  /* 23 */
+  {cwevent_runner1_src_event, "RUN1_ORIGIN_EVENT_ID",
+   "event number on which runner on first reached base"},
+  /* 24 */
+  {cwevent_runner2_defensive_position, "RUN2_FLD_CD", "defensive position of runner on second"},
+  /* 25 */
+  {cwevent_runner2_lineup_position, "RUN2_LINEUP_CD", "lineup position of runner on second"},
+  /* 26 */
+  {cwevent_runner2_src_event, "RUN2_ORIGIN_EVENT_ID",
+   "event number on which runner on second reached base"},
+  /* 27 */
+  {cwevent_runner3_defensive_position, "RUN3_FLD_CD", "defensive position of runner on third"},
+  /* 28 */
+  {cwevent_runner3_lineup_position, "RUN3_LINEUP_CD", "lineup position of runner on third"},
+  /* 29 */
+  {cwevent_runner3_src_event, "RUN3_ORIGIN_EVENT_ID",
+   "event number on which runner on third reached base"},
+  /* 30 */
+  {cwevent_responsible_catcher1, "RUN1_RESP_CAT_ID", "Responsible catcher for runner on 1st"},
+  /* 31 */
+  {cwevent_responsible_catcher2, "RUN2_RESP_CAT_ID", "Responsible catcher for runner on 2nd"},
+  /* 32 */
+  {cwevent_responsible_catcher3, "RUN3_RESP_CAT_ID", "Responsible catcher for runner on 3rd"},
+  /* 33 */ {cwevent_pitches_balls, "PA_BALL_CT", "number of balls thrown in plate appearance"},
+  /* 34 */
+  {cwevent_pitches_balls_called, "PA_CALLED_BALL_CT",
+   "number of called balls in plate appearance"},
+  /* 35 */
+  {cwevent_pitches_balls_intentional, "PA_INTENT_BALL_CT",
+   "number of intentional balls in plate appearance"},
+  /* 36 */
+  {cwevent_pitches_balls_pitchout, "PA_PITCHOUT_BALL_CT",
+   "number of pitchouts in plate appearance"},
+  /* 37 */
+  {cwevent_pitches_balls_hit_batter, "PA_HITBATTER_BALL_CT",
+   "number of pitches hitting batter in plate appearance"},
+  /* 38 */
+  {cwevent_pitches_balls_other, "PA_OTHER_BALL_CT", "number of other balls in plate appearance"},
+  /* 39 */
+  {cwevent_pitches_strikes, "PA_STRIKE_CT", "number of strikes thrown in plate appearance"},
+  /* 40 */
+  {cwevent_pitches_strikes_called, "PA_CALLED_STRIKE_CT",
+   "number of called strikes in plate appearance"},
+  /* 41 */
+  {cwevent_pitches_strikes_swinging, "PA_SWINGMISS_STRIKE_CT",
+   "number of swinging strikes in plate appearance"},
+  /* 42 */
+  {cwevent_pitches_strikes_foul, "PA_FOUL_STRIKE_CT", "number of foul balls in plate appearance"},
+  /* 43 */
+  {cwevent_pitches_strikes_inplay, "PA_INPLAY_STRIKE_CT",
+   "number of balls in play in plate appearance"},
+  /* 44 */
+  {cwevent_pitches_strikes_other, "PA_OTHER_STRIKE_CT",
+   "number of other strikes in plate appearance"},
+  /* 45 */ {cwevent_runs_on_play, "EVENT_RUNS_CT", "number of runs on play"},
+  /* 46 */ {cwevent_fielded_by_id, "FLD_ID", "id of player fielding batted ball"},
+  /* 47 */ {cwevent_force_second_flag, "BASE2_FORCE_FL", "force play at second flag"},
+  /* 48 */ {cwevent_force_third_flag, "BASE3_FORCE_FL", "force play at third flag"},
+  /* 49 */ {cwevent_force_home_flag, "BASE4_FORCE_FL", "force play at home flag"},
+  /* 50 */ {cwevent_safe_on_error_flag, "BAT_SAFE_ERR_FL", "batter safe on error flag"},
+  /* 51 */ {cwevent_batter_fate, "BAT_FATE_ID", "fate of batter (base ultimately advanced to)"},
+  /* 52 */ {cwevent_runner1_fate, "RUN1_FATE_ID", "fate of runner on first"},
+  /* 53 */ {cwevent_runner2_fate, "RUN2_FATE_ID", "fate of runner on second"},
+  /* 54 */ {cwevent_runner3_fate, "RUN3_FATE_ID", "fate of runner on third"},
+  /* 55 */
+  {cwevent_inning_future_runs, "FATE_RUNS_CT", "runs scored in half inning after this event"},
+  /* 56 */ {cwevent_assist6, "ASS6_FLD_CD", "fielder with sixth assist"},
+  /* 57 */ {cwevent_assist7, "ASS7_FLD_CD", "fielder with seventh assist"},
+  /* 58 */ {cwevent_assist8, "ASS8_FLD_CD", "fielder with eighth assist"},
+  /* 59 */ {cwevent_assist9, "ASS9_FLD_CD", "fielder with ninth assist"},
+  /* 60 */ {cwevent_assist10, "ASS10_FLD_CD", "fielder with tenth assist"},
+  /* 61 */ {cwevent_unknown_out_flag, "UNKNOWN_OUT_EXC_FL", "unknown fielding credit flag"},
+  /* 62 */ {cwevent_uncertain_play_flag, "UNCERTAIN_PLAY_EXC_FL", "uncertain play flag"},
+  /* 63 */ {cwevent_count_text, "COUNT_TX", "text of count as appears in event file"},
+  /* 64 */
+  {cwevent_runner1_auto, "RUN1_AUTO_FL", "whether runner on first is an automatic runner"},
+  /* 65 */
+  {cwevent_runner2_auto, "RUN2_AUTO_FL", "whether runner on second is an automatic runner"},
+  /* 66 */
+  {cwevent_runner3_auto, "RUN3_AUTO_FL", "whether runner on third is an automatic runner"}};
 
-void
-cwevent_process_game(CWGame *game, CWRoster *visitors, CWRoster *home) 
+void cwevent_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 {
   char output_line[4096];
   CWBuffer buf;
@@ -1775,19 +1699,19 @@ cwevent_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
     cw_buffer_init(&buf, output_line, sizeof(output_line), ascii, ',');
     for (i = 0; i <= max_field; i++) {
       if (fields[i]) {
-	    (*field_data[i].f)(&buf, gameiter, visitors, home);
+        (*field_data[i].f)(&buf, gameiter, visitors, home);
       }
     }
 
     for (i = 0; i <= max_ext_field; i++) {
       if (ext_fields[i]) {
-	    (*ext_field_data[i].f)(&buf, gameiter, visitors, home);
+        (*ext_field_data[i].f)(&buf, gameiter, visitors, home);
       }
     }
 
     if (buf.truncated) {
-      fprintf(stderr, "Error: output buffer truncated for game %s, event %d\n",
-              game->game_id, gameiter->state->event_count + 1);
+      fprintf(stderr, "Error: output buffer truncated for game %s, event %d\n", game->game_id,
+              gameiter->state->event_count + 1);
       exit(1);
     }
 
@@ -1803,10 +1727,10 @@ cwevent_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 
 void (*cwtools_process_game)(CWGame *, CWRoster *, CWRoster *) = cwevent_process_game;
 
-void
-cwevent_print_help(void)
+void cwevent_print_help(void)
 {
-  fprintf(stderr, "\n\ncwevent generates files suitable for use by dBase or Lotus-like programs\n");
+  fprintf(stderr,
+          "\n\ncwevent generates files suitable for use by dBase or Lotus-like programs\n");
   fprintf(stderr, "Each record describes one event.\n");
   fprintf(stderr, "Usage: cwevent [options] eventfile...\n");
   fprintf(stderr, "options:\n");
@@ -1830,8 +1754,7 @@ cwevent_print_help(void)
 
 void (*cwtools_print_help)(void) = cwevent_print_help;
 
-void
-cwevent_print_field_list(void)
+void cwevent_print_field_list(void)
 {
   int i;
 
@@ -1856,27 +1779,25 @@ cwevent_print_field_list(void)
     fprintf(stderr, "%-2d      %s\n", i, ext_field_data[i].description);
   }
 
-  
   exit(0);
 }
 
 void (*cwtools_print_field_list)(void) = cwevent_print_field_list;
 
-void
-cwevent_print_welcome_message(char *argv0)
+void cwevent_print_welcome_message(char *argv0)
 {
-  fprintf(stderr, 
-	  "\nChadwick expanded event descriptor, version " VERSION); 
+  fprintf(stderr, "\nChadwick expanded event descriptor, version " VERSION);
   fprintf(stderr, "\n  Type '%s -h' for help.\n", argv0);
-  fprintf(stderr, "Copyright (c) 2002-2026\nDr T L Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)\n");
-  fprintf(stderr, "This is free software, " 
-	  "subject to the terms of the GNU GPL license.\n\n");
+  fprintf(
+    stderr,
+    "Copyright (c) 2002-2026\nDr T L Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)\n");
+  fprintf(stderr, "This is free software, "
+                  "subject to the terms of the GNU GPL license.\n\n");
 }
 
 void (*cwtools_print_welcome_message)(char *) = cwevent_print_welcome_message;
 
-void
-cwevent_initialize(void)
+void cwevent_initialize(void)
 {
   int i;
   char output_line[4096];
@@ -1910,8 +1831,7 @@ cwevent_initialize(void)
 
 void (*cwtools_initialize)(void) = cwevent_initialize;
 
-void
-cwevent_cleanup(void)
+void cwevent_cleanup(void)
 {
 }
 
@@ -1923,11 +1843,9 @@ extern char last_date[5];
 extern char game_id[20];
 extern int quiet;
 
-extern void
-cwtools_parse_field_list(char *text, int max_field, int *fields);
+extern void cwtools_parse_field_list(char *text, int max_field, int *fields);
 
-int
-cwevent_parse_command_line(int argc, char *argv[])
+int cwevent_parse_command_line(int argc, char *argv[])
 {
   int i;
   strcpy(year, "");
@@ -1942,7 +1860,7 @@ cwevent_parse_command_line(int argc, char *argv[])
     }
     else if (!strcmp(argv[i], "-e")) {
       if (++i < argc) {
-	strncpy(last_date, argv[i], 4);
+        strncpy(last_date, argv[i], 4);
       }
     }
     else if (!strcmp(argv[i], "-h")) {
@@ -1954,12 +1872,12 @@ cwevent_parse_command_line(int argc, char *argv[])
     }
     else if (!strcmp(argv[i], "-i")) {
       if (++i < argc) {
-	strncpy(game_id, argv[i], 19);
+        strncpy(game_id, argv[i], 19);
       }
     }
     else if (!strcmp(argv[i], "-f")) {
       if (++i < argc) {
-	cwtools_parse_field_list(argv[i], max_field, fields);
+        cwtools_parse_field_list(argv[i], max_field, fields);
       }
     }
     else if (!strcmp(argv[i], "-n")) {
@@ -1970,17 +1888,17 @@ cwevent_parse_command_line(int argc, char *argv[])
     }
     else if (!strcmp(argv[i], "-s")) {
       if (++i < argc) {
-	strncpy(first_date, argv[i], 4);
+        strncpy(first_date, argv[i], 4);
       }
     }
     else if (!strcmp(argv[i], "-x")) {
       if (++i < argc) {
-	cwtools_parse_field_list(argv[i], max_ext_field, ext_fields);
+        cwtools_parse_field_list(argv[i], max_ext_field, ext_fields);
       }
     }
     else if (!strcmp(argv[i], "-y")) {
       if (++i < argc) {
-	strncpy(year, argv[i], 5);
+        strncpy(year, argv[i], 5);
       }
     }
     else if (argv[i][0] == '-') {

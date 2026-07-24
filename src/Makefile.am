@@ -22,4 +22,3 @@
 #
 
 SUBDIRS = cwlib cwtools
-

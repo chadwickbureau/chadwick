@@ -59,7 +59,7 @@ class GameDiff(object):
         self.t1 = t1
         self.t2 = t2
         self.key = key
-        
+
     @property
     def context(self):
         return self.t1["GameID"]
@@ -71,22 +71,21 @@ class GameDiff(object):
     @property
     def tool2(self):
         return self.t2[self.key]
-        
+
 
 class GameDiffEngine(tool.DiffEngine):
     @property
     def diff_object(self):  return GameDiff
-    
+
 
 def run_diff(tool1_path, tool2_path, data_path, year):
     tool1 = GameToolProcess(tool1_path, "Chadwick", year)
     tool2 = GameToolProcess(tool2_path, "BGAME", year)
     engine = GameDiffEngine()
     tool.run_diff(engine, tool1, tool2, data_path)
-    
+
 if __name__ == "__main__":
     import sys
     run_diff(sys.argv[1], sys.argv[2],
              "/home/dataczar/git/retrosheet/event/regular",
              sys.argv[3])
-           

@@ -33,5 +33,4 @@
 #include "gameiter.h"
 #include "box.h"
 
-#endif   /* CW_CHADWICK_H */
-
+#endif /* CW_CHADWICK_H */

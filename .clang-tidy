@@ -1,0 +1,32 @@
+Checks: >
+  -*,
+  bugprone-assert-side-effect,
+  bugprone-infinite-loop,
+  bugprone-multiple-statement-macro,
+  bugprone-suspicious-semicolon,
+  bugprone-sizeof-expression,
+  bugprone-misplaced-operator-in-strlen-in-alloc,
+  bugprone-misplaced-pointer-arithmetic-in-alloc,
+  bugprone-implicit-widening-of-multiplication-result,
+  bugprone-suspicious-memset-usage,
+  bugprone-suspicious-realloc-usage,
+  bugprone-suspicious-string-compare,
+  bugprone-suspicious-memory-comparison,
+  clang-analyzer-core.DivideZero,
+  clang-analyzer-core.UndefinedBinaryOperatorResult,
+  bugprone-misplaced-widening-cast,
+  bugprone-narrowing-conversions,
+  bugprone-signed-char-misuse,
+  clang-analyzer-unix.Malloc,
+  clang-analyzer-unix.MallocSizeof,
+  clang-analyzer-unix.cstring.BadSizeArg,
+  clang-analyzer-unix.cstring.NotNullTerminated,
+  clang-analyzer-unix.cstring.NullArg,
+  clang-analyzer-security.ArrayBound
+
+# Any diagnostic from an enabled check is a CI failure.
+WarningsAsErrors: '*'
+
+# Report diagnostics from Chadwick headers, but not from system headers.
+HeaderFilterRegex: '^.*/src/'
+SystemHeaders: false

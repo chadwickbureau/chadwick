@@ -34,9 +34,8 @@ typedef struct cw_player_struct {
  * Initialize a CWPlayer object with the data provided.
  * Caller is responsible for memory management on created object
  */
-CWPlayer *cw_player_create(char *player_id, 
-			   char *last_name, char *first_name,
-			   char bats, char throws);
+CWPlayer *cw_player_create(char *player_id, char *last_name, char *first_name, char bats,
+                           char throws);
 
 /*
  * Cleans up memory allocated internally by 'player'.
@@ -54,7 +53,6 @@ void cw_player_set_first_name(CWPlayer *player, char *name);
  */
 void cw_player_set_last_name(CWPlayer *player, char *name);
 
-
 typedef struct cw_roster_struct {
   char *team_id, *city, *nickname, *league;
   int year;
@@ -66,15 +64,13 @@ typedef struct cw_roster_struct {
  * Allocates and initializes a new CWRoster.  Roster initially has no
  * players.  Caller is responsible for memory management of returned pointer.
  */
-CWRoster *cw_roster_create(char *team_id, int year, char *league,
-			   char *city, char *nickname);
+CWRoster *cw_roster_create(char *team_id, int year, char *league, char *city, char *nickname);
 
 /*
  * Cleans up memory allocated internally to 'roster'.  Caller is
  * responsible for free()ing 'roster' itself.
  */
 void cw_roster_cleanup(CWRoster *roster);
-
 
 /*
  * Sets the city which the team represents
@@ -110,9 +106,8 @@ void cw_roster_player_append(CWRoster *roster, CWPlayer *player);
  */
 CWPlayer *cw_roster_player_find(CWRoster *roster, char *player_id);
 
-
 /*
- * Returns the number of players on the roster 
+ * Returns the number of players on the roster
  */
 int cw_roster_player_count(CWRoster *roster);
 
@@ -139,8 +134,4 @@ char cw_roster_batting_hand(CWRoster *roster, char *player_id);
  */
 char cw_roster_throwing_hand(CWRoster *roster, char *player_id);
 
-#endif  /* CW_ROSTER_H */
-
-
-
-
+#endif /* CW_ROSTER_H */

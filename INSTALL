@@ -2,7 +2,7 @@ Windows users
 =============
 
 If you've downloaded the binary distribution (chadwick-x.y.z-bin.zip),
-simply unzip the programs into the directory where you would like to 
+simply unzip the programs into the directory where you would like to
 put them.  The command-line tools require no special installation setup.
 
 If you want to build from source, Makefiles are provided which should work

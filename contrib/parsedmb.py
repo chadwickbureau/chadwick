@@ -11,7 +11,7 @@ def isbatter(event):
     """
     return event[0].isdigit() or event in [ "K", "K+WP", "W", "IW", "S", "D", "T", "HR",
                                             "HBP", "CI" ]
-                                           
+
 def ishit(event):
     return event in [ "S", "D", "T", "HR" ]
 
@@ -46,7 +46,7 @@ def ExtractAccountForm(lines):
                     noteindex = int(part[:-1])
                 else:
                     notes[noteindex] = part
-            
+
         else:
             rows.append({ "batter": line[:18].strip(),
                           "position": line[18:20].strip(),
@@ -58,7 +58,7 @@ def ExtractAccountForm(lines):
 
 
     data = [ ]
-            
+
     for col in xrange(5):
         for row in rows:
             if row["batter"] != "":
@@ -114,7 +114,7 @@ def ExtractPrimaries(f):
             while "------" not in line and "IN OUT ER" not in line:
                 lines.append(line)
                 line = f.readline()
-            
+
             sheets.append(ExtractAccountForm(lines))
             continue
         else:
@@ -144,7 +144,6 @@ if __name__ == "__main__":
     # Under unix, pipe this through 'sort' then 'uniq' to generate
     # all the unique event codes in a season.
     import glob
-    
+
     for fn in glob.glob("*.box"):
         ExtractPrimaries(file(fn))
-

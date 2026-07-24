@@ -1,5 +1,5 @@
 # [0.11.0]
-	
+
 ## Behaviour changes
 - In `cwevent`, runner advancement types 6 and 7 (for automatic runners) have been
   removed.  Instead, new flags for whether a runner is the result of an autoamtic runner
@@ -190,8 +190,3 @@
   removed.  This was a very old Retrosheet code that has been
   deprecated long ago and has not appeared in any released files
   for years.
-
-
-  
-
-   

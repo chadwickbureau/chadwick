@@ -21,7 +21,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-
 #ifndef BUFFER_H
 #define BUFFER_H
 
@@ -38,8 +37,8 @@ typedef struct cw_buffer {
   char delimiter;
 } CWBuffer;
 
-static inline void
-cw_buffer_init(CWBuffer *buf, char *storage, size_t size, int use_delimiter, char delimiter)
+static inline void cw_buffer_init(CWBuffer *buf, char *storage, size_t size, int use_delimiter,
+                                  char delimiter)
 {
   buf->current = storage;
   buf->end = storage + size;
@@ -61,7 +60,7 @@ static inline int cw_buffer_emit(CWBuffer *buf, const char *fmt, ...)
 
   /* Add delimiter if required */
   if (buf->use_delimiter && buf->need_sep) {
-    if ((size_t)(buf->end - buf->current) > 1) {
+    if ((size_t) (buf->end - buf->current) > 1) {
       *(buf->current++) = buf->delimiter;
       *buf->current = '\0';
     }
@@ -74,27 +73,26 @@ static inline int cw_buffer_emit(CWBuffer *buf, const char *fmt, ...)
 
   va_list ap;
   va_start(ap, fmt);
-  size_t available = (size_t)(buf->end - buf->current);
+  size_t available = (size_t) (buf->end - buf->current);
   int n = vsnprintf(buf->current, available, fmt, ap);
   va_end(ap);
   if (n < 0) {
     buf->truncated = 1;
     return 0;
   }
-  if ((size_t)n >= available) {
+  if ((size_t) n >= available) {
     buf->current = buf->end - 1;
     buf->truncated = 1;
-    return (int)(available - 1);
+    return (int) (available - 1);
   }
   buf->current += n;
   return n;
 }
 
-static inline void
-cw_buffer_begin_field(CWBuffer *buf)
+static inline void cw_buffer_begin_field(CWBuffer *buf)
 {
   if (buf->use_delimiter && buf->need_sep) {
-    if ((size_t)(buf->end - buf->current) > 1) {
+    if ((size_t) (buf->end - buf->current) > 1) {
       *(buf->current++) = buf->delimiter;
       *buf->current = '\0';
     }
@@ -102,17 +100,15 @@ cw_buffer_begin_field(CWBuffer *buf)
       buf->truncated = 1;
     }
   }
-  buf->need_sep = 0;  /* suppress further delimiters */
+  buf->need_sep = 0; /* suppress further delimiters */
 }
 
-static inline void
-cw_buffer_end_field(CWBuffer *buf)
+static inline void cw_buffer_end_field(CWBuffer *buf)
 {
   buf->need_sep = 1;
 }
 
-static inline int
-cw_buffer_emit_string(CWBuffer *buf, const char *s, int width)
+static inline int cw_buffer_emit_string(CWBuffer *buf, const char *s, int width)
 {
   if (buf->use_delimiter) {
     return cw_buffer_emit(buf, "\"%s\"", s ? s : "");
@@ -122,8 +118,7 @@ cw_buffer_emit_string(CWBuffer *buf, const char *s, int width)
   }
 }
 
-static inline int
-cw_buffer_emit_string_rjust(CWBuffer *buf, const char *s, int width)
+static inline int cw_buffer_emit_string_rjust(CWBuffer *buf, const char *s, int width)
 {
   if (buf->use_delimiter) {
     return cw_buffer_emit(buf, "\"%s\"", s ? s : "");
@@ -133,8 +128,7 @@ cw_buffer_emit_string_rjust(CWBuffer *buf, const char *s, int width)
   }
 }
 
-static inline int
-cw_buffer_emit_char(CWBuffer *buf, char c)
+static inline int cw_buffer_emit_char(CWBuffer *buf, char c)
 {
   if (buf->use_delimiter) {
     return cw_buffer_emit(buf, "\"%c\"", c);
@@ -144,14 +138,12 @@ cw_buffer_emit_char(CWBuffer *buf, char c)
   }
 }
 
-static inline int
-cw_buffer_emit_char_unquoted(CWBuffer *buf, char c)
+static inline int cw_buffer_emit_char_unquoted(CWBuffer *buf, char c)
 {
   return cw_buffer_emit(buf, "%c", c);
 }
 
-static inline int
-cw_buffer_emit_char_rjust(CWBuffer *buf, char c, int width)
+static inline int cw_buffer_emit_char_rjust(CWBuffer *buf, char c, int width)
 {
   if (buf->use_delimiter) {
     return cw_buffer_emit(buf, "\"%c\"", c);
@@ -161,8 +153,7 @@ cw_buffer_emit_char_rjust(CWBuffer *buf, char c, int width)
   }
 }
 
-static inline int
-cw_buffer_emit_int(CWBuffer *buf, int value, int width)
+static inline int cw_buffer_emit_int(CWBuffer *buf, int value, int width)
 {
   if (buf->use_delimiter || width == 0) {
     return cw_buffer_emit(buf, "%d", value);
@@ -172,16 +163,14 @@ cw_buffer_emit_int(CWBuffer *buf, int value, int width)
   }
 }
 
-static inline int
-cw_buffer_emit_flag(CWBuffer *buf, int flag)
+static inline int cw_buffer_emit_flag(CWBuffer *buf, int flag)
 {
   return cw_buffer_emit_char(buf, flag ? 'T' : 'F');
 }
 
-static inline int
-cw_buffer_emit_flag_rjust(CWBuffer *buf, int flag, int width)
+static inline int cw_buffer_emit_flag_rjust(CWBuffer *buf, int flag, int width)
 {
   return cw_buffer_emit_char_rjust(buf, flag ? 'T' : 'F', width);
 }
 
-#endif  // BUFFER_H
+#endif // BUFFER_H

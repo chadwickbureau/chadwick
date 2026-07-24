@@ -25,12 +25,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include "roster.h"
-#include "file.h"    
+#include "file.h"
 
-CWPlayer *
-cw_player_create(char *player_id,
-		 char *last_name, char *first_name,
-		 char bats, char throws)
+CWPlayer *cw_player_create(char *player_id, char *last_name, char *first_name, char bats,
+                           char throws)
 {
   CWPlayer *player = (CWPlayer *) malloc(sizeof(CWPlayer));
   player->player_id = (char *) malloc(sizeof(char) * (strlen(player_id) + 1));
@@ -39,7 +37,7 @@ cw_player_create(char *player_id,
   player->last_name = (char *) malloc(sizeof(char) * (strlen(last_name) + 1));
   strcpy(player->last_name, last_name);
 
-  player->first_name = (char *) malloc(sizeof(char) * (strlen(first_name)+1));
+  player->first_name = (char *) malloc(sizeof(char) * (strlen(first_name) + 1));
   strcpy(player->first_name, first_name);
 
   player->bats = bats;
@@ -50,38 +48,36 @@ cw_player_create(char *player_id,
   return player;
 }
 
-void
-cw_player_cleanup(CWPlayer *player)
+void cw_player_cleanup(CWPlayer *player)
 {
   free(player->player_id);
   free(player->last_name);
   free(player->first_name);
 }
 
-
-void
-cw_player_set_first_name(CWPlayer *player, char *name)
+void cw_player_set_first_name(CWPlayer *player, char *name)
 {
   char *x = (char *) malloc(sizeof(char) * (strlen(name) + 1));
-  if (x == NULL)  return;
+  if (x == NULL) {
+    return;
+  }
   strcpy(x, name);
   free(player->first_name);
-  player->first_name = x;    
+  player->first_name = x;
 }
 
-void
-cw_player_set_last_name(CWPlayer *player, char *name)
+void cw_player_set_last_name(CWPlayer *player, char *name)
 {
   char *x = (char *) malloc(sizeof(char) * (strlen(name) + 1));
-  if (x == NULL)  return;
+  if (x == NULL) {
+    return;
+  }
   strcpy(x, name);
   free(player->last_name);
-  player->last_name = x;    
+  player->last_name = x;
 }
 
-CWRoster *
-cw_roster_create(char *team_id, int year, char *league,
-		 char *city, char *nickname)
+CWRoster *cw_roster_create(char *team_id, int year, char *league, char *city, char *nickname)
 {
   CWRoster *roster = (CWRoster *) malloc(sizeof(CWRoster));
   roster->team_id = (char *) malloc(sizeof(char) * (strlen(team_id) + 1));
@@ -106,8 +102,7 @@ cw_roster_create(char *team_id, int year, char *league,
   return roster;
 }
 
-void 
-cw_roster_cleanup(CWRoster *roster)
+void cw_roster_cleanup(CWRoster *roster)
 {
   CWPlayer *player = roster->first_player;
 
@@ -124,39 +119,40 @@ cw_roster_cleanup(CWRoster *roster)
   free(roster->league);
 }
 
-void
-cw_roster_set_city(CWRoster *roster, char *city)
+void cw_roster_set_city(CWRoster *roster, char *city)
 {
   char *x = (char *) malloc(sizeof(char) * (strlen(city) + 1));
-  if (x == NULL)  return;
+  if (x == NULL) {
+    return;
+  }
   strcpy(x, city);
   free(roster->city);
-  roster->city = x;    
+  roster->city = x;
 }
 
-void
-cw_roster_set_nickname(CWRoster *roster, char *nickname)
+void cw_roster_set_nickname(CWRoster *roster, char *nickname)
 {
   char *x = (char *) malloc(sizeof(char) * (strlen(nickname) + 1));
-  if (x == NULL)  return;
+  if (x == NULL) {
+    return;
+  }
   strcpy(x, nickname);
   free(roster->nickname);
-  roster->nickname = x;    
+  roster->nickname = x;
 }
 
-void
-cw_roster_set_league(CWRoster *roster, char *league)
+void cw_roster_set_league(CWRoster *roster, char *league)
 {
   char *x = (char *) malloc(sizeof(char) * (strlen(league) + 1));
-  if (x == NULL)  return;
+  if (x == NULL) {
+    return;
+  }
   strcpy(x, league);
   free(roster->league);
-  roster->league = x;    
+  roster->league = x;
 }
 
-
-void
-cw_roster_player_insert(CWRoster *roster, CWPlayer *player)
+void cw_roster_player_insert(CWRoster *roster, CWPlayer *player)
 {
   if (roster->first_player == NULL) {
     roster->first_player = player;
@@ -187,11 +183,10 @@ cw_roster_player_insert(CWRoster *roster, CWPlayer *player)
   }
 }
 
-void
-cw_roster_player_append(CWRoster *roster, CWPlayer *player)
+void cw_roster_player_append(CWRoster *roster, CWPlayer *player)
 {
   player->prev = roster->last_player;
- 
+
   if (roster->first_player == NULL) {
     roster->first_player = player;
   }
@@ -202,8 +197,7 @@ cw_roster_player_append(CWRoster *roster, CWPlayer *player)
   roster->last_player = player;
 }
 
-CWPlayer *
-cw_roster_player_find(CWRoster *roster, char *player_id)
+CWPlayer *cw_roster_player_find(CWRoster *roster, char *player_id)
 {
   CWPlayer *player = (roster) ? roster->first_player : NULL;
 
@@ -222,8 +216,7 @@ cw_roster_player_find(CWRoster *roster, char *player_id)
   return NULL;
 }
 
-int
-cw_roster_player_count(CWRoster *roster)
+int cw_roster_player_count(CWRoster *roster)
 {
   CWPlayer *player = roster->first_player;
   int count = 0;
@@ -235,8 +228,7 @@ cw_roster_player_count(CWRoster *roster)
   return count;
 }
 
-int
-cw_roster_read(CWRoster *roster, FILE *file)
+int cw_roster_read(CWRoster *roster, FILE *file)
 {
   char buf[256], *player_id, *last_name, *first_name, *bats, *throws;
 
@@ -260,30 +252,25 @@ cw_roster_read(CWRoster *roster, FILE *file)
     /* TODO: Some Retrosheet roster files have additional fields
      * at the end.  Preserve these (and write them out in cw_roster_write() ).
      */
-    cw_roster_player_append(roster, 
-			    cw_player_create(player_id, 
-					     last_name, first_name,
-					     bats[0], throws[0]));
+    cw_roster_player_append(
+      roster, cw_player_create(player_id, last_name, first_name, bats[0], throws[0]));
   }
   return 1;
 }
 
-void
-cw_roster_write(CWRoster *roster, FILE *file)
+void cw_roster_write(CWRoster *roster, FILE *file)
 {
   CWPlayer *player = roster->first_player;
 
   while (player != NULL) {
-    fprintf(file, "\"%s\",\"%s\",\"%s\",%c,%c\n",
-	    player->player_id, player->last_name, player->first_name,
-	    player->bats, player->throws);
+    fprintf(file, "\"%s\",\"%s\",\"%s\",%c,%c\n", player->player_id, player->last_name,
+            player->first_name, player->bats, player->throws);
 
     player = player->next;
   }
 }
 
-char
-cw_roster_batting_hand(CWRoster *roster, char *player_id)
+char cw_roster_batting_hand(CWRoster *roster, char *player_id)
 {
   CWPlayer *player;
 
@@ -293,15 +280,17 @@ cw_roster_batting_hand(CWRoster *roster, char *player_id)
 
   for (player = roster->first_player; player; player = player->next) {
     if (!strcmp(player->player_id, player_id)) {
-      return (player->bats != '\0' && player->bats != ' ') ? player->bats : '?';
+      if (player->bats != '\0' && player->bats != ' ') {
+        return player->bats;
+      }
+      return '?';
     }
   }
 
   return '?';
 }
 
-char
-cw_roster_throwing_hand(CWRoster *roster, char *player_id)
+char cw_roster_throwing_hand(CWRoster *roster, char *player_id)
 {
   CWPlayer *player;
 
@@ -311,10 +300,12 @@ cw_roster_throwing_hand(CWRoster *roster, char *player_id)
 
   for (player = roster->first_player; player; player = player->next) {
     if (!strcmp(player->player_id, player_id)) {
-      return (player->throws != '\0' && player->throws != ' ') ? player->throws : '?';
+      if (player->throws != '\0' && player->throws != ' ') {
+        return player->throws;
+      }
+      return '?';
     }
   }
 
   return '?';
 }
-

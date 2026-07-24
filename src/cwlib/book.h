@@ -71,14 +71,13 @@ CWGame *cw_scorebook_remove_game(CWScorebook *scorebook, char *game_id);
  * Reads the contents of the scorebook file 'file' into
  * the scorebook 'scorebook'.  Returns the number of games successfully read,
  * or -1 if the file could not be opened.
- */ 
+ */
 int cw_scorebook_read(CWScorebook *scorebook, FILE *file);
 
 /*
  * Writes the contents of the scorebook to file 'file'.
  */
 void cw_scorebook_write(CWScorebook *scorebook, FILE *file);
-
 
 typedef struct cw_scorebook_iter_struct {
   CWGame *current;
@@ -92,8 +91,7 @@ typedef struct cw_scorebook_iter_struct {
  * skip.  Passing NULL for 'f' gives an iterator that will return all
  * games in the scorebook.
  */
-CWScorebookIterator *cw_scorebook_iterate(CWScorebook *scorebook,
-					  int (*f)(CWGame *));
+CWScorebookIterator *cw_scorebook_iterate(CWScorebook *scorebook, int (*f)(CWGame *));
 
 /*
  * Cleans up internal memory allocation associated with 'iterator'.
@@ -107,5 +105,4 @@ void cw_scorebook_iterator_cleanup(CWScorebookIterator *iterator);
  */
 CWGame *cw_scorebook_iterator_next(CWScorebookIterator *iterator);
 
-
-#endif  /* CW_BOOK_H */
+#endif /* CW_BOOK_H */

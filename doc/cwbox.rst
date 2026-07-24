@@ -142,4 +142,3 @@ was created, other tools like :program:`cwsub`, :program:`cwcomment`,
 :program:`cwdaily`, and extensions to :program:`cwgame` are preferred ways
 to extract data in tabular format and cover the gaps in DiamondWare's
 tooling that the XML format was intended to mitigate.
-

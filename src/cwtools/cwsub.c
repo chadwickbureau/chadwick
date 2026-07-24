@@ -35,11 +35,7 @@
 extern int ascii;
 
 /* Fields to display (-f) */
-int fields[] = {
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1
-};
+int fields[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
 int max_field = 24;
 
@@ -65,26 +61,23 @@ typedef struct field_struct {
   char *header, *description;
 } field_struct;
 
-
 /*
  * preprocessor directive for conveniently declaring function signature
  */
 
-#define DECLARE_FIELDFUNC(funcname) \
-int funcname(char *buffer, CWGameIterator *gameiter, CWAppearance *sub)
+#define DECLARE_FIELDFUNC(funcname)                                                               \
+  int funcname(char *buffer, CWGameIterator *gameiter, CWAppearance *sub)
 
 /* Field 0 */
 DECLARE_FIELDFUNC(cwsub_game_id)
 {
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-12s",
-		 gameiter->game->game_id);
+  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-12s", gameiter->game->game_id);
 }
 
 /* Field 1 */
 DECLARE_FIELDFUNC(cwsub_inning)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d",
-		 gameiter->event->inning);
+  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->event->inning);
 }
 
 /* Field 2 */
@@ -121,29 +114,28 @@ DECLARE_FIELDFUNC(cwsub_position)
 DECLARE_FIELDFUNC(cwsub_removed_player)
 {
   return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-		 gameiter->state->lineups[sub->slot][sub->team].player_id);
+                 gameiter->state->lineups[sub->slot][sub->team].player_id);
 }
 
 /* Field 8 */
 DECLARE_FIELDFUNC(cwsub_removed_position)
 {
   return sprintf(buffer, (ascii) ? "%d" : "%2d",
-		 gameiter->state->lineups[sub->slot][sub->team].position);
+                 gameiter->state->lineups[sub->slot][sub->team].position);
 }
 
 /* Field 9 */
 DECLARE_FIELDFUNC(cwsub_event_number)
 {
   return sprintf(buffer, (ascii) ? "%d" : "%3d",
-		 (!strcmp(gameiter->event->event_text, "NP")) ?
-		 gameiter->state->event_count : gameiter->state->event_count + 1);
+                 (!strcmp(gameiter->event->event_text, "NP")) ? gameiter->state->event_count
+                                                              : gameiter->state->event_count + 1);
 }
 
 /* Field 10 */
 DECLARE_FIELDFUNC(cwsub_balls)
 {
-  if (strlen(gameiter->event->count) >= 2 &&
-      gameiter->event->count[0] != '?' &&
+  if (strlen(gameiter->event->count) >= 2 && gameiter->event->count[0] != '?' &&
       gameiter->event->count[1] != '?') {
     return sprintf(buffer, "%c", gameiter->event->count[0]);
   }
@@ -155,8 +147,7 @@ DECLARE_FIELDFUNC(cwsub_balls)
 /* Field 11 */
 DECLARE_FIELDFUNC(cwsub_strikes)
 {
-  if (strlen(gameiter->event->count) >= 2 &&
-      gameiter->event->count[0] != '?' &&
+  if (strlen(gameiter->event->count) >= 2 && gameiter->event->count[0] != '?' &&
       gameiter->event->count[1] != '?') {
     return sprintf(buffer, "%c", gameiter->event->count[1]);
   }
@@ -262,35 +253,39 @@ DECLARE_FIELDFUNC(cwsub_pitches_strikes_other)
 }
 
 static field_struct field_data[] = {
-  { cwsub_game_id, "GAME_ID", "game id" },
-  { cwsub_inning, "INN_CT", "inning" },
-  { cwsub_batting_team, "BAT_HOME_ID", "batting team" },
-  { cwsub_player, "SUB_ID", "substitute" },
-  { cwsub_team, "SUB_HOME_ID", "team" },
-  { cwsub_slot, "SUB_LINEUP_ID", "lineup position" },
-  { cwsub_position, "SUB_FLD_CD", "fielding position" },
-  { cwsub_removed_player, "REMOVED_ID", "removed player" },
-  { cwsub_removed_position, "REMOVED_FLD_CD", "position of removed player" },
-  { cwsub_event_number, "EVENT_ID", "event number" },
-  { cwsub_balls, "BALLS_CT", "balls" },
-  { cwsub_strikes, "STRIKES_CT", "strikes" },
-  { cwsub_pitches, "PITCH_SEQ_TX", "pitch sequence" },
-  { cwsub_pitches_balls, "PA_BALL_CT", "number of balls thrown in plate appearance" },
-  { cwsub_pitches_balls_called, "PA_CALLED_BALL_CT", "number of called balls in plate appearance" },
-  { cwsub_pitches_balls_intentional, "PA_INTENT_BALL_CT", "number of intentional balls in plate appearance" },
-  { cwsub_pitches_balls_pitchout, "PA_PITCHOUT_BALL_CT", "number of pitchouts in plate appearance" },
-  { cwsub_pitches_balls_hit_batter, "PA_HITBATTER_BALL_CT", "number of pitches hitting batter in plate appearance" },
-  { cwsub_pitches_balls_other, "PA_OTHER_BALL_CT", "number of other balls in plate appearance" },
-  { cwsub_pitches_strikes, "PA_STRIKE_CT", "number of strikes thrown in plate appearance" },
-  { cwsub_pitches_strikes_called, "PA_CALLED_STRIKE_CT", "number of called strikes in plate appearance" },
-  { cwsub_pitches_strikes_swinging, "PA_SWINGMISS_STRIKE_CT", "number of swinging strikes in plate appearance" },
-  { cwsub_pitches_strikes_foul, "PA_FOUL_STRIKE_CT", "number of foul balls in plate appearance" },
-  { cwsub_pitches_strikes_inplay, "PA_INPLAY_STRIKE_CT", "number of balls in play in plate appearance" },
-  { cwsub_pitches_strikes_other, "PA_OTHER_STRIKE_CT", "number of other strikes in plate appearance" }
-};
+  {cwsub_game_id, "GAME_ID", "game id"},
+  {cwsub_inning, "INN_CT", "inning"},
+  {cwsub_batting_team, "BAT_HOME_ID", "batting team"},
+  {cwsub_player, "SUB_ID", "substitute"},
+  {cwsub_team, "SUB_HOME_ID", "team"},
+  {cwsub_slot, "SUB_LINEUP_ID", "lineup position"},
+  {cwsub_position, "SUB_FLD_CD", "fielding position"},
+  {cwsub_removed_player, "REMOVED_ID", "removed player"},
+  {cwsub_removed_position, "REMOVED_FLD_CD", "position of removed player"},
+  {cwsub_event_number, "EVENT_ID", "event number"},
+  {cwsub_balls, "BALLS_CT", "balls"},
+  {cwsub_strikes, "STRIKES_CT", "strikes"},
+  {cwsub_pitches, "PITCH_SEQ_TX", "pitch sequence"},
+  {cwsub_pitches_balls, "PA_BALL_CT", "number of balls thrown in plate appearance"},
+  {cwsub_pitches_balls_called, "PA_CALLED_BALL_CT", "number of called balls in plate appearance"},
+  {cwsub_pitches_balls_intentional, "PA_INTENT_BALL_CT",
+   "number of intentional balls in plate appearance"},
+  {cwsub_pitches_balls_pitchout, "PA_PITCHOUT_BALL_CT", "number of pitchouts in plate appearance"},
+  {cwsub_pitches_balls_hit_batter, "PA_HITBATTER_BALL_CT",
+   "number of pitches hitting batter in plate appearance"},
+  {cwsub_pitches_balls_other, "PA_OTHER_BALL_CT", "number of other balls in plate appearance"},
+  {cwsub_pitches_strikes, "PA_STRIKE_CT", "number of strikes thrown in plate appearance"},
+  {cwsub_pitches_strikes_called, "PA_CALLED_STRIKE_CT",
+   "number of called strikes in plate appearance"},
+  {cwsub_pitches_strikes_swinging, "PA_SWINGMISS_STRIKE_CT",
+   "number of swinging strikes in plate appearance"},
+  {cwsub_pitches_strikes_foul, "PA_FOUL_STRIKE_CT", "number of foul balls in plate appearance"},
+  {cwsub_pitches_strikes_inplay, "PA_INPLAY_STRIKE_CT",
+   "number of balls in play in plate appearance"},
+  {cwsub_pitches_strikes_other, "PA_OTHER_STRIKE_CT",
+   "number of other strikes in plate appearance"}};
 
-void
-cwsub_process_game(CWGame *game, CWRoster *_visitors, CWRoster *_home)
+void cwsub_process_game(CWGame *game, CWRoster *_visitors, CWRoster *_home)
 {
   char *buf;
   char output_line[1024];
@@ -304,15 +299,15 @@ cwsub_process_game(CWGame *game, CWRoster *_visitors, CWRoster *_home)
       strcpy(output_line, "");
       buf = output_line;
       for (i = 0; i <= max_field; i++) {
-	if (fields[i]) {
-	  if (ascii && comma) {
-	    *(buf++) = ',';
-	  }
-	  else {
-	    comma = 1;
-	  }
-	  buf += (*field_data[i].f)(buf, gameiter, sub);
-	}
+        if (fields[i]) {
+          if (ascii && comma) {
+            *(buf++) = ',';
+          }
+          else {
+            comma = 1;
+          }
+          buf += (*field_data[i].f)(buf, gameiter, sub);
+        }
       }
 
       printf("%s", output_line);
@@ -322,15 +317,14 @@ cwsub_process_game(CWGame *game, CWRoster *_visitors, CWRoster *_home)
 
     cw_gameiter_next(gameiter);
   }
-  
+
   cw_gameiter_cleanup(gameiter);
   free(gameiter);
 }
 
 void (*cwtools_process_game)(CWGame *, CWRoster *, CWRoster *) = cwsub_process_game;
 
-void
-cwsub_print_help(void)
+void cwsub_print_help(void)
 {
   fprintf(stderr, "\n\ncwsub generates files suitable for use by dBase or Lotus-like programs\n");
   fprintf(stderr, "Each record describes one substitution.\n");
@@ -355,8 +349,7 @@ cwsub_print_help(void)
 
 void (*cwtools_print_help)(void) = cwsub_print_help;
 
-void
-cwsub_print_field_list(void)
+void cwsub_print_field_list(void)
 {
   int i;
 
@@ -373,21 +366,20 @@ cwsub_print_field_list(void)
 
 void (*cwtools_print_field_list)(void) = cwsub_print_field_list;
 
-void
-cwsub_print_welcome_message(char *argv0)
+void cwsub_print_welcome_message(char *argv0)
 {
-  fprintf(stderr,
-	  "\nChadwick substitute descriptor, version " VERSION); 
+  fprintf(stderr, "\nChadwick substitute descriptor, version " VERSION);
   fprintf(stderr, "\n  Type '%s -h' for help.\n", argv0);
-  fprintf(stderr, "Copyright (c) 2002-2026\nDr T L Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)\n");
+  fprintf(
+    stderr,
+    "Copyright (c) 2002-2026\nDr T L Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)\n");
   fprintf(stderr, "This is free software, "
-	  "subject to the terms of the GNU GPL license.\n\n");
+                  "subject to the terms of the GNU GPL license.\n\n");
 }
 
 void (*cwtools_print_welcome_message)(char *) = cwsub_print_welcome_message;
 
-void
-cwsub_initialize(void)
+void cwsub_initialize(void)
 {
   int i, comma = 0;
   char output_line[4096];
@@ -403,10 +395,10 @@ cwsub_initialize(void)
   for (i = 0; i <= max_field; i++) {
     if (fields[i]) {
       if (ascii && comma) {
-	*(buf++) = ',';
+        *(buf++) = ',';
       }
       else {
-	comma = 1;
+        comma = 1;
       }
       buf += sprintf(buf, "\"%s\"", field_data[i].header);
     }
@@ -418,13 +410,11 @@ cwsub_initialize(void)
 
 void (*cwtools_initialize)(void) = cwsub_initialize;
 
-void
-cwsub_cleanup(void)
+void cwsub_cleanup(void)
 {
 }
 
 void (*cwtools_cleanup)(void) = cwsub_cleanup;
-
 
 extern char year[5];
 extern char first_date[5];
@@ -432,11 +422,9 @@ extern char last_date[5];
 extern char game_id[20];
 extern int quiet;
 
-extern void
-cwtools_parse_field_list(char *text, int max_field, int *fields);
+extern void cwtools_parse_field_list(char *text, int max_field, int *fields);
 
-int
-cwsub_parse_command_line(int argc, char *argv[])
+int cwsub_parse_command_line(int argc, char *argv[])
 {
   int i;
   strcpy(year, "");
@@ -451,7 +439,7 @@ cwsub_parse_command_line(int argc, char *argv[])
     }
     else if (!strcmp(argv[i], "-e")) {
       if (++i < argc) {
-	strncpy(last_date, argv[i], 4);
+        strncpy(last_date, argv[i], 4);
       }
     }
     else if (!strcmp(argv[i], "-h")) {
@@ -463,12 +451,12 @@ cwsub_parse_command_line(int argc, char *argv[])
     }
     else if (!strcmp(argv[i], "-i")) {
       if (++i < argc) {
-	strncpy(game_id, argv[i], 19);
+        strncpy(game_id, argv[i], 19);
       }
     }
     else if (!strcmp(argv[i], "-f")) {
       if (++i < argc) {
-	cwtools_parse_field_list(argv[i], max_field, fields);
+        cwtools_parse_field_list(argv[i], max_field, fields);
       }
     }
     else if (!strcmp(argv[i], "-n")) {
@@ -479,12 +467,12 @@ cwsub_parse_command_line(int argc, char *argv[])
     }
     else if (!strcmp(argv[i], "-s")) {
       if (++i < argc) {
-	strncpy(first_date, argv[i], 4);
+        strncpy(first_date, argv[i], 4);
       }
     }
     else if (!strcmp(argv[i], "-y")) {
       if (++i < argc) {
-	strncpy(year, argv[i], 5);
+        strncpy(year, argv[i], 5);
       }
     }
     else if (argv[i][0] == '-') {

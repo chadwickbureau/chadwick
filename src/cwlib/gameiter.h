@@ -28,7 +28,7 @@
 #include "game.h"
 
 typedef struct cw_game_state {
-  char date[9];     /* Updates on game resumption after suspension */
+  char date[9]; /* Updates on game resumption after suspension */
   int event_count, inning, batting_team, outs, inning_batters, inning_score;
   int score[2], hits[2], errors[2], times_out[2];
   int next_batter[2], num_batters[2], dh_slot[2];
@@ -48,8 +48,8 @@ typedef struct cw_game_state {
   char *fielders[10][2];
 
   char *removed_for_ph, *removed_for_pr[4];
-  char *walk_pitcher;      /* For application of rule 10.18(h)(1) */
-  char *strikeout_batter;  /* For application of rule 10.17(b) */
+  char *walk_pitcher;     /* For application of rule 10.18(h)(1) */
+  char *strikeout_batter; /* For application of rule 10.17(b) */
   char strikeout_batter_hand;
   int removed_position;
   char *go_ahead_rbi;
@@ -74,24 +74,19 @@ int cw_gamestate_left_on_base(CWGameState *state, int team);
  * the player with ID 'player_id'.  Returns -1 if player is not found
  * in the lineup; 0 if the player is a non-batting pitcher.
  */
-int cw_gamestate_lineup_slot(CWGameState *state,
-			     int team, char *player_id);
-
+int cw_gamestate_lineup_slot(CWGameState *state, int team, char *player_id);
 
 /*
  * Returns the position which 'player_id' currently plays on defense.
  * For this function, 10 = DH, 11 = PH, 12 = PR.
  */
-int cw_gamestate_player_position(CWGameState *state,
-				 int team, char *player_id);
+int cw_gamestate_player_position(CWGameState *state, int team, char *player_id);
 
 /*
  * Returns the position associated with a runner, without applying the
  * batted-around adjustment used for the batter's PH/PR statistics.
  */
-int cw_gamestate_runner_position(CWGameState *state,
-				 int team, char *player_id);
-
+int cw_gamestate_runner_position(CWGameState *state, int team, char *player_id);
 
 /*
  * Returns nonzero if and only if 'base' is currently occupied.
@@ -102,8 +97,7 @@ int cw_gamestate_base_occupied(CWGameState *state, int base);
  * The batter who is charged with the outcome of the event
  * (almost always the actual batter, except as indicated in rule 10.17(b)
  */
-char *cw_gamestate_charged_batter(CWGameState *state, 
-				  char *batter, CWEventData *);
+char *cw_gamestate_charged_batter(CWGameState *state, char *batter, CWEventData *);
 
 /*
  * The side from which the charged batter was batting.  This may be
@@ -111,19 +105,14 @@ char *cw_gamestate_charged_batter(CWGameState *state,
  * to look up the batter, and 'defRoster' the pitcher, assuming the
  * opposite-side rule for switch-hitters.
  */
-char cw_gamestate_charged_batter_hand(CWGameState *state, char *batter,
-				      CWEventData *,
-				      CWRoster *offRoster,
-				      CWRoster *defRoster);
-
+char cw_gamestate_charged_batter_hand(CWGameState *state, char *batter, CWEventData *,
+                                      CWRoster *offRoster, CWRoster *defRoster);
 
 /*
  * The pitcher who is charged with the outcome of the event
  * (almost always the actual pitcher, except as indicated in rule 10.18(h)
  */
-char *cw_gamestate_charged_pitcher(CWGameState *state,
-				   CWEventData *event_data);
-
+char *cw_gamestate_charged_pitcher(CWGameState *state, CWEventData *event_data);
 
 /*
  * The pitcher who is charged with the scoring of the runner on base 'base'.
@@ -135,9 +124,7 @@ char *cw_gamestate_charged_pitcher(CWGameState *state,
  * as the responsible pitcher so that stats can be calculated directly
  * from the cwevent output without having to reparse the play.
  */
-char *cw_gamestate_responsible_pitcher(CWGameState *state, 
-				                       CWEventData *event_data,
-				                       int base);
+char *cw_gamestate_responsible_pitcher(CWGameState *state, CWEventData *event_data, int base);
 
 /*
  * Whether the runner on base `base` is the consequence of the placement of an
@@ -145,18 +132,14 @@ char *cw_gamestate_responsible_pitcher(CWGameState *state,
  *
  * This is determined using the same rules as the responsible pitcher.
  */
-int cw_gamestate_runner_is_auto(CWGameState *state,
-					            CWEventData *event_data,
-					            int base);
+int cw_gamestate_runner_is_auto(CWGameState *state, CWEventData *event_data, int base);
 
 /*
  * The catcher who is charged with the scoring of the runner on base 'base'.
  * This is unofficial, and follows the same conventions as for those
  * of assigning pitcher responsibility.
  */
-char *cw_gamestate_responsible_catcher(CWGameState *state, 
-				                       CWEventData *event_data,
-				                       int base);
+char *cw_gamestate_responsible_catcher(CWGameState *state, CWEventData *event_data, int base);
 
 /*
  * TODO:
@@ -166,7 +149,7 @@ typedef struct cw_gameiter_struct {
   CWGame *game;
   CWEvent *event;
   CWEventData *event_data;
-  int parse_ok;            /* Nonzero if last event did not parse */
+  int parse_ok; /* Nonzero if last event did not parse */
   CWGameState *state;
 } CWGameIterator;
 
@@ -189,7 +172,6 @@ CWGameIterator *cw_gameiter_copy(CWGameIterator *gameiter);
  */
 void cw_gameiter_cleanup(CWGameIterator *gameiter);
 
-
 /*
  * Reset iterator to beginning of game
  */
@@ -205,7 +187,4 @@ void cw_gameiter_next(CWGameIterator *gameiter);
  */
 int cw_gameiter_runner_fate(CWGameIterator *gameiter, int base);
 
-
-#endif   /* CW_GAMEITER_H */
-
-
+#endif /* CW_GAMEITER_H */

@@ -89,7 +89,6 @@ void xml_node_close(XMLNode *node);
  */
 XMLNode *xml_node_open(XMLNode *parent, char *name);
 
-
 /*
  * Print 'data' as CDATA under 'node'.  Implicitly closes
  * any open child notes of 'node'. The pointer to 'data
@@ -103,16 +102,14 @@ void xml_node_cdata(XMLNode *node, char *data);
  * The pointers to 'attr' and 'value' are not stored, so they may
  * be deallocated or modified after the call completes.
  */
-void
-xml_node_attribute(XMLNode *node, char *attr, char *value);
+void xml_node_attribute(XMLNode *node, char *attr, char *value);
 
 /*
  * Adds the attribute 'attr' with value 'value' to the open node 'node'.
  * The pointer to 'attr' is not stored, so it may
  * be deallocated or modified after the call completes.
  */
-void
-xml_node_attribute_int(XMLNode *node, char *attr, int value);
+void xml_node_attribute_int(XMLNode *node, char *attr, int value);
 
 /*
  * Adds the attribute 'attr' with value 'value' to the open node 'node'.
@@ -121,17 +118,13 @@ xml_node_attribute_int(XMLNode *node, char *attr, int value);
  * The pointer to 'attr' is not stored, so it may
  * be deallocated or modified after the call completes.
  */
-void
-xml_node_attribute_posint(XMLNode *node, char *attr, int value);
+void xml_node_attribute_posint(XMLNode *node, char *attr, int value);
 
 /*
  * Adds the attribute 'attr' by formatting the va_args using format string
  * 'format'. The pointer to 'attr' is not stored, so it may
  * be deallocated or modified after the call completes.
  */
-void
-xml_node_attribute_fmt(XMLNode *node, char *attr, char *format, ...);
+void xml_node_attribute_fmt(XMLNode *node, char *attr, char *format, ...);
 
-
-
-#endif  /* XMLWRITE_H */
+#endif /* XMLWRITE_H */

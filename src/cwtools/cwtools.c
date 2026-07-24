@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>   /* for isdigit() */
+#include <ctype.h> /* for isdigit() */
 #if HAVE_DIR_H
 #include <dos.h>
 #include <dir.h>
@@ -41,7 +41,7 @@
  *************************************************************************/
 
 /* The maximum field number; field numbers start at zero */
-extern unsigned int max_field;
+extern int max_field;
 
 /* An array of size max_field + 1, to hold field flags */
 extern int fields[];
@@ -81,8 +81,7 @@ int ascii = 1;
 /* If 'quiet', programs should write no status messages to stderr */
 int quiet = 0;
 
-static char *
-cwtools_teamfile_filename(int lowercase)
+static char *cwtools_teamfile_filename(int lowercase)
 {
   size_t size = strlen(year) + sizeof("TEAM");
   char *filename;
@@ -98,8 +97,7 @@ cwtools_teamfile_filename(int lowercase)
   return filename;
 }
 
-static char *
-cwtools_roster_filename(const char *team_id)
+static char *cwtools_roster_filename(const char *team_id)
 {
   size_t size = strlen(team_id) + strlen(year) + sizeof(".ROS");
   char *filename;
@@ -115,8 +113,7 @@ cwtools_roster_filename(const char *team_id)
   return filename;
 }
 
-void
-cwtools_read_rosters(CWLeague *league)
+void cwtools_read_rosters(CWLeague *league)
 {
   char *filename;
   FILE *teamfile;
@@ -132,7 +129,7 @@ cwtools_read_rosters(CWLeague *league)
     filename = cwtools_teamfile_filename(1);
 
     teamfile = fopen(filename, "r");
-    
+
     if (teamfile == NULL) {
       fprintf(stderr, "Can't find teamfile (%s)\n", filename);
       free(filename);
@@ -162,45 +159,34 @@ cwtools_read_rosters(CWLeague *league)
   }
 }
 
-int
-cwtools_game_in_range(CWGame *game, char *first, char *last)
+int cwtools_game_in_range(CWGame *game, char *first, char *last)
 {
   int g_month, g_day, g_year;
   char date_string[5];
   sscanf(cw_game_info_lookup(game, "date"), "%d/%d/%d", &g_year, &g_month, &g_day);
   sprintf(date_string, "%02d%02d", g_month, g_day);
-  return (strcmp(date_string, first) >= 0 &&
-          strcmp(date_string, last) <= 0);
+  return (strcmp(date_string, first) >= 0 && strcmp(date_string, last) <= 0);
 }
 
-int
-cwtools_select_game(CWGame *game)
+int cwtools_select_game(CWGame *game)
 {
-  return ((!strcmp(game_id, "") ||
-	   !strcmp(game_id, game->game_id)) &&
-	  cwtools_game_in_range(game, first_date, last_date));
+  return ((!strcmp(game_id, "") || !strcmp(game_id, game->game_id)) &&
+          cwtools_game_in_range(game, first_date, last_date));
 }
 
-void
-cwtools_iterate_games(CWScorebook *scorebook, CWLeague *league)
+void cwtools_iterate_games(CWScorebook *scorebook, CWLeague *league)
 {
-  CWScorebookIterator *iterator = cw_scorebook_iterate(scorebook,
-						       cwtools_select_game);
+  CWScorebookIterator *iterator = cw_scorebook_iterate(scorebook, cwtools_select_game);
   CWGame *game;
 
   while ((game = cw_scorebook_iterator_next(iterator)) != NULL) {
     (*cwtools_process_game)(game,
-			    cw_league_roster_find(league,
-						  cw_game_info_lookup(game,
-								      "visteam")),
-			    cw_league_roster_find(league,
-						  cw_game_info_lookup(game,
-								      "hometeam")));
+                            cw_league_roster_find(league, cw_game_info_lookup(game, "visteam")),
+                            cw_league_roster_find(league, cw_game_info_lookup(game, "hometeam")));
   }
 }
 
-void
-cwtools_process_scorebook(CWLeague *league, char *filename)
+void cwtools_process_scorebook(CWLeague *league, char *filename)
 {
   CWScorebook *scorebook = cw_scorebook_create();
   FILE *file = fopen(filename, "r");
@@ -220,8 +206,7 @@ cwtools_process_scorebook(CWLeague *league, char *filename)
 }
 
 #if HAVE_DIR_H
-void
-cwtools_process_filespec(CWLeague *league, char *filespec)
+void cwtools_process_filespec(CWLeague *league, char *filespec)
 {
   int handle;
   struct _finddata_t state;
@@ -232,8 +217,7 @@ cwtools_process_filespec(CWLeague *league, char *filespec)
   }
 }
 #elif defined(MSDOS)
-void 
-cwtools_process_filespec(CWLeague *league, char *filespec)
+void cwtools_process_filespec(CWLeague *league, char *filespec)
 {
   struct ffblk state;
   int done = findfirst(filespec, &state, 0);
@@ -244,19 +228,18 @@ cwtools_process_filespec(CWLeague *league, char *filespec)
   }
 }
 #else  /* not HAVE_DIR_H/MSDOS */
-void
-cwtools_process_filespec(CWLeague *league, char *filespec)
+void cwtools_process_filespec(CWLeague *league, char *filespec)
 {
   cwtools_process_scorebook(league, filespec);
 }
-#endif  /* HAVE_DIR_H/MSDOS */
+#endif /* HAVE_DIR_H/MSDOS */
 
-void
-cwtools_parse_field_list(char *text, int maxfield, int *field)
+void cwtools_parse_field_list(char *text, int maxfield, int *field)
 {
   unsigned int i = 0, j, firstNum, secondNum, err = 0;
 
-  for (j = 0; j <= maxfield; field[j++] = 0);
+  for (j = 0; j <= maxfield; field[j++] = 0)
+    ;
 
   while (i < strlen(text)) {
     if (!isdigit(text[i])) {
@@ -275,20 +258,21 @@ cwtools_parse_field_list(char *text, int maxfield, int *field)
     if (text[i] == '-') {
       i++;
       if (!isdigit(text[i])) {
-	break;
+        break;
       }
 
       secondNum = text[i++] - '0';
       while (isdigit(text[i])) {
-	secondNum = secondNum * 10 + text[i++] - '0';
+        secondNum = secondNum * 10 + text[i++] - '0';
       }
 
       if (secondNum > maxfield || secondNum < firstNum) {
-	err = 1;
-	break;
+        err = 1;
+        break;
       }
-      
-      for (j = firstNum; j <= secondNum; field[j++] = 1);
+
+      for (j = firstNum; j <= secondNum; field[j++] = 1)
+        ;
     }
     else {
       field[firstNum] = 1;
@@ -302,21 +286,17 @@ cwtools_parse_field_list(char *text, int maxfield, int *field)
   }
 
   if (i < strlen(text) || err) {
-    fprintf(stderr,
-	    "\n*** Invalid field spec.  A field spec is a list of fields\n");
-    fprintf(stderr,
-	    "and ranges, separated by commas.  No spaces are allowed.\n");
+    fprintf(stderr, "\n*** Invalid field spec.  A field spec is a list of fields\n");
+    fprintf(stderr, "and ranges, separated by commas.  No spaces are allowed.\n");
     fprintf(stderr, "Example:\n");
     fprintf(stderr, "  %s -f 0-4,7,12,20-31\n", program_name);
-    fprintf(stderr,
-	    "The spec is invalid if any value is larger than the max\n");
+    fprintf(stderr, "The spec is invalid if any value is larger than the max\n");
     fprintf(stderr, "field number, %d.\n", maxfield);
     exit(1);
   }
 }
 
-int
-cwtools_default_parse_command_line(int argc, char *argv[])
+int cwtools_default_parse_command_line(int argc, char *argv[])
 {
   int i;
   strcpy(year, "");
@@ -331,7 +311,7 @@ cwtools_default_parse_command_line(int argc, char *argv[])
     }
     else if (!strcmp(argv[i], "-e")) {
       if (++i < argc) {
-	strncpy(last_date, argv[i], 4);
+        strncpy(last_date, argv[i], 4);
       }
     }
     else if (!strcmp(argv[i], "-h")) {
@@ -343,12 +323,12 @@ cwtools_default_parse_command_line(int argc, char *argv[])
     }
     else if (!strcmp(argv[i], "-i")) {
       if (++i < argc) {
-	strncpy(game_id, argv[i], 19);
+        strncpy(game_id, argv[i], 19);
       }
     }
     else if (!strcmp(argv[i], "-f")) {
       if (++i < argc) {
-	cwtools_parse_field_list(argv[i], max_field, fields);
+        cwtools_parse_field_list(argv[i], max_field, fields);
       }
     }
     else if (!strcmp(argv[i], "-ft")) {
@@ -356,12 +336,12 @@ cwtools_default_parse_command_line(int argc, char *argv[])
     }
     else if (!strcmp(argv[i], "-s")) {
       if (++i < argc) {
-	strncpy(first_date, argv[i], 4);
+        strncpy(first_date, argv[i], 4);
       }
     }
     else if (!strcmp(argv[i], "-y")) {
       if (++i < argc) {
-	strncpy(year, argv[i], 5);
+        strncpy(year, argv[i], 5);
       }
     }
     else if (argv[i][0] == '-') {

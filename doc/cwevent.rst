@@ -108,14 +108,14 @@ made during a plate appearance.
      - Shortstop
      - ``POS6_FLD_ID``
    * - 23
-     - Left fielder  
+     - Left fielder
      - ``POS7_FLD_ID``
    * - 24
      - Center fielder
      - ``POS8_FLD_ID``
    * - 25
      - Right fielder
-     - ``POS9_FLD_ID`` 
+     - ``POS9_FLD_ID``
    * - 26
      - Runner on first
      - ``BASE1_RUN_ID``
@@ -139,10 +139,10 @@ made during a plate appearance.
      - ``BAT_FLD_CD``
    * - 33
      - Lineup position
-     - ``BAT_LINEUP_ID`` 
+     - ``BAT_LINEUP_ID``
    * - 34
      - :ref:`Event type <cwtools.cwevent.eventtype>`
-     - ``EVENT_CD`` 
+     - ``EVENT_CD``
    * - 35
      - Batter event flag
      - ``BAT_EVENT_FL``
@@ -554,7 +554,7 @@ made during a plate appearance.
    * - 66
      - whether runner on third is an automatic runner
      - ``RUN3_AUTO_FL``
-    
+
 
 .. _cwtools.cwevent.resplayers:
 
@@ -638,15 +638,15 @@ in Retrosheet-produced play-by-play files.
      - Strikeout
    * - 4
      - Stolen base
-   * - 5 
+   * - 5
      - Defensive indifference
    * - 6
      - Caught stealing
    * - 7
      - Pickoff error (obsolete)
-   * - 8 
+   * - 8
      - Pickoff
-   * - 9 
+   * - 9
      - Wild pitch
    * - 10
      - Passed ball
@@ -656,7 +656,7 @@ in Retrosheet-produced play-by-play files.
      - Other advance/out advancing
    * - 13
      - Foul error
-   * - 14 
+   * - 14
      - Walk
    * - 15
      - Intentional walk
@@ -752,7 +752,7 @@ in the rules states:
    runners. When a pitcher puts runners on base and is relieved, such
    pitcher  shall be charged with all runs subsequently scored up to
    and including the number of runners such pitcher left on base when
-   such pitcher left the game, unless such runners are put 
+   such pitcher left the game, unless such runners are put
    out without action by the batter.
 
 Chadwick implements this by assigning "responsibility"
@@ -774,7 +774,7 @@ not Pitcher B, i.e., the responsibility shifts in the middle of the
 play. In order to facilitate calculation of runs and earned runs
 allowed correctly from cwevent output, in this case, the record for
 the play will report R2 as being the responsibility of Pitcher A,
-i.e., it will report the responsibility after the mid-play shift. 
+i.e., it will report the responsibility after the mid-play shift.
 
 This convention will not affect most applications.  Indeed, the
 Official Rules technically do not have a concept of assigning

@@ -50,4 +50,4 @@ int cw_file_find_game(char *game_id, FILE *file);
  */
 int cw_file_find_first_game(FILE *file);
 
-#endif  /* CW_FILE_H */
+#endif /* CW_FILE_H */

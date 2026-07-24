@@ -26,11 +26,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "file.h"    /* for file-reading and tokenizing */
+#include "file.h" /* for file-reading and tokenizing */
 #include "league.h"
 
-CWLeague *
-cw_league_create(void)
+CWLeague *cw_league_create(void)
 {
   CWLeague *rosterList = (CWLeague *) malloc(sizeof(CWLeague));
   rosterList->first_roster = NULL;
@@ -39,8 +38,7 @@ cw_league_create(void)
   return rosterList;
 }
 
-void
-cw_league_cleanup(CWLeague *rosterList)
+void cw_league_cleanup(CWLeague *rosterList)
 {
   CWRoster *roster = rosterList->first_roster;
 
@@ -55,11 +53,10 @@ cw_league_cleanup(CWLeague *rosterList)
   rosterList->last_roster = NULL;
 }
 
-void
-cw_league_roster_append(CWLeague *rosterList, CWRoster *roster)
+void cw_league_roster_append(CWLeague *rosterList, CWRoster *roster)
 {
   roster->prev = rosterList->last_roster;
- 
+
   if (rosterList->first_roster == NULL) {
     rosterList->first_roster = roster;
   }
@@ -70,18 +67,16 @@ cw_league_roster_append(CWLeague *rosterList, CWRoster *roster)
   rosterList->last_roster = roster;
 }
 
-CWRoster *
-cw_league_roster_find(CWLeague *league, char *team)
+CWRoster *cw_league_roster_find(CWLeague *league, char *team)
 {
   CWRoster *roster = league->first_roster;
-  while (roster && strcmp(roster->team_id, team)) {
+  while (roster && strcmp(roster->team_id, team) != 0) {
     roster = roster->next;
   }
   return roster;
 }
 
-int
-cw_league_read(CWLeague *rosterList, FILE *file)
+int cw_league_read(CWLeague *rosterList, FILE *file)
 {
   char buf[256], *team_id, *league, *city, *nickname;
 
@@ -100,23 +95,18 @@ cw_league_read(CWLeague *rosterList, FILE *file)
       continue;
     }
 
-    cw_league_roster_append(rosterList, 
-			    cw_roster_create(team_id, 0, league,
-					     city, nickname));
+    cw_league_roster_append(rosterList, cw_roster_create(team_id, 0, league, city, nickname));
   }
   return 1;
 }
 
-void
-cw_league_write(CWLeague *league, FILE *file)
+void cw_league_write(CWLeague *league, FILE *file)
 {
   CWRoster *roster = league->first_roster;
 
   while (roster != NULL) {
-    fprintf(file, "%s,%s,%s,%s\n", 
-	    roster->team_id, roster->league, roster->city, roster->nickname);
+    fprintf(file, "%s,%s,%s,%s\n", roster->team_id, roster->league, roster->city,
+            roster->nickname);
     roster = roster->next;
   }
 }
-
-

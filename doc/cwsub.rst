@@ -6,7 +6,7 @@ cwsub: Player substitution descriptor
 :program:`cwsub` extracts information about
 in-game player substitutions. It is designed to be used in conjunction
 with :program:`cwevent` to mitigate a blind spot in the
-existing tools. 
+existing tools.
 
 :program:`cwsub` outputs up to 25 pieces of
 information about each substitution. All are included by default; which
@@ -100,4 +100,3 @@ counts for the plate appearance up to the point of the substitution.
    * - 24
      - number of other strikes in plate appearance
      - ``PA_OTHER_STRIKE_CT``
-

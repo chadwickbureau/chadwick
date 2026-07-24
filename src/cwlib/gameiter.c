@@ -35,8 +35,7 @@
  * other data tracked on them.
  ***********************************************************************/
 
-int
-cw_gamestate_base_occupied(CWGameState *state, int base)
+int cw_gamestate_base_occupied(CWGameState *state, int base)
 {
   return strcmp(state->runners[base].runner, "");
 }
@@ -48,14 +47,11 @@ cw_gamestate_base_occupied(CWGameState *state, int base)
  * base at the start of the inning; use cw_gamestate_move_runner
  * for implementing advancements.
  */
-static void
-cw_gamestate_place_runner(CWGameState *state, int base, char *runner)
+static void cw_gamestate_place_runner(CWGameState *state, int base, char *runner)
 {
   CW_STRLCPY(state->runners[base].runner, runner);
-  CW_STRLCPY(state->runners[base].pitcher,
-	         state->fielders[1][1-state->batting_team]);
-  CW_STRLCPY(state->runners[base].catcher,
-	         state->fielders[2][1-state->batting_team]);
+  CW_STRLCPY(state->runners[base].pitcher, state->fielders[1][1 - state->batting_team]);
+  CW_STRLCPY(state->runners[base].catcher, state->fielders[2][1 - state->batting_team]);
   state->runners[base].is_auto = 1;
   state->num_auto_runners[state->batting_team]++;
 }
@@ -64,37 +60,31 @@ cw_gamestate_place_runner(CWGameState *state, int base, char *runner)
  * This places the batter(-runner) on base 0 at the start of a batter event,
  * setting the responsibility correctly given the event type.
  */
-static void
-cw_gamestate_place_batter(CWGameState *state, char *batter, int event_type)
+static void cw_gamestate_place_batter(CWGameState *state, char *batter, int event_type)
 {
   CW_STRLCPY(state->runners[0].runner, batter);
-  if ((event_type == CW_EVENT_WALK ||
-       event_type == CW_EVENT_INTENTIONALWALK) &&
+  if ((event_type == CW_EVENT_WALK || event_type == CW_EVENT_INTENTIONALWALK) &&
       state->walk_pitcher) {
     strcpy(state->runners[0].pitcher, state->walk_pitcher);
   }
   else {
-    CW_STRLCPY(state->runners[0].pitcher,
-	           state->fielders[DWARE_POS_P][1-state->batting_team]);
+    CW_STRLCPY(state->runners[0].pitcher, state->fielders[DWARE_POS_P][1 - state->batting_team]);
   }
-  CW_STRLCPY(state->runners[0].catcher,
-	         state->fielders[DWARE_POS_C][1-state->batting_team]);
+  CW_STRLCPY(state->runners[0].catcher, state->fielders[DWARE_POS_C][1 - state->batting_team]);
   state->runners[0].src_event = state->event_count;
   state->runners[0].is_auto = 0;
 }
 
-/* 
+/*
  * This replaces an existing runner, without changing responsibility;
  * used for pinch-runners or courtesy runners.
  */
-static void
-cw_gamestate_replace_runner(CWGameState *state, int base, char *runner)
+static void cw_gamestate_replace_runner(CWGameState *state, int base, char *runner)
 {
   CW_STRLCPY(state->runners[base].runner, runner);
 }
 
-static void
-cw_gamestate_move_runner(CWGameState *state, int src, int dest)
+static void cw_gamestate_move_runner(CWGameState *state, int src, int dest)
 {
   strcpy(state->runners[dest].runner, state->runners[src].runner);
   strcpy(state->runners[dest].pitcher, state->runners[src].pitcher);
@@ -112,8 +102,7 @@ cw_gamestate_move_runner(CWGameState *state, int src, int dest)
  * out on a fielder's choice, "push" the responsibilities for all
  * runners back one runner.
  */
-static void
-cw_gamestate_reassign_responsibility(CWGameState *state, int base)
+static void cw_gamestate_reassign_responsibility(CWGameState *state, int base)
 {
   int b;
 
@@ -131,8 +120,7 @@ cw_gamestate_reassign_responsibility(CWGameState *state, int base)
   state->runners[0].is_auto = state->runners[base].is_auto;
 }
 
-static void
-cw_gamestate_clear_runner(CWGameState *state, int base)
+static void cw_gamestate_clear_runner(CWGameState *state, int base)
 {
   strcpy(state->runners[base].runner, "");
   strcpy(state->runners[base].pitcher, "");
@@ -141,8 +129,7 @@ cw_gamestate_clear_runner(CWGameState *state, int base)
   state->runners[base].is_auto = 0;
 }
 
-static void
-cw_gamestate_clear_all_runners(CWGameState *state)
+static void cw_gamestate_clear_all_runners(CWGameState *state)
 {
   int base;
   for (base = DWARE_BASE_BATTER; base < DWARE_BASE_COUNT; base++) {
@@ -150,8 +137,7 @@ cw_gamestate_clear_all_runners(CWGameState *state)
   }
 }
 
-static void
-cw_gamestate_copy_runners(CWGameState *dest, CWGameState *src)
+static void cw_gamestate_copy_runners(CWGameState *dest, CWGameState *src)
 {
   int i;
 
@@ -166,8 +152,7 @@ cw_gamestate_copy_runners(CWGameState *dest, CWGameState *src)
 
 /***********************************************************************/
 
-void 
-cw_gamestate_initialize(CWGameState *state)
+void cw_gamestate_initialize(CWGameState *state)
 {
   int i, t;
 
@@ -219,8 +204,7 @@ cw_gamestate_initialize(CWGameState *state)
 }
 
 /* Create a copy of orig_state */
-CWGameState * 
-cw_gamestate_copy(CWGameState *orig_state)
+CWGameState *cw_gamestate_copy(CWGameState *orig_state)
 {
   int i, t;
   CWGameState *state = (CWGameState *) malloc(sizeof(CWGameState));
@@ -271,8 +255,7 @@ cw_gamestate_copy(CWGameState *orig_state)
   return state;
 }
 
-void
-cw_gamestate_cleanup(CWGameState *state)
+void cw_gamestate_cleanup(CWGameState *state)
 {
   int i, t;
 
@@ -298,48 +281,43 @@ cw_gamestate_cleanup(CWGameState *state)
  * Private auxiliary function to check whether go-ahead RBI changes
  * based on the given event.
  */
-static void
-cw_gamestate_check_go_ahead_rbi(CWGameState *state, char *batter,
-				CWEventData *event_data)
+static void cw_gamestate_check_go_ahead_rbi(CWGameState *state, char *batter,
+                                            CWEventData *event_data)
 {
-  int diff = (state->score[state->batting_team] -
-	      state->score[1-state->batting_team]);
+  int diff = (state->score[state->batting_team] - state->score[1 - state->batting_team]);
   int base;
 
   for (base = 3; base >= 0; base--) {
     if (event_data->advance[base] >= 4) {
       diff++;
       if (diff == 1) {
-	/* This was the go-ahead run */
-	if (event_data->rbi_flag[base]) {
-	  state->go_ahead_rbi = (char *) malloc(strlen(batter)+1);
-	  strcpy(state->go_ahead_rbi, batter);
-	}
-	else if (state->go_ahead_rbi) {
-	  free(state->go_ahead_rbi);
-	  state->go_ahead_rbi = NULL;
-	}
-	return;
+        /* This was the go-ahead run */
+        if (event_data->rbi_flag[base]) {
+          state->go_ahead_rbi = (char *) malloc(strlen(batter) + 1);
+          strcpy(state->go_ahead_rbi, batter);
+        }
+        else if (state->go_ahead_rbi) {
+          free(state->go_ahead_rbi);
+          state->go_ahead_rbi = NULL;
+        }
+        return;
       }
       else if (diff == 0) {
-	/* This was the tying run */
-	if (state->go_ahead_rbi) {
-	  free(state->go_ahead_rbi);
-	  state->go_ahead_rbi = NULL;
-	}
+        /* This was the tying run */
+        if (state->go_ahead_rbi) {
+          free(state->go_ahead_rbi);
+          state->go_ahead_rbi = NULL;
+        }
       }
     }
   }
 }
 
-static void
-cw_gamestate_process_advance(CWGameState *state, 
-			     char *batter, CWEventData *event_data)
+static void cw_gamestate_process_advance(CWGameState *state, char *batter, CWEventData *event_data)
 {
   cw_gamestate_place_batter(state, batter, event_data->event_type);
-  
-  if (event_data->advance[3] >= 4 ||
-      cw_event_runner_put_out(event_data, 3)) {
+
+  if (event_data->advance[3] >= 4 || cw_event_runner_put_out(event_data, 3)) {
     if (event_data->fc_flag[3] && cw_event_runner_put_out(event_data, 3)) {
       cw_gamestate_reassign_responsibility(state, 3);
     }
@@ -350,8 +328,7 @@ cw_gamestate_process_advance(CWGameState *state,
     cw_gamestate_move_runner(state, 2, 3);
   }
 
-  if (event_data->advance[2] >= 3 || 
-      cw_event_runner_put_out(event_data, 2)) {
+  if (event_data->advance[2] >= 3 || cw_event_runner_put_out(event_data, 2)) {
     if (event_data->fc_flag[2] && cw_event_runner_put_out(event_data, 2)) {
       cw_gamestate_reassign_responsibility(state, 2);
     }
@@ -393,8 +370,7 @@ cw_gamestate_process_advance(CWGameState *state,
   }
 }
 
-void cw_gamestate_update(CWGameState *state, 
-			 char *batter, CWEventData *event_data)
+void cw_gamestate_update(CWGameState *state, char *batter, CWEventData *event_data)
 {
   int i;
 
@@ -407,8 +383,8 @@ void cw_gamestate_update(CWGameState *state,
   state->score[state->batting_team] += cw_event_runs_on_play(event_data);
   state->inning_score += cw_event_runs_on_play(event_data);
   state->hits[state->batting_team] +=
-    (event_data->event_type >= CW_EVENT_SINGLE &&
-     event_data->event_type <= CW_EVENT_HOMERUN) ? 1 : 0;
+    (event_data->event_type >= CW_EVENT_SINGLE && event_data->event_type <= CW_EVENT_HOMERUN) ? 1
+                                                                                              : 0;
   state->errors[1 - state->batting_team] += event_data->num_errors;
   state->times_out[state->batting_team] += cw_event_outs_on_play(event_data);
   state->outs += cw_event_outs_on_play(event_data);
@@ -439,41 +415,28 @@ void cw_gamestate_update(CWGameState *state,
   }
 }
 
-static void
-cw_gamestate_substitute(CWGameState *state, 
-			char *batter, char *count,
-			char *player_id, char *name,
-			int team, int slot, int pos)
+static void cw_gamestate_substitute(CWGameState *state, char *batter, char *count, char *player_id,
+                                    char *name, int team, int slot, int pos)
 {
   char *removedPlayer = state->lineups[slot][team].player_id;
   int removedPosition = state->lineups[slot][team].position;
 
-  state->lineups[slot][team].player_id = 
-    (char *) malloc(sizeof(char) * (strlen(player_id) + 1));
-  strcpy(state->lineups[slot][team].player_id,
-	 player_id);
+  state->lineups[slot][team].player_id = (char *) malloc(sizeof(char) * (strlen(player_id) + 1));
+  strcpy(state->lineups[slot][team].player_id, player_id);
 
   free(state->lineups[slot][team].name);
-  state->lineups[slot][team].name =
-    (char *) malloc(sizeof(char) * (strlen(name) + 1));
+  state->lineups[slot][team].name = (char *) malloc(sizeof(char) * (strlen(name) + 1));
   strcpy(state->lineups[slot][team].name, name);
-  
+
   state->lineups[slot][team].position = pos;
-  
+
   if (strlen(count) == 2 && count[0] != '?' && count[1] != '?') {
-    if (pos == 1 && 
-	(!strcmp(count, "20") ||
-	 !strcmp(count, "21") || count[0] == '3')) {
-      state->walk_pitcher =
-	(char *) malloc((strlen(state->fielders[1][team]) + 1)
-			* sizeof(char));
-      strcpy(state->walk_pitcher,
-	     state->fielders[1][team]);
+    if (pos == 1 && (!strcmp(count, "20") || !strcmp(count, "21") || count[0] == '3')) {
+      state->walk_pitcher = (char *) malloc((strlen(state->fielders[1][team]) + 1) * sizeof(char));
+      strcpy(state->walk_pitcher, state->fielders[1][team]);
     }
-    else if (pos == DWARE_POS_PH && state->strikeout_batter == NULL &&
-	     count[1] == '2') {
-      state->strikeout_batter = 
-	(char *) malloc((strlen(batter) + 1) * sizeof(char));
+    else if (pos == DWARE_POS_PH && state->strikeout_batter == NULL && count[1] == '2') {
+      state->strikeout_batter = (char *) malloc((strlen(batter) + 1) * sizeof(char));
       strcpy(state->strikeout_batter, batter);
       state->strikeout_batter_hand = state->batter_hand;
     }
@@ -481,12 +444,9 @@ cw_gamestate_substitute(CWGameState *state,
 
   if (pos <= DWARE_POS_MAX) {
     free(state->fielders[pos][team]);
-    state->fielders[pos][team] =
-      (char *) malloc(sizeof(char) * (strlen(player_id) + 1));
-    strcpy(state->fielders[pos][team],
-	   player_id);
-    if (pos == 1 && slot > 0 &&
-	state->lineups[0][team].player_id != NULL) {
+    state->fielders[pos][team] = (char *) malloc(sizeof(char) * (strlen(player_id) + 1));
+    strcpy(state->fielders[pos][team], player_id);
+    if (pos == 1 && slot > 0 && state->lineups[0][team].player_id != NULL) {
       /* Substituting a pitcher into the batting order, eliminating
        * the DH.  Clear out slot zero.
        */
@@ -519,7 +479,7 @@ cw_gamestate_substitute(CWGameState *state,
 
   if (slot > 0 && state->lineups[0][team].player_id != NULL &&
       !strcmp(state->lineups[0][team].player_id, player_id)) {
-      /* Substituting a pitcher into the batting order, eliminating
+    /* Substituting a pitcher into the batting order, eliminating
        * the DH.  Clear out slot zero.
        * This circumstance ought to be illegal, but has happened
        * on at least one occasion, on 1976/9/5 when Catfish Hunter
@@ -533,8 +493,7 @@ cw_gamestate_substitute(CWGameState *state,
   }
 }
 
-static void
-cw_gamestate_change_sides(CWGameState *state, CWEvent *event)
+static void cw_gamestate_change_sides(CWGameState *state, CWEvent *event)
 {
   int i;
 
@@ -552,8 +511,7 @@ cw_gamestate_change_sides(CWGameState *state, CWEvent *event)
   /* Pinch-hitters or -runners for DH automatically become DH,
    * even though no sub record occurs */
   for (i = 0; i <= 1; i++) {
-    if (state->dh_slot[i] > 0 &&
-	state->lineups[state->dh_slot[i]][i].position > 10) {
+    if (state->dh_slot[i] > 0 && state->lineups[state->dh_slot[i]][i].position > 10) {
       state->lineups[state->dh_slot[i]][i].position = 10;
     }
   }
@@ -562,15 +520,13 @@ cw_gamestate_change_sides(CWGameState *state, CWEvent *event)
   XFREE(state->removed_for_ph)
 }
 
-int
-cw_gamestate_left_on_base(CWGameState *state, int team)
+int cw_gamestate_left_on_base(CWGameState *state, int team)
 {
-  return (state->num_batters[team] + state->num_auto_runners[team] -
-	  state->score[team] - state->times_out[team]);
+  return (state->num_batters[team] + state->num_auto_runners[team] - state->score[team] -
+          state->times_out[team]);
 }
 
-int
-cw_gamestate_lineup_slot(CWGameState *state, int team, char *player_id)
+int cw_gamestate_lineup_slot(CWGameState *state, int team, char *player_id)
 {
   int i;
 
@@ -581,13 +537,13 @@ cw_gamestate_lineup_slot(CWGameState *state, int team, char *player_id)
    *
    * As a longer-term refinement: There are (rare) instances where
    * a player appears as a courtesy runner while already in the lineup.
-   * In such a case the approach of this function does not work. 
-   * A more robust solution is to carry a pointer to a player's 
+   * In such a case the approach of this function does not work.
+   * A more robust solution is to carry a pointer to a player's
    * "identity" in the boxscore in the game state.
    */
   for (i = 9; i >= 0; i--) {
     if (state->lineups[i][team].player_id &&
-	!strcmp(player_id, state->lineups[i][team].player_id)) {
+        !strcmp(player_id, state->lineups[i][team].player_id)) {
       return i;
     }
   }
@@ -595,40 +551,34 @@ cw_gamestate_lineup_slot(CWGameState *state, int team, char *player_id)
   return -1;
 }
 
-int
-cw_gamestate_runner_position(CWGameState *state,
-			     int team, char *player_id)
+int cw_gamestate_runner_position(CWGameState *state, int team, char *player_id)
 {
   int i;
 
   for (i = 1; i <= 9; i++) {
     if (state->lineups[i][team].player_id &&
-	!strcmp(player_id, state->lineups[i][team].player_id)) {
-      if (state->lineups[i][team].position > 10 &&
-	  state->dh_slot[team] == i) {
-	/* Bit of a special case: bevent considers PH for DH to be
+        !strcmp(player_id, state->lineups[i][team].player_id)) {
+      if (state->lineups[i][team].position > 10 && state->dh_slot[team] == i) {
+        /* Bit of a special case: bevent considers PH for DH to be
 	 * a DH right away, issuing position code 10 instead of 11 */
-	return 10;
+        return 10;
       }
       else {
-	return state->lineups[i][team].position;
+        return state->lineups[i][team].position;
       }
     }
   }
 
   /* Check the pitcher last: this is in those cases where the pitcher
    * comes to bat even though the DH was in effect */
-  if (state->lineups[0][team].player_id &&
-      !strcmp(player_id, state->lineups[0][team].player_id)) {
+  if (state->lineups[0][team].player_id && !strcmp(player_id, state->lineups[0][team].player_id)) {
     return state->lineups[0][team].position;
   }
 
   return -1;
 }
 
-int
-cw_gamestate_player_position(CWGameState *state,
-			     int team, char *player_id)
+int cw_gamestate_player_position(CWGameState *state, int team, char *player_id)
 {
   int position = cw_gamestate_runner_position(state, team, player_id);
 
@@ -641,12 +591,9 @@ cw_gamestate_player_position(CWGameState *state,
   return position;
 }
 
-char *
-cw_gamestate_charged_batter(CWGameState *state, 
-			    char *batter, CWEventData *event_data)
+char *cw_gamestate_charged_batter(CWGameState *state, char *batter, CWEventData *event_data)
 {
-  if (event_data->event_type == CW_EVENT_STRIKEOUT &&
-      state->strikeout_batter != NULL) {
+  if (event_data->event_type == CW_EVENT_STRIKEOUT && state->strikeout_batter != NULL) {
     return state->strikeout_batter;
   }
   else {
@@ -654,24 +601,19 @@ cw_gamestate_charged_batter(CWGameState *state,
   }
 }
 
-char
-cw_gamestate_charged_batter_hand(CWGameState *state, char *batter,
-				 CWEventData *event_data,
-				 CWRoster *offRoster, CWRoster *defRoster)
+char cw_gamestate_charged_batter_hand(CWGameState *state, char *batter, CWEventData *event_data,
+                                      CWRoster *offRoster, CWRoster *defRoster)
 {
   char resPitcherHand, resBatterHand;
 
-  if (event_data->event_type == CW_EVENT_STRIKEOUT &&
-      state->strikeout_batter != NULL &&
+  if (event_data->event_type == CW_EVENT_STRIKEOUT && state->strikeout_batter != NULL &&
       state->strikeout_batter_hand != ' ') {
     return state->strikeout_batter_hand;
   }
-  
+
   if (state->batter_hand == ' ') {
-    resBatterHand = 
-      cw_roster_batting_hand(offRoster,
-			     cw_gamestate_charged_batter(state, batter,
-							 event_data));
+    resBatterHand =
+      cw_roster_batting_hand(offRoster, cw_gamestate_charged_batter(state, batter, event_data));
   }
   else {
     resBatterHand = state->batter_hand;
@@ -682,10 +624,8 @@ cw_gamestate_charged_batter_hand(CWGameState *state, char *batter,
       resPitcherHand = state->pitcher_hand;
     }
     else {
-      resPitcherHand = 
-	cw_roster_throwing_hand(defRoster,
-				cw_gamestate_charged_pitcher(state,
-							     event_data));
+      resPitcherHand =
+        cw_roster_throwing_hand(defRoster, cw_gamestate_charged_pitcher(state, event_data));
     }
     if (resPitcherHand == 'L') {
       return 'R';
@@ -703,16 +643,15 @@ cw_gamestate_charged_batter_hand(CWGameState *state, char *batter,
   }
 }
 
-char *
-cw_gamestate_charged_pitcher(CWGameState *state, CWEventData *event_data)
+char *cw_gamestate_charged_pitcher(CWGameState *state, CWEventData *event_data)
 {
-  if ((event_data->event_type == CW_EVENT_WALK || 
+  if ((event_data->event_type == CW_EVENT_WALK ||
        event_data->event_type == CW_EVENT_INTENTIONALWALK) &&
       state->walk_pitcher) {
     return state->walk_pitcher;
   }
   else {
-    return state->fielders[1][1-state->batting_team];
+    return state->fielders[1][1 - state->batting_team];
   }
 }
 
@@ -721,36 +660,30 @@ cw_gamestate_charged_pitcher(CWGameState *state, CWEventData *event_data)
  * preceding runner is put out by batter action but a subsequent runner then
  * scores.
  */
-static int
-cw_gamestate_responsible_base(CWGameState *state, CWEventData *event_data,
-                              int base)
+static int cw_gamestate_responsible_base(CWGameState *state, CWEventData *event_data, int base)
 {
   if (base == 3) {
     return 3;
   }
   if (base == 2) {
-    if (cw_event_runner_put_out(event_data, 3) &&
-        event_data->fc_flag[3] && event_data->advance[2] >= 4) {
+    if (cw_event_runner_put_out(event_data, 3) && event_data->fc_flag[3] &&
+        event_data->advance[2] >= 4) {
       return 3;
     }
     return 2;
   }
-  if (cw_event_runner_put_out(event_data, 3) &&
-      event_data->fc_flag[3] && event_data->advance[2] >= 4) {
+  if (cw_event_runner_put_out(event_data, 3) && event_data->fc_flag[3] &&
+      event_data->advance[2] >= 4) {
     return 2;
   }
-  if (cw_event_runner_put_out(event_data, 3) &&
-      event_data->fc_flag[3] &&
-      !cw_gamestate_base_occupied(state, 2) &&
-      event_data->advance[1] >= 4) {
+  if (cw_event_runner_put_out(event_data, 3) && event_data->fc_flag[3] &&
+      !cw_gamestate_base_occupied(state, 2) && event_data->advance[1] >= 4) {
     return 3;
   }
   return 1;
 }
 
-char *
-cw_gamestate_responsible_pitcher(CWGameState *state, CWEventData *event_data,
-                                 int base)
+char *cw_gamestate_responsible_pitcher(CWGameState *state, CWEventData *event_data, int base)
 {
   if (!cw_gamestate_base_occupied(state, base)) {
     return "";
@@ -759,9 +692,7 @@ cw_gamestate_responsible_pitcher(CWGameState *state, CWEventData *event_data,
   return state->runners[orig_base].pitcher;
 }
 
-int
-cw_gamestate_runner_is_auto(CWGameState *state, CWEventData *event_data,
-                            int base)
+int cw_gamestate_runner_is_auto(CWGameState *state, CWEventData *event_data, int base)
 {
   if (!cw_gamestate_base_occupied(state, base)) {
     return 0;
@@ -774,9 +705,7 @@ cw_gamestate_runner_is_auto(CWGameState *state, CWEventData *event_data,
  * The "responsible catcher" (for catcher ERA) is computed using the
  * same rules as the "responsible pitcher."
  */
-char *
-cw_gamestate_responsible_catcher(CWGameState *state, CWEventData *event_data,
-			                         	 int base)
+char *cw_gamestate_responsible_catcher(CWGameState *state, CWEventData *event_data, int base)
 {
   if (!cw_gamestate_base_occupied(state, base)) {
     return "";
@@ -786,32 +715,27 @@ cw_gamestate_responsible_catcher(CWGameState *state, CWEventData *event_data,
 }
 
 /*
- * Private auxiliary function to set up lineups with starters 
+ * Private auxiliary function to set up lineups with starters
  */
-static void
-cw_gameiter_lineup_setup(CWGameIterator *gameiter)
+static void cw_gameiter_lineup_setup(CWGameIterator *gameiter)
 {
   CWAppearance *starter = gameiter->game->first_starter;
 
   while (starter != NULL) {
     gameiter->state->lineups[starter->slot][starter->team].player_id =
       (char *) malloc(sizeof(char) * (strlen(starter->player_id) + 1));
-    strcpy(gameiter->state->lineups[starter->slot][starter->team].player_id,
-	   starter->player_id);
+    strcpy(gameiter->state->lineups[starter->slot][starter->team].player_id, starter->player_id);
 
     gameiter->state->lineups[starter->slot][starter->team].name =
       (char *) malloc(sizeof(char) * (strlen(starter->name) + 1));
-    strcpy(gameiter->state->lineups[starter->slot][starter->team].name,
-	   starter->name);
+    strcpy(gameiter->state->lineups[starter->slot][starter->team].name, starter->name);
 
-    gameiter->state->lineups[starter->slot][starter->team].position = 
-      starter->pos;
+    gameiter->state->lineups[starter->slot][starter->team].position = starter->pos;
 
     if (starter->pos <= 9) {
       gameiter->state->fielders[starter->pos][starter->team] =
-	(char *) malloc(sizeof(char) * (strlen(starter->player_id) + 1));
-      strcpy(gameiter->state->fielders[starter->pos][starter->team],
-	     starter->player_id);
+        (char *) malloc(sizeof(char) * (strlen(starter->player_id) + 1));
+      strcpy(gameiter->state->fielders[starter->pos][starter->team], starter->player_id);
     }
     else if (starter->pos == 10) {
       gameiter->state->dh_slot[starter->team] = starter->slot;
@@ -821,8 +745,7 @@ cw_gameiter_lineup_setup(CWGameIterator *gameiter)
   }
 }
 
-void
-cw_gameiter_reset(CWGameIterator *gameiter)
+void cw_gameiter_reset(CWGameIterator *gameiter)
 {
   char *date = cw_game_info_lookup(gameiter->game, "date");
 
@@ -830,9 +753,8 @@ cw_gameiter_reset(CWGameIterator *gameiter)
 
   cw_gamestate_cleanup(gameiter->state);
   cw_gamestate_initialize(gameiter->state);
-  sprintf(gameiter->state->date, "%c%c%c%c%c%c%c%c",
-	  date[0], date[1], date[2], date[3],
-	  date[5], date[6], date[8], date[9]);
+  sprintf(gameiter->state->date, "%c%c%c%c%c%c%c%c", date[0], date[1], date[2], date[3], date[5],
+          date[6], date[8], date[9]);
   cw_gameiter_lineup_setup(gameiter);
 
   if (cw_game_info_lookup(gameiter->game, "htbf") &&
@@ -847,8 +769,7 @@ cw_gameiter_reset(CWGameIterator *gameiter)
     if (strcmp(gameiter->event->event_text, "NP") != 0) {
       gameiter->state->batter_hand = gameiter->event->batter_hand;
       gameiter->state->pitcher_hand = gameiter->event->pitcher_hand;
-      gameiter->parse_ok = cw_parse_event(gameiter->event->event_text, 
-					  gameiter->event_data);
+      gameiter->parse_ok = cw_parse_event(gameiter->event->event_text, gameiter->event_data);
     }
     else {
       /* There are some very rare instances with an NP as the first play */
@@ -857,8 +778,7 @@ cw_gameiter_reset(CWGameIterator *gameiter)
   }
 }
 
-CWGameIterator *
-cw_gameiter_create(CWGame *game)
+CWGameIterator *cw_gameiter_create(CWGame *game)
 {
   CWGameIterator *gameiter = (CWGameIterator *) malloc(sizeof(CWGameIterator));
   gameiter->game = game;
@@ -873,8 +793,7 @@ cw_gameiter_create(CWGame *game)
   return gameiter;
 }
 
-CWGameIterator *
-cw_gameiter_copy(CWGameIterator *orig_gameiter)
+CWGameIterator *cw_gameiter_copy(CWGameIterator *orig_gameiter)
 {
   CWGameIterator *gameiter = (CWGameIterator *) malloc(sizeof(CWGameIterator));
 
@@ -890,30 +809,25 @@ cw_gameiter_copy(CWGameIterator *orig_gameiter)
   return gameiter;
 }
 
-void
-cw_gameiter_cleanup(CWGameIterator *gameiter)
+void cw_gameiter_cleanup(CWGameIterator *gameiter)
 {
   cw_gamestate_cleanup(gameiter->state);
   XFREE(gameiter->state)
   XFREE(gameiter->event_data)
 }
 
-static void
-cw_gameiter_process_subs(CWGameIterator *gameiter)
+static void cw_gameiter_process_subs(CWGameIterator *gameiter)
 {
   CWAppearance *sub = gameiter->event->first_sub;
 
   while (sub != NULL) {
-    cw_gamestate_substitute(gameiter->state,
-			    gameiter->event->batter, gameiter->event->count,
-			    sub->player_id, sub->name,
-			    sub->team, sub->slot, sub->pos);
+    cw_gamestate_substitute(gameiter->state, gameiter->event->batter, gameiter->event->count,
+                            sub->player_id, sub->name, sub->team, sub->slot, sub->pos);
     sub = sub->next;
   }
 }
 
-static void
-cw_gameiter_process_comments(CWGameIterator *gameiter)
+static void cw_gameiter_process_comments(CWGameIterator *gameiter)
 {
   char *token;
   CWComment *comment = gameiter->event->first_comment;
@@ -928,15 +842,12 @@ cw_gameiter_process_comments(CWGameIterator *gameiter)
   }
 }
 
-void 
-cw_gameiter_next(CWGameIterator *gameiter)
+void cw_gameiter_next(CWGameIterator *gameiter)
 {
   int base;
 
   if (strcmp(gameiter->event->event_text, "NP") != 0) {
-    cw_gamestate_update(gameiter->state,
-                        gameiter->event->batter, gameiter->event_data);
-
+    cw_gamestate_update(gameiter->state, gameiter->event->batter, gameiter->event_data);
   }
   else {
     gameiter->state->batter_hand = gameiter->event->batter_hand;
@@ -948,7 +859,7 @@ cw_gameiter_next(CWGameIterator *gameiter)
 
   /* Now, move on to the next event, and parse it.
    * There are a few entries in the CWEventData that are context-dependent,
-   * in the sense that they cannot fully be inferred from the 
+   * in the sense that they cannot fully be inferred from the
    * event text alone.  The remaining code handles those cases.
    */
   gameiter->event = gameiter->event->next;
@@ -977,15 +888,13 @@ cw_gameiter_next(CWGameIterator *gameiter)
     gameiter->state->next_batter[gameiter->state->batting_team] = gameiter->event->ladj_slot;
   }
   if (gameiter->event && gameiter->event->auto_base != 0) {
-    cw_gamestate_place_runner(gameiter->state,
-                              gameiter->event->auto_base,
+    cw_gamestate_place_runner(gameiter->state, gameiter->event->auto_base,
                               gameiter->event->auto_runner_id);
   }
   if (gameiter->event) {
     for (base = 1; base <= 3; base++) {
       if (gameiter->event->presadj[base] != NULL) {
-        CW_STRLCPY(gameiter->state->runners[base].pitcher,
-                   gameiter->event->presadj[base]);
+        CW_STRLCPY(gameiter->state->runners[base].pitcher, gameiter->event->presadj[base]);
       }
     }
   }
@@ -993,8 +902,7 @@ cw_gameiter_next(CWGameIterator *gameiter)
     int i;
     gameiter->state->batter_hand = gameiter->event->batter_hand;
     gameiter->state->pitcher_hand = gameiter->event->pitcher_hand;
-    gameiter->parse_ok = cw_parse_event(gameiter->event->event_text,
-                                        gameiter->event_data);
+    gameiter->parse_ok = cw_parse_event(gameiter->event->event_text, gameiter->event_data);
     for (i = DWARE_BASE_FIRST; i <= DWARE_BASE_THIRD; i++) {
       if (gameiter->event_data->advance[i] == 0 &&
           cw_gamestate_base_occupied(gameiter->state, i) &&
@@ -1003,13 +911,12 @@ cw_gameiter_next(CWGameIterator *gameiter)
       }
     }
 
-    if ((gameiter->event_data->event_type == CW_EVENT_ERROR &&
-         gameiter->state->outs == 2 &&
+    if ((gameiter->event_data->event_type == CW_EVENT_ERROR && gameiter->state->outs == 2 &&
          gameiter->event_data->rbi_flag[3] == 1) ||
         (gameiter->event_data->event_type == CW_EVENT_WALK ||
          gameiter->event_data->event_type == CW_EVENT_INTENTIONALWALK) &&
-         (!cw_gamestate_base_occupied(gameiter->state, 2) ||
-          !cw_gamestate_base_occupied(gameiter->state, 1))) {
+          (!cw_gamestate_base_occupied(gameiter->state, 2) ||
+           !cw_gamestate_base_occupied(gameiter->state, 1))) {
       gameiter->event_data->rbi_flag[3] = 0;
     }
 
@@ -1043,8 +950,7 @@ int cw_gameiter_runner_fate(CWGameIterator *orig_gameiter, int base)
   base = orig_gameiter->event_data->advance[base];
   gameiter = cw_gameiter_copy(orig_gameiter);
   cw_gameiter_next(gameiter);
-  while (gameiter->event != NULL &&
-         gameiter->state->inning == orig_gameiter->state->inning &&
+  while (gameiter->event != NULL && gameiter->state->inning == orig_gameiter->state->inning &&
          gameiter->state->batting_team == orig_gameiter->state->batting_team) {
     if (strcmp(gameiter->event->event_text, "NP") != 0) {
       base = gameiter->event_data->advance[base];
@@ -1057,4 +963,4 @@ int cw_gameiter_runner_fate(CWGameIterator *orig_gameiter, int base)
   cw_gameiter_cleanup(gameiter);
   free(gameiter);
   return base;
-}		
+}

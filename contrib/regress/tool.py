@@ -13,7 +13,7 @@ class ToolProcess(object):
                                    stdout=subprocess.PIPE)
         for row in csv.DictReader(process.stdout, self.header):
             yield self.rowclass(row)
-            
+
 
 
 class DiffEngine(object):

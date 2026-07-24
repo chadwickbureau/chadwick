@@ -29,9 +29,7 @@
 
 #include "xmlwrite.h"
 
-
-XMLDoc *
-xml_document_create(FILE *f, char *root)
+XMLDoc *xml_document_create(FILE *f, char *root)
 {
   XMLDoc *doc = (XMLDoc *) malloc(sizeof(XMLDoc));
   doc->f = f;
@@ -51,8 +49,7 @@ xml_document_create(FILE *f, char *root)
   return doc;
 }
 
-void 
-xml_document_cleanup(XMLDoc *doc)
+void xml_document_cleanup(XMLDoc *doc)
 {
   XMLNode *node = doc->root;
 
@@ -69,10 +66,9 @@ xml_document_cleanup(XMLDoc *doc)
   free(doc);
 }
 
-XMLNode *
-xml_node_open(XMLNode *parent, char *name)
+XMLNode *xml_node_open(XMLNode *parent, char *name)
 {
-  int i;
+  size_t i;
 
   if (parent->next) {
     /* A child node entry has been allocated.  Is it still open?
@@ -88,11 +84,12 @@ xml_node_open(XMLNode *parent, char *name)
     parent->next->has_children = 0;
     parent->next->f = parent->f;
     parent->next->next = NULL;
-    parent->next->indent = (char *) malloc(sizeof(char)*2*parent->next->depth + 1);
-    for (i = 0; i < 2 * parent->next->depth; i++) {
+    size_t indent_width = 2U * (size_t) parent->next->depth;
+    parent->next->indent = (char *) malloc(indent_width + 1);
+    for (i = 0; i < indent_width; i++) {
       parent->next->indent[i] = ' ';
     }
-    parent->next->indent[2*parent->next->depth] = '\0';
+    parent->next->indent[indent_width] = '\0';
   }
 
   if (!parent->has_children) {
@@ -128,8 +125,7 @@ void xml_node_close(XMLNode *node)
   node->open = 0;
 }
 
-void 
-xml_node_cdata(XMLNode *node, char *data)
+void xml_node_cdata(XMLNode *node, char *data)
 {
   if (node->next && node->next->open) {
     xml_node_close(node->next);
@@ -143,29 +139,31 @@ xml_node_cdata(XMLNode *node, char *data)
   fprintf(node->f, "%s  %s\n", node->indent, data);
 }
 
-void
-xml_node_attribute(XMLNode *node, char *attr, char *value)
+void xml_node_attribute(XMLNode *node, char *attr, char *value)
 {
-  if (!node->open) return;
+  if (!node->open) {
+    return;
+  }
   fprintf(node->f, " %s=\"%s\"", attr, value);
 }
 
-void
-xml_node_attribute_int(XMLNode *node, char *attr, int value)
+void xml_node_attribute_int(XMLNode *node, char *attr, int value)
 {
-  if (!node->open) return;
+  if (!node->open) {
+    return;
+  }
   fprintf(node->f, " %s=\"%d\"", attr, value);
 }
 
-void
-xml_node_attribute_posint(XMLNode *node, char *attr, int value)
+void xml_node_attribute_posint(XMLNode *node, char *attr, int value)
 {
-  if (!node->open || value < 0) return;
+  if (!node->open || value < 0) {
+    return;
+  }
   fprintf(node->f, " %s=\"%d\"", attr, value);
 }
 
-void
-xml_node_attribute_fmt(XMLNode *node, char *attr, char *format, ...) 
+void xml_node_attribute_fmt(XMLNode *node, char *attr, char *format, ...)
 {
   va_list argp;
   char value[1024];

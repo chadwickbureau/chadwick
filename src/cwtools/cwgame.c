@@ -38,31 +38,18 @@
 extern int ascii;
 
 /* Fields to display (-f) */
-int fields[86] = {
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 0
-};
+int fields[86] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
 
 int max_field = 85;
 
 /* Extended fields to display (-x) */
-int ext_fields[97] = {
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0
-};
+int ext_fields[97] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 int max_ext_field = 96;
 
@@ -89,7 +76,6 @@ static inline int cwgame_print_string_or_null(CWBuffer *buffer, char *value, int
   return cw_buffer_emit_string(buffer, "", width);
 }
 
-
 /*************************************************************************
  * Utility routines to compute day of week
  *************************************************************************/
@@ -101,12 +87,11 @@ static inline int cwgame_print_string_or_null(CWBuffer *buffer, char *value, int
  * This implementation was posted to comp.lang.c in 1992 by
  * Tomohiko Sakamoto.
  */
-static int
-get_day_of_week(int month, int day, int year) 
+static int get_day_of_week(int month, int day, int year)
 {
-  static int t[12] = { 0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4 };
+  static int t[12] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
   year -= month < 3;
-  return (year + year/4 - year/100 + year/400 + t[month-1] + day) % 7;
+  return (year + year / 4 - year / 100 + year / 400 + t[month - 1] + day) % 7;
 }
 
 /*************************************************************************
@@ -118,11 +103,10 @@ typedef struct cwgame_lookup_struct {
   char *text;
 } CWLookup;
 
-static int
-cwgame_lookup(char *text, CWLookup *table)
+static int cwgame_lookup(char *text, CWLookup *table)
 {
   int i;
-  
+
   if (text == NULL) {
     return 0;
   }
@@ -140,8 +124,7 @@ cwgame_lookup(char *text, CWLookup *table)
  * Derive a player name from an appearance record in a game.
  * Used when roster file is not available.
  */
-char *
-cwgame_game_find_name(CWGame *game, char *player_id)
+char *cwgame_game_find_name(CWGame *game, char *player_id)
 {
   CWAppearance *app;
   CWEvent *event;
@@ -155,7 +138,7 @@ cwgame_game_find_name(CWGame *game, char *player_id)
   for (event = game->first_event; event != NULL; event = event->next) {
     for (app = event->first_sub; app != NULL; app = app->next) {
       if (!strcmp(app->player_id, player_id)) {
-	return app->name;
+        return app->name;
       }
     }
   }
@@ -165,13 +148,13 @@ cwgame_game_find_name(CWGame *game, char *player_id)
 /* Auxiliary function: find a player's bio entry and print his
  * first and last names to the buffer
  */
-int cwgame_find_player_name(CWGame *game, CWBuffer *buffer, char *player_id,
-			    CWRoster *visitors, CWRoster *home)
+int cwgame_find_player_name(CWGame *game, CWBuffer *buffer, char *player_id, CWRoster *visitors,
+                            CWRoster *home)
 {
   CWPlayer *bio = NULL;
   if (visitors) {
     bio = cw_roster_player_find(visitors, player_id);
-  }    
+  }
   if (!bio && home) {
     bio = cw_roster_player_find(home, player_id);
   }
@@ -186,8 +169,7 @@ int cwgame_find_player_name(CWGame *game, CWBuffer *buffer, char *player_id,
 /*
  * typedef to declare the pointer-to-function type
  */
-typedef int (*field_func)(CWBuffer *, CWGameIterator *, CWBoxscore *,
-			  CWRoster *, CWRoster *);
+typedef int (*field_func)(CWBuffer *, CWGameIterator *, CWBoxscore *, CWRoster *, CWRoster *);
 
 /*
  * convenient structure to hold all information relating to a field
@@ -202,9 +184,9 @@ typedef struct field_struct {
  * preprocessor directive for conveniently declaring function signature
  */
 
-#define DECLARE_FIELDFUNC(funcname) \
-int funcname(CWBuffer *buffer, CWGameIterator *gameiter, CWBoxscore *box, \
-             CWRoster *visitors, CWRoster *home)
+#define DECLARE_FIELDFUNC(funcname)                                                               \
+  int funcname(CWBuffer *buffer, CWGameIterator *gameiter, CWBoxscore *box, CWRoster *visitors,   \
+               CWRoster *home)
 
 /* Field 0 */
 DECLARE_FIELDFUNC(cwgame_game_id)
@@ -216,27 +198,23 @@ DECLARE_FIELDFUNC(cwgame_game_id)
 DECLARE_FIELDFUNC(cwgame_date)
 {
   char *date = cw_game_info_lookup(gameiter->game, "date");
-  return cw_buffer_emit(buffer, (ascii) ? "\"%c%c%c%c%c%c%c%c\"" : "%c%c%c%c%c%c%c%c",
-		 date[0], date[1], date[2], date[3],
-		 date[5], date[6], date[8], date[9]);
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c%c%c%c%c%c%c%c\"" : "%c%c%c%c%c%c%c%c", date[0],
+                        date[1], date[2], date[3], date[5], date[6], date[8], date[9]);
 }
 
 /* Field 2 */
 DECLARE_FIELDFUNC(cwgame_number)
 {
   char *tmp;
-  return cw_buffer_emit_int(buffer,
-		 (tmp = cw_game_info_lookup(gameiter->game, "number")) ?
-		 cw_atoi(tmp, NULL) : 0, 5);
+  return cw_buffer_emit_int(
+    buffer, (tmp = cw_game_info_lookup(gameiter->game, "number")) ? cw_atoi(tmp, NULL) : 0, 5);
 }
 
 /* Field 3 */
 DECLARE_FIELDFUNC(cwgame_day_of_week)
 {
-  static char *day_names[7] = {
-    "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
-    "Saturday"
-  };
+  static char *day_names[7] = {"Sunday",   "Monday", "Tuesday", "Wednesday",
+                               "Thursday", "Friday", "Saturday"};
 
   int month, day, year;
   char *date = cw_game_info_lookup(gameiter->game, "date");
@@ -251,8 +229,7 @@ DECLARE_FIELDFUNC(cwgame_day_of_week)
     year += 1900;
   }
 
-  return cw_buffer_emit_string(buffer,
-		 day_names[get_day_of_week(month, day, year)], 9);
+  return cw_buffer_emit_string(buffer, day_names[get_day_of_week(month, day, year)], 9);
 }
 
 /* Field 4 */
@@ -274,17 +251,19 @@ DECLARE_FIELDFUNC(cwgame_use_dh)
 {
   char *tmp;
   return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
-		 (tmp = cw_game_info_lookup(gameiter->game, "usedh")) ? 
-		 ((!strcmp(tmp, "true")) ? 'T' : 'F') : 'F');
+                        (tmp = cw_game_info_lookup(gameiter->game, "usedh"))
+                          ? ((!strcmp(tmp, "true")) ? 'T' : 'F')
+                          : 'F');
 }
 
 /* Field 6 */
 DECLARE_FIELDFUNC(cwgame_day_night)
 {
   char *tmp;
-  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c", 
-		 (tmp = cw_game_info_lookup(gameiter->game, "daynight")) ?
-		 ((!strcmp(tmp, "night")) ? 'N' : 'D') : 'D');
+  return cw_buffer_emit(buffer, (ascii) ? "\"%c\"" : "%c",
+                        (tmp = cw_game_info_lookup(gameiter->game, "daynight"))
+                          ? ((!strcmp(tmp, "night")) ? 'N' : 'D')
+                          : 'D');
 }
 
 /* Field 7 */
@@ -360,8 +339,9 @@ DECLARE_FIELDFUNC(cwgame_attendance)
 {
   char *tmp = cw_game_info_lookup(gameiter->game, "attendance");
   return cw_buffer_emit(buffer, (ascii) ? "%d" : "%5d",
-                 (tmp && strcmp(tmp, "") != 0) ?
-		         cw_atoi(tmp, "Warning: invalid value '%s' for info,attendance\n") : 0);
+                        (tmp && strcmp(tmp, "") != 0)
+                          ? cw_atoi(tmp, "Warning: invalid value '%s' for info,attendance\n")
+                          : 0);
 }
 
 /* Field 19 */
@@ -373,7 +353,8 @@ DECLARE_FIELDFUNC(cwgame_scorer)
 /* Field 20 */
 DECLARE_FIELDFUNC(cwgame_translator)
 {
-  return cwgame_print_string_or_null(buffer, cw_game_info_lookup(gameiter->game, "translator"), 30);
+  return cwgame_print_string_or_null(buffer, cw_game_info_lookup(gameiter->game, "translator"),
+                                     30);
 }
 
 /* Field 21 */
@@ -397,27 +378,19 @@ DECLARE_FIELDFUNC(cwgame_edittime)
 /* Field 24 */
 DECLARE_FIELDFUNC(cwgame_howscored)
 {
-  static CWLookup table[] = {
-    { 0, "unknown" }, { 1, "park" }, { 2, "tv" }, { 3, "radio" },
-    { -1, "" }
-  };
+  static CWLookup table[] = {{0, "unknown"}, {1, "park"}, {2, "tv"}, {3, "radio"}, {-1, ""}};
 
-  return cw_buffer_emit_int(buffer,
-		 cwgame_lookup(cw_game_info_lookup(gameiter->game,
-						   "howscored"), table), 1);
+  return cw_buffer_emit_int(
+    buffer, cwgame_lookup(cw_game_info_lookup(gameiter->game, "howscored"), table), 1);
 }
 
 /* Field 25 */
 DECLARE_FIELDFUNC(cwgame_pitches)
 {
-  static CWLookup table[] = {
-    { 0, "unknown" }, { 1, "pitches" }, { 2, "count" }, { 0, "none" },
-    { -1, "" }
-  };
+  static CWLookup table[] = {{0, "unknown"}, {1, "pitches"}, {2, "count"}, {0, "none"}, {-1, ""}};
 
-  return cw_buffer_emit_int(buffer,
-		 cwgame_lookup(cw_game_info_lookup(gameiter->game, "pitches"),
-			       table), 1);
+  return cw_buffer_emit_int(
+    buffer, cwgame_lookup(cw_game_info_lookup(gameiter->game, "pitches"), table), 1);
 }
 
 /* Field 26 */
@@ -429,22 +402,18 @@ DECLARE_FIELDFUNC(cwgame_temperature)
   }
   else {
     return cw_buffer_emit_int(buffer,
-                   cw_atoi(value, "Warning: invalid value '%s' for info,temp\n"), 3);
+                              cw_atoi(value, "Warning: invalid value '%s' for info,temp\n"), 3);
   }
 }
 
 /* Field 27 */
 DECLARE_FIELDFUNC(cwgame_wind_direction)
 {
-  CWLookup table[] = {
-    { 0, "unknown" }, { 1, "tolf" }, { 2, "tocf" }, { 3, "torf" },
-    { 4, "ltor" }, { 5, "fromlf" }, { 6, "fromcf" }, { 7, "fromrf" },
-    { 8, "rtol" }, { -1, "" }
-  };
+  CWLookup table[] = {{0, "unknown"}, {1, "tolf"},   {2, "tocf"},   {3, "torf"}, {4, "ltor"},
+                      {5, "fromlf"},  {6, "fromcf"}, {7, "fromrf"}, {8, "rtol"}, {-1, ""}};
 
-  return cw_buffer_emit_int(buffer,
-		 cwgame_lookup(cw_game_info_lookup(gameiter->game, "winddir"),
-			       table), 1);
+  return cw_buffer_emit_int(
+    buffer, cwgame_lookup(cw_game_info_lookup(gameiter->game, "winddir"), table), 1);
 }
 
 /* Field 28 */
@@ -455,47 +424,39 @@ DECLARE_FIELDFUNC(cwgame_wind_speed)
     return cw_buffer_emit_int(buffer, 0, 2);
   }
   else {
-    return cw_buffer_emit_int(buffer, cw_atoi(value, "Warning: invalid value '%s' for info,windspeed\n"), 2);
+    return cw_buffer_emit_int(
+      buffer, cw_atoi(value, "Warning: invalid value '%s' for info,windspeed\n"), 2);
   }
 }
 
 /* Field 29 */
 DECLARE_FIELDFUNC(cwgame_field_condition)
 {
-  CWLookup table[] = {
-    { 0, "unknown" }, { 1, "soaked" }, { 2, "wet" }, 
-    { 3, "damp" }, { 4, "dry" }, { -1, "" }
-  };
+  CWLookup table[] = {{0, "unknown"}, {1, "soaked"}, {2, "wet"},
+                      {3, "damp"},    {4, "dry"},    {-1, ""}};
 
-  return cw_buffer_emit_int(buffer,
-		 cwgame_lookup(cw_game_info_lookup(gameiter->game,
-						   "fieldcond"), table), 1);
+  return cw_buffer_emit_int(
+    buffer, cwgame_lookup(cw_game_info_lookup(gameiter->game, "fieldcond"), table), 1);
 }
 
 /* Field 30 */
 DECLARE_FIELDFUNC(cwgame_precipitation)
 {
-  CWLookup table[] = {
-    { 0, "unknown" }, { 1, "none" }, { 2, "drizzle" }, { 3, "showers" },
-    { 4, "rain" }, { 5, "snow" }, { -1, "" }
-  };
+  CWLookup table[] = {{0, "unknown"}, {1, "none"}, {2, "drizzle"}, {3, "showers"},
+                      {4, "rain"},    {5, "snow"}, {-1, ""}};
 
-  return cw_buffer_emit_int(buffer,
-		 cwgame_lookup(cw_game_info_lookup(gameiter->game,
-						   "precip"), table), 1);
+  return cw_buffer_emit_int(
+    buffer, cwgame_lookup(cw_game_info_lookup(gameiter->game, "precip"), table), 1);
 }
 
 /* Field 31 */
 DECLARE_FIELDFUNC(cwgame_sky)
 {
-  CWLookup table[] = {
-    { 0, "unknown" }, { 1, "sunny" }, { 2, "cloudy" }, { 3, "overcast" },
-    { 4, "night" }, { 5, "dome" }, { -1, "" }
-  };
+  CWLookup table[] = {{0, "unknown"}, {1, "sunny"}, {2, "cloudy"}, {3, "overcast"},
+                      {4, "night"},   {5, "dome"},  {-1, ""}};
 
   return cw_buffer_emit_int(buffer,
-		 cwgame_lookup(cw_game_info_lookup(gameiter->game, "sky"),
-			       table), 1);
+                            cwgame_lookup(cw_game_info_lookup(gameiter->game, "sky"), table), 1);
 }
 
 /* Field 32 */
@@ -503,8 +464,9 @@ DECLARE_FIELDFUNC(cwgame_time_of_game)
 {
   char *tmp = cw_game_info_lookup(gameiter->game, "timeofgame");
   return cw_buffer_emit(buffer, (ascii) ? "%d" : "%5d",
-                 (tmp && strcmp(tmp, "") != 0) ?
-                 cw_atoi(tmp, "Warning: invalid value '%s' for info,timeofgame\n") : 0);
+                        (tmp && strcmp(tmp, "") != 0)
+                          ? cw_atoi(tmp, "Warning: invalid value '%s' for info,timeofgame\n")
+                          : 0);
 }
 
 /* Field 33 */
@@ -517,10 +479,10 @@ DECLARE_FIELDFUNC(cwgame_innings)
   else {
     for (i = 1; i < 50; i++) {
       if (box->linescore[i][0] < 0 && box->linescore[i][1] < 0) {
-	      break;
+        break;
       }
     }
-    return cw_buffer_emit_int(buffer, i-1, 2);
+    return cw_buffer_emit_int(buffer, i - 1, 2);
   }
 }
 
@@ -564,8 +526,7 @@ DECLARE_FIELDFUNC(cwgame_home_errors)
 DECLARE_FIELDFUNC(cwgame_visitor_lob)
 {
   if (gameiter->game->first_event != NULL) {
-    return cw_buffer_emit_int(buffer,
-		   cw_gamestate_left_on_base(gameiter->state, 0), 2);
+    return cw_buffer_emit_int(buffer, cw_gamestate_left_on_base(gameiter->state, 0), 2);
   }
   else {
     return cw_buffer_emit_int(buffer, box->lob[0], 2);
@@ -576,8 +537,7 @@ DECLARE_FIELDFUNC(cwgame_visitor_lob)
 DECLARE_FIELDFUNC(cwgame_home_lob)
 {
   if (gameiter->game->first_event != NULL) {
-    return cw_buffer_emit_int(buffer,
-		   cw_gamestate_left_on_base(gameiter->state, 1), 2);
+    return cw_buffer_emit_int(buffer, cw_gamestate_left_on_base(gameiter->state, 1), 2);
   }
   else {
     return cw_buffer_emit_int(buffer, box->lob[1], 2);
@@ -608,8 +568,7 @@ DECLARE_FIELDFUNC(cwgame_gwrbi)
   return cwgame_print_string_or_null(buffer, cw_game_info_lookup(gameiter->game, "gwrbi"), 8);
 }
 
-int
-cwgame_final_pitcher(CWBuffer *buffer, CWGame *game, CWBoxscore *box, int team)
+int cwgame_final_pitcher(CWBuffer *buffer, CWGame *game, CWBoxscore *box, int team)
 {
   CWBoxPitcher *pitcher = box->pitchers[team];
   char *player_id = (pitcher && pitcher->prev) ? pitcher->prev->player_id : "";
@@ -617,8 +576,7 @@ cwgame_final_pitcher(CWBuffer *buffer, CWGame *game, CWBoxscore *box, int team)
 }
 
 /* Fields for starting lineups */
-int
-cwgame_starting_player(CWBuffer *buffer, CWGame *game, int team, int slot)
+int cwgame_starting_player(CWBuffer *buffer, CWGame *game, int team, int slot)
 {
   CWAppearance *starter = cw_game_starter_find(game, team, slot);
   if (starter) {
@@ -629,8 +587,7 @@ cwgame_starting_player(CWBuffer *buffer, CWGame *game, int team, int slot)
   }
 }
 
-int
-cwgame_starting_position(CWBuffer *buffer, CWGame *game, int team, int slot)
+int cwgame_starting_position(CWBuffer *buffer, CWGame *game, int team, int slot)
 {
   CWAppearance *starter = cw_game_starter_find(game, team, slot);
   if (starter) {
@@ -644,164 +601,154 @@ cwgame_starting_position(CWBuffer *buffer, CWGame *game, int team, int slot)
 /* Field 84 */
 DECLARE_FIELDFUNC(cwgame_official_scorer)
 {
-  return cwgame_print_string_or_null(buffer,
-                     cw_game_info_lookup(gameiter->game, "oscorer"), 8);
+  return cwgame_print_string_or_null(buffer, cw_game_info_lookup(gameiter->game, "oscorer"), 8);
 }
 
 /* Field 85 */
 DECLARE_FIELDFUNC(cwgame_game_type)
 {
   char *tmp = cw_game_info_lookup(gameiter->game, "gametype");
-  return cw_buffer_emit_string(buffer,
-                 (tmp && strcmp(tmp, "") != 0) ? tmp : "regular", 12);
+  return cw_buffer_emit_string(buffer, (tmp && strcmp(tmp, "") != 0) ? tmp : "regular", 12);
 }
 
 static field_struct field_data[] = {
-  /*  0 */ { cwgame_game_id, "GAME_ID", "game id" },
-  /*  1 */ { cwgame_date, "GAME_DT", "date" },
-  /*  2 */ { cwgame_number, "GAME_CT", "game number (0 = no double header)" },
-  /*  3 */ { cwgame_day_of_week, "GAME_DY", "day of week" },
-  /*  4 */ { cwgame_start_time, "START_GAME_TM", "start time" },
-  /*  5 */ { cwgame_use_dh, "DH_FL", "DH used flag" },
-  /*  6 */ { cwgame_day_night, "DAYNIGHT_PARK_CD", "day/night flag" },
-  /*  7 */ { cwgame_visitors, "AWAY_TEAM_ID", "visiting team" },
-  /*  8 */ { cwgame_home, "HOME_TEAM_ID", "home team" },
-  /*  9 */ { cwgame_site, "PARK_ID", "game site" },
-  /* 10 */ { cwgame_visitors_pitcher, "AWAY_START_PIT_ID", 
-	     "vis. starting pitcher" },
-  /* 11 */ { cwgame_home_pitcher, "HOME_START_PIT_ID", 
-	     "home starting pitcher" },
-  /* 12 */ { cwgame_umpire_home, "BASE4_UMP_ID", "home plate umpire" },
-  /* 13 */ { cwgame_umpire_1b, "BASE1_UMP_ID", "first base umpire" },
-  /* 14 */ { cwgame_umpire_2b, "BASE2_UMP_ID", "second base umpire" },
-  /* 15 */ { cwgame_umpire_3b, "BASE3_UMP_ID", "third base umpire" },
-  /* 16 */ { cwgame_umpire_lf, "LF_UMP_ID", "left field umpire" },
-  /* 17 */ { cwgame_umpire_rf, "RF_UMP_ID", "right field umpire" },
-  /* 18 */ { cwgame_attendance, "ATTEND_PARK_CT", "attendance" },
-  /* 19 */ { cwgame_scorer, "SCORER_RECORD_ID", "PS scorer" },
-  /* 20 */ { cwgame_translator, "TRANSLATOR_RECORD_ID", "translator" },
-  /* 21 */ { cwgame_inputter, "INPUTTER_RECORD_ID", "inputter" },
-  /* 22 */ { cwgame_inputtime, "INPUT_RECORD_TS", "input time" },
-  /* 23 */ { cwgame_edittime, "EDIT_RECORD_TS", "edit time" },
-  /* 24 */ { cwgame_howscored, "METHOD_RECORD_CD", "how scored" },
-  /* 25 */ { cwgame_pitches, "PITCHES_RECORD_CD", "pitches entered?" },
-  /* 26 */ { cwgame_temperature, "TEMP_PARK_CT", "temperature" },
-  /* 27 */ { cwgame_wind_direction, "WIND_DIRECTION_PARK_CD", 
-	     "wind direction" },
-  /* 28 */ { cwgame_wind_speed, "WIND_SPEED_PARK_CT", "wind speed" },
-  /* 29 */ { cwgame_field_condition, "FIELD_PARK_CD", "field condition" },
-  /* 30 */ { cwgame_precipitation, "PRECIP_PARK_CD", "precipitation" },
-  /* 31 */ { cwgame_sky, "SKY_PARK_CD", "sky" },
-  /* 32 */ { cwgame_time_of_game, "MINUTES_GAME_CT", "time of game" },
-  /* 33 */ { cwgame_innings, "INN_CT", "number of innings" },
-  /* 34 */ { cwgame_visitor_score, "AWAY_SCORE_CT", "visitor final score" },
-  /* 35 */ { cwgame_home_score, "HOME_SCORE_CT", "home final score" },
-  /* 36 */ { cwgame_visitor_hits, "AWAY_HITS_CT", "visitor hits" },
-  /* 37 */ { cwgame_home_hits, "HOME_HITS_CT", "home hits" },
-  /* 38 */ { cwgame_visitor_errors, "AWAY_ERR_CT", "visitor errors" },
-  /* 39 */ { cwgame_home_errors, "HOME_ERR_CT", "home errors" },
-  /* 40 */ { cwgame_visitor_lob, "AWAY_LOB_CT", "visitor left on base" },
-  /* 41 */ { cwgame_home_lob, "HOME_LOB_CT", "home left on base" },
-  /* 42 */ { cwgame_winning_pitcher, "WIN_PIT_ID", "winning pitcher" },
-  /* 43 */ { cwgame_losing_pitcher, "LOSE_PIT_ID", "losing pitcher" },
-  /* 44 */ { cwgame_save, "SAVE_PIT_ID", "save for" },
-  /* 45 */ { cwgame_gwrbi, "GWRBI_BAT_ID", "GW RBI" },
-  /* 46 */ { NULL, "AWAY_LINEUP1_BAT_ID", "visitor batter 1" },
-  /* 47 */ { NULL, "AWAY_LINEUP1_FLD_CD", "visitor position 1" },
-  /* 48 */ { NULL, "AWAY_LINEUP2_BAT_ID", "visitor batter 2" },
-  /* 49 */ { NULL, "AWAY_LINEUP2_FLD_CD", "visitor position 2" },
-  /* 50 */ { NULL, "AWAY_LINEUP3_BAT_ID", "visitor batter 3" },
-  /* 51 */ { NULL, "AWAY_LINEUP3_FLD_CD", "visitor position 3" },
-  /* 52 */ { NULL, "AWAY_LINEUP4_BAT_ID", "visitor batter 4" },
-  /* 53 */ { NULL, "AWAY_LINEUP4_FLD_CD", "visitor position 4" },
-  /* 54 */ { NULL, "AWAY_LINEUP5_BAT_ID", "visitor batter 5" },
-  /* 55 */ { NULL, "AWAY_LINEUP5_FLD_CD", "visitor position 5" },
-  /* 56 */ { NULL, "AWAY_LINEUP6_BAT_ID", "visitor batter 6" },
-  /* 57 */ { NULL, "AWAY_LINEUP6_FLD_CD", "visitor position 6" },
-  /* 58 */ { NULL, "AWAY_LINEUP7_BAT_ID", "visitor batter 7" },
-  /* 59 */ { NULL, "AWAY_LINEUP7_FLD_CD", "visitor position 7" },
-  /* 60 */ { NULL, "AWAY_LINEUP8_BAT_ID", "visitor batter 8" },
-  /* 61 */ { NULL, "AWAY_LINEUP8_FLD_CD", "visitor position 8" },
-  /* 62 */ { NULL, "AWAY_LINEUP9_BAT_ID", "visitor batter 9" },
-  /* 63 */ { NULL, "AWAY_LINEUP9_FLD_CD", "visitor position 9" },
-  /* 64 */ { NULL, "HOME_LINEUP1_BAT_ID", "home batter 1" },
-  /* 65 */ { NULL, "HOME_LINEUP1_FLD_CD", "home position 1" },
-  /* 66 */ { NULL, "HOME_LINEUP2_BAT_ID", "home batter 2" },
-  /* 67 */ { NULL, "HOME_LINEUP2_FLD_CD", "home position 2" },
-  /* 68 */ { NULL, "HOME_LINEUP3_BAT_ID", "home batter 3" },
-  /* 69 */ { NULL, "HOME_LINEUP3_FLD_CD", "home position 3" },
-  /* 70 */ { NULL, "HOME_LINEUP4_BAT_ID", "home batter 4" },
-  /* 71 */ { NULL, "HOME_LINEUP4_FLD_CD", "home position 4" },
-  /* 72 */ { NULL, "HOME_LINEUP5_BAT_ID", "home batter 5" },
-  /* 73 */ { NULL, "HOME_LINEUP5_FLD_CD", "home position 5" },
-  /* 74 */ { NULL, "HOME_LINEUP6_BAT_ID", "home batter 6" },
-  /* 75 */ { NULL, "HOME_LINEUP6_FLD_CD", "home position 6" },
-  /* 76 */ { NULL, "HOME_LINEUP7_BAT_ID", "home batter 7" },
-  /* 77 */ { NULL, "HOME_LINEUP7_FLD_CD", "home position 7" },
-  /* 78 */ { NULL, "HOME_LINEUP8_BAT_ID", "home batter 8" },
-  /* 79 */ { NULL, "HOME_LINEUP8_FLD_CD", "home position 8" },
-  /* 80 */ { NULL, "HOME_LINEUP9_BAT_ID", "home batter 9" },
-  /* 81 */ { NULL, "HOME_LINEUP9_FLD_CD", "home position 9" },
-  /* 82 */ { NULL, "AWAY_FINISH_PIT_ID", 
-	     "visiting finisher (NULL if complete game)" },
-  /* 83 */ { NULL, "HOME_FINISH_PIT_ID", 
-	     "home finisher (NULL if complete game)" },
-  /* 84 */ { cwgame_official_scorer, "OFFICIAL_SCORER_ID",
-	     "official scorer" },
-  /* 85 */ { cwgame_game_type, "GAME_TYPE_TX", "game type"}
-};
+  /*  0 */ {cwgame_game_id, "GAME_ID", "game id"},
+  /*  1 */ {cwgame_date, "GAME_DT", "date"},
+  /*  2 */ {cwgame_number, "GAME_CT", "game number (0 = no double header)"},
+  /*  3 */ {cwgame_day_of_week, "GAME_DY", "day of week"},
+  /*  4 */ {cwgame_start_time, "START_GAME_TM", "start time"},
+  /*  5 */ {cwgame_use_dh, "DH_FL", "DH used flag"},
+  /*  6 */ {cwgame_day_night, "DAYNIGHT_PARK_CD", "day/night flag"},
+  /*  7 */ {cwgame_visitors, "AWAY_TEAM_ID", "visiting team"},
+  /*  8 */ {cwgame_home, "HOME_TEAM_ID", "home team"},
+  /*  9 */ {cwgame_site, "PARK_ID", "game site"},
+  /* 10 */ {cwgame_visitors_pitcher, "AWAY_START_PIT_ID", "vis. starting pitcher"},
+  /* 11 */ {cwgame_home_pitcher, "HOME_START_PIT_ID", "home starting pitcher"},
+  /* 12 */ {cwgame_umpire_home, "BASE4_UMP_ID", "home plate umpire"},
+  /* 13 */ {cwgame_umpire_1b, "BASE1_UMP_ID", "first base umpire"},
+  /* 14 */ {cwgame_umpire_2b, "BASE2_UMP_ID", "second base umpire"},
+  /* 15 */ {cwgame_umpire_3b, "BASE3_UMP_ID", "third base umpire"},
+  /* 16 */ {cwgame_umpire_lf, "LF_UMP_ID", "left field umpire"},
+  /* 17 */ {cwgame_umpire_rf, "RF_UMP_ID", "right field umpire"},
+  /* 18 */ {cwgame_attendance, "ATTEND_PARK_CT", "attendance"},
+  /* 19 */ {cwgame_scorer, "SCORER_RECORD_ID", "PS scorer"},
+  /* 20 */ {cwgame_translator, "TRANSLATOR_RECORD_ID", "translator"},
+  /* 21 */ {cwgame_inputter, "INPUTTER_RECORD_ID", "inputter"},
+  /* 22 */ {cwgame_inputtime, "INPUT_RECORD_TS", "input time"},
+  /* 23 */ {cwgame_edittime, "EDIT_RECORD_TS", "edit time"},
+  /* 24 */ {cwgame_howscored, "METHOD_RECORD_CD", "how scored"},
+  /* 25 */ {cwgame_pitches, "PITCHES_RECORD_CD", "pitches entered?"},
+  /* 26 */ {cwgame_temperature, "TEMP_PARK_CT", "temperature"},
+  /* 27 */ {cwgame_wind_direction, "WIND_DIRECTION_PARK_CD", "wind direction"},
+  /* 28 */ {cwgame_wind_speed, "WIND_SPEED_PARK_CT", "wind speed"},
+  /* 29 */ {cwgame_field_condition, "FIELD_PARK_CD", "field condition"},
+  /* 30 */ {cwgame_precipitation, "PRECIP_PARK_CD", "precipitation"},
+  /* 31 */ {cwgame_sky, "SKY_PARK_CD", "sky"},
+  /* 32 */ {cwgame_time_of_game, "MINUTES_GAME_CT", "time of game"},
+  /* 33 */ {cwgame_innings, "INN_CT", "number of innings"},
+  /* 34 */ {cwgame_visitor_score, "AWAY_SCORE_CT", "visitor final score"},
+  /* 35 */ {cwgame_home_score, "HOME_SCORE_CT", "home final score"},
+  /* 36 */ {cwgame_visitor_hits, "AWAY_HITS_CT", "visitor hits"},
+  /* 37 */ {cwgame_home_hits, "HOME_HITS_CT", "home hits"},
+  /* 38 */ {cwgame_visitor_errors, "AWAY_ERR_CT", "visitor errors"},
+  /* 39 */ {cwgame_home_errors, "HOME_ERR_CT", "home errors"},
+  /* 40 */ {cwgame_visitor_lob, "AWAY_LOB_CT", "visitor left on base"},
+  /* 41 */ {cwgame_home_lob, "HOME_LOB_CT", "home left on base"},
+  /* 42 */ {cwgame_winning_pitcher, "WIN_PIT_ID", "winning pitcher"},
+  /* 43 */ {cwgame_losing_pitcher, "LOSE_PIT_ID", "losing pitcher"},
+  /* 44 */ {cwgame_save, "SAVE_PIT_ID", "save for"},
+  /* 45 */ {cwgame_gwrbi, "GWRBI_BAT_ID", "GW RBI"},
+  /* 46 */ {NULL, "AWAY_LINEUP1_BAT_ID", "visitor batter 1"},
+  /* 47 */ {NULL, "AWAY_LINEUP1_FLD_CD", "visitor position 1"},
+  /* 48 */ {NULL, "AWAY_LINEUP2_BAT_ID", "visitor batter 2"},
+  /* 49 */ {NULL, "AWAY_LINEUP2_FLD_CD", "visitor position 2"},
+  /* 50 */ {NULL, "AWAY_LINEUP3_BAT_ID", "visitor batter 3"},
+  /* 51 */ {NULL, "AWAY_LINEUP3_FLD_CD", "visitor position 3"},
+  /* 52 */ {NULL, "AWAY_LINEUP4_BAT_ID", "visitor batter 4"},
+  /* 53 */ {NULL, "AWAY_LINEUP4_FLD_CD", "visitor position 4"},
+  /* 54 */ {NULL, "AWAY_LINEUP5_BAT_ID", "visitor batter 5"},
+  /* 55 */ {NULL, "AWAY_LINEUP5_FLD_CD", "visitor position 5"},
+  /* 56 */ {NULL, "AWAY_LINEUP6_BAT_ID", "visitor batter 6"},
+  /* 57 */ {NULL, "AWAY_LINEUP6_FLD_CD", "visitor position 6"},
+  /* 58 */ {NULL, "AWAY_LINEUP7_BAT_ID", "visitor batter 7"},
+  /* 59 */ {NULL, "AWAY_LINEUP7_FLD_CD", "visitor position 7"},
+  /* 60 */ {NULL, "AWAY_LINEUP8_BAT_ID", "visitor batter 8"},
+  /* 61 */ {NULL, "AWAY_LINEUP8_FLD_CD", "visitor position 8"},
+  /* 62 */ {NULL, "AWAY_LINEUP9_BAT_ID", "visitor batter 9"},
+  /* 63 */ {NULL, "AWAY_LINEUP9_FLD_CD", "visitor position 9"},
+  /* 64 */ {NULL, "HOME_LINEUP1_BAT_ID", "home batter 1"},
+  /* 65 */ {NULL, "HOME_LINEUP1_FLD_CD", "home position 1"},
+  /* 66 */ {NULL, "HOME_LINEUP2_BAT_ID", "home batter 2"},
+  /* 67 */ {NULL, "HOME_LINEUP2_FLD_CD", "home position 2"},
+  /* 68 */ {NULL, "HOME_LINEUP3_BAT_ID", "home batter 3"},
+  /* 69 */ {NULL, "HOME_LINEUP3_FLD_CD", "home position 3"},
+  /* 70 */ {NULL, "HOME_LINEUP4_BAT_ID", "home batter 4"},
+  /* 71 */ {NULL, "HOME_LINEUP4_FLD_CD", "home position 4"},
+  /* 72 */ {NULL, "HOME_LINEUP5_BAT_ID", "home batter 5"},
+  /* 73 */ {NULL, "HOME_LINEUP5_FLD_CD", "home position 5"},
+  /* 74 */ {NULL, "HOME_LINEUP6_BAT_ID", "home batter 6"},
+  /* 75 */ {NULL, "HOME_LINEUP6_FLD_CD", "home position 6"},
+  /* 76 */ {NULL, "HOME_LINEUP7_BAT_ID", "home batter 7"},
+  /* 77 */ {NULL, "HOME_LINEUP7_FLD_CD", "home position 7"},
+  /* 78 */ {NULL, "HOME_LINEUP8_BAT_ID", "home batter 8"},
+  /* 79 */ {NULL, "HOME_LINEUP8_FLD_CD", "home position 8"},
+  /* 80 */ {NULL, "HOME_LINEUP9_BAT_ID", "home batter 9"},
+  /* 81 */ {NULL, "HOME_LINEUP9_FLD_CD", "home position 9"},
+  /* 82 */ {NULL, "AWAY_FINISH_PIT_ID", "visiting finisher (NULL if complete game)"},
+  /* 83 */ {NULL, "HOME_FINISH_PIT_ID", "home finisher (NULL if complete game)"},
+  /* 84 */ {cwgame_official_scorer, "OFFICIAL_SCORER_ID", "official scorer"},
+  /* 85 */ {cwgame_game_type, "GAME_TYPE_TX", "game type"}};
 
-#define DECLARE_TABULATED_BATTER_FUNC(funcname, alignment, fieldname) \
-DECLARE_FIELDFUNC(funcname) \
-{ \
-  int slot, tot = 0; \
-  for (slot = 1; slot <= 9; slot++) { \
-    CWBoxPlayer *player = cw_box_get_starter(box, alignment, slot); \
-    while (player != NULL) { \
-      if (player->batting->fieldname < 0) { \
-         tot = -1; \
- 	     break; \
-      } \
-      tot += player->batting->fieldname; \
-      player = player->next; \
-    } \
-  } \
-  return cwgame_print_integer_or_null(buffer, tot); \
-}
+#define DECLARE_TABULATED_BATTER_FUNC(funcname, alignment, fieldname)                             \
+  DECLARE_FIELDFUNC(funcname)                                                                     \
+  {                                                                                               \
+    int slot, tot = 0;                                                                            \
+    for (slot = 1; slot <= 9; slot++) {                                                           \
+      CWBoxPlayer *player = cw_box_get_starter(box, alignment, slot);                             \
+      while (player != NULL) {                                                                    \
+        if (player->batting->fieldname < 0) {                                                     \
+          tot = -1;                                                                               \
+          break;                                                                                  \
+        }                                                                                         \
+        tot += player->batting->fieldname;                                                        \
+        player = player->next;                                                                    \
+      }                                                                                           \
+    }                                                                                             \
+    return cwgame_print_integer_or_null(buffer, tot);                                             \
+  }
 
-#define DECLARE_TABULATED_PITCHER_FUNC(funcname, alignment, fieldname) \
-DECLARE_FIELDFUNC(funcname) \
-{ \
-  int tot = 0; \
-  CWBoxPitcher *pitcher = cw_box_get_starting_pitcher(box, alignment); \
-  while (pitcher != NULL) { \
-    tot += pitcher->pitching->fieldname; \
-    pitcher = pitcher->next; \
-  } \
-  return cwgame_print_integer_or_null(buffer, tot); \
-}
+#define DECLARE_TABULATED_PITCHER_FUNC(funcname, alignment, fieldname)                            \
+  DECLARE_FIELDFUNC(funcname)                                                                     \
+  {                                                                                               \
+    int tot = 0;                                                                                  \
+    CWBoxPitcher *pitcher = cw_box_get_starting_pitcher(box, alignment);                          \
+    while (pitcher != NULL) {                                                                     \
+      tot += pitcher->pitching->fieldname;                                                        \
+      pitcher = pitcher->next;                                                                    \
+    }                                                                                             \
+    return cwgame_print_integer_or_null(buffer, tot);                                             \
+  }
 
-
-#define DECLARE_TABULATED_FIELDER_FUNC(funcname, alignment, fieldname, frompos, topos) \
-DECLARE_FIELDFUNC(funcname) \
-{ \
-  int slot, pos, tot = 0; \
-  for (slot = 0; slot <= 9; slot++) { \
-    CWBoxPlayer *player = cw_box_get_starter(box, alignment, slot); \
-    while (player != NULL) { \
-      for (pos = frompos; pos <= topos; pos++) { \
-         if (player->fielding[pos] != NULL) { \
-            if (player->fielding[pos]->fieldname < 0) { \
-              return cw_buffer_emit(buffer, "%d", -1); \
-            } \
-            tot += player->fielding[pos]->fieldname; \
-         } \
-      } \
-      player = player->next; \
-    } \
-  } \
-  return cwgame_print_integer_or_null(buffer, tot); \
-}
+#define DECLARE_TABULATED_FIELDER_FUNC(funcname, alignment, fieldname, frompos, topos)            \
+  DECLARE_FIELDFUNC(funcname)                                                                     \
+  {                                                                                               \
+    int slot, pos, tot = 0;                                                                       \
+    for (slot = 0; slot <= 9; slot++) {                                                           \
+      CWBoxPlayer *player = cw_box_get_starter(box, alignment, slot);                             \
+      while (player != NULL) {                                                                    \
+        for (pos = frompos; pos <= topos; pos++) {                                                \
+          if (player->fielding[pos] != NULL) {                                                    \
+            if (player->fielding[pos]->fieldname < 0) {                                           \
+              return cw_buffer_emit(buffer, "%d", -1);                                            \
+            }                                                                                     \
+            tot += player->fielding[pos]->fieldname;                                              \
+          }                                                                                       \
+        }                                                                                         \
+        player = player->next;                                                                    \
+      }                                                                                           \
+    }                                                                                             \
+    return cwgame_print_integer_or_null(buffer, tot);                                             \
+  }
 
 /*************************************************************************
  * Implementation of "extended" fields
@@ -844,7 +791,7 @@ DECLARE_FIELDFUNC(cwgame_length_outs)
       pitcher = pitcher->next;
     }
   }
-  
+
   return cw_buffer_emit_int(buffer, outs, 3);
 }
 
@@ -954,7 +901,8 @@ DECLARE_FIELDFUNC(cwgame_visitors_pitchers)
   CWBoxPitcher *pitcher = cw_box_get_starting_pitcher(box, 0);
   int i = 0;
 
-  for (; pitcher != NULL; pitcher = pitcher->next, i++);
+  for (; pitcher != NULL; pitcher = pitcher->next, i++)
+    ;
   return cw_buffer_emit_int(buffer, i, 2);
 }
 
@@ -1045,7 +993,8 @@ DECLARE_FIELDFUNC(cwgame_home_pitchers)
   CWBoxPitcher *pitcher = cw_box_get_starting_pitcher(box, 1);
   int i = 0;
 
-  for (; pitcher != NULL; pitcher = pitcher->next, i++);
+  for (; pitcher != NULL; pitcher = pitcher->next, i++)
+    ;
   return cw_buffer_emit_int(buffer, i, 2);
 }
 
@@ -1184,8 +1133,8 @@ DECLARE_FIELDFUNC(cwgame_save_pitcher_name)
 /* Field 99 */
 DECLARE_FIELDFUNC(cwgame_goahead_rbi_id)
 {
-  return cw_buffer_emit_string(buffer,
-		 (gameiter->state->go_ahead_rbi) ? gameiter->state->go_ahead_rbi : "", 8);
+  return cw_buffer_emit_string(
+    buffer, (gameiter->state->go_ahead_rbi) ? gameiter->state->go_ahead_rbi : "", 8);
 }
 
 /* Field 100 */
@@ -1200,19 +1149,16 @@ DECLARE_FIELDFUNC(cwgame_goahead_rbi_name)
   }
 }
 
-int cwgame_find_lineup_name(CWGame *game, CWBuffer *buffer,
-                            int alignment, int slot,
+int cwgame_find_lineup_name(CWGame *game, CWBuffer *buffer, int alignment, int slot,
                             CWRoster *visitors, CWRoster *home)
 {
   CWAppearance *starter = cw_game_starter_find(game, alignment, slot);
   if (starter) {
-    return cwgame_find_player_name(game, buffer, starter->player_id,
-                                   visitors, home);
+    return cwgame_find_player_name(game, buffer, starter->player_id, visitors, home);
   }
   else {
     return cw_buffer_emit_string(buffer, "(null)", 30);
   }
-
 }
 
 DECLARE_FIELDFUNC(cwgame_visitors_batter1_name)
@@ -1327,118 +1273,114 @@ DECLARE_FIELDFUNC(cwgame_scheduled_innings)
 {
   char *tmp;
   return cw_buffer_emit(buffer, "%s",
-		 (tmp = cw_game_info_lookup(gameiter->game, "innings")) ?
-		 tmp : "9");
+                        (tmp = cw_game_info_lookup(gameiter->game, "innings")) ? tmp : "9");
 }
 
 DECLARE_FIELDFUNC(cwgame_tiebreaker)
 {
   char *tmp;
   return cw_buffer_emit(buffer, "\"%s\"",
-		 (tmp = cw_game_info_lookup(gameiter->game, "tiebreaker")) ?
-		 tmp : "");
+                        (tmp = cw_game_info_lookup(gameiter->game, "tiebreaker")) ? tmp : "");
 }
 
-
 static field_struct ext_field_data[] = {
-  { cwgame_visitors_league, "AWAY_TEAM_LEAGUE_ID", "visiting team league" },
-  { cwgame_home_league, "HOME_TEAM_LEAGUE_ID", "home team league" },
-  { cwgame_visitors_game, "AWAY_TEAM_GAME_CT", "visiting team game number" },
-  { cwgame_home_game, "HOME_TEAM_GAME_CT", "home team game number" },
-  { cwgame_length_outs, "OUTS_CT", "length of game in outs" },
-  { cwgame_completion_info, "COMPLETION_TX", "information on completion of game" },
-  { cwgame_forfeit_info, "FORFEIT_TX", "information on forfeit of game" },
-  { cwgame_protest_info, "PROTEST_TX", "information on protest of game" },
-  { cwgame_visitors_line, "AWAY_LINE_TX", "visiting team linescore" },
-  { cwgame_home_line, "HOME_LINE_TX", "home team linescore" },
-  { cwgame_visitors_ab, "AWAY_AB_CT", "visiting team AB" },
-  { cwgame_visitors_2b, "AWAY_2B_CT", "visiting team 2B" },
-  { cwgame_visitors_3b, "AWAY_3B_CT", "visiting team 3B" },
-  { cwgame_visitors_hr, "AWAY_HR_CT", "visiting team HR" },
-  { cwgame_visitors_bi, "AWAY_BI_CT", "visiting team RBI" },
-  { cwgame_visitors_sh, "AWAY_SH_CT", "visiting team SH" },
-  { cwgame_visitors_sf, "AWAY_SF_CT", "visiting team SF" },
-  { cwgame_visitors_hp, "AWAY_HP_CT", "visiting team HP" },
-  { cwgame_visitors_bb, "AWAY_BB_CT", "visiting team BB" },
-  { cwgame_visitors_ibb, "AWAY_IBB_CT", "visiting team IBB" },
-  { cwgame_visitors_so, "AWAY_SO_CT", "visiting team SO" },
-  { cwgame_visitors_sb, "AWAY_SB_CT", "visiting team SB" },
-  { cwgame_visitors_cs, "AWAY_CS_CT", "visiting team CS" },
-  { cwgame_visitors_gdp, "AWAY_GDP_CT", "visiting team GDP" },
-  { cwgame_visitors_xi, "AWAY_XI_CT", "visiting team reach on interference" },
-  { cwgame_visitors_pitchers, "AWAY_PITCHER_CT", "number of pitchers used by visiting team" },
-  { cwgame_visitors_er, "AWAY_ER_CT", "visiting team individual ER allowed" },
-  { cwgame_visitors_ter, "AWAY_TER_CT", "visiting team team ER allowed" },
-  { cwgame_visitors_wp, "AWAY_WP_CT", "visiting team WP" },
-  { cwgame_visitors_bk, "AWAY_BK_CT", "visiting team BK" },
-  { cwgame_visitors_po, "AWAY_PO_CT", "visiting team PO" },
-  { cwgame_visitors_a, "AWAY_A_CT", "visiting team A" },
-  { cwgame_visitors_pb, "AWAY_PB_CT", "visiting team PB" },
-  { cwgame_visitors_dp, "AWAY_DP_CT", "visiting team DP" },
-  { cwgame_visitors_tp, "AWAY_TP_CT", "visiting team TP" },
-  { cwgame_home_ab, "HOME_AB_CT", "home team AB" },
-  { cwgame_home_2b, "HOME_2B_CT", "home team 2B" },
-  { cwgame_home_3b, "HOME_3B_CT", "home team 3B" },
-  { cwgame_home_hr, "HOME_HR_CT", "home team HR" },
-  { cwgame_home_bi, "HOME_BI_CT", "home team RBI" },
-  { cwgame_home_sh, "HOME_SH_CT", "home team SH" },
-  { cwgame_home_sf, "HOME_SF_CT", "home team SF" },
-  { cwgame_home_hp, "HOME_HP_CT", "home team HP" },
-  { cwgame_home_bb, "HOME_BB_CT", "home team BB" },
-  { cwgame_home_ibb, "HOME_IBB_CT", "home team IBB" },
-  { cwgame_home_so, "HOME_SO_CT", "home team SO" },
-  { cwgame_home_sb, "HOME_SB_CT", "home team SB" },
-  { cwgame_home_cs, "HOME_CS_CT", "home team CS" },
-  { cwgame_home_gdp, "HOME_GDP_CT", "home team GDP" },
-  { cwgame_home_xi, "HOME_XI_CT", "home team reach on interference" },
-  { cwgame_home_pitchers, "HOME_PITCHER_CT", "number of pitchers used by home team" },
-  { cwgame_home_er, "HOME_ER_CT", "home team individual ER allowed" },
-  { cwgame_home_ter, "HOME_TER_CT", "home team team ER allowed" },
-  { cwgame_home_wp, "HOME_WP_CT", "home team WP" },
-  { cwgame_home_bk, "HOME_BK_CT", "home team BK" },
-  { cwgame_home_po, "HOME_PO_CT", "home team PO" },
-  { cwgame_home_a, "HOME_A_CT", "home team A" },
-  { cwgame_home_pb, "HOME_PB_CT", "home team PB" },
-  { cwgame_home_dp, "HOME_DP_CT", "home team DP" },
-  { cwgame_home_tp, "HOME_TP_CT", "home team TP" },
-  { cwgame_umpire_home_name, "UMP_HOME_NAME_TX", "home plate umpire name" },
-  { cwgame_umpire_1b_name, "UMP_1B_NAME_TX", "first base umpire name" },
-  { cwgame_umpire_2b_name, "UMP_2B_NAME_TX", "second base umpire name" },
-  { cwgame_umpire_3b_name, "UMP_3B_NAME_TX", "third base umpire name" },
-  { cwgame_umpire_lf_name, "UMP_LF_NAME_TX", "left field umpire name" },
-  { cwgame_umpire_rf_name, "UMP_RF_NAME_TX", "right field umpire name" },
-  { cwgame_visitors_manager_id, "AWAY_MANAGER_ID", "visitors manager ID" },
-  { cwgame_visitors_manager_name, "AWAY_MANAGER_NAME_TX", "visitors manager name" },
-  { cwgame_home_manager_id, "HOME_MANAGER_ID", "home manager ID" },
-  { cwgame_home_manager_name, "HOME_MANAGER_NAME_TX", "home manager name" },
-  { cwgame_winning_pitcher_name, "WIN_PIT_NAME_TX", "winning pitcher name" },
-  { cwgame_losing_pitcher_name, "LOSE_PIT_NAME_TX", "losing pitcher name" },
-  { cwgame_save_pitcher_name, "SAVE_PIT_NAME_TX", "save pitcher name" },
-  { cwgame_goahead_rbi_id, "GOAHEAD_RBI_ID", "batter with goahead RBI ID" },
-  { cwgame_goahead_rbi_name, "GOAHEAD_RBI_NAME_TX", "batter with goahead RBI" },
-  { cwgame_visitors_batter1_name, "AWAY_LINEUP1_BAT_NAME_TX", "visitor batter 1 name" },
-  { cwgame_visitors_batter2_name, "AWAY_LINEUP2_BAT_NAME_TX", "visitor batter 2 name" },
-  { cwgame_visitors_batter3_name, "AWAY_LINEUP3_BAT_NAME_TX", "visitor batter 3 name" },
-  { cwgame_visitors_batter4_name, "AWAY_LINEUP4_BAT_NAME_TX", "visitor batter 4 name" },
-  { cwgame_visitors_batter5_name, "AWAY_LINEUP5_BAT_NAME_TX", "visitor batter 5 name" },
-  { cwgame_visitors_batter6_name, "AWAY_LINEUP6_BAT_NAME_TX", "visitor batter 6 name" },
-  { cwgame_visitors_batter7_name, "AWAY_LINEUP7_BAT_NAME_TX", "visitor batter 7 name" },
-  { cwgame_visitors_batter8_name, "AWAY_LINEUP8_BAT_NAME_TX", "visitor batter 8 name" },
-  { cwgame_visitors_batter9_name, "AWAY_LINEUP9_BAT_NAME_TX", "visitor batter 9 name" },
-  { cwgame_home_batter1_name, "HOME_LINEUP1_BAT_NAME_TX", "home batter 1 name" },
-  { cwgame_home_batter2_name, "HOME_LINEUP2_BAT_NAME_TX", "home batter 2 name" },
-  { cwgame_home_batter3_name, "HOME_LINEUP3_BAT_NAME_TX", "home batter 3 name" },
-  { cwgame_home_batter4_name, "HOME_LINEUP4_BAT_NAME_TX", "home batter 4 name" },
-  { cwgame_home_batter5_name, "HOME_LINEUP5_BAT_NAME_TX", "home batter 5 name" },
-  { cwgame_home_batter6_name, "HOME_LINEUP6_BAT_NAME_TX", "home batter 6 name" },
-  { cwgame_home_batter7_name, "HOME_LINEUP7_BAT_NAME_TX", "home batter 7 name" },
-  { cwgame_home_batter8_name, "HOME_LINEUP8_BAT_NAME_TX", "home batter 8 name" },
-  { cwgame_home_batter9_name, "HOME_LINEUP9_BAT_NAME_TX", "home batter 9 name" },
-  { cwgame_additional_info, "ADD_INFO_TX", "additional information" },
-  { cwgame_acquisition_info, "ACQ_INFO_TX", "acquisition information" },
-  { cwgame_scheduled_innings, "SCHED_INN_CT", "scheduled length of game in innings " },
-  { cwgame_tiebreaker, "TIEBREAK_CD", "tiebreaker rule type in use" }
-};
+  {cwgame_visitors_league, "AWAY_TEAM_LEAGUE_ID", "visiting team league"},
+  {cwgame_home_league, "HOME_TEAM_LEAGUE_ID", "home team league"},
+  {cwgame_visitors_game, "AWAY_TEAM_GAME_CT", "visiting team game number"},
+  {cwgame_home_game, "HOME_TEAM_GAME_CT", "home team game number"},
+  {cwgame_length_outs, "OUTS_CT", "length of game in outs"},
+  {cwgame_completion_info, "COMPLETION_TX", "information on completion of game"},
+  {cwgame_forfeit_info, "FORFEIT_TX", "information on forfeit of game"},
+  {cwgame_protest_info, "PROTEST_TX", "information on protest of game"},
+  {cwgame_visitors_line, "AWAY_LINE_TX", "visiting team linescore"},
+  {cwgame_home_line, "HOME_LINE_TX", "home team linescore"},
+  {cwgame_visitors_ab, "AWAY_AB_CT", "visiting team AB"},
+  {cwgame_visitors_2b, "AWAY_2B_CT", "visiting team 2B"},
+  {cwgame_visitors_3b, "AWAY_3B_CT", "visiting team 3B"},
+  {cwgame_visitors_hr, "AWAY_HR_CT", "visiting team HR"},
+  {cwgame_visitors_bi, "AWAY_BI_CT", "visiting team RBI"},
+  {cwgame_visitors_sh, "AWAY_SH_CT", "visiting team SH"},
+  {cwgame_visitors_sf, "AWAY_SF_CT", "visiting team SF"},
+  {cwgame_visitors_hp, "AWAY_HP_CT", "visiting team HP"},
+  {cwgame_visitors_bb, "AWAY_BB_CT", "visiting team BB"},
+  {cwgame_visitors_ibb, "AWAY_IBB_CT", "visiting team IBB"},
+  {cwgame_visitors_so, "AWAY_SO_CT", "visiting team SO"},
+  {cwgame_visitors_sb, "AWAY_SB_CT", "visiting team SB"},
+  {cwgame_visitors_cs, "AWAY_CS_CT", "visiting team CS"},
+  {cwgame_visitors_gdp, "AWAY_GDP_CT", "visiting team GDP"},
+  {cwgame_visitors_xi, "AWAY_XI_CT", "visiting team reach on interference"},
+  {cwgame_visitors_pitchers, "AWAY_PITCHER_CT", "number of pitchers used by visiting team"},
+  {cwgame_visitors_er, "AWAY_ER_CT", "visiting team individual ER allowed"},
+  {cwgame_visitors_ter, "AWAY_TER_CT", "visiting team team ER allowed"},
+  {cwgame_visitors_wp, "AWAY_WP_CT", "visiting team WP"},
+  {cwgame_visitors_bk, "AWAY_BK_CT", "visiting team BK"},
+  {cwgame_visitors_po, "AWAY_PO_CT", "visiting team PO"},
+  {cwgame_visitors_a, "AWAY_A_CT", "visiting team A"},
+  {cwgame_visitors_pb, "AWAY_PB_CT", "visiting team PB"},
+  {cwgame_visitors_dp, "AWAY_DP_CT", "visiting team DP"},
+  {cwgame_visitors_tp, "AWAY_TP_CT", "visiting team TP"},
+  {cwgame_home_ab, "HOME_AB_CT", "home team AB"},
+  {cwgame_home_2b, "HOME_2B_CT", "home team 2B"},
+  {cwgame_home_3b, "HOME_3B_CT", "home team 3B"},
+  {cwgame_home_hr, "HOME_HR_CT", "home team HR"},
+  {cwgame_home_bi, "HOME_BI_CT", "home team RBI"},
+  {cwgame_home_sh, "HOME_SH_CT", "home team SH"},
+  {cwgame_home_sf, "HOME_SF_CT", "home team SF"},
+  {cwgame_home_hp, "HOME_HP_CT", "home team HP"},
+  {cwgame_home_bb, "HOME_BB_CT", "home team BB"},
+  {cwgame_home_ibb, "HOME_IBB_CT", "home team IBB"},
+  {cwgame_home_so, "HOME_SO_CT", "home team SO"},
+  {cwgame_home_sb, "HOME_SB_CT", "home team SB"},
+  {cwgame_home_cs, "HOME_CS_CT", "home team CS"},
+  {cwgame_home_gdp, "HOME_GDP_CT", "home team GDP"},
+  {cwgame_home_xi, "HOME_XI_CT", "home team reach on interference"},
+  {cwgame_home_pitchers, "HOME_PITCHER_CT", "number of pitchers used by home team"},
+  {cwgame_home_er, "HOME_ER_CT", "home team individual ER allowed"},
+  {cwgame_home_ter, "HOME_TER_CT", "home team team ER allowed"},
+  {cwgame_home_wp, "HOME_WP_CT", "home team WP"},
+  {cwgame_home_bk, "HOME_BK_CT", "home team BK"},
+  {cwgame_home_po, "HOME_PO_CT", "home team PO"},
+  {cwgame_home_a, "HOME_A_CT", "home team A"},
+  {cwgame_home_pb, "HOME_PB_CT", "home team PB"},
+  {cwgame_home_dp, "HOME_DP_CT", "home team DP"},
+  {cwgame_home_tp, "HOME_TP_CT", "home team TP"},
+  {cwgame_umpire_home_name, "UMP_HOME_NAME_TX", "home plate umpire name"},
+  {cwgame_umpire_1b_name, "UMP_1B_NAME_TX", "first base umpire name"},
+  {cwgame_umpire_2b_name, "UMP_2B_NAME_TX", "second base umpire name"},
+  {cwgame_umpire_3b_name, "UMP_3B_NAME_TX", "third base umpire name"},
+  {cwgame_umpire_lf_name, "UMP_LF_NAME_TX", "left field umpire name"},
+  {cwgame_umpire_rf_name, "UMP_RF_NAME_TX", "right field umpire name"},
+  {cwgame_visitors_manager_id, "AWAY_MANAGER_ID", "visitors manager ID"},
+  {cwgame_visitors_manager_name, "AWAY_MANAGER_NAME_TX", "visitors manager name"},
+  {cwgame_home_manager_id, "HOME_MANAGER_ID", "home manager ID"},
+  {cwgame_home_manager_name, "HOME_MANAGER_NAME_TX", "home manager name"},
+  {cwgame_winning_pitcher_name, "WIN_PIT_NAME_TX", "winning pitcher name"},
+  {cwgame_losing_pitcher_name, "LOSE_PIT_NAME_TX", "losing pitcher name"},
+  {cwgame_save_pitcher_name, "SAVE_PIT_NAME_TX", "save pitcher name"},
+  {cwgame_goahead_rbi_id, "GOAHEAD_RBI_ID", "batter with goahead RBI ID"},
+  {cwgame_goahead_rbi_name, "GOAHEAD_RBI_NAME_TX", "batter with goahead RBI"},
+  {cwgame_visitors_batter1_name, "AWAY_LINEUP1_BAT_NAME_TX", "visitor batter 1 name"},
+  {cwgame_visitors_batter2_name, "AWAY_LINEUP2_BAT_NAME_TX", "visitor batter 2 name"},
+  {cwgame_visitors_batter3_name, "AWAY_LINEUP3_BAT_NAME_TX", "visitor batter 3 name"},
+  {cwgame_visitors_batter4_name, "AWAY_LINEUP4_BAT_NAME_TX", "visitor batter 4 name"},
+  {cwgame_visitors_batter5_name, "AWAY_LINEUP5_BAT_NAME_TX", "visitor batter 5 name"},
+  {cwgame_visitors_batter6_name, "AWAY_LINEUP6_BAT_NAME_TX", "visitor batter 6 name"},
+  {cwgame_visitors_batter7_name, "AWAY_LINEUP7_BAT_NAME_TX", "visitor batter 7 name"},
+  {cwgame_visitors_batter8_name, "AWAY_LINEUP8_BAT_NAME_TX", "visitor batter 8 name"},
+  {cwgame_visitors_batter9_name, "AWAY_LINEUP9_BAT_NAME_TX", "visitor batter 9 name"},
+  {cwgame_home_batter1_name, "HOME_LINEUP1_BAT_NAME_TX", "home batter 1 name"},
+  {cwgame_home_batter2_name, "HOME_LINEUP2_BAT_NAME_TX", "home batter 2 name"},
+  {cwgame_home_batter3_name, "HOME_LINEUP3_BAT_NAME_TX", "home batter 3 name"},
+  {cwgame_home_batter4_name, "HOME_LINEUP4_BAT_NAME_TX", "home batter 4 name"},
+  {cwgame_home_batter5_name, "HOME_LINEUP5_BAT_NAME_TX", "home batter 5 name"},
+  {cwgame_home_batter6_name, "HOME_LINEUP6_BAT_NAME_TX", "home batter 6 name"},
+  {cwgame_home_batter7_name, "HOME_LINEUP7_BAT_NAME_TX", "home batter 7 name"},
+  {cwgame_home_batter8_name, "HOME_LINEUP8_BAT_NAME_TX", "home batter 8 name"},
+  {cwgame_home_batter9_name, "HOME_LINEUP9_BAT_NAME_TX", "home batter 9 name"},
+  {cwgame_additional_info, "ADD_INFO_TX", "additional information"},
+  {cwgame_acquisition_info, "ACQ_INFO_TX", "acquisition information"},
+  {cwgame_scheduled_innings, "SCHED_INN_CT", "scheduled length of game in innings "},
+  {cwgame_tiebreaker, "TIEBREAK_CD", "tiebreaker rule type in use"}};
 
 void cwgame_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
 {
@@ -1462,10 +1404,10 @@ void cwgame_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
   for (t = 0; t <= 1; t++) {
     for (i = 1; i <= 9; i++) {
       for (j = 0; j <= 1; j++) {
-	      if (fields[46 + t*18 + 2*(i-1) + j]) {
-	         ((j == 0) ? cwgame_starting_player(&buf, game, t, i) :
-		       cwgame_starting_position(&buf, game, t, i));
-	      }
+        if (fields[46 + t * 18 + 2 * (i - 1) + j]) {
+          ((j == 0) ? cwgame_starting_player(&buf, game, t, i)
+                    : cwgame_starting_position(&buf, game, t, i));
+        }
       }
     }
   }
@@ -1477,13 +1419,13 @@ void cwgame_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
     }
     t++;
   }
-  
+
   for (i = 84; i <= max_field; i++) {
     if (fields[i]) {
       (*field_data[i].f)(&buf, gameiter, box, visitors, home);
     }
   }
-    
+
   for (i = 0; i <= max_ext_field; i++) {
     if (ext_fields[i]) {
       (*ext_field_data[i].f)(&buf, gameiter, box, visitors, home);
@@ -1491,8 +1433,7 @@ void cwgame_process_game(CWGame *game, CWRoster *visitors, CWRoster *home)
   }
 
   if (buf.truncated) {
-    fprintf(stderr, "Error: output buffer truncated for game %s\n",
-            game->game_id);
+    fprintf(stderr, "Error: output buffer truncated for game %s\n", game->game_id);
     exit(1);
   }
 
@@ -1531,8 +1472,7 @@ void cwgame_print_help(void)
 
 void (*cwtools_print_help)(void) = cwgame_print_help;
 
-void
-cwgame_print_field_list(void)
+void cwgame_print_field_list(void)
 {
   int i;
 
@@ -1562,21 +1502,20 @@ cwgame_print_field_list(void)
 
 void (*cwtools_print_field_list)(void) = cwgame_print_field_list;
 
-void
-cwgame_print_welcome_message(char *argv0)
+void cwgame_print_welcome_message(char *argv0)
 {
-  fprintf(stderr, 
-	  "\nChadwick expanded game descriptor, version " VERSION);
+  fprintf(stderr, "\nChadwick expanded game descriptor, version " VERSION);
   fprintf(stderr, "\n  Type '%s -h' for help.\n", argv0);
-  fprintf(stderr, "Copyright (c) 2002-2026\nDr T L Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)\n");
+  fprintf(
+    stderr,
+    "Copyright (c) 2002-2026\nDr T L Turocy, Chadwick Baseball Bureau (ted.turocy@gmail.com)\n");
   fprintf(stderr, "This is free software, "
-	  "subject to the terms of the GNU GPL license.\n\n");
+                  "subject to the terms of the GNU GPL license.\n\n");
 }
 
 void (*cwtools_print_welcome_message)(char *) = cwgame_print_welcome_message;
 
-void
-cwgame_initialize(void)
+void cwgame_initialize(void)
 {
   int i;
   char output_line[4096];
@@ -1610,8 +1549,7 @@ cwgame_initialize(void)
 
 void (*cwtools_initialize)(void) = cwgame_initialize;
 
-void
-cwgame_cleanup(void)
+void cwgame_cleanup(void)
 {
 }
 
@@ -1623,11 +1561,9 @@ extern char last_date[5];
 extern char game_id[20];
 extern int quiet;
 
-extern void
-cwtools_parse_field_list(char *text, int max_field, int *fields);
+extern void cwtools_parse_field_list(char *text, int max_field, int *fields);
 
-int
-cwgame_parse_command_line(int argc, char *argv[])
+int cwgame_parse_command_line(int argc, char *argv[])
 {
   int i;
   strcpy(year, "");
@@ -1642,7 +1578,7 @@ cwgame_parse_command_line(int argc, char *argv[])
     }
     else if (!strcmp(argv[i], "-e")) {
       if (++i < argc) {
-	strncpy(last_date, argv[i], 4);
+        strncpy(last_date, argv[i], 4);
       }
     }
     else if (!strcmp(argv[i], "-h")) {
@@ -1654,12 +1590,12 @@ cwgame_parse_command_line(int argc, char *argv[])
     }
     else if (!strcmp(argv[i], "-i")) {
       if (++i < argc) {
-	strncpy(game_id, argv[i], 19);
+        strncpy(game_id, argv[i], 19);
       }
     }
     else if (!strcmp(argv[i], "-f")) {
       if (++i < argc) {
-	cwtools_parse_field_list(argv[i], max_field, fields);
+        cwtools_parse_field_list(argv[i], max_field, fields);
       }
     }
     else if (!strcmp(argv[i], "-n")) {
@@ -1670,17 +1606,17 @@ cwgame_parse_command_line(int argc, char *argv[])
     }
     else if (!strcmp(argv[i], "-s")) {
       if (++i < argc) {
-	strncpy(first_date, argv[i], 4);
+        strncpy(first_date, argv[i], 4);
       }
     }
     else if (!strcmp(argv[i], "-x")) {
       if (++i < argc) {
-	cwtools_parse_field_list(argv[i], max_ext_field, ext_fields);
+        cwtools_parse_field_list(argv[i], max_ext_field, ext_fields);
       }
     }
     else if (!strcmp(argv[i], "-y")) {
       if (++i < argc) {
-	strncpy(year, argv[i], 5);
+        strncpy(year, argv[i], 5);
       }
     }
     else if (argv[i][0] == '-') {
