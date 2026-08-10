@@ -33,6 +33,7 @@ typedef struct cw_buffer {
   char *end;
   int truncated;
   int need_sep;
+  int field_open;
   int use_delimiter;
   char delimiter;
 } CWBuffer;
@@ -44,6 +45,7 @@ static inline void cw_buffer_init(CWBuffer *buf, char *storage, size_t size, int
   buf->end = storage + size;
   buf->truncated = 0;
   buf->need_sep = 0;
+  buf->field_open = 0;
   buf->use_delimiter = use_delimiter;
   buf->delimiter = delimiter;
   if (size > 0) {
@@ -59,7 +61,7 @@ static inline int cw_buffer_emit(CWBuffer *buf, const char *fmt, ...)
   }
 
   /* Add delimiter if required */
-  if (buf->use_delimiter && buf->need_sep) {
+  if (buf->use_delimiter && buf->need_sep && !buf->field_open) {
     if ((size_t) (buf->end - buf->current) > 1) {
       *(buf->current++) = buf->delimiter;
       *buf->current = '\0';
@@ -69,7 +71,9 @@ static inline int cw_buffer_emit(CWBuffer *buf, const char *fmt, ...)
       return 0;
     }
   }
-  buf->need_sep = 1;
+  if (!buf->field_open) {
+    buf->need_sep = 1;
+  }
 
   va_list ap;
   va_start(ap, fmt);
@@ -100,11 +104,13 @@ static inline void cw_buffer_begin_field(CWBuffer *buf)
       buf->truncated = 1;
     }
   }
-  buf->need_sep = 0; /* suppress further delimiters */
+  buf->need_sep = 0;
+  buf->field_open = 1;
 }
 
 static inline void cw_buffer_end_field(CWBuffer *buf)
 {
+  buf->field_open = 0;
   buf->need_sep = 1;
 }
 
