@@ -1480,6 +1480,8 @@ void cwgame_print_help(void)
   fprintf(stderr, "  -h        print this help\n");
   fprintf(stderr, "  -i id     only process game given by id\n");
   fprintf(stderr, "  -y year   Year to process (for teamyyyy and aaayyyy.ros).\n");
+  fprintf(stderr,
+          "  -D dir    Directory to find team and roster files (default is current directory)\n");
   fprintf(stderr, "  -s start  Earliest date to process (mmdd).\n");
   fprintf(stderr, "  -e end    Last date to process (mmdd).\n");
   fprintf(stderr, "  -a        generate Ascii-delimited format files (default)\n");
@@ -1589,6 +1591,7 @@ extern char year[5];
 extern char first_date[5];
 extern char last_date[5];
 extern char game_id[20];
+extern char data_dir[1024];
 extern int quiet;
 
 extern void cwtools_parse_field_list(char *text, int max_field, int *fields);
@@ -1659,6 +1662,12 @@ int cwgame_parse_command_line(int argc, char *argv[])
     else if (!strcmp(argv[i], "-y")) {
       if (++i < argc) {
         strncpy(year, argv[i], 5);
+      }
+    }
+    else if (!strcmp(argv[i], "-D")) {
+      if (++i < argc) {
+        strncpy(data_dir, argv[i], sizeof(data_dir) - 1);
+        data_dir[sizeof(data_dir) - 1] = '\0';
       }
     }
     else if (argv[i][0] == '-') {

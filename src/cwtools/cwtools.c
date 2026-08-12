@@ -76,15 +76,39 @@ char first_date[5] = "0101";
 char last_date[5] = "1231";
 char game_id[20] = "";
 
+/* Directory in which to find TEAMyyyy and roster files (empty = current working directory) */
+char data_dir[1024] = "";
+
 int ascii = 1;
 
 /* If 'quiet', programs should write no status messages to stderr */
 int quiet = 0;
 
+/* Prepend data_dir to filename, if data_dir is set.  Result is malloc'd
+ * and must be freed by the caller. */
+static char *cwtools_build_path(const char *filename)
+{
+  size_t dir_len = strlen(data_dir);
+  int need_sep = dir_len > 0 && data_dir[dir_len - 1] != '/';
+  size_t size = dir_len + need_sep + strlen(filename) + 1;
+  char *path;
+
+  path = malloc(size);
+  if (path == NULL) {
+    fprintf(stderr, "Error: could not allocate memory for filename\n");
+    exit(1);
+  }
+
+  snprintf(path, size, "%s%s%s", data_dir, need_sep ? "/" : "", filename);
+
+  return path;
+}
+
 static char *cwtools_teamfile_filename(int lowercase)
 {
   size_t size = strlen(year) + sizeof("TEAM");
   char *filename;
+  char *path;
 
   filename = malloc(size);
   if (filename == NULL) {
@@ -93,14 +117,17 @@ static char *cwtools_teamfile_filename(int lowercase)
   }
 
   snprintf(filename, size, "%s%s", lowercase ? "team" : "TEAM", year);
+  path = cwtools_build_path(filename);
+  free(filename);
 
-  return filename;
+  return path;
 }
 
 static char *cwtools_roster_filename(const char *team_id)
 {
   size_t size = strlen(team_id) + strlen(year) + sizeof(".ROS");
   char *filename;
+  char *path;
 
   filename = malloc(size);
   if (filename == NULL) {
@@ -109,8 +136,10 @@ static char *cwtools_roster_filename(const char *team_id)
   }
 
   snprintf(filename, size, "%s%s.ROS", team_id, year);
+  path = cwtools_build_path(filename);
+  free(filename);
 
-  return filename;
+  return path;
 }
 
 void cwtools_read_rosters(CWLeague *league)
@@ -308,6 +337,12 @@ int cwtools_default_parse_command_line(int argc, char *argv[])
     else if (!strcmp(argv[i], "-d")) {
       (*cwtools_print_welcome_message)(argv[0]);
       (*cwtools_print_field_list)();
+    }
+    else if (!strcmp(argv[i], "-D")) {
+      if (++i < argc) {
+        strncpy(data_dir, argv[i], sizeof(data_dir) - 1);
+        data_dir[sizeof(data_dir) - 1] = '\0';
+      }
     }
     else if (!strcmp(argv[i], "-e")) {
       if (++i < argc) {
