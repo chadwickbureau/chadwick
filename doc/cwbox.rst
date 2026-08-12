@@ -24,7 +24,7 @@ The command has the following form::
    cwbox [options] eventfile...
 
 :program:`cwbox` supports the common ``-h``, ``-i``, ``-y``, ``-s``,
-``-e``, and ``-q`` options described in :ref:`the command-line options
+``-e``, and ``-Q`` options described in :ref:`the command-line options
 table <cwtools.commandline>`. It does not provide selectable fields,
 so ``-d``, ``-f``, and ``-n`` are not available.
 

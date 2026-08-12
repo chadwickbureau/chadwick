@@ -81,7 +81,7 @@ void cwbox_print_help(void)
   fprintf(stderr, "  -e end    Last date to process (mmdd).\n");
   fprintf(stderr, "  -X        output boxscores as XML.\n");
   fprintf(stderr, "  -S        output boxscores as SportsML.\n");
-  fprintf(stderr, "  -q        operate quietly; do not output progress messages\n");
+  fprintf(stderr, "  -Q        operate quietly; do not output progress messages\n");
   exit(0);
 }
 
@@ -105,7 +105,7 @@ int cwbox_parse_command_line(int argc, char *argv[])
       (*cwtools_print_welcome_message)(argv[0]);
       (*cwtools_print_help)();
     }
-    else if (!strcmp(argv[i], "-q")) {
+    else if (!strcmp(argv[i], "-Q")) {
       quiet = 1;
     }
     else if (!strcmp(argv[i], "-i")) {

@@ -118,13 +118,16 @@ class ToolCommandTest(unittest.TestCase):
     def test_quiet_switch_is_optional(self):
         path = Path("2023ABC.EVA")
         quiet = compare.tool_command(
-            "cwevent", "", "2023", compare.CONFIGS["event"], (path,), quiet=True
+            "cwevent", "", "2023", compare.CONFIGS["event"], (path,),
+            quiet=True, quiet_flag="-Q",
         )
         interactive = compare.tool_command(
             "BEVENT", "wine", "2023", compare.CONFIGS["event"], (path,), quiet=False
         )
-        self.assertIn("-q", quiet)
+        self.assertIn("-Q", quiet)
+        self.assertNotIn("-q", quiet)
         self.assertNotIn("-q", interactive)
+        self.assertNotIn("-Q", interactive)
         self.assertEqual(interactive[0:2], ["wine", "BEVENT"])
 
 

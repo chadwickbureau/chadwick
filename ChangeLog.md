@@ -1,6 +1,8 @@
 # [0.11.0]
 
 ## Behaviour changes
+- The command-line option for "quiet mode" is now `-Q` instead of `-q`, as the latter is
+  used by `BEVENT`/`BGAME` for interactive selection of games to process.
 - In `cwevent`, runner advancement types 6 and 7 (for automatic runners) have been
   removed.  Instead, new flags for whether a runner is the result of an autoamtic runner
   placement are now provided.

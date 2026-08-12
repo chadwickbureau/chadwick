@@ -305,11 +305,12 @@ def tool_command(
     files: Sequence[Path],
     *,
     quiet: bool,
+    quiet_flag: str = "-q",
 ) -> list[str]:
     return [
         *shlex.split(prefix),
         executable,
-        *(["-q"] if quiet else []),
+        *([quiet_flag] if quiet else []),
         "-y",
         year,
         "-f",
@@ -493,6 +494,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     config,
                     files,
                     quiet=True,
+                    quiet_flag="-Q",
                 ),
                 directory,
                 config.candidate_name,

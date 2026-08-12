@@ -40,7 +40,7 @@ comparison step is currently running.
 
 The harness deliberately does not pass `-q` to BEVENT: in that program the
 switch prompts interactively before processing each game. Chadwick's tools
-still receive `-q` to suppress their progress messages.
+still receive `-Q` to suppress their progress messages.
 
 DiamondWare exit statuses under Wine are treated as advisory because the
 programs may return a nonzero status after producing complete output. The

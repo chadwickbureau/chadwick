@@ -318,7 +318,7 @@ int cwtools_default_parse_command_line(int argc, char *argv[])
       (*cwtools_print_welcome_message)(argv[0]);
       (*cwtools_print_help)();
     }
-    else if (!strcmp(argv[i], "-q")) {
+    else if (!strcmp(argv[i], "-Q")) {
       quiet = 1;
     }
     else if (!strcmp(argv[i], "-i")) {

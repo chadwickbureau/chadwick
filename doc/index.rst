@@ -133,7 +133,7 @@ available for every tool are noted in their descriptions.
      - If in ASCII mode (the default), the first row of the output is
        a comma-separated list of column headers. Not available for
        :program:`cwbox`.
-   * - ``-q``
+   * - ``-Q``
      - Operate quietly; do not print progress messages.
    * - ``-s mmdd``
      - The earliest date to process (inclusive)
