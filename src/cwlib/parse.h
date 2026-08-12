@@ -102,6 +102,11 @@ typedef struct cw_parsed_event_struct {
    * 'F' for fumbled, and 'D' for dropped throw. */
   char error_types[10];
   char batted_ball_type;
+  /* Default batted ball type inferred from fielding credits and from
+   * flags such as /SF, /FO, /IF that assume rather than state a
+   * trajectory.  Resolved into batted_ball_type, if that is still
+   * unset, by cw_parse_sanity_check(). */
+  char inferred_batted_ball_type;
   char hit_location[20];
 } CWEventData;
 

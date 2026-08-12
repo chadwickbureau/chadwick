@@ -292,6 +292,7 @@ static void cw_parse_event_initialize(CWEventData *event)
     event->touches[i] = 0;
   }
   event->batted_ball_type = ' ';
+  event->inferred_batted_ball_type = ' ';
   strcpy(event->hit_location, "");
 }
 
@@ -668,6 +669,16 @@ static char locations[][20] = {
   "89XDW", "9DW", "9LDW", "7LMF", "7LM", "7M", "78M", "8LM", "8M", "8RM", "89M", "9M", "9LM",
   "9LMF", "8LS", "8RS", "8LD", "8RD", "8LXD", "8RXD", "8LXDW", "8RXDW", ""};
 
+/*
+ * cw_apply_event_flag: process a single flag from a play string
+ *
+ * Flags that state a trajectory outright (/F, /G, /BP, GDP, a
+ * location-trajectory code like F8, etc.) set batted_ball_type
+ * directly.  Flags that merely assume one (/SF, /FO, /IF) set
+ * inferred_batted_ball_type instead, so that cw_parse_sanity_check()
+ * can apply them only if nothing else in the play string was
+ * explicit about the trajectory.
+ */
 static void cw_apply_event_flag(CWEventData *event, const char *flag)
 {
   if (!strcmp(flag, "/SH")) {
@@ -676,16 +687,7 @@ static void cw_apply_event_flag(CWEventData *event, const char *flag)
   }
   else if (!strcmp(flag, "/SF")) {
     event->sf_flag = 1;
-    /* Unless marked otherwise, a /SF is considered a fly ball.
-     * Special case: there are a handful of plays like E4/SF, where
-     * a sac fly is awarded when an infielder drops a fly.  In these
-     * cases, we override the default assumption about the batted
-     * ball type.
-     */
-    if (event->batted_ball_type == ' ' ||
-        (event->event_type == CW_EVENT_ERROR && event->batted_ball_type == 'G')) {
-      event->batted_ball_type = 'F';
-    }
+    event->inferred_batted_ball_type = 'F';
   }
   else if (!strcmp(flag, "/DP")) {
     event->dp_flag = 1;
@@ -738,9 +740,7 @@ static void cw_apply_event_flag(CWEventData *event, const char *flag)
   }
   else if (!strcmp(flag, "/FO")) {
     event->force_flag = 1;
-    if (event->batted_ball_type == ' ') {
-      event->batted_ball_type = 'G';
-    }
+    event->inferred_batted_ball_type = 'G';
   }
   else if ((!strcmp(flag, "/TH") || !strcmp(flag, "/TH1") || !strcmp(flag, "/TH2") ||
             !strcmp(flag, "/TH3") || !strcmp(flag, "/THH")) &&
@@ -775,9 +775,11 @@ static void cw_apply_event_flag(CWEventData *event, const char *flag)
   else if (!strcmp(flag, "/L")) {
     event->batted_ball_type = 'L';
   }
-  else if (!strcmp(flag, "/P") || !strcmp(flag, "/IF")) {
-    /* Infield fly is assumed to be a popup */
+  else if (!strcmp(flag, "/P")) {
     event->batted_ball_type = 'P';
+  }
+  else if (!strcmp(flag, "/IF")) {
+    event->inferred_batted_ball_type = 'P';
   }
   else if (strlen(flag) >= 3) {
     char traj = flag[(flag[1] == 'B') ? 2 : 1];
@@ -1095,7 +1097,7 @@ static int cw_parse_safe_on_error(CWParserState *state, CWEventData *event, int 
   event->errors[event->num_errors] = (state->sym - '0');
   event->error_types[event->num_errors++] = 'F';
   event->fielded_by = (state->sym - '0');
-  event->batted_ball_type = (state->sym <= '6') ? 'G' : 'F';
+  event->inferred_batted_ball_type = (state->sym <= '6') ? 'G' : 'F';
   cw_parse_nextsym(state);
 
   /* Special case: writing En? for really bad play */
@@ -1122,7 +1124,7 @@ static int cw_parse_safe_on_error(CWParserState *state, CWEventData *event, int 
 static int cw_parse_fielders_choice(CWParserState *state, CWEventData *event, int flags)
 {
   event->advance[0] = 1;
-  event->batted_ball_type = 'G';
+  event->inferred_batted_ball_type = 'G';
 
   if (state->sym >= '1' && state->sym <= '9') {
     event->fielded_by = (state->sym - '0');
@@ -1234,15 +1236,15 @@ static int cw_parse_generic_out(CWParserState *state, CWEventData *event, int fl
       }
       event->fc_flag[base] = 1;
       event->primary_out_flag[base] = 1;
-      if (event->batted_ball_type == ' ') {
+      if (event->inferred_batted_ball_type == ' ') {
         if (strlen(state->token) > 1 || base > 0) {
           /* Assumption: more than one fielder implies ground ball,
 	     unless overriden later by a flag; also, getting the first
 	     out on a non-batter implies a bounce */
-          event->batted_ball_type = 'G';
+          event->inferred_batted_ball_type = 'G';
         }
         else if (strlen(state->token) == 1 && base == 0) {
-          event->batted_ball_type = 'F';
+          event->inferred_batted_ball_type = 'F';
         }
       }
 
@@ -1253,10 +1255,10 @@ static int cw_parse_generic_out(CWParserState *state, CWEventData *event, int fl
       if (strlen(state->token) > 1 || lastFielder != ' ') {
         /* Assumption: more than one fielder implies ground ball,
 	   unless overriden later by a flag */
-        event->batted_ball_type = 'G';
+        event->inferred_batted_ball_type = 'G';
       }
       else {
-        event->batted_ball_type = 'F';
+        event->inferred_batted_ball_type = 'F';
       }
 
       cw_event_set_play(event, 0, state->token);
@@ -1860,6 +1862,14 @@ static int cw_parse_advancement(CWParserState *state, CWEventData *event)
 void cw_parse_sanity_check(CWEventData *event)
 {
   int base;
+
+  /* An explicit trajectory (from a flag like /F, /BG, or a location
+   * code like F8) always takes precedence over one merely inferred
+   * from fielding credits or from flags such as /SF, /FO, /IF that
+   * assume rather than state a trajectory. */
+  if (event->batted_ball_type == ' ') {
+    event->batted_ball_type = event->inferred_batted_ball_type;
+  }
 
   if (event->event_type == CW_EVENT_SINGLE && event->advance[0] == 0 &&
       !strcmp(event->play[0], "")) {
