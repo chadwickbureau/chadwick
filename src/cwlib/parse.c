@@ -872,6 +872,9 @@ static int cw_parse_balk(CWParserState *state, CWEventData *event, int flags)
 }
 
 static int cw_parse_caught_stealing(CWParserState *state, CWEventData *event, int flags);
+static int cw_parse_pickoff(CWParserState *state, CWEventData *event, int flags);
+static int cw_parse_pickoff_stolen_base(CWParserState *state, CWEventData *event, int flags);
+static int cw_parse_pickoff_caught_stealing(CWParserState *state, CWEventData *event, int flags);
 
 static int cw_parse_stolen_base(CWParserState *state, CWEventData *event, int flags)
 {
@@ -930,6 +933,15 @@ static int cw_parse_stolen_base(CWParserState *state, CWEventData *event, int fl
        * with the "primary" event being whichever is listed first.
        */
       cw_parse_caught_stealing(state, event, 0);
+    }
+    else if (!strcmp(state->token, "POCS")) {
+      cw_parse_pickoff_caught_stealing(state, event, 0);
+    }
+    else if (!strcmp(state->token, "POSB")) {
+      cw_parse_pickoff_stolen_base(state, event, 0);
+    }
+    else if (!strcmp(state->token, "PO")) {
+      cw_parse_pickoff(state, event, 0);
     }
     else {
       return cw_parse_invalid(state);
@@ -1041,6 +1053,15 @@ static int cw_parse_caught_stealing(CWParserState *state, CWEventData *event, in
        * with the "primary" event being whichever is listed first.
        */
       cw_parse_stolen_base(state, event, 0);
+    }
+    else if (!strcmp(state->token, "POCS")) {
+      cw_parse_pickoff_caught_stealing(state, event, 0);
+    }
+    else if (!strcmp(state->token, "POSB")) {
+      cw_parse_pickoff_stolen_base(state, event, 0);
+    }
+    else if (!strcmp(state->token, "PO")) {
+      cw_parse_pickoff(state, event, 0);
     }
     else {
       return cw_parse_invalid(state);
