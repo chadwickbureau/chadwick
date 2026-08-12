@@ -631,6 +631,17 @@ static int cw_parse_advance_modifier(CWParserState *state, CWEventData *event, i
     else if (!strcmp(state->token, "THH") || !strcmp(state->token, "INT")) {
       /* silently accept interference flag */
     }
+    else if (!strcmp(state->token, "SB")) {
+      /* A SB has been awarded once (in 2025) on a BK primary event,
+       * making stolen bases in the secondary event grammatically legal
+       */
+      if (baseFrom >= 1 && baseFrom <= 3) {
+        event->sb_flag[baseFrom] = 1;
+      }
+      if ((state->sym >= '2' && state->sym <= '4') || state->sym == 'H') {
+        cw_parse_nextsym(state);
+      }
+    }
     else {
       return cw_parse_invalid(state);
     }
