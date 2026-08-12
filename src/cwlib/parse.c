@@ -159,8 +159,11 @@ typedef struct {
  *
  * This performs pre-processing normalisation on the input play string:
  *   - All letters are converted to uppercase
- *   - The symbols '#' and '!' have no semantic meaning for parsing purposes
- *     and so are stripped
+ *   - The symbols '#', '!' and '?' have no semantic meaning for parsing
+ *     purposes and so are stripped. '#' and '!' are purely decorative;
+ *     '?' historically marked a "dubious play" (Project Scoresheet
+ *     notation) or, in older and now-archaic usage, an unknown fielder.
+ *     Chadwick no longer distinguishes either case.
  *   - The strings SBH and CSH are mapped to SB4 and CS4 for subsequent
  *     processing convenience.
  */
@@ -174,7 +177,7 @@ static void cw_parse_initialize(CWParserState *state, const char *input)
   for (read_pos = 0; input[read_pos] != '\0'; read_pos++) {
     unsigned char ch = (unsigned char) input[read_pos];
 
-    if (ch != '#' && ch != '!') {
+    if (ch != '#' && ch != '!' && ch != '?') {
       state->inputString[write_pos++] = (char) toupper(ch);
     }
   }
@@ -237,12 +240,10 @@ static int cw_parse_invalid(CWParserState *state)
 
 /*
  * isfielder -- return 1 if parameter corresponds to a fielder, 0 if not
- *              This function accepts '?' as a fielder
- *              (this is a deprecated feature of the notation)
  */
 static int isfielder(char fielder)
 {
-  return ((fielder >= '1' && fielder <= '9') || fielder == '?');
+  return (fielder >= '1' && fielder <= '9');
 }
 
 /*
@@ -319,8 +320,6 @@ static void cw_parse_primary_event(CWParserState *state)
  *
  * Notes:
  * - Using bevent convention, fielded by is set to first fielder listed
- * - Accepts question mark as a valid fielder, but sets fielded by to zero
- *   if question mark leads fielder list
  */
 
 static void cw_parse_hit_fielder(CWParserState *state, CWEventData *event)
@@ -341,14 +340,10 @@ static void cw_parse_hit_fielder(CWParserState *state, CWEventData *event)
  * at exit:  state->sym points to first character after fielding credit
  *           returns 0 if batter out, nonzero if batter safe on muffed throw
  * Notes:
- * - Accepts question mark as a valid fielder, but does not issue putouts
- *   or assists when question mark is used.
  * - prev is the "previous" fielder, as in cases like '64(1)3/GDP';
  *   here, prev would equal '4' on the second call, to essentially turn
  *   the string into '64(1)43/GDP'
  * - Will handle strings starting in 'E'
- * - Question marks for missing fielders are saved in the token field;
- *   this is a difference from bevent's behavior
  */
 static int cw_parse_fielding_credit(CWParserState *state, CWEventData *event, char prev)
 {
@@ -386,7 +381,7 @@ static int cw_parse_fielding_credit(CWParserState *state, CWEventData *event, ch
   while (1) {
     cw_parse_nextsym(state);
 
-    if ((state->sym >= '1' && state->sym <= '9') || state->sym == '?') {
+    if (state->sym >= '1' && state->sym <= '9') {
       if (isdigit(lastChar)) {
         assists[num_assists++] = lastChar - '0';
         if (event->num_touches == 0 ||
@@ -394,9 +389,7 @@ static int cw_parse_fielding_credit(CWParserState *state, CWEventData *event, ch
           event->touches[event->num_touches++] = lastChar - '0';
         }
       }
-      if (state->sym != '?') {
-        *(play++) = state->sym;
-      }
+      *(play++) = state->sym;
       lastChar = state->sym;
     }
     else if (state->sym == 'E') {
@@ -1121,11 +1114,6 @@ static int cw_parse_safe_on_error(CWParserState *state, CWEventData *event, int 
   event->inferred_batted_ball_type = (state->sym <= '6') ? 'G' : 'F';
   cw_parse_nextsym(state);
 
-  /* Special case: writing En? for really bad play */
-  if (state->sym == '?') {
-    cw_parse_nextsym(state);
-  }
-
   if (flags && state->sym == '/') {
     cw_parse_flags(state, event);
   }
@@ -1149,9 +1137,6 @@ static int cw_parse_fielders_choice(CWParserState *state, CWEventData *event, in
 
   if (state->sym >= '1' && state->sym <= '9') {
     event->fielded_by = (state->sym - '0');
-    cw_parse_nextsym(state);
-  }
-  else if (state->sym == '?') {
     cw_parse_nextsym(state);
   }
 
@@ -1226,7 +1211,7 @@ static int cw_parse_generic_out(CWParserState *state, CWEventData *event, int fl
   int safe;
   int forcePlay = -1;
 
-  if (state->sym != '?' && (state->sym != '9' || cw_parse_peek(state) != '9')) {
+  if (state->sym != '9' || cw_parse_peek(state) != '9') {
     /* In June 2020, DWS modified BEVENT so that generic outs
      * starting with 99 now return fielded_by = 0 instead of fielded_by = 9
      */

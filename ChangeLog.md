@@ -39,7 +39,10 @@
   of a player's positions. (#7)
 - The extended `cwevent` fields reporting runner position correct report pinch-runners as
   position 12 instead of position 0.  (#11)
-
+- Support for the use of "?" as a "missing fielder" placeholder has been removed; this has been
+  deprecated by Retrosheet for a very long time.  Play strings are normalised to strip out (and
+  therefore simply ignore) the presence of any stray "?" characters, to accommodate a handful of
+  cases still in the Retrosheet corpus.
 
 # [0.10.0] - 2023-01-02
 
