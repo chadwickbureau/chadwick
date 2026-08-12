@@ -45,7 +45,7 @@ The following table gives the contents of each of the 86 fields
      - Game ID
      - ``GAME_ID``
    * - 1
-     - Date
+     - :ref:`Date <cwtools.cwgame.gamedate>`
      - ``GAME_DT``
    * - 2
      - Game number
@@ -598,6 +598,40 @@ The following table gives the contents of each of the 86 fields
    * - 96
      - :ref:`tiebreaker rule type in use <cwtools.cwgame.tiebreak>`
      - ``TIEBREAK_CD``
+
+.. _cwtools.cwgame.gamedate:
+
+Date (field 1)
+--------------
+
+The format of this field is controlled by the ``-dsf``, ``-dsp``,
+``-dnf``, and ``-dnp`` command-line switches, matching the switches
+of the same name in BGAME:
+
+.. list-table:: Command-line switches for the date field format
+   :header-rows: 1
+   :widths: 10,15,10
+
+   * - Switch
+     - Format
+     - Example
+   * - ``-dsf``
+     - slashes, full year
+     - ``04/08/2025``
+   * - ``-dsp``
+     - slashes, partial (two-digit) year
+     - ``04/08/25``
+   * - ``-dnf``
+     - no slashes, full year
+     - ``20250408``
+   * - ``-dnp``
+     - no slashes, partial (two-digit) year
+     - ``250408``
+
+.. note:: BGAME's default is ``-dnp`` (no slashes, two-digit year).
+   :program:`cwgame` instead defaults to ``-dnf`` (no slashes,
+   four-digit year, which is consistent with ISO 8601 dates).  Pass ``-dnp``
+   explicitly to reproduce BGAME's default output for this field.
 
 .. _cwtools.cwgame.howscored:
 

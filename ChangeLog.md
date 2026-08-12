@@ -3,6 +3,9 @@
 ## Behaviour changes
 - The command-line option for "quiet mode" is now `-Q` instead of `-q`, as the latter is
   used by `BEVENT`/`BGAME` for interactive selection of games to process.
+- Add command line switches `-dsf`/`-dsp`/`-dnf`/`-dnp` to `cwgame` to match `BGAME`.
+  `cwgame` continues to differ from `BGAME` in using "YYYYMMDD" as the default format, while
+  BGAME still uses YYMMDD.
 - In `cwevent`, runner advancement types 6 and 7 (for automatic runners) have been
   removed.  Instead, new flags for whether a runner is the result of an autoamtic runner
   placement are now provided.
@@ -16,10 +19,10 @@
   `UNKNOWN_PLAY_EXC_FL` are now quoted explicitly to be consistent with
   all other flag fields.
 - In `cwgame`, warnings on empty values for attendance and timeofgame has been
-  removed.  These are now output as 0 (instead of -1) to restore `BEVENT`
+  removed.  These are now output as 0 (instead of -1) to restore `BGAME`
   compatibility.
 - In `cwgame`, "unknown" in now an accepted value for `info,temp` and `info,windspeed`.
-  "unknown" values are output as 0 for `BEVENT` compatibility.
+  "unknown" values are output as 0 for `BGAME` compatibility.
 - In `cwevent`, the implementation of the batter/runner "fate" extended fields was
   entirely incorrect.  This has been corrected.  (#45)
 - In handling rosters, treat blank or null values for batting or throwing side

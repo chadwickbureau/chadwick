@@ -110,13 +110,19 @@ class ToolConfig:
     fields: tuple[str, ...]
     field_range: str
     key_fields: tuple[str, ...]
+    extra_args: tuple[str, ...] = ()
 
 
 CONFIGS = {
     "event": ToolConfig(
         "event", "cwevent", "BEVENT", EVENT_FIELDS, "0-96", ("GAME_ID", "EVENT_ID")
     ),
-    "game": ToolConfig("game", "cwgame", "BGAME", GAME_FIELDS, "0-83", ("GAME_ID",)),
+    "game": ToolConfig(
+        "game", "cwgame", "BGAME", GAME_FIELDS, "0-83", ("GAME_ID",),
+        # cwgame defaults GAME_DT to a 4-digit year (-dnf); BGAME defaults to
+        # a 2-digit year (-dnp). Force both to -dnf so GAME_DT lines up.
+        extra_args=("-dnf",),
+    ),
 }
 
 
@@ -315,6 +321,7 @@ def tool_command(
         year,
         "-f",
         config.field_range,
+        *config.extra_args,
         *(path.name for path in files),
     ]
 
@@ -507,7 +514,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     year,
                     config,
                     files,
-                    quiet=config.mode != "event",
+                    quiet=False,
                 ),
                 directory,
                 config.reference_name,

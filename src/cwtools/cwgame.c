@@ -57,6 +57,17 @@ char program_name[20] = "cwgame";
 
 int print_header = 0;
 
+/* Format of the gamedate field (-dsf, -dsp, -dnf, -dnp). Unlike BGAME,
+ * whose default is a two-digit year, cwgame defaults to a four-digit
+ * year (no slashes); see the documentation for the rationale.
+ */
+#define CWGAME_DATE_NOSLASH_FULL 0
+#define CWGAME_DATE_NOSLASH_PARTIAL 1
+#define CWGAME_DATE_SLASH_FULL 2
+#define CWGAME_DATE_SLASH_PARTIAL 3
+
+int date_format = CWGAME_DATE_NOSLASH_FULL;
+
 /* Auxiliary function: negative numbers in the boxscore structure
  * correspond to nulls, which should be rendered as blanks in output.
  */
@@ -198,8 +209,22 @@ DECLARE_FIELDFUNC(cwgame_game_id)
 DECLARE_FIELDFUNC(cwgame_date)
 {
   char *date = cw_game_info_lookup(gameiter->game, "date");
-  return cw_buffer_emit(buffer, (ascii) ? "\"%c%c%c%c%c%c%c%c\"" : "%c%c%c%c%c%c%c%c", date[0],
-                        date[1], date[2], date[3], date[5], date[6], date[8], date[9]);
+
+  switch (date_format) {
+  case CWGAME_DATE_SLASH_FULL:
+    return cw_buffer_emit(buffer, (ascii) ? "\"%c%c/%c%c/%c%c%c%c\"" : "%c%c/%c%c/%c%c%c%c",
+                          date[5], date[6], date[8], date[9], date[0], date[1], date[2], date[3]);
+  case CWGAME_DATE_SLASH_PARTIAL:
+    return cw_buffer_emit(buffer, (ascii) ? "\"%c%c/%c%c/%c%c\"" : "%c%c/%c%c/%c%c", date[5],
+                          date[6], date[8], date[9], date[2], date[3]);
+  case CWGAME_DATE_NOSLASH_PARTIAL:
+    return cw_buffer_emit(buffer, (ascii) ? "\"%c%c%c%c%c%c\"" : "%c%c%c%c%c%c", date[2], date[3],
+                          date[5], date[6], date[8], date[9]);
+  case CWGAME_DATE_NOSLASH_FULL:
+  default:
+    return cw_buffer_emit(buffer, (ascii) ? "\"%c%c%c%c%c%c%c%c\"" : "%c%c%c%c%c%c%c%c", date[0],
+                          date[1], date[2], date[3], date[5], date[6], date[8], date[9]);
+  }
 }
 
 /* Field 2 */
@@ -1464,6 +1489,11 @@ void cwgame_print_help(void)
   fprintf(stderr, "  -x flist  give list of extended fields to output\n");
   fprintf(stderr, "              Default is none\n");
   fprintf(stderr, "  -d        print list of field numbers and descriptions\n");
+  fprintf(stderr, "  The -dxx switches choose a date format for the gamedate field.\n");
+  fprintf(stderr, "  -dsf      slashes, full year: mm/dd/yyyy\n");
+  fprintf(stderr, "  -dsp      slashes, partial year: mm/dd/yy\n");
+  fprintf(stderr, "  -dnf      no slashes, full year: yyyymmdd (the default)\n");
+  fprintf(stderr, "  -dnp      no slashes, partial year: yymmdd\n");
   fprintf(stderr, "  -Q        operate quietly; do not output progress messages\n");
   fprintf(stderr, "  -n        print field names in first row of output\n\n");
 
@@ -1575,6 +1605,18 @@ int cwgame_parse_command_line(int argc, char *argv[])
     else if (!strcmp(argv[i], "-d")) {
       (*cwtools_print_welcome_message)(argv[0]);
       (*cwtools_print_field_list)();
+    }
+    else if (!strcmp(argv[i], "-dsf")) {
+      date_format = CWGAME_DATE_SLASH_FULL;
+    }
+    else if (!strcmp(argv[i], "-dsp")) {
+      date_format = CWGAME_DATE_SLASH_PARTIAL;
+    }
+    else if (!strcmp(argv[i], "-dnf")) {
+      date_format = CWGAME_DATE_NOSLASH_FULL;
+    }
+    else if (!strcmp(argv[i], "-dnp")) {
+      date_format = CWGAME_DATE_NOSLASH_PARTIAL;
     }
     else if (!strcmp(argv[i], "-e")) {
       if (++i < argc) {
