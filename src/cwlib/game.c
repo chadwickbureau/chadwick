@@ -762,8 +762,11 @@ CWGame *cw_game_read(FILE *file)
       if (pitHand != ' ') {
         game->last_event->pitcher_hand = pitHand;
         XCOPY(game->last_event->pitcher_hand_id, pitHandPitcher)
-        pitHand = ' ';
-        strcpy(pitHandPitcher, "");
+        if (strcmp(play, "NP") != 0) {
+          /* padj applies to the next non-NP play */
+          pitHand = ' ';
+          strcpy(pitHandPitcher, "");
+        }
       }
 
       if (ladjSlot != 0) {
@@ -797,6 +800,12 @@ CWGame *cw_game_read(FILE *file)
       if (player_id && name && team && slot && pos) {
         cw_game_substitute_append(game, player_id, name, cw_atoi(team, NULL), cw_atoi(slot, NULL),
                                   cw_atoi(pos, NULL));
+        if (cw_atoi(pos, NULL) == 1 && pitHand != ' ' && strcmp(player_id, pitHandPitcher) != 0) {
+          /* A pending padj is for the pitcher being relieved, so it no
+           * longer applies once a different pitcher takes the mound. */
+          pitHand = ' ';
+          strcpy(pitHandPitcher, "");
+        }
       }
     }
     else if (!strcmp(tok, "com")) {
