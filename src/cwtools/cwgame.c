@@ -596,7 +596,7 @@ DECLARE_FIELDFUNC(cwgame_gwrbi)
 int cwgame_final_pitcher(CWBuffer *buffer, CWGame *game, CWBoxscore *box, int team)
 {
   CWBoxPitcher *pitcher = box->pitchers[team];
-  char *player_id = (pitcher && pitcher->prev) ? pitcher->prev->player_id : "";
+  char *player_id = (pitcher && pitcher->prev) ? pitcher->player_id : "";
   return cw_buffer_emit_string(buffer, player_id, 8);
 }
 
