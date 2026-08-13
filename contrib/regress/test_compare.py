@@ -68,18 +68,79 @@ class EventRulesTest(unittest.TestCase):
         self.assertTrue(compare.event_fields_differ("PO1_FLD_CD", self.left, self.right))
 
 
+class UnknownFielderBattedballTest(unittest.TestCase):
+    def setUp(self):
+        self.left = row(
+            compare.EVENT_FIELDS, GAME_ID="G", EVENT_ID="1", EVENT_TX="99", BAT_PLAY_TX="99"
+        )
+        self.right = dict(self.left)
+
+    def test_matches_known_divergence(self):
+        self.left["BATTEDBALL_CD"] = ""
+        self.right["BATTEDBALL_CD"] = "G"
+        self.assertTrue(
+            compare.is_unknown_fielder_battedball_diff("BATTEDBALL_CD", self.left, self.right)
+        )
+
+    def test_matches_suffixed_play_text(self):
+        self.left["EVENT_TX"] = self.right["EVENT_TX"] = "99.2-3"
+        self.left["BATTEDBALL_CD"] = ""
+        self.right["BATTEDBALL_CD"] = "G"
+        self.assertTrue(
+            compare.is_unknown_fielder_battedball_diff("BATTEDBALL_CD", self.left, self.right)
+        )
+
+    def test_ignores_other_fields(self):
+        self.left["BATTEDBALL_CD"] = ""
+        self.right["BATTEDBALL_CD"] = "G"
+        self.assertFalse(
+            compare.is_unknown_fielder_battedball_diff("FLD_CD", self.left, self.right)
+        )
+
+    def test_ignores_non_unknown_fielder_plays(self):
+        self.left["EVENT_TX"] = self.right["EVENT_TX"] = "63"
+        self.left["BAT_PLAY_TX"] = self.right["BAT_PLAY_TX"] = "63"
+        self.left["BATTEDBALL_CD"] = ""
+        self.right["BATTEDBALL_CD"] = "G"
+        self.assertFalse(
+            compare.is_unknown_fielder_battedball_diff("BATTEDBALL_CD", self.left, self.right)
+        )
+
+    def test_ignores_unknown_credit_on_forced_runner(self):
+        # "99(1)/FO": the unknown credit belongs to the forced runner, not
+        # the batter, so BAT_PLAY_TX is empty even though EVENT_TX starts
+        # with "99". The batted ball type here is legitimately inferred
+        # from the force play, not from "99", so this should not be
+        # aggregated even if it happened to differ.
+        self.left["EVENT_TX"] = self.right["EVENT_TX"] = "99(1)/FO"
+        self.left["BAT_PLAY_TX"] = self.right["BAT_PLAY_TX"] = ""
+        self.left["BATTEDBALL_CD"] = ""
+        self.right["BATTEDBALL_CD"] = "G"
+        self.assertFalse(
+            compare.is_unknown_fielder_battedball_diff("BATTEDBALL_CD", self.left, self.right)
+        )
+
+    def test_ignores_other_reference_values(self):
+        self.left["BATTEDBALL_CD"] = ""
+        self.right["BATTEDBALL_CD"] = "F"
+        self.assertFalse(
+            compare.is_unknown_fielder_battedball_diff("BATTEDBALL_CD", self.left, self.right)
+        )
+
+
 class ComparisonTest(unittest.TestCase):
     def test_aligns_records_by_key_and_finds_missing_records(self):
         first = row(compare.GAME_FIELDS, GAME_ID="A", HOME_SCORE_CT="1")
         second = row(compare.GAME_FIELDS, GAME_ID="B")
         reference = row(compare.GAME_FIELDS, GAME_ID="A", HOME_SCORE_CT="2")
-        differences, candidate_only, reference_only = compare.compare_rows(
+        differences, candidate_only, reference_only, unknown_fielder_diffs = compare.compare_rows(
             [second, first], [reference], compare.CONFIGS["game"]
         )
         self.assertEqual([item.field for item in differences], ["HOME_SCORE_CT"])
         self.assertEqual(candidate_only, [("B",)])
         self.assertEqual(reference_only, [])
         self.assertIsNone(differences[0].context)
+        self.assertEqual(unknown_fielder_diffs, 0)
 
     def test_event_difference_includes_play_context(self):
         candidate = row(
@@ -100,7 +161,7 @@ class ComparisonTest(unittest.TestCase):
         )
         reference = dict(candidate)
         reference["H_CD"] = "0"
-        differences, _, _ = compare.compare_rows(
+        differences, _, _, _ = compare.compare_rows(
             [candidate], [reference], compare.CONFIGS["event"]
         )
         context = differences[0].context
@@ -112,6 +173,25 @@ class ComparisonTest(unittest.TestCase):
         duplicate = row(compare.GAME_FIELDS, GAME_ID="A")
         with self.assertRaisesRegex(compare.HarnessError, "duplicate record key A"):
             compare.compare_rows([duplicate, duplicate], [], compare.CONFIGS["game"])
+
+    def test_tallies_unknown_fielder_battedball_diffs_instead_of_listing(self):
+        candidate = row(
+            compare.EVENT_FIELDS,
+            GAME_ID="GAME",
+            EVENT_ID="1",
+            EVENT_TX="99.2-3",
+            BAT_PLAY_TX="99",
+            BATTEDBALL_CD="",
+        )
+        reference = dict(candidate)
+        reference["BATTEDBALL_CD"] = "G"
+        differences, candidate_only, reference_only, unknown_fielder_diffs = (
+            compare.compare_rows([candidate], [reference], compare.CONFIGS["event"])
+        )
+        self.assertEqual(differences, [])
+        self.assertEqual(candidate_only, [])
+        self.assertEqual(reference_only, [])
+        self.assertEqual(unknown_fielder_diffs, 1)
 
 
 class ToolCommandTest(unittest.TestCase):

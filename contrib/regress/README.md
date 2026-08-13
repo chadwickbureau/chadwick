@@ -63,5 +63,13 @@ Event differences are grouped by play. Each group identifies the inning half,
 outs, count, score, occupied bases, batter, and original play text before
 listing the fields that differ.
 
+One divergence is tallied rather than itemized: for a play recorded simply as
+`99` (Retrosheet's placeholder for a wholly unknown fielding credit), BEVENT
+infers a ground ball for `BATTEDBALL_CD`, while Chadwick correctly leaves it
+blank, since `99` carries no trajectory information. Because this can recur
+many times within a single older, incompletely-reconstructed game, the
+harness counts these instances and reports a single summary line per year
+instead of listing each one; nothing is printed when there are none.
+
 The harness compares BEVENT fields 0-96 and BGAME fields 0-83. Newer Chadwick
 extensions are intentionally outside this compatibility check.

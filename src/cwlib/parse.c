@@ -1220,7 +1220,30 @@ static int cw_parse_generic_out(CWParserState *state, CWEventData *event, int fl
   event->advance[0] = 1;
 
   while (isfielder(state->sym)) {
+    int putouts_before = event->num_putouts;
+    int assists_before = event->num_assists;
+    int touches_before = event->num_touches;
+
     safe = cw_parse_fielding_credit(state, event, lastFielder);
+
+    if (!strcmp(state->token, "99")) {
+      /* "99" is the placeholder for a wholly unknown fielding
+       * credit.  Roll back whatever cw_parse_fielding_credit() recorded
+       * for it and leave the batted ball type uninferred. */
+      int i;
+      for (i = putouts_before; i < event->num_putouts; i++) {
+        event->putouts[i] = 0;
+      }
+      for (i = assists_before; i < event->num_assists; i++) {
+        event->assists[i] = 0;
+      }
+      for (i = touches_before; i < event->num_touches; i++) {
+        event->touches[i] = 0;
+      }
+      event->num_putouts = putouts_before;
+      event->num_assists = assists_before;
+      event->num_touches = touches_before;
+    }
 
     if (state->sym == '(') {
       int base = cw_parse_out_base(state);
@@ -1242,11 +1265,11 @@ static int cw_parse_generic_out(CWParserState *state, CWEventData *event, int fl
       }
       event->fc_flag[base] = 1;
       event->primary_out_flag[base] = 1;
-      if (event->inferred_batted_ball_type == ' ') {
+      if (event->inferred_batted_ball_type == ' ' && strcmp(state->token, "99") != 0) {
         if (strlen(state->token) > 1 || base > 0) {
           /* Assumption: more than one fielder implies ground ball,
-	     unless overriden later by a flag; also, getting the first
-	     out on a non-batter implies a bounce */
+	         * unless overridden later by a flag; also, getting the first
+	         * out on a non-batter implies a bounce */
           event->inferred_batted_ball_type = 'G';
         }
         else if (strlen(state->token) == 1 && base == 0) {
@@ -1258,13 +1281,15 @@ static int cw_parse_generic_out(CWParserState *state, CWEventData *event, int fl
       lastFielder = state->token[strlen(state->token) - 1];
     }
     else {
-      if (strlen(state->token) > 1 || lastFielder != ' ') {
-        /* Assumption: more than one fielder implies ground ball,
-	   unless overriden later by a flag */
-        event->inferred_batted_ball_type = 'G';
-      }
-      else {
-        event->inferred_batted_ball_type = 'F';
+      if (strcmp(state->token, "99") != 0) {
+        if (strlen(state->token) > 1 || lastFielder != ' ') {
+          /* Assumption: more than one fielder implies ground ball,
+	         * unless overridden later by a flag */
+          event->inferred_batted_ball_type = 'G';
+        }
+        else {
+          event->inferred_batted_ball_type = 'F';
+        }
       }
 
       cw_event_set_play(event, 0, state->token);
@@ -1962,7 +1987,7 @@ void cw_parse_sanity_check(CWEventData *event)
 
   /* The following implements rules for default batted ball types based
    * upon defensive fielding credit */
-  if (event->event_type == CW_EVENT_GENERICOUT) {
+  if (event->event_type == CW_EVENT_GENERICOUT && strcmp(event->play[0], "99") != 0) {
     if (strlen(event->play[0]) == 1 && !event->dp_flag && !event->tp_flag && !event->bunt_flag &&
         event->batted_ball_type == ' ') {
       event->batted_ball_type = 'F';

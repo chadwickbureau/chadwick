@@ -199,6 +199,32 @@ def event_fields_differ(
     return candidate[field] != reference[field]
 
 
+def is_unknown_fielder_battedball_diff(
+    field: str, candidate: dict[str, str], reference: dict[str, str]
+) -> bool:
+    """BEVENT infers a ground ball from Retrosheet's "99" (wholly
+    unknown fielder) placeholder; Chadwick leaves BATTEDBALL_CD blank
+    instead, since "99" carries no trajectory information. This is a
+    known, expected divergence -- tally it rather than listing every
+    instance.
+
+    The play text may carry a suffix beyond the bare credit (e.g.
+    "99.2-3", "99/SF.3-H"), so matching requires both that the play
+    code starts with "99" and that the batter's own fielding credit
+    (BAT_PLAY_TX) is exactly "99" -- as opposed to, say, "99(1)/FO",
+    where the unknown credit belongs to a forced runner rather than
+    the batter, and the batted ball type is legitimately inferred
+    from the force play instead.
+    """
+    return (
+        field == "BATTEDBALL_CD"
+        and candidate["EVENT_TX"].startswith("99")
+        and candidate["BAT_PLAY_TX"] == "99"
+        and candidate[field] == ""
+        and reference[field] == "G"
+    )
+
+
 def event_context(row: dict[str, str]) -> EventContext:
     return EventContext(
         inning=row["INN_CT"],
@@ -218,15 +244,19 @@ def compare_rows(
     candidate_rows: Iterable[dict[str, str]],
     reference_rows: Iterable[dict[str, str]],
     config: ToolConfig,
-) -> tuple[list[Difference], list[tuple[str, ...]], list[tuple[str, ...]]]:
+) -> tuple[list[Difference], list[tuple[str, ...]], list[tuple[str, ...]], int]:
     candidate = index_rows(candidate_rows, config.key_fields, config.candidate_name)
     reference = index_rows(reference_rows, config.key_fields, config.reference_name)
     candidate_only = sorted(candidate.keys() - reference.keys())
     reference_only = sorted(reference.keys() - candidate.keys())
     differences: list[Difference] = []
+    unknown_fielder_battedball_diffs = 0
     for key in sorted(candidate.keys() & reference.keys()):
         left, right = candidate[key], reference[key]
         for field in config.fields:
+            if config.mode == "event" and is_unknown_fielder_battedball_diff(field, left, right):
+                unknown_fielder_battedball_diffs += 1
+                continue
             differs = (
                 event_fields_differ(field, left, right)
                 if config.mode == "event"
@@ -237,7 +267,7 @@ def compare_rows(
                 differences.append(
                     Difference(key, field, left[field], right[field], context)
                 )
-    return differences, candidate_only, reference_only
+    return differences, candidate_only, reference_only, unknown_fielder_battedball_diffs
 
 
 def filtered_diagnostics(stderr: str) -> str:
@@ -548,8 +578,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 len(reference_rows),
                 config.reference_name,
             )
-            differences, candidate_only, reference_only = compare_rows(
-                candidate_rows, reference_rows, config
+            differences, candidate_only, reference_only, unknown_fielder_battedball_diffs = (
+                compare_rows(candidate_rows, reference_rows, config)
             )
             candidate_records = len(candidate_rows)
             count = len(differences) + len(candidate_only) + len(reference_only)
@@ -578,6 +608,12 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             else:
                 print(f"{year}: PASS ({candidate_records} records)")
+            if unknown_fielder_battedball_diffs:
+                print(
+                    f"{year}: {unknown_fielder_battedball_diffs} known BATTEDBALL_CD "
+                    'divergence(s) on "99" (unknown fielder) plays -- '
+                    f"{config.reference_name} reports 'G', {config.candidate_name} leaves it blank"
+                )
     return 1 if failed else 0
 
 
