@@ -116,6 +116,9 @@ available for every tool are noted in their descriptions.
    * - ``-d``
      - Print a list of the available fields and descriptions (for use
        with ``-f``). Not available for :program:`cwbox`.
+   * - ``-D dir``
+     - Directory in which to find team and roster files (``TEAMyyyy``
+       and ``aaayyyy.ROS``), instead of the current directory.
    * - ``-e mmdd``
      - The latest date to process (inclusive)
    * - ``-f flist``

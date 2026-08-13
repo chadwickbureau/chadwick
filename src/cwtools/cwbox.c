@@ -44,6 +44,7 @@ int use_sportsml = 0;
 char program_name[] = "cwbox";
 
 extern char year[], first_date[], last_date[], game_id[];
+extern char data_dir[1024];
 extern int ascii;
 extern int quiet;
 
@@ -77,6 +78,8 @@ void cwbox_print_help(void)
   fprintf(stderr, "  -h        print this help\n");
   fprintf(stderr, "  -i id     only process game given by id\n");
   fprintf(stderr, "  -y year   Year to process (for teamyyyy and aaayyyy.ros).\n");
+  fprintf(stderr,
+          "  -D dir    Directory to find team and roster files (default is current directory)\n");
   fprintf(stderr, "  -s start  Earliest date to process (mmdd).\n");
   fprintf(stderr, "  -e end    Last date to process (mmdd).\n");
   fprintf(stderr, "  -X        output boxscores as XML.\n");
@@ -124,6 +127,12 @@ int cwbox_parse_command_line(int argc, char *argv[])
     else if (!strcmp(argv[i], "-y")) {
       if (++i < argc) {
         strncpy(year, argv[i], 5);
+      }
+    }
+    else if (!strcmp(argv[i], "-D")) {
+      if (++i < argc) {
+        strncpy(data_dir, argv[i], sizeof(data_dir) - 1);
+        data_dir[sizeof(data_dir) - 1] = '\0';
       }
     }
     /* This part is cwbox-specific */
