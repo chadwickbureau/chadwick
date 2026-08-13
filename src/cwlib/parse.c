@@ -1390,8 +1390,8 @@ static int cw_parse_indifference(CWParserState *state, CWEventData *event, int f
  * at exit:  state->sym points to '.' or end of string, as appropriate
  *
  * Notes:
- * - flags are unusual with this event; /AP, /BINT, /INT, /OBA, /DP, and /TP
- *   are accepted.
+ * - flags are unusual with this event; /AP, /BINT, /INT, /OBA, /DP, /TP,
+ *   and /TH (with an optional base number) are accepted.
  */
 static int cw_parse_other_advance(CWParserState *state, CWEventData *event, int flags)
 {
@@ -1409,6 +1409,11 @@ static int cw_parse_other_advance(CWParserState *state, CWEventData *event, int 
     }
     else if (!strcmp(state->token, "TP")) {
       event->tp_flag = 1;
+    }
+    else if (!strcmp(state->token, "TH") || !strcmp(state->token, "TH1") ||
+             !strcmp(state->token, "TH2") || !strcmp(state->token, "TH3") ||
+             !strcmp(state->token, "THH")) {
+      /* throw notation on the primary event; no action required */
     }
     else if (state->token[0] == 'R') {
       /* accept "relay" notation flags silently */
