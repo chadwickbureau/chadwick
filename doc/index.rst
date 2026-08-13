@@ -13,8 +13,8 @@ DiamondWare format, as used by Retrosheet (http://www.retrosheet.org).
 Author
 -------
 
-Chadwick is written, maintained, and Copyright 2002-2023 by
-Dr T. L. Turocy (ted.turocy <aht> gmail <daht> com) 
+Chadwick is written, maintained, and Copyright 2002-2026 by
+Dr T. L. Turocy (ted.turocy <aht> gmail <daht> com)
 at Chadwick Baseball Bureau (http://www.chadwick-bureau.com).
 
 License
@@ -54,7 +54,7 @@ The author thanks `Sports Reference, LLC <http://www.sports-reference.com>`_,
 the `Society for American Baseball Research <http://www.sabr.org>`_,
 and `XMLTeam, Inc. <http://www.xmlteam.com>`_
 for support in the development of portions of
-Chadwick. The author also thanks David Smith of 
+Chadwick. The author also thanks David Smith of
 `Retrosheet <http://www.retrosheet.org>`_ for his
 always-gracious assistance and guidance.
 
@@ -73,36 +73,36 @@ information from Retrosheet play-by-play event files:
   extractor, which replaces and extends the DiamondWare program
   BGAME.
 
-- :program:`cwbox`, a boxscore generator, which
+- :ref:`cwbox <cwtools.cwbox>`, a boxscore generator, which
   replaces and extends the DiamondWare program BOX.
 
-- :program:`cwdaily`, which produces day-by-day player statistical
-  totals.  This program is unique to Chadwick.
-  
+- :ref:`cwdaily <cwtools.cwdaily>`, which produces per-game player
+  statistical records. This program is unique to Chadwick.
+
 - :ref:`cwsub <cwtools.cwsub>`, which extracts information
   about in-game player substitutions. This program is unique to
   Chadwick.
 
-- :program:`cwcomment`, which extracts comment
+- :ref:`cwcomment <cwtools.cwcomment>`, which extracts comment
   fields from event files. This program is unique to Chadwick.
 
-This documentation is intended to be read in conjunction with the 
+This documentation is intended to be read in conjunction with the
 materials provided by Retrosheet (see
 https://www.retrosheet.org/game.htm)
 summarizing the contents of
 play-by-play files and operation of the DiamondWare versions of these
 tools.  The Chadwick documentation focuses on filling in gaps in the
 Retrosheet documentation, and on detailing Chadwick-specific
-extensions the toolset.
+extensions to the toolset.
 
 .. _cwtools.commandline:
 
 Command-line options
 --------------------
 
-Each of the command-line tools shares a common set of options
-controlling their behavior. These are detailed in the following
-table.
+The command-line tools share many options controlling their behavior.
+These are detailed in the following table. Options which are not
+available for every tool are noted in their descriptions.
 
 .. list-table:: Common command-line options and their effects
    :header-rows: 1
@@ -111,21 +111,33 @@ table.
    * - Switch
      - Description
    * - ``-a``
-     - Generate ASCII comma-delimited files (default)
+     - Generate ASCII comma-delimited files (default). This option
+       does not affect :program:`cwbox`.
    * - ``-d``
-     - Print a list of the available fields and descriptions (for use with ``-f``)
+     - Print a list of the available fields and descriptions (for use
+       with ``-f``). Not available for :program:`cwbox`.
+   * - ``-D dir``
+     - Directory in which to find team and roster files (``TEAMyyyy``
+       and ``aaayyyy.ROS``), instead of the current directory.
    * - ``-e mmdd``
      - The latest date to process (inclusive)
    * - ``-f flist``
-     - List of fields to output. The default list can be viewed with ``-h``; the list of available fields can be viewed with ``-d``
+     - List of fields to output. The default list can be viewed with
+       ``-h``; the list of available fields can be viewed with ``-d``.
+       Not available for :program:`cwbox`.
    * - ``-ft``
-     - Generate FORTRAN format files.
+     - Generate FORTRAN format files. This option does not affect
+       :program:`cwbox`.
    * - ``-h``
      - Prints description and usage information for the tool.
    * - ``-i *gameid*``
      - Only process the game with ID ``gameid``
    * - ``-n``
-     - If in ASCII mode (the default), the first row of the output is a comma-separated list of column headers.
+     - If in ASCII mode (the default), the first row of the output is
+       a comma-separated list of column headers. Not available for
+       :program:`cwbox`.
+   * - ``-Q``
+     - Operate quietly; do not print progress messages.
    * - ``-s mmdd``
      - The earliest date to process (inclusive)
    * - ``-y``
@@ -140,13 +152,15 @@ Documentation of individual tools
 
     cwevent
     cwgame
+    cwbox
+    cwdaily
     cwsub
+    cwcomment
 
 
 .. Indices and tables
 .. ------------------
-.. 
+..
 .. * :ref:`genindex`
 .. * :ref:`modindex`
 .. * :ref:`search`
-

@@ -1,6 +1,6 @@
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2023, Dr T L Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2026, Dr T L Turocy (ted.turocy@gmail.com)
  *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *
  * FILE: src/cwlib/chadwick.h
@@ -33,5 +33,4 @@
 #include "gameiter.h"
 #include "box.h"
 
-#endif   /* CW_CHADWICK_H */
-
+#endif /* CW_CHADWICK_H */

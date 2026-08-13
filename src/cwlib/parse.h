@@ -1,6 +1,6 @@
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2023, Dr T L Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2026, Dr T L Turocy (ted.turocy@gmail.com)
  *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *
  * FILE: src/cwlib/parse.h
@@ -83,12 +83,12 @@ typedef enum {
   CW_EVENT_PITCH_PICKOFF_CATCHER_THIRD = 123
 } CWEventType;
 
-
 typedef struct cw_parsed_event_struct {
   CWEventType event_type;
   /* rbi_flag: 2 == (RBI) actually in play text */
   /* muff_flag: nonzero if runner is safe on a play like 1X2(6E4) */
-  int advance[4], rbi_flag[4], fc_flag[4], muff_flag[4];
+  /* primary_out_flag: out is encoded in the primary event */
+  int advance[4], rbi_flag[4], fc_flag[4], primary_out_flag[4], muff_flag[4];
   char play[4][20];
   int sh_flag, sf_flag, dp_flag, gdp_flag, tp_flag;
   int wp_flag, pb_flag, foul_flag, bunt_flag, force_flag;
@@ -98,10 +98,15 @@ typedef struct cw_parsed_event_struct {
    * intended for listing players involved in DP or TP */
   int num_putouts, num_assists, num_errors, num_touches;
   int putouts[3], assists[10], errors[10], touches[20];
-  /* Error types are 'N' for none, 'T' for throwing, 
+  /* Error types are 'N' for none, 'T' for throwing,
    * 'F' for fumbled, and 'D' for dropped throw. */
   char error_types[10];
   char batted_ball_type;
+  /* Default batted ball type inferred from fielding credits and from
+   * flags such as /SF, /FO, /IF that assume rather than state a
+   * trajectory.  Resolved into batted_ball_type, if that is still
+   * unset, by cw_parse_sanity_check(). */
+  char inferred_batted_ball_type;
   char hit_location[20];
 } CWEventData;
 
@@ -116,11 +121,4 @@ int cw_event_outs_on_play(CWEventData *event);
 int cw_event_runs_on_play(CWEventData *event);
 int cw_event_rbi_on_play(CWEventData *event);
 
-#endif  /* CW_PARSE_H */
-
-
-
-
-
-
-
+#endif /* CW_PARSE_H */

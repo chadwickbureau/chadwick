@@ -1,0 +1,33 @@
+# Chadwick's established C style, with spaces used consistently for indentation.
+BasedOnStyle: LLVM
+Language: Cpp
+
+IndentWidth: 2
+ContinuationIndentWidth: 2
+TabWidth: 8
+UseTab: Never
+IndentCaseLabels: false
+
+ColumnLimit: 99
+PointerAlignment: Right
+DerivePointerAlignment: false
+SpaceAfterCStyleCast: true
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterFunction: true
+  BeforeElse: true
+
+SpaceBeforeParens: ControlStatements
+AllowShortBlocksOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+InsertBraces: true
+
+AlignAfterOpenBracket: Align
+BinPackArguments: true
+BinPackParameters: true
+
+SortIncludes: Never
+ReflowComments: false

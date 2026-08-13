@@ -4,16 +4,20 @@ cwgame: Game information extractor
 ==================================
 
 :program:`cwgame` is a command-line tool which extracts summary
-information about each game in the data file.  
-These fields 
-are grouped into two categories. There are 83 fields which are
+information about each game in the data file.
+These fields
+are grouped into two categories. There are 86 fields which are
 compatible with the Retrosheet BGAME game descriptor tool.  These
 are specified using the ``-f`` command-line flag. In addition, cwgame
 offers a number "extended" fields which expand upon or give more
 detailed information not easily accessed via the standard
-fields. These are are specified using the ``-x`` command-line flag.
+fields. These are specified using the ``-x`` command-line flag.
 Many of these extended fields are defined to match fields which appear
-in the Retrosheet gamelogs.  
+in the Retrosheet gamelogs.
+
+The batting, pitching, and fielding totals reported by
+:program:`cwgame` are team totals. For per-game statistics for
+individual players, use :ref:`cwdaily <cwtools.cwdaily>`.
 
 .. note::
    :program:`cwgame` guarantees that the standard field numbers will
@@ -26,8 +30,8 @@ in the Retrosheet gamelogs.
    are not promised to be stable.  It is recommended to use the field
    labels instead in writing scripts to process the output of
    :program:`cwgame` extended fields.
- 
-The following table gives the contents of each of the 84 fields
+
+The following table gives the contents of each of the 86 fields
 :program:`cwgame` outputs.
 
 .. list-table:: cwgame standard field numbers
@@ -41,7 +45,7 @@ The following table gives the contents of each of the 84 fields
      - Game ID
      - ``GAME_ID``
    * - 1
-     - Date
+     - :ref:`Date <cwtools.cwgame.gamedate>`
      - ``GAME_DT``
    * - 2
      - Game number
@@ -290,6 +294,9 @@ The following table gives the contents of each of the 84 fields
      - Home finishing pitcher
      - ``HOME_FINISH_PIT_ID``
    * - 84
+     - Official scorer
+     - ``OFFICIAL_SCORER_ID``
+   * - 85
      - Game type
      - ``GAME_TYPE_TX``
 
@@ -309,14 +316,14 @@ The following table gives the contents of each of the 84 fields
    * - 2
      - visiting team game number
      - ``AWAY_TEAM_GAME_CT``
-   * - 3 
+   * - 3
      - home team game number
      - ``HOME_TEAM_GAME_CT``
    * - 4
      - length of game in outs
      - ``OUTS_CT``
    * - 5
-     - information on completion of game 
+     - information on completion of game
      - ``COMPLETION_TX``
    * - 6
      - information on forfeit of game
@@ -324,7 +331,7 @@ The following table gives the contents of each of the 84 fields
    * - 7
      - information on protest of game
      - ``PROTEST_TX``
-   * - 8 
+   * - 8
      - visiting team linescore
      - ``AWAY_LINE_TX``
    * - 9
@@ -342,7 +349,7 @@ The following table gives the contents of each of the 84 fields
    * - 13
      - visiting team HR
      - ``AWAY_HR_CT``
-   * - 14 
+   * - 14
      - visiting team RBI
      - ``AWAY_BI_CT``
    * - 15
@@ -351,7 +358,7 @@ The following table gives the contents of each of the 84 fields
    * - 16
      - visiting team SF
      - ``AWAY_SF_CT``
-   * - 17 
+   * - 17
      - visiting team HP
      - ``AWAY_HP_CT``
    * - 18
@@ -360,7 +367,7 @@ The following table gives the contents of each of the 84 fields
    * - 19
      - visiting team IBB
      - ``AWAY_IBB_CT``
-   * - 20 
+   * - 20
      - visiting team SO
      - ``AWAY_SO_CT``
    * - 21
@@ -387,7 +394,7 @@ The following table gives the contents of each of the 84 fields
    * - 28
      - visiting team WP
      - ``AWAY_WP_CT``
-   * - 29 
+   * - 29
      - visiting team BK
      - ``AWAY_BK_CT``
    * - 30
@@ -419,8 +426,8 @@ The following table gives the contents of each of the 84 fields
      - ``HOME_HR_CT``
    * - 39
      - home team RBI
-     - ``HOME_RBI_CT``
-   * - 40 
+     - ``HOME_BI_CT``
+   * - 40
      - home team SH
      - ``HOME_SH_CT``
    * - 41
@@ -592,6 +599,40 @@ The following table gives the contents of each of the 84 fields
      - :ref:`tiebreaker rule type in use <cwtools.cwgame.tiebreak>`
      - ``TIEBREAK_CD``
 
+.. _cwtools.cwgame.gamedate:
+
+Date (field 1)
+--------------
+
+The format of this field is controlled by the ``-dsf``, ``-dsp``,
+``-dnf``, and ``-dnp`` command-line switches, matching the switches
+of the same name in BGAME:
+
+.. list-table:: Command-line switches for the date field format
+   :header-rows: 1
+   :widths: 10,15,10
+
+   * - Switch
+     - Format
+     - Example
+   * - ``-dsf``
+     - slashes, full year
+     - ``04/08/2025``
+   * - ``-dsp``
+     - slashes, partial (two-digit) year
+     - ``04/08/25``
+   * - ``-dnf``
+     - no slashes, full year
+     - ``20250408``
+   * - ``-dnp``
+     - no slashes, partial (two-digit) year
+     - ``250408``
+
+.. note:: BGAME's default is ``-dnp`` (no slashes, two-digit year).
+   :program:`cwgame` instead defaults to ``-dnf`` (no slashes,
+   four-digit year, which is consistent with ISO 8601 dates).  Pass ``-dnp``
+   explicitly to reproduce BGAME's default output for this field.
+
 .. _cwtools.cwgame.howscored:
 
 How scored (field 24)
@@ -632,13 +673,11 @@ pitch detail in the file.
    * - Code
      - Description
    * - 0
-     - unknown
+     - unknown or none
    * - 1
      - pitches
    * - 2
      - count
-   * - 3
-     - none
 
 .. note:: This field reports the contents of the
    info,pitches field in the game file. Some games
@@ -681,10 +720,10 @@ of the wind.
      - fromlf
    * - 6
      - fromcf
-   * - 7 
+   * - 7
      - fromrf
-   * - 8 
-     - rtol 
+   * - 8
+     - rtol
 
 
 .. _cwtools.cwgame.windspeed:
@@ -692,8 +731,9 @@ of the wind.
 Wind speed (field 28)
 ---------------------
 
-The game time wind speed, in miles per hour. The value
--1 is used when the wind speed is unknown.
+The game-time wind speed, in miles per hour. The value 0 is used when
+the ``info,windspeed`` record is absent or its value is blank or
+``unknown``. Otherwise, the numeric value of the record is output.
 
 .. _cwtools.cwgame.fieldcondition:
 
@@ -731,7 +771,7 @@ precipitation level.
 .. list-table:: Numeric codes for precipitation field
    :header-rows: 1
    :widths: 5,20
-  
+
    * - Code
      - Description
    * - 0
@@ -761,14 +801,14 @@ Numeric codes for sky field.
 .. list-table:: Numeric codes for sky field
    :header-rows: 1
    :widths: 5,20
-  
+
    * - Code
      - Description
    * - 0
      - unknown
    * - 1
      - sunny
-   * - 2 
+   * - 2
      - cloudy
    * - 3
      - overcast
@@ -783,8 +823,9 @@ Numeric codes for sky field.
 Tiebreaker rule type in use (extended field 96)
 -----------------------------------------------
 
-This field indicates games in which an extra-innings tiebreaker
-rule was in use.  The only valid value for this field currently
-is `2`, indicating that extra innings began with a runner on
-second base.
+This field reports the value of the ``info,tiebreaker`` record, which
+identifies the base on which a runner is placed at the start of an
+extra inning. It is blank when the record is absent.
 
+The only tiebreaker rule used in MLB through 2026 is ``2``, meaning
+that an extra inning starts with a runner on second base only.

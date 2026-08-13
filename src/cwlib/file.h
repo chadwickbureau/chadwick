@@ -1,6 +1,6 @@
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2023, Dr T L Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2026, Dr T L Turocy (ted.turocy@gmail.com)
  *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *
  * FILE: src/cwlib/file.h
@@ -23,7 +23,6 @@
 
 #ifndef CW_FILE_H
 #define CW_FILE_H
-
 
 /*
  * Record reader: Encapsulates reading files one line at a time, normalising
@@ -54,7 +53,6 @@ int cw_record_reader_next(CWRecordReader *r);
  * Access the current line (NULL-terminated)
  */
 const char *cw_record_reader_line(const CWRecordReader *r);
-
 
 /*
  * A slightly nicer tokenizer API, which removes the first-next call asymmetry.
@@ -95,4 +93,4 @@ int cw_file_find_game(char *game_id, FILE *file);
  */
 int cw_file_find_first_game(FILE *file);
 
-#endif  /* CW_FILE_H */
+#endif /* CW_FILE_H */

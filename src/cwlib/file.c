@@ -1,6 +1,6 @@
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2023, Dr T L Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2026, Dr T L Turocy (ted.turocy@gmail.com)
  *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *
  * FILE: src/cwlib/file.c
@@ -101,7 +101,6 @@ const char *cw_record_reader_line(const CWRecordReader *r)
   return r->line;
 }
 
-
 void cw_tokenizer_init(CWTokenizer *t, char *line)
 {
   t->current = line;
@@ -127,7 +126,7 @@ char *cw_tokenizer_next(CWTokenizer *t)
 
   /* Quoted field */
   if (*s == '"') {
-    s++;  /* skip opening quote */
+    s++; /* skip opening quote */
     start = s;
     while (*s && *s != '"') {
       s++;
@@ -156,14 +155,12 @@ char *cw_tokenizer_next(CWTokenizer *t)
   return start;
 }
 
-
 /*
  * This replacement for atoi() does validity checking on the input,
  * and returns -1 (which is used by Retrosheet as the null value)
  * for invalid values.
  */
-int
-cw_atoi(char *s, char *msg)
+int cw_atoi(char *s, char *msg)
 {
   char *end = NULL;
   long temp = strtol(s, &end, 10);
@@ -178,7 +175,6 @@ cw_atoi(char *s, char *msg)
   }
   return -1;
 }
-
 
 /*
  * Find the position in the file of the specified gameID.
@@ -246,5 +242,3 @@ int cw_file_find_first_game(FILE *file)
   cw_record_reader_cleanup(&r);
   return 0;
 }
-
-

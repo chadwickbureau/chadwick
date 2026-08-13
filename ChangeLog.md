@@ -1,11 +1,17 @@
 # [0.11.0]
-	
+
 ## Behaviour changes
+- The command-line option for "quiet mode" is now `-Q` instead of `-q`, as the latter is
+  used by `BEVENT`/`BGAME` for interactive selection of games to process.
+- Add command line switches `-dsf`/`-dsp`/`-dnf`/`-dnp` to `cwgame` to match `BGAME`.
+  `cwgame` continues to differ from `BGAME` in using "YYYYMMDD" as the default format, while
+  BGAME still uses YYMMDD.
 - In `cwevent`, runner advancement types 6 and 7 (for automatic runners) have been
   removed.  Instead, new flags for whether a runner is the result of an autoamtic runner
   placement are now provided.
-- In `cwgame`, field 84 has been added to report the value of the new `info,gametype`
-  field.  To match `BGAME` behaviour this field is not reported by default.
+- In `cwgame`, field 84 has been added to report the value of `info,oscorer`, and
+  field 85 has been added to report the value of the new `info,gametype` field.
+  To match current `BGAME` behaviour, game type is not reported by default.
   Any game that does not have an `info,gametype` record is assumed to be "regular".
 - Pitch types A (automatic strike) and V (automatic ball) are no longer
   counted towards pitches/strikes.
@@ -13,10 +19,10 @@
   `UNKNOWN_PLAY_EXC_FL` are now quoted explicitly to be consistent with
   all other flag fields.
 - In `cwgame`, warnings on empty values for attendance and timeofgame has been
-  removed.  These are now output as 0 (instead of -1) to restore `BEVENT`
+  removed.  These are now output as 0 (instead of -1) to restore `BGAME`
   compatibility.
 - In `cwgame`, "unknown" in now an accepted value for `info,temp` and `info,windspeed`.
-  "unknown" values are output as 0 for `BEVENT` compatibility.
+  "unknown" values are output as 0 for `BGAME` compatibility.
 - In `cwevent`, the implementation of the batter/runner "fate" extended fields was
   entirely incorrect.  This has been corrected.  (#45)
 - In handling rosters, treat blank or null values for batting or throwing side
@@ -25,8 +31,20 @@
   player's totals are null.
 - Parsing of C/ now accepts additional flags, to account for the fact this is used for
   runners reading first on obstruction and also for shift/positioning violations.
-
-
+- Support for archaic flag /SAC (as a synonym for /SH) has been removed.
+- The `cwevent` extended fields indicating force outs also treat as a force any out reported
+  in the primary portion of the event string if marked as a double play with /DP.
+  This handles cases where a /GDP is not awarded due to interferences.  (#13)
+- With boxscore event files, pinch-hitting and pinch-running are correctly added to the list
+  of a player's positions. (#7)
+- The extended `cwevent` fields reporting runner position correct report pinch-runners as
+  position 12 instead of position 0.  (#11)
+- Added command-line switch `-D` to allow referring to TEAM and roster files in a directory
+  different from the current one.  (#51)
+- Support for the use of "?" as a "missing fielder" placeholder has been removed; this has been
+  deprecated by Retrosheet for a very long time.  Play strings are normalised to strip out (and
+  therefore simply ignore) the presence of any stray "?" characters, to accommodate a handful of
+  cases still in the Retrosheet corpus.
 
 # [0.10.0] - 2023-01-02
 
@@ -182,9 +200,3 @@
   removed.  This was a very old Retrosheet code that has been
   deprecated long ago and has not appeared in any released files
   for years.
-
-
-  
-
-   
-

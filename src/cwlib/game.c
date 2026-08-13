@@ -1,6 +1,6 @@
 /*
  * This file is part of Chadwick
- * Copyright (c) 2002-2023, Dr T L Turocy (ted.turocy@gmail.com)
+ * Copyright (c) 2002-2026, Dr T L Turocy (ted.turocy@gmail.com)
  *                          Chadwick Baseball Bureau (http://www.chadwick-bureau.com)
  *
  * FILE: src/cwlib/game.c
@@ -172,7 +172,8 @@ static void cw_game_cleanup_data(CWGame *game)
     int i;
     CWData *next_data = data->next;
 
-    for (i = 0; i < data->num_data; free(data->data[i++]));
+    for (i = 0; i < data->num_data; free(data->data[i++]))
+      ;
     free(data->data);
     data = next_data;
   }
@@ -191,7 +192,8 @@ static void cw_game_cleanup_stat(CWGame *game)
     int i;
     CWData *next_data = data->next;
 
-    for (i = 0; i < data->num_data; free(data->data[i++]));
+    for (i = 0; i < data->num_data; free(data->data[i++]))
+      ;
     free(data->data);
     data = next_data;
   }
@@ -199,7 +201,6 @@ static void cw_game_cleanup_stat(CWGame *game)
   game->first_stat = NULL;
   game->last_stat = NULL;
 }
-
 
 /*
  * Private auxiliary function to clean up memory from evdata list
@@ -211,7 +212,8 @@ static void cw_game_cleanup_evdata(CWGame *game)
     int i;
     CWData *next_data = data->next;
 
-    for (i = 0; i < data->num_data; free(data->data[i++]));
+    for (i = 0; i < data->num_data; free(data->data[i++]))
+      ;
     free(data->data);
     data = next_data;
   }
@@ -219,7 +221,6 @@ static void cw_game_cleanup_evdata(CWGame *game)
   game->first_evdata = NULL;
   game->last_evdata = NULL;
 }
-
 
 /*
  * Private auxiliary function to clean up memory from data list
@@ -231,7 +232,8 @@ static void cw_game_cleanup_line(CWGame *game)
     int i;
     CWData *next_data = data->next;
 
-    for (i = 0; i < data->num_data; free(data->data[i++]));
+    for (i = 0; i < data->num_data; free(data->data[i++]))
+      ;
     free(data->data);
     data = next_data;
   }
@@ -264,7 +266,6 @@ void cw_game_set_version(CWGame *game, char *version)
   XCOPY(game->version, version)
 }
 
-
 void cw_game_info_append(CWGame *game, char *label, char *data)
 {
   CWInfo *info = (CWInfo *) malloc(sizeof(CWInfo));
@@ -282,8 +283,7 @@ void cw_game_info_append(CWGame *game, char *label, char *data)
   game->last_info = info;
 }
 
-void
-cw_game_info_set(CWGame *game, char *label, char *data)
+void cw_game_info_set(CWGame *game, char *label, char *data)
 {
   CWInfo *info = game->first_info;
 
@@ -322,8 +322,7 @@ char *cw_game_info_lookup(CWGame *game, char *label)
   return NULL;
 }
 
-void cw_game_starter_append(CWGame *game, char *player_id, char *name,
-                            int team, int slot, int pos)
+void cw_game_starter_append(CWGame *game, char *player_id, char *name, int team, int slot, int pos)
 {
   CWAppearance *starter = (CWAppearance *) malloc(sizeof(CWAppearance));
   XCOPY(starter->player_id, player_id)
@@ -343,8 +342,7 @@ void cw_game_starter_append(CWGame *game, char *player_id, char *name,
   game->last_starter = starter;
 }
 
-CWAppearance *
-cw_game_starter_find(CWGame *game, int team, int slot)
+CWAppearance *cw_game_starter_find(CWGame *game, int team, int slot)
 {
   CWAppearance *starter = game->first_starter;
   while (starter != NULL) {
@@ -357,8 +355,7 @@ cw_game_starter_find(CWGame *game, int team, int slot)
   return NULL;
 }
 
-CWAppearance *
-cw_game_starter_find_by_position(CWGame *game, int team, int pos)
+CWAppearance *cw_game_starter_find_by_position(CWGame *game, int team, int pos)
 {
   CWAppearance *starter = game->first_starter;
   while (starter != NULL) {
@@ -371,9 +368,8 @@ cw_game_starter_find_by_position(CWGame *game, int team, int pos)
   return NULL;
 }
 
-void cw_game_event_append(CWGame *game, int inning, int batting_team,
-                          char *batter, char *count, char *pitches,
-                          char *event_text)
+void cw_game_event_append(CWGame *game, int inning, int batting_team, char *batter, char *count,
+                          char *pitches, char *event_text)
 {
   CWEvent *event = (CWEvent *) malloc(sizeof(CWEvent));
   event->inning = inning;
@@ -414,8 +410,8 @@ void cw_game_truncate(CWGame *game, CWEvent *event)
   cw_game_cleanup_events(game, event);
 }
 
-void cw_game_substitute_append(CWGame *game, char *player_id, char *name,
-                               int team, int slot, int pos)
+void cw_game_substitute_append(CWGame *game, char *player_id, char *name, int team, int slot,
+                               int pos)
 {
   CWAppearance *sub = (CWAppearance *) malloc(sizeof(CWAppearance));
   XCOPY(sub->player_id, player_id)
@@ -464,9 +460,7 @@ void cw_game_data_set_er(CWGame *game, char *playerID, int er)
   CWData *data = game->first_data;
 
   while (data != NULL) {
-    if (data->num_data >= 3 &&
-        !strcmp(data->data[0], "er") &&
-        !strcmp(data->data[1], playerID)) {
+    if (data->num_data >= 3 && !strcmp(data->data[0], "er") && !strcmp(data->data[1], playerID)) {
       free(data->data[2]);
       data->data[2] = (char *) malloc(10 * sizeof(char));
       sprintf(data->data[2], "%d", er);
@@ -481,7 +475,6 @@ void cw_game_data_set_er(CWGame *game, char *playerID, int er)
   sprintf(foo[2], "%d", er);
   cw_game_data_append(game, 3, foo);
 }
-
 
 void cw_game_stat_append(CWGame *game, int num_data, char **data)
 {
@@ -611,8 +604,7 @@ void cw_game_comment_append(CWGame *game, char *text)
   }
 }
 
-void
-cw_game_replace_player(CWGame *game, char *key_old, char *key_new)
+void cw_game_replace_player(CWGame *game, char *key_old, char *key_new)
 {
   CWAppearance *sub;
   CWData *data;
@@ -640,8 +632,7 @@ cw_game_replace_player(CWGame *game, char *key_old, char *key_new)
   }
 
   for (data = game->first_data; data != NULL; data = data->next) {
-    if (data->num_data >= 3 && !strcmp(data->data[0], "er") &&
-        !strcmp(data->data[1], key_old)) {
+    if (data->num_data >= 3 && !strcmp(data->data[0], "er") && !strcmp(data->data[1], key_old)) {
       free(data->data[1]);
       XCOPY(data->data[1], key_new)
     }
@@ -661,17 +652,14 @@ cw_game_replace_player(CWGame *game, char *key_old, char *key_new)
   }
 }
 
-static void
-cw_game_warn_invalid_record(CWGame *game, char *line)
+static void cw_game_warn_invalid_record(CWGame *game, char *line)
 {
-  fprintf(stderr, "WARNING: In %s, skipping invalid record:\n",
-          game->game_id);
+  fprintf(stderr, "WARNING: In %s, skipping invalid record:\n", game->game_id);
   /* The record will already have end-of-line included so no need for \n. */
   fprintf(stderr, "         %s", line);
 }
 
-CWGame *
-cw_game_read(FILE *file)
+CWGame *cw_game_read(FILE *file)
 {
   CWRecordReader r;
   CWTokenizer tok;
@@ -722,9 +710,9 @@ cw_game_read(FILE *file)
     tok0 = cw_tokenizer_next(&tok);
 
     if (!tok0 || !strcmp(tok0, "id")) {
-       fsetpos(file, &filepos);
-       free(line_copy);
-       break;
+      fsetpos(file, &filepos);
+      free(line_copy);
+      break;
     }
     else if (!strcmp(tok0, "version")) {
       char *version = cw_tokenizer_next(&tok);
@@ -746,8 +734,7 @@ cw_game_read(FILE *file)
       char *slot = cw_tokenizer_next(&tok);
       char *pos = cw_tokenizer_next(&tok);
       if (player_id && name && team && slot && pos) {
-        cw_game_starter_append(game, player_id, name,
-                               cw_atoi(team, NULL), cw_atoi(slot, NULL),
+        cw_game_starter_append(game, player_id, name, cw_atoi(team, NULL), cw_atoi(slot, NULL),
                                cw_atoi(pos, NULL));
       }
     }
@@ -759,10 +746,8 @@ cw_game_read(FILE *file)
       char *pitches = cw_tokenizer_next(&tok);
       char *play = cw_tokenizer_next(&tok);
       if (inning && batting_team && batter && count && pitches && play) {
-        cw_game_event_append(game,
-                             cw_atoi(inning, NULL),
-                             cw_atoi(batting_team, NULL),
-                             batter, count, pitches, play);
+        cw_game_event_append(game, cw_atoi(inning, NULL), cw_atoi(batting_team, NULL), batter,
+                             count, pitches, play);
       }
       if (batHand != ' ' && !strcmp(batHandBatter, batter)) {
         game->last_event->batter_hand = batHand;
@@ -776,8 +761,11 @@ cw_game_read(FILE *file)
       if (pitHand != ' ') {
         game->last_event->pitcher_hand = pitHand;
         XCOPY(game->last_event->pitcher_hand_id, pitHandPitcher)
-        pitHand = ' ';
-        strcpy(pitHandPitcher, "");
+        if (strcmp(play, "NP") != 0) {
+          /* padj applies to the next non-NP play */
+          pitHand = ' ';
+          strcpy(pitHandPitcher, "");
+        }
       }
 
       if (ladjSlot != 0) {
@@ -808,9 +796,14 @@ cw_game_read(FILE *file)
       char *slot = cw_tokenizer_next(&tok);
       char *pos = cw_tokenizer_next(&tok);
       if (player_id && name && team && slot && pos) {
-        cw_game_substitute_append(game, player_id, name,
-                                  cw_atoi(team, NULL), cw_atoi(slot, NULL),
+        cw_game_substitute_append(game, player_id, name, cw_atoi(team, NULL), cw_atoi(slot, NULL),
                                   cw_atoi(pos, NULL));
+        if (cw_atoi(pos, NULL) == 1 && pitHand != ' ' && strcmp(player_id, pitHandPitcher) != 0) {
+          /* A pending padj is for the pitcher being relieved, so it no
+           * longer applies once a different pitcher takes the mound. */
+          pitHand = ' ';
+          strcpy(pitHandPitcher, "");
+        }
       }
     }
     else if (!strcmp(tok0, "com")) {
@@ -918,8 +911,7 @@ cw_game_read(FILE *file)
   return game;
 }
 
-static void
-cw_game_write_header(CWGame *game, FILE *file)
+static void cw_game_write_header(CWGame *game, FILE *file)
 {
   CWInfo *info = game->first_info;
 
@@ -929,18 +921,13 @@ cw_game_write_header(CWGame *game, FILE *file)
   while (info != NULL) {
     /*
      * Use explicit quotes around the data if either a comma appears
-     * in the data, or to be output-compatible with existing tools 
+     * in the data, or to be output-compatible with existing tools
      */
-    if (strstr(info->data, ",") ||
-        !strcmp(info->label, "inputprogvers") ||
-        !strcmp(info->label, "umphome") ||
-        !strcmp(info->label, "ump1b") ||
-        !strcmp(info->label, "ump2b") ||
-        !strcmp(info->label, "ump3b") ||
-        !strcmp(info->label, "umplf") ||
-        !strcmp(info->label, "umprf") ||
-        !strcmp(info->label, "scorer") ||
-        !strcmp(info->label, "translator") ||
+    if (strstr(info->data, ",") || !strcmp(info->label, "inputprogvers") ||
+        !strcmp(info->label, "umphome") || !strcmp(info->label, "ump1b") ||
+        !strcmp(info->label, "ump2b") || !strcmp(info->label, "ump3b") ||
+        !strcmp(info->label, "umplf") || !strcmp(info->label, "umprf") ||
+        !strcmp(info->label, "scorer") || !strcmp(info->label, "translator") ||
         !strcmp(info->label, "inputter")) {
       fprintf(file, "info,%s,\"%s\"\n", info->label, info->data);
     }
@@ -951,21 +938,18 @@ cw_game_write_header(CWGame *game, FILE *file)
   }
 }
 
-static void
-cw_game_write_starters(CWGame *game, FILE *file)
+static void cw_game_write_starters(CWGame *game, FILE *file)
 {
   CWAppearance *starter = game->first_starter;
 
   while (starter != NULL) {
-    fprintf(file, "start,%s,\"%s\",%d,%d,%d\n",
-            starter->player_id, starter->name,
-            starter->team, starter->slot, starter->pos);
+    fprintf(file, "start,%s,\"%s\",%d,%d,%d\n", starter->player_id, starter->name, starter->team,
+            starter->slot, starter->pos);
     starter = starter->next;
   }
 }
 
-static void
-cw_game_write_comments(CWGame *game, FILE *file)
+static void cw_game_write_comments(CWGame *game, FILE *file)
 {
   CWComment *comment = game->first_comment;
 
@@ -975,8 +959,7 @@ cw_game_write_comments(CWGame *game, FILE *file)
   }
 }
 
-static void
-cw_game_write_events(CWGame *game, FILE *file)
+static void cw_game_write_events(CWGame *game, FILE *file)
 {
   CWEvent *event = game->first_event;
 
@@ -993,16 +976,13 @@ cw_game_write_events(CWGame *game, FILE *file)
     if (event->auto_base != 0) {
       fprintf(file, "radj,%s,%d\n", event->auto_runner_id, event->auto_base);
     }
-    fprintf(file, "play,%d,%d,%s,%s,%s,%s\n",
-            event->inning, event->batting_team,
-            event->batter, event->count, event->pitches,
-            event->event_text);
+    fprintf(file, "play,%d,%d,%s,%s,%s,%s\n", event->inning, event->batting_team, event->batter,
+            event->count, event->pitches, event->event_text);
     if (event->first_sub != NULL) {
       CWAppearance *sub = event->first_sub;
       while (sub != NULL) {
-        fprintf(file, "sub,%s,\"%s\",%d,%d,%d\n",
-                sub->player_id, sub->name,
-                sub->team, sub->slot, sub->pos);
+        fprintf(file, "sub,%s,\"%s\",%d,%d,%d\n", sub->player_id, sub->name, sub->team, sub->slot,
+                sub->pos);
         sub = sub->next;
       }
     }
@@ -1017,8 +997,7 @@ cw_game_write_events(CWGame *game, FILE *file)
   }
 }
 
-static void
-cw_game_write_stat(CWGame *game, FILE *file)
+static void cw_game_write_stat(CWGame *game, FILE *file)
 {
   CWData *data = game->first_stat;
 
@@ -1034,8 +1013,7 @@ cw_game_write_stat(CWGame *game, FILE *file)
   }
 }
 
-static void
-cw_game_write_line(CWGame *game, FILE *file)
+static void cw_game_write_line(CWGame *game, FILE *file)
 {
   CWData *data = game->first_line;
 
@@ -1051,8 +1029,7 @@ cw_game_write_line(CWGame *game, FILE *file)
   }
 }
 
-static void
-cw_game_write_data(CWGame *game, FILE *file)
+static void cw_game_write_data(CWGame *game, FILE *file)
 {
   CWData *data = game->first_data;
 
@@ -1068,8 +1045,7 @@ cw_game_write_data(CWGame *game, FILE *file)
   }
 }
 
-void
-cw_game_write(CWGame *game, FILE *file)
+void cw_game_write(CWGame *game, FILE *file)
 {
   cw_game_write_header(game, file);
   cw_game_write_starters(game, file);
@@ -1080,8 +1056,7 @@ cw_game_write(CWGame *game, FILE *file)
   cw_game_write_data(game, file);
 }
 
-void
-cw_event_comment_append(CWEvent *event, char *text)
+void cw_event_comment_append(CWEvent *event, char *text)
 {
   CWComment *comment = (CWComment *) malloc(sizeof(CWComment));
   XCOPY(comment->text, text)
@@ -1096,70 +1071,78 @@ cw_event_comment_append(CWEvent *event, char *text)
   event->last_comment = comment;
 }
 
-int
-cw_pitch_thrown(char c)
-{ return (cw_pitch_ball_thrown(c) | cw_pitch_strike_thrown(c)) ? 1 : 0; }
-
-int
-cw_pitch_ball_thrown(char c)
-{ return (c == 'B' || c == 'H' || c == 'I' || c == 'P') ? 1 : 0; }
-
-int
-cw_pitch_ball_called(char c)
-{ return (c == 'B') ? 1 : 0; }
-
-int
-cw_pitch_ball_intentional(char c)
-{ return (c == 'I') ? 1 : 0; }
-
-int
-cw_pitch_ball_pitchout(char c)
-{ return (c == 'P') ? 1 : 0; }
-
-int
-cw_pitch_ball_hit_batter(char c)
-{ return (c == 'H') ? 1 : 0; }
-
-int
-cw_pitch_ball_other(char c)
-{ return (c == 'V') ? 1 : 0; }
-
-int
-cw_pitch_strike_thrown(char c)
+int cw_pitch_thrown(char c)
 {
-  return (c == 'C' || c == 'F' || c == 'K' || c == 'L' ||
-          c == 'M' || c == 'O' || c == 'Q' || c == 'R' ||
-          c == 'S' || c == 'T' || c == 'X' || c == 'Y') ? 1 : 0;
+  return (cw_pitch_ball_thrown(c) | cw_pitch_strike_thrown(c)) ? 1 : 0;
 }
 
-int
-cw_pitch_strike_called(char c)
-{ return (c == 'C') ? 1 : 0; }
+int cw_pitch_ball_thrown(char c)
+{
+  return (c == 'B' || c == 'H' || c == 'I' || c == 'P') ? 1 : 0;
+}
 
-int
-cw_pitch_strike_swinging(char c)
-{ return (c == 'S' || c == 'M' || c == 'Q') ? 1 : 0; }
+int cw_pitch_ball_called(char c)
+{
+  return (c == 'B') ? 1 : 0;
+}
 
-int
-cw_pitch_strike_foul(char c)
-{ return (c == 'F' || c == 'L' || c == 'O' || c == 'T' || c == 'R') ? 1 : 0; }
+int cw_pitch_ball_intentional(char c)
+{
+  return (c == 'I') ? 1 : 0;
+}
 
-int
-cw_pitch_strike_inplay(char c)
-{ return (c == 'X' || c == 'Y') ? 1 : 0; }
+int cw_pitch_ball_pitchout(char c)
+{
+  return (c == 'P') ? 1 : 0;
+}
 
-int
-cw_pitch_strike_other(char c)
-{ return (c == 'A' || c == 'K') ? 1 : 0; }
+int cw_pitch_ball_hit_batter(char c)
+{
+  return (c == 'H') ? 1 : 0;
+}
 
-int
-cw_pitch_count_pitches(char *pitches, int (*criterion)(char))
+int cw_pitch_ball_other(char c)
+{
+  return (c == 'V') ? 1 : 0;
+}
+
+int cw_pitch_strike_thrown(char c)
+{
+  return (c == 'C' || c == 'F' || c == 'K' || c == 'L' || c == 'M' || c == 'O' || c == 'Q' ||
+          c == 'R' || c == 'S' || c == 'T' || c == 'X' || c == 'Y')
+           ? 1
+           : 0;
+}
+
+int cw_pitch_strike_called(char c)
+{
+  return (c == 'C') ? 1 : 0;
+}
+
+int cw_pitch_strike_swinging(char c)
+{
+  return (c == 'S' || c == 'M' || c == 'Q') ? 1 : 0;
+}
+
+int cw_pitch_strike_foul(char c)
+{
+  return (c == 'F' || c == 'L' || c == 'O' || c == 'T' || c == 'R') ? 1 : 0;
+}
+
+int cw_pitch_strike_inplay(char c)
+{
+  return (c == 'X' || c == 'Y') ? 1 : 0;
+}
+
+int cw_pitch_strike_other(char c)
+{
+  return (c == 'A' || c == 'K') ? 1 : 0;
+}
+
+int cw_pitch_count_pitches(char *pitches, int (*criterion)(char))
 {
   int count;
-  for (count = 0; *pitches; count += criterion(*pitches++));
+  for (count = 0; *pitches; count += criterion(*pitches++))
+    ;
   return count;
 }
-
-
-
-
