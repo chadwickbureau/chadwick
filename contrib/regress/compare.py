@@ -336,10 +336,15 @@ def season_directory(data_root: Path, year: str) -> Path:
 def event_files(data_root: Path, year: str) -> list[Path]:
     directory = season_directory(data_root, year)
     files = sorted(
-        path for path in directory.glob(f"{year}*.EV?") if path.is_file()
+        path
+        for pattern in (f"{year}*.EV?", f"{year}*.ED?")
+        for path in directory.glob(pattern)
+        if path.is_file()
     )
     if not files:
-        raise HarnessError(f"no event files matching {year}*.EV? in {directory}")
+        raise HarnessError(
+            f"no event files matching {year}*.EV? or {year}*.ED? in {directory}"
+        )
     return files
 
 

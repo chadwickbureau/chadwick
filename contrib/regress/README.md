@@ -26,8 +26,9 @@ setup, execution, or malformed-output errors. Use `--max-differences N` to
 limit diagnostics.
 
 `--data-dir` is the root of a Retrosheet data repository. For a requested year
-the harness reads event files from `seasons/<year>` beneath that root and runs
-both tools with that season directory as their working directory.
+the harness reads event files (`*.EV?`) and deduced event files (`*.ED?`)
+from `seasons/<year>` beneath that root and runs both tools with that season
+directory as their working directory.
 
 Progress is written to standard error, while difference reports remain on
 standard output. Pass `--verbose` to log the exact commands, input-file counts,

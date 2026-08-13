@@ -143,6 +143,19 @@ class DataLayoutTest(unittest.TestCase):
             self.assertEqual(compare.season_directory(root, "2025"), directory)
             self.assertEqual(compare.event_files(root, "2025"), [expected])
 
+    def test_finds_deduced_files_alongside_event_files(self):
+        with TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            directory = root / "seasons" / "1908"
+            directory.mkdir(parents=True)
+            deduced = directory / "1908CHN.EDN"
+            deduced.touch()
+            event = directory / "1908CHA.EVA"
+            event.touch()
+            self.assertEqual(
+                compare.event_files(root, "1908"), sorted([deduced, event])
+            )
+
     def test_rejects_missing_season_directory(self):
         with TemporaryDirectory() as temporary:
             with self.assertRaisesRegex(
