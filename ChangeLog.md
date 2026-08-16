@@ -45,6 +45,10 @@
   deprecated by Retrosheet for a very long time.  Play strings are normalised to strip out (and
   therefore simply ignore) the presence of any stray "?" characters, to accommodate a handful of
   cases still in the Retrosheet corpus.
+- Corrected handling of unknown-fielding-credit ("99") primary outs; these default to a null
+  batted ball type (previously these were being emitted as ground balls)
+- On unknown fielding credit plays, do not award touches to the right fielder (only used in
+  sequencing the rendering of double/triple plays in boxscores)
 
 # [0.10.0] - 2023-01-02
 
