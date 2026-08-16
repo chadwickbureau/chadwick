@@ -143,16 +143,21 @@ CWGame *cw_scorebook_remove_game(CWScorebook *scorebook, char *game_id)
 
 static int cw_scorebook_read_comments(CWScorebook *scorebook, FILE *file)
 {
-  while (1) {
-    char buf[256], *tok, *com;
-    if (fgets(buf, 256, file) == NULL) {
-      return 0;
-    }
+  CWRecordReader r;
+  CWTokenizer tok;
 
-    tok = cw_strtok(buf);
-    com = cw_strtok(NULL);
+  cw_record_reader_init(&r, file);
 
-    if (tok && !strcmp(tok, "com") && com) {
+  while (cw_record_reader_next(&r) == 1) {
+    char *line = (char *) cw_record_reader_line(&r);
+    char *tag, *com;
+
+    cw_tokenizer_init(&tok, line);
+
+    tag = cw_tokenizer_next(&tok);
+    com = cw_tokenizer_next(&tok);
+
+    if (tag && !strcmp(tag, "com") && com) {
       CWComment *comment = (CWComment *) malloc(sizeof(CWComment));
       comment->text = (char *) malloc(sizeof(char) * (strlen(com) + 1));
       strcpy(comment->text, com);
@@ -167,9 +172,12 @@ static int cw_scorebook_read_comments(CWScorebook *scorebook, FILE *file)
       scorebook->last_comment = comment;
     }
     else {
+      cw_record_reader_cleanup(&r);
       return 1;
     }
   }
+  cw_record_reader_cleanup(&r);
+  return 0;
 }
 
 int cw_scorebook_read(CWScorebook *scorebook, FILE *file)
