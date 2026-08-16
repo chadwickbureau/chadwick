@@ -958,7 +958,7 @@ DECLARE_FIELDFUNC(cwevent_fielding_team_id)
     return cw_buffer_emit_string(buffer, cw_game_info_lookup(gameiter->game, "visteam"), 3);
   }
   else {
-    return cw_buffer_emit(buffer, cw_game_info_lookup(gameiter->game, "hometeam"), 3);
+    return cw_buffer_emit_string(buffer, cw_game_info_lookup(gameiter->game, "hometeam"), 3);
   }
 }
 
