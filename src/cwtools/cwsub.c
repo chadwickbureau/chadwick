@@ -27,6 +27,7 @@
 #include <ctype.h>
 
 #include "cwlib/chadwick.h"
+#include "buffer.h"
 
 /*************************************************************************
  * Global variables for command-line options
@@ -50,7 +51,7 @@ int print_header = 0;
 /*
  * typedef to declare the pointer-to-function type
  */
-typedef int (*field_func)(char *, CWGameIterator *, CWAppearance *);
+typedef int (*field_func)(CWBuffer *, CWGameIterator *, CWAppearance *);
 
 /*
  * convenient structure to hold all information relating to a field
@@ -66,70 +67,71 @@ typedef struct field_struct {
  */
 
 #define DECLARE_FIELDFUNC(funcname)                                                               \
-  int funcname(char *buffer, CWGameIterator *gameiter, CWAppearance *sub)
+  int funcname(CWBuffer *buffer, CWGameIterator *gameiter, CWAppearance *sub)
 
 /* Field 0 */
 DECLARE_FIELDFUNC(cwsub_game_id)
 {
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-12s", gameiter->game->game_id);
+  return cw_buffer_emit_string(buffer, gameiter->game->game_id, 12);
 }
 
 /* Field 1 */
 DECLARE_FIELDFUNC(cwsub_inning)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", gameiter->event->inning);
+  return cw_buffer_emit_int(buffer, gameiter->event->inning, 2);
 }
 
 /* Field 2 */
 DECLARE_FIELDFUNC(cwsub_batting_team)
 {
-  return sprintf(buffer, "%d", gameiter->event->batting_team);
+  return cw_buffer_emit_int(buffer, gameiter->event->batting_team, 0);
 }
 
 /* Field 3 */
 DECLARE_FIELDFUNC(cwsub_player)
 {
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s", sub->player_id);
+  return cw_buffer_emit_string(buffer, sub->player_id, 8);
 }
 
 /* Field 4 */
 DECLARE_FIELDFUNC(cwsub_team)
 {
-  return sprintf(buffer, "%d", sub->team);
+  return cw_buffer_emit_int(buffer, sub->team, 0);
 }
 
 /* Field 5 */
 DECLARE_FIELDFUNC(cwsub_slot)
 {
-  return sprintf(buffer, "%d", sub->slot);
+  return cw_buffer_emit_int(buffer, sub->slot, 0);
 }
 
 /* Field 6 */
 DECLARE_FIELDFUNC(cwsub_position)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d", sub->pos);
+  return cw_buffer_emit_int(buffer, sub->pos, 2);
 }
 
 /* Field 7 */
 DECLARE_FIELDFUNC(cwsub_removed_player)
 {
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-8s",
-                 gameiter->state->lineups[sub->slot][sub->team].player_id);
+  return cw_buffer_emit_string(buffer, gameiter->state->lineups[sub->slot][sub->team].player_id,
+                               8);
 }
 
 /* Field 8 */
 DECLARE_FIELDFUNC(cwsub_removed_position)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%2d",
-                 gameiter->state->lineups[sub->slot][sub->team].position);
+  return cw_buffer_emit_int(buffer, gameiter->state->lineups[sub->slot][sub->team].position, 2);
 }
 
 /* Field 9 */
 DECLARE_FIELDFUNC(cwsub_event_number)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%3d",
-                 (!strcmp(gameiter->event->event_text, "NP")) ? gameiter->state->event_count
-                                                              : gameiter->state->event_count + 1);
+  return cw_buffer_emit_int(buffer,
+                            (!strcmp(gameiter->event->event_text, "NP"))
+                              ? gameiter->state->event_count
+                              : gameiter->state->event_count + 1,
+                            3);
 }
 
 /* Field 10 */
@@ -137,10 +139,10 @@ DECLARE_FIELDFUNC(cwsub_balls)
 {
   if (strlen(gameiter->event->count) >= 2 && gameiter->event->count[0] != '?' &&
       gameiter->event->count[1] != '?') {
-    return sprintf(buffer, "%c", gameiter->event->count[0]);
+    return cw_buffer_emit(buffer, "%c", gameiter->event->count[0]);
   }
   else {
-    return sprintf(buffer, "0");
+    return cw_buffer_emit(buffer, "0");
   }
 }
 
@@ -149,10 +151,10 @@ DECLARE_FIELDFUNC(cwsub_strikes)
 {
   if (strlen(gameiter->event->count) >= 2 && gameiter->event->count[0] != '?' &&
       gameiter->event->count[1] != '?') {
-    return sprintf(buffer, "%c", gameiter->event->count[1]);
+    return cw_buffer_emit(buffer, "%c", gameiter->event->count[1]);
   }
   else {
-    return sprintf(buffer, "0");
+    return cw_buffer_emit(buffer, "0");
   }
 }
 
@@ -165,91 +167,94 @@ DECLARE_FIELDFUNC(cwsub_pitches)
   while (foo && isspace(*foo)) {
     foo++;
   }
-  return sprintf(buffer, (ascii) ? "\"%s\"" : "%-20s", foo);
+  return cw_buffer_emit_string(buffer, foo, 20);
 }
 
 /* Field 13 */
 DECLARE_FIELDFUNC(cwsub_pitches_balls)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%02d",
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_thrown));
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
+                        cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_thrown));
 }
 
 /* Field 14 */
 DECLARE_FIELDFUNC(cwsub_pitches_balls_called)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%02d",
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_called));
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
+                        cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_called));
 }
 
 /* Field 15 */
 DECLARE_FIELDFUNC(cwsub_pitches_balls_intentional)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%02d",
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_intentional));
+  return cw_buffer_emit(
+    buffer, (ascii) ? "%d" : "%02d",
+    cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_intentional));
 }
 
 /* Field 16 */
 DECLARE_FIELDFUNC(cwsub_pitches_balls_pitchout)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%02d",
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_pitchout));
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
+                        cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_pitchout));
 }
 
 /* Field 17 */
 DECLARE_FIELDFUNC(cwsub_pitches_balls_hit_batter)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%02d",
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_hit_batter));
+  return cw_buffer_emit(
+    buffer, (ascii) ? "%d" : "%02d",
+    cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_hit_batter));
 }
 
 /* Field 18 */
 DECLARE_FIELDFUNC(cwsub_pitches_balls_other)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%02d",
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_other));
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
+                        cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_ball_other));
 }
 
 /* Field 19 */
 DECLARE_FIELDFUNC(cwsub_pitches_strikes)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%02d",
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_thrown));
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
+                        cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_thrown));
 }
 
 /* Field 20 */
 DECLARE_FIELDFUNC(cwsub_pitches_strikes_called)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%02d",
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_called));
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
+                        cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_called));
 }
 
 /* Field 21 */
 DECLARE_FIELDFUNC(cwsub_pitches_strikes_swinging)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%02d",
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_swinging));
+  return cw_buffer_emit(
+    buffer, (ascii) ? "%d" : "%02d",
+    cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_swinging));
 }
 
 /* Field 22 */
 DECLARE_FIELDFUNC(cwsub_pitches_strikes_foul)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%02d",
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_foul));
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
+                        cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_foul));
 }
 
 /* Field 23 */
 DECLARE_FIELDFUNC(cwsub_pitches_strikes_inplay)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%02d",
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_inplay));
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
+                        cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_inplay));
 }
 
 /* Field 24 */
 DECLARE_FIELDFUNC(cwsub_pitches_strikes_other)
 {
-  return sprintf(buffer, (ascii) ? "%d" : "%02d",
-                 cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_other));
+  return cw_buffer_emit(buffer, (ascii) ? "%d" : "%02d",
+                        cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_other));
 }
 
 static field_struct field_data[] = {
@@ -287,27 +292,24 @@ static field_struct field_data[] = {
 
 void cwsub_process_game(CWGame *game, CWRoster *_visitors, CWRoster *_home)
 {
-  char *buf;
   char output_line[1024];
-  int i, comma;
+  CWBuffer buf;
+  int i;
   CWGameIterator *gameiter = cw_gameiter_create(game);
 
   while (gameiter->event != NULL) {
     CWAppearance *sub = gameiter->event->first_sub;
     while (sub) {
-      comma = 0;
-      strcpy(output_line, "");
-      buf = output_line;
+      cw_buffer_init(&buf, output_line, sizeof(output_line), ascii, ',');
       for (i = 0; i <= max_field; i++) {
         if (fields[i]) {
-          if (ascii && comma) {
-            *(buf++) = ',';
-          }
-          else {
-            comma = 1;
-          }
-          buf += (*field_data[i].f)(buf, gameiter, sub);
+          (*field_data[i].f)(&buf, gameiter, sub);
         }
+      }
+
+      if (buf.truncated) {
+        fprintf(stderr, "Error: output buffer truncated for game %s\n", game->game_id);
+        exit(1);
       }
 
       printf("%s", output_line);
@@ -383,27 +385,25 @@ void (*cwtools_print_welcome_message)(char *) = cwsub_print_welcome_message;
 
 void cwsub_initialize(void)
 {
-  int i, comma = 0;
+  int i;
   char output_line[4096];
-  char *buf;
+  CWBuffer buf;
 
   if (!ascii || !print_header) {
     return;
   }
 
-  strcpy(output_line, "");
-  buf = output_line;
+  cw_buffer_init(&buf, output_line, sizeof(output_line), ascii, ',');
 
   for (i = 0; i <= max_field; i++) {
     if (fields[i]) {
-      if (ascii && comma) {
-        *(buf++) = ',';
-      }
-      else {
-        comma = 1;
-      }
-      buf += sprintf(buf, "\"%s\"", field_data[i].header);
+      cw_buffer_emit(&buf, "\"%s\"", field_data[i].header);
     }
+  }
+
+  if (buf.truncated) {
+    fprintf(stderr, "Error: output buffer truncated while generating header\n");
+    exit(1);
   }
 
   printf("%s", output_line);
