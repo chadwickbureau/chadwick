@@ -36,9 +36,9 @@
 extern int ascii;
 
 /* Fields to display (-f) */
-int fields[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+int fields[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
-int max_field = 24;
+int max_field = 25;
 
 char program_name[20] = "cwsub";
 
@@ -257,6 +257,12 @@ DECLARE_FIELDFUNC(cwsub_pitches_strikes_other)
                         cw_pitch_count_pitches(gameiter->event->pitches, cw_pitch_strike_other));
 }
 
+/* Field 25 */
+DECLARE_FIELDFUNC(cwsub_count_text)
+{
+  return cw_buffer_emit_string(buffer, gameiter->event->count, 2);
+}
+
 static field_struct field_data[] = {
   {cwsub_game_id, "GAME_ID", "game id"},
   {cwsub_inning, "INN_CT", "inning"},
@@ -288,7 +294,8 @@ static field_struct field_data[] = {
   {cwsub_pitches_strikes_inplay, "PA_INPLAY_STRIKE_CT",
    "number of balls in play in plate appearance"},
   {cwsub_pitches_strikes_other, "PA_OTHER_STRIKE_CT",
-   "number of other strikes in plate appearance"}};
+   "number of other strikes in plate appearance"},
+  {cwsub_count_text, "COUNT_TX", "text of count as appears in event file"}};
 
 void cwsub_process_game(CWGame *game, CWRoster *_visitors, CWRoster *_home)
 {

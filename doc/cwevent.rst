@@ -853,7 +853,11 @@ record accessible in :program:`cwevent` output.
 
 For substitutions during a plate appearance,
 :ref:`cwsub <cwtools.cwsub>` reports the count, pitch sequence, and
-cumulative pitch-type counts at the point of the substitution.
+cumulative pitch-type counts at the point of the substitution. Its
+``BALLS_CT`` and ``STRIKES_CT`` fields report zero for an unknown count,
+following the same convention as :program:`cwevent`, and its own
+``COUNT_TX`` field likewise reports the count verbatim so that an
+unknown count can be distinguished from a genuine 0-0.
 
 .. _cwtools.cwevent.pitchcounts:
 

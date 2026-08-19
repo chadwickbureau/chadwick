@@ -8,7 +8,7 @@ in-game player substitutions. It is designed to be used in conjunction
 with :program:`cwevent` to mitigate a blind spot in the
 existing tools.
 
-:program:`cwsub` outputs up to 25 pieces of
+:program:`cwsub` outputs up to 26 pieces of
 information about each substitution. All are included by default; which
 ones are generated is controlled by the -f switch.
 
@@ -17,6 +17,15 @@ The fields have the same interpretation those with the same name in
 extending :program:`cwevent` by treating substitutions as events in
 their own right.  In particular, the count and pitch counts are cumulative
 counts for the plate appearance up to the point of the substitution.
+
+As with :program:`cwevent`, fields 10 and 11, ``BALLS_CT`` and
+``STRIKES_CT``, report zero whenever the count at the point of the
+substitution is unknown, to maintain compatibility with the Retrosheet
+tools. Field 25, ``COUNT_TX``, reports the count verbatim, including
+question marks, and so can be used to disambiguate a genuine 0-0 count
+from an unknown one; see :ref:`Reporting of counts
+<cwtools.cwevent.count>` in the :program:`cwevent` documentation for
+further detail.
 
 .. list-table:: cwsub field numbers
    :header-rows: 1
@@ -56,13 +65,13 @@ counts for the plate appearance up to the point of the substitution.
      - Event number
      - ``EVENT_ID``
    * - 10
-     - Balls
+     - :ref:`Balls <cwtools.cwevent.count>`
      - ``BALLS_CT``
    * - 11
-     - Strikes
+     - :ref:`Strikes <cwtools.cwevent.count>`
      - ``STRIKES_CT``
    * - 12
-     - Pitch sequence
+     - :ref:`Pitch sequence <cwtools.cwevent.count>`
      - ``PITCH_SEQ_TX``
    * - 13
      - number of balls in plate appearance
@@ -100,3 +109,6 @@ counts for the plate appearance up to the point of the substitution.
    * - 24
      - number of other strikes in plate appearance
      - ``PA_OTHER_STRIKE_CT``
+   * - 25
+     - :ref:`text of count as appears in event file <cwtools.cwevent.count>`
+     - ``COUNT_TX``
