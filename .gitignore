@@ -31,3 +31,7 @@ pychadwick
 build/
 .DS_Store
 compile
+depcomp
+install-sh
+missing
+.idea/

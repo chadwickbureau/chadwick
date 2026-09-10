@@ -59,6 +59,11 @@ Chadwick. The author also thanks David Smith of
 always-gracious assistance and guidance.
 
 
+.. toctree::
+    :maxdepth: 1
+
+    installation
+
 Command-line tools
 ==================
 

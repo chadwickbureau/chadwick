@@ -1,4 +1,4 @@
-# [0.11.0]
+# [0.11.0] - 2026-09-10
 
 ## Behaviour changes
 - The command-line option for "quiet mode" is now `-Q` instead of `-q`, as the latter is
