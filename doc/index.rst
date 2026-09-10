@@ -1,13 +1,20 @@
-=======================================================
- Chadwick: Software Tools for Game-Level Baseball Data
-=======================================================
+===============================================================
+ Chadwick: A Retrosheet and DiamondWare baseball data processor
+===============================================================
 
 Introduction
 ============
 
-Chadwick is a collection of command-line utility programs for extracting
-information from baseball play-by-play and boxscore files in the
-DiamondWare format, as used by Retrosheet (http://www.retrosheet.org).
+Chadwick is a suite of command-line tools for extracting statistics and
+play-by-play data from Retrosheet's DiamondWare-format event and boxscore
+files (https://www.retrosheet.org).
+
+.. note::
+   **Getting Chadwick.** Windows users can download ready-to-run
+   binaries from the `latest GitHub release
+   <https://github.com/chadwickbureau/chadwick/releases/latest>`_.
+   macOS/Linux users, and anyone building from source, should see
+   :doc:`installation`.
 
 
 Author
@@ -15,7 +22,7 @@ Author
 
 Chadwick is written, maintained, and Copyright 2002-2026 by
 Dr T. L. Turocy (ted.turocy <aht> gmail <daht> com)
-at Chadwick Baseball Bureau (http://www.chadwick-bureau.com).
+at Chadwick Baseball Bureau (https://www.chadwick-bureau.com).
 
 License
 -------
@@ -24,11 +31,64 @@ Chadwick is licensed under the terms of the GNU General Public License.
 If the GPL doesn't meet your needs, contact the author for other licensing
 possibilities.
 
+Command-line tools
+==================
+
+Chadwick provides six command-line programs, each reading Retrosheet
+play-by-play or boxscore event files and extracting a specific kind of
+tabular data:
+
+.. grid:: 1 2 2 3
+   :gutter: 3
+
+   .. grid-item-card:: ⚾ cwevent
+      :link: cwtools.cwevent
+      :link-type: ref
+
+      Expanded event descriptor. Extracts detailed information about
+      individual plays, replacing and extending DiamondWare's BEVENT.
+
+   .. grid-item-card:: 🏟️ cwgame
+      :link: cwtools.cwgame
+      :link-type: ref
+
+      Game information extractor. Extracts per-game summary and team
+      totals, replacing and extending DiamondWare's BGAME.
+
+   .. grid-item-card:: 📋 cwbox
+      :link: cwtools.cwbox
+      :link-type: ref
+
+      Boxscore generator. Produces a human-readable boxscore report,
+      replacing and extending DiamondWare's BOX.
+
+   .. grid-item-card:: 📅 cwdaily
+      :link: cwtools.cwdaily
+      :link-type: ref
+
+      Player game-by-game generator. Produces one record per player
+      per game, with batting, pitching, and fielding totals. Unique
+      to Chadwick.
+
+   .. grid-item-card:: 🔄 cwsub
+      :link: cwtools.cwsub
+      :link-type: ref
+
+      Player substitution descriptor. Extracts in-game substitutions,
+      complementing cwevent. Unique to Chadwick.
+
+   .. grid-item-card:: 💬 cwcomment
+      :link: cwtools.cwcomment
+      :link-type: ref
+
+      Comment extractor. Extracts comment fields, including ejections
+      and umpire changes. Unique to Chadwick.
+
+
 Development
 -----------
 
-The Chadwick source code is managed using git, at
-https://github.com/chadwickbureau/chadwick.
+Chadwick development can be found at https://github.com/chadwickbureau/chadwick.
 
 Bugs in Chadwick should be reported to the issue tracker on github at
 https://github.com/chadwickbureau/chadwick/issues.
@@ -36,136 +96,27 @@ Please be as specific as possible in reporting a bug, including the
 version of Chadwick you are using, the operating system(s) you're
 using, and a detailed list of steps to reproduce the issue.
 
-Community
----------
-
-To get the latest news on the Chadwick tool suite, you can:
-
-- Subscribe to the Chadwick Baseball Bureau's twitter feed
-  (@chadwickbureau);
-- Like the Chadwick Baseball Bureau on Facebook;
-- Read the Chadwick Baseball Bureau's blog at
-  (http://www.chadwick-bureau.com/blog/)
-
 Acknowledgments
 ---------------
 
-The author thanks `Sports Reference, LLC <http://www.sports-reference.com>`_,
-the `Society for American Baseball Research <http://www.sabr.org>`_,
-and `XMLTeam, Inc. <http://www.xmlteam.com>`_
+The author thanks `Sports Reference, LLC <https://www.sports-reference.com>`_,
+the `Society for American Baseball Research <https://www.sabr.org>`_,
+and `XMLTeam, Inc. <https://www.xmlteam.com>`_
 for support in the development of portions of
 Chadwick. The author also thanks David Smith of
-`Retrosheet <http://www.retrosheet.org>`_ for his
+`Retrosheet <https://www.retrosheet.org>`_ for his
 always-gracious assistance and guidance.
 
 
 .. toctree::
     :maxdepth: 1
+    :hidden:
 
     installation
-
-Command-line tools
-==================
-
-Chadwick provides the following command-line programs for extracting
-information from Retrosheet play-by-play event files:
-
-- :ref:`cwevent <cwtools.cwevent>`, an expanded event
-  descriptor, which replaces and extends the DiamondWare program
-  BEVENT.
-
-- :ref:`cwgame <cwtools.cwgame>`, a game information
-  extractor, which replaces and extends the DiamondWare program
-  BGAME.
-
-- :ref:`cwbox <cwtools.cwbox>`, a boxscore generator, which
-  replaces and extends the DiamondWare program BOX.
-
-- :ref:`cwdaily <cwtools.cwdaily>`, which produces per-game player
-  statistical records. This program is unique to Chadwick.
-
-- :ref:`cwsub <cwtools.cwsub>`, which extracts information
-  about in-game player substitutions. This program is unique to
-  Chadwick.
-
-- :ref:`cwcomment <cwtools.cwcomment>`, which extracts comment
-  fields from event files. This program is unique to Chadwick.
-
-This documentation is intended to be read in conjunction with the
-materials provided by Retrosheet (see
-https://www.retrosheet.org/game.htm)
-summarizing the contents of
-play-by-play files and operation of the DiamondWare versions of these
-tools.  The Chadwick documentation focuses on filling in gaps in the
-Retrosheet documentation, and on detailing Chadwick-specific
-extensions to the toolset.
-
-.. _cwtools.commandline:
-
-Command-line options
---------------------
-
-The command-line tools share many options controlling their behavior.
-These are detailed in the following table. Options which are not
-available for every tool are noted in their descriptions.
-
-.. list-table:: Common command-line options and their effects
-   :header-rows: 1
-   :widths: 10,40
-
-   * - Switch
-     - Description
-   * - ``-a``
-     - Generate ASCII comma-delimited files (default). This option
-       does not affect :program:`cwbox`.
-   * - ``-d``
-     - Print a list of the available fields and descriptions (for use
-       with ``-f``). Not available for :program:`cwbox`.
-   * - ``-D dir``
-     - Directory in which to find team and roster files (``TEAMyyyy``
-       and ``aaayyyy.ROS``), instead of the current directory.
-   * - ``-e mmdd``
-     - The latest date to process (inclusive)
-   * - ``-f flist``
-     - List of fields to output. The default list can be viewed with
-       ``-h``; the list of available fields can be viewed with ``-d``.
-       Not available for :program:`cwbox`.
-   * - ``-ft``
-     - Generate FORTRAN format files. This option does not affect
-       :program:`cwbox`.
-   * - ``-h``
-     - Prints description and usage information for the tool.
-   * - ``-i *gameid*``
-     - Only process the game with ID ``gameid``
-   * - ``-n``
-     - If in ASCII mode (the default), the first row of the output is
-       a comma-separated list of column headers. Not available for
-       :program:`cwbox`.
-   * - ``-Q``
-     - Operate quietly; do not print progress messages.
-   * - ``-s mmdd``
-     - The earliest date to process (inclusive)
-   * - ``-y``
-     - Specifies the year to use (four digits)
-
-
-Documentation of individual tools
----------------------------------
-
-.. toctree::
-    :maxdepth: 1
-
+    commandline
     cwevent
     cwgame
     cwbox
     cwdaily
     cwsub
     cwcomment
-
-
-.. Indices and tables
-.. ------------------
-..
-.. * :ref:`genindex`
-.. * :ref:`modindex`
-.. * :ref:`search`

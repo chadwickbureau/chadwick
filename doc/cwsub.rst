@@ -27,6 +27,10 @@ from an unknown one; see :ref:`Reporting of counts
 <cwtools.cwevent.count>` in the :program:`cwevent` documentation for
 further detail.
 
+.. seealso::
+   :doc:`commandline` for the command-line options shared by all
+   Chadwick tools.
+
 .. list-table:: cwsub field numbers
    :header-rows: 1
    :widths: 5,20,10

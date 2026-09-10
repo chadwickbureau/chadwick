@@ -24,6 +24,10 @@ be selected with the ``-f`` command-line option. The other common
 command-line options are described in :ref:`the command-line options
 table <cwtools.commandline>`.
 
+.. seealso::
+   :doc:`commandline` for the command-line options shared by all
+   Chadwick tools.
+
 
 Identification fields (0-10)
 ----------------------------

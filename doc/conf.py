@@ -22,7 +22,7 @@ import sys, os
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = []
+extensions = ['sphinx_design']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -62,9 +62,9 @@ release = '0.11.0'
 # List of documents that shouldn't be included in the build.
 #unused_docs = []
 
-# List of directories, relative to source directory, that shouldn't be searched
-# for source files.
-exclude_trees = ['_build']
+# List of patterns, relative to source directory, that match files and
+# directories to ignore when looking for source files.
+exclude_patterns = ['_build']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
@@ -89,21 +89,26 @@ pygments_style = 'sphinx'
 
 # -- Options for HTML output ---------------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  Major themes that come with
-# Sphinx are currently 'default' and 'sphinxdoc'.
-html_theme = 'default'
+# The theme to use for HTML and HTML Help pages.
+html_theme = 'furo'
 
 # Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation.
+# further.  Furo is themed via CSS custom properties; here we repaint its
+# accent color as the traditional Chadwick "baseball green", for light and
+# dark mode alike.
 html_theme_options = {
-    "rightsidebar": True,
-    "sidebarbgcolor": "#339933",
-    "headtextcolor": "#339933"
-    }
+    "light_css_variables": {
+        "color-brand-primary": "#2e7d32",
+        "color-brand-content": "#2e7d32",
+    },
+    "dark_css_variables": {
+        "color-brand-primary": "#66bb6a",
+        "color-brand-content": "#66bb6a",
+    },
+}
 
-# Add any paths that contain custom themes here, relative to this directory.
-#html_theme_path = []
+# The image shown at the top of the sidebar.
+html_logo = '_static/chadwick.jpg'
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -111,10 +116,6 @@ html_theme_options = {
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #html_short_title = None
-
-# The name of an image file (relative to this directory) to place at the top
-# of the sidebar.
-#html_logo = None
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -125,6 +126,9 @@ html_theme_options = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# Additional CSS files to load after the theme's own stylesheet.
+html_css_files = ['custom.css']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
