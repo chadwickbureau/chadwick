@@ -30,6 +30,10 @@ made during a plate appearance.
    labels instead in writing scripts to process the output of
    :program:`cwevent` extended fields.
 
+.. seealso::
+   :doc:`commandline` for the command-line options shared by all
+   Chadwick tools.
+
 
 .. list-table:: cwevent standard field numbers
    :header-rows: 1

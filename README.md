@@ -1,10 +1,11 @@
 Chadwick
 --------
 
-Chadwick is a collection of command-line utility programs for
-extracting information from baseball play-by-play and boxscore files
-in the DiamondWare format, as used by Retrosheet
-(http://www.retrosheet.org).
+[![Latest release](https://img.shields.io/github/v/release/chadwickbureau/chadwick)](https://github.com/chadwickbureau/chadwick/releases/latest)
+
+Chadwick is a suite of command-line tools for extracting statistics and
+play-by-play data from Retrosheet's DiamondWare-format event and boxscore
+files (https://www.retrosheet.org).
 
 The latest release of Chadwick is 0.11.0.
 
@@ -21,21 +22,19 @@ GNU General Public License (GPL).
 Installation
 ============
 
-Releases are managed via the github repository; see
-https://github.com/chadwickbureau/chadwick/releases.
+**Windows users**: pre-built binaries are attached to each release —
+download `chadwick-x.y.z-bin.zip` from the
+[latest release page](https://github.com/chadwickbureau/chadwick/releases/latest)
+and unzip; no further installation is needed.
 
-Compilation is via the standard autotools method, i.e.:
+**macOS/Linux users**: compilation is via the standard autotools method:
     ./configure
     make
     make install
 
 Chadwick is written in fairly standard conservative C, and should
-build on OS X and Linux/Un*x systems.
-
-Chadwick may also be packaged in your favourite package manager.
-
-For Windows users, pre-built binaries are available on the release
-page.
+build on OS X and Linux/Un*x systems. Chadwick may also be packaged
+in your favourite package manager.
 
 
 Documentation

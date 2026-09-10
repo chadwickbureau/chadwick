@@ -15,6 +15,10 @@ inning-by-inning line score, and lists of notable events. For
 machine-readable tabular output, use :program:`cwgame` for team and
 game totals or :program:`cwdaily` for individual player totals.
 
+.. seealso::
+   :doc:`commandline` for the command-line options shared by all
+   Chadwick tools.
+
 
 Command-line options
 --------------------

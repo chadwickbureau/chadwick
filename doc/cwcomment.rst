@@ -14,6 +14,10 @@ command-line option. The other common command-line options are
 described in :ref:`the command-line options table
 <cwtools.commandline>`.
 
+.. seealso::
+   :doc:`commandline` for the command-line options shared by all
+   Chadwick tools.
+
 .. list-table:: cwcomment field numbers
    :header-rows: 1
    :widths: 5,25,20

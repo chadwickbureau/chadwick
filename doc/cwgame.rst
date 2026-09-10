@@ -31,6 +31,10 @@ individual players, use :ref:`cwdaily <cwtools.cwdaily>`.
    labels instead in writing scripts to process the output of
    :program:`cwgame` extended fields.
 
+.. seealso::
+   :doc:`commandline` for the command-line options shared by all
+   Chadwick tools.
+
 The following table gives the contents of each of the 86 fields
 :program:`cwgame` outputs.
 
