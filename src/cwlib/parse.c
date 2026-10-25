@@ -1561,6 +1561,9 @@ static int cw_parse_pickoff_stolen_base(CWParserState *state, CWEventData *event
  */
 static int cw_parse_pickoff_caught_stealing(CWParserState *state, CWEventData *event, int flags)
 {
+  if (state->sym < '2' || state->sym > '4') {
+    return cw_parse_invalid(state);
+  }
   event->po_flag[state->sym - '1'] = 1;
   return cw_parse_caught_stealing(state, event, flags);
 }
