@@ -655,8 +655,7 @@ void cw_game_replace_player(CWGame *game, char *key_old, char *key_new)
 static void cw_game_warn_invalid_record(CWGame *game, char *line)
 {
   fprintf(stderr, "WARNING: In %s, skipping invalid record:\n", game->game_id);
-  /* The record will already have end-of-line included so no need for \n. */
-  fprintf(stderr, "         %s", line);
+  fprintf(stderr, "         %s\n", line);
 }
 
 CWGame *cw_game_read(FILE *file)
@@ -748,45 +747,49 @@ CWGame *cw_game_read(FILE *file)
       if (inning && batting_team && batter && count && pitches && play) {
         cw_game_event_append(game, cw_atoi(inning, NULL), cw_atoi(batting_team, NULL), batter,
                              count, pitches, play);
-      }
-      if (batHand != ' ' && !strcmp(batHandBatter, batter)) {
-        game->last_event->batter_hand = batHand;
+
+        if (batHand != ' ' && !strcmp(batHandBatter, batter)) {
+          game->last_event->batter_hand = batHand;
+        }
+        else {
+          /* Once batter changes, clear this out */
+          batHand = ' ';
+          strcpy(batHandBatter, "");
+        }
+
+        if (pitHand != ' ') {
+          game->last_event->pitcher_hand = pitHand;
+          XCOPY(game->last_event->pitcher_hand_id, pitHandPitcher)
+          if (strcmp(play, "NP") != 0) {
+            /* padj applies to the next non-NP play */
+            pitHand = ' ';
+            strcpy(pitHandPitcher, "");
+          }
+        }
+
+        if (ladjSlot != 0) {
+          game->last_event->ladj_align = ladjAlign;
+          game->last_event->ladj_slot = ladjSlot;
+          ladjAlign = 0;
+          ladjSlot = 0;
+        }
+
+        if (autoBase != 0) {
+          game->last_event->auto_base = autoBase;
+          XCOPY(game->last_event->auto_runner_id, autoRunner)
+          autoBase = 0;
+          strcpy(autoRunner, "");
+        }
+
+        for (i = 1; i <= 3; i++) {
+          if (strcmp(presadj[i], "") != 0) {
+            XCOPY(game->last_event->presadj[i], presadj[i])
+            strcpy(presadj[i], "");
+          }
+        }
       }
       else {
-        /* Once batter changes, clear this out */
-        batHand = ' ';
-        strcpy(batHandBatter, "");
-      }
-
-      if (pitHand != ' ') {
-        game->last_event->pitcher_hand = pitHand;
-        XCOPY(game->last_event->pitcher_hand_id, pitHandPitcher)
-        if (strcmp(play, "NP") != 0) {
-          /* padj applies to the next non-NP play */
-          pitHand = ' ';
-          strcpy(pitHandPitcher, "");
-        }
-      }
-
-      if (ladjSlot != 0) {
-        game->last_event->ladj_align = ladjAlign;
-        game->last_event->ladj_slot = ladjSlot;
-        ladjAlign = 0;
-        ladjSlot = 0;
-      }
-
-      if (autoBase != 0) {
-        game->last_event->auto_base = autoBase;
-        XCOPY(game->last_event->auto_runner_id, autoRunner)
-        autoBase = 0;
-        strcpy(autoRunner, "");
-      }
-
-      for (i = 1; i <= 3; i++) {
-        if (strcmp(presadj[i], "") != 0) {
-          XCOPY(game->last_event->presadj[i], presadj[i])
-          strcpy(presadj[i], "");
-        }
+        cw_game_warn_invalid_record(game, line_copy);
       }
     }
     else if (!strcmp(tok0, "sub")) {
@@ -796,6 +799,12 @@ CWGame *cw_game_read(FILE *file)
       char *slot = cw_tokenizer_next(&tok);
       char *pos = cw_tokenizer_next(&tok);
       if (player_id && name && team && slot && pos) {
+        if (game->last_event == NULL) {
+          /* A substitution is attached to the play it precedes */
+          cw_game_warn_invalid_record(game, line_copy);
+          free(line_copy);
+          continue;
+        }
         cw_game_substitute_append(game, player_id, name, cw_atoi(team, NULL), cw_atoi(slot, NULL),
                                   cw_atoi(pos, NULL));
         if (cw_atoi(pos, NULL) == 1 && pitHand != ' ' && strcmp(player_id, pitHandPitcher) != 0) {
@@ -898,12 +907,12 @@ CWGame *cw_game_read(FILE *file)
           CW_STRLCPY(presadj[base], pitcher);
         }
         else {
-          cw_game_warn_invalid_record(game, line);
+          cw_game_warn_invalid_record(game, line_copy);
         }
       }
     }
     else {
-      cw_game_warn_invalid_record(game, line);
+      cw_game_warn_invalid_record(game, line_copy);
     }
     free(line_copy);
   }
