@@ -83,13 +83,19 @@ typedef enum {
   CW_EVENT_PITCH_PICKOFF_CATCHER_THIRD = 123
 } CWEventType;
 
+#define CW_MAX_PUTOUTS 3
+#define CW_MAX_ASSISTS 10
+#define CW_MAX_ERRORS 10
+#define CW_MAX_TOUCHES 20
+#define CW_MAX_PLAY 20
+
 typedef struct cw_parsed_event_struct {
   CWEventType event_type;
   /* rbi_flag: 2 == (RBI) actually in play text */
   /* muff_flag: nonzero if runner is safe on a play like 1X2(6E4) */
   /* primary_out_flag: out is encoded in the primary event */
   int advance[4], rbi_flag[4], fc_flag[4], primary_out_flag[4], muff_flag[4];
-  char play[4][20];
+  char play[4][CW_MAX_PLAY];
   int sh_flag, sf_flag, dp_flag, gdp_flag, tp_flag;
   int wp_flag, pb_flag, foul_flag, bunt_flag, force_flag;
   int sb_flag[4], cs_flag[4], po_flag[4];
@@ -97,10 +103,11 @@ typedef struct cw_parsed_event_struct {
   /* touches lists players in the order fielding credits are assigned;
    * intended for listing players involved in DP or TP */
   int num_putouts, num_assists, num_errors, num_touches;
-  int putouts[3], assists[10], errors[10], touches[20];
+  int putouts[CW_MAX_PUTOUTS], assists[CW_MAX_ASSISTS], errors[CW_MAX_ERRORS];
+  int touches[CW_MAX_TOUCHES];
   /* Error types are 'N' for none, 'T' for throwing,
    * 'F' for fumbled, and 'D' for dropped throw. */
-  char error_types[10];
+  char error_types[CW_MAX_ERRORS];
   char batted_ball_type;
   /* Default batted ball type inferred from fielding credits and from
    * flags such as /SF, /FO, /IF that assume rather than state a

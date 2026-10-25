@@ -981,14 +981,14 @@ static void cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
 	     if fielding credit for one part of a DP is known, but I don't know
 	     if there is any instance where that occurs in Retrosheet.
       */
-      for (i = 0; i <= 2; i++) {
+      for (i = 0; i < CW_MAX_PUTOUTS; i++) {
         if (gameiter->event_data->putouts[i] == pos) {
           fielding->po++;
           accepted = 1;
         }
       }
 
-      for (i = 0; i < 10; i++) {
+      for (i = 0; i < CW_MAX_ASSISTS; i++) {
         if (gameiter->event_data->assists[i] == pos) {
           fielding->a++;
           accepted = 1;
@@ -996,7 +996,7 @@ static void cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       }
     }
 
-    for (i = 0; i < 10; i++) {
+    for (i = 0; i < CW_MAX_ERRORS; i++) {
       if (gameiter->event_data->errors[i] == pos) {
         fielding->e++;
         cw_box_add_event(&(boxscore->err_list), gameiter->state->inning,
