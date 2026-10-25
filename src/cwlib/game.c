@@ -718,12 +718,18 @@ static CWGame *cw_game_read_record(FILE *file)
       if (version) {
         cw_game_set_version(game, version);
       }
+      else {
+        cw_game_warn_invalid_record(game, line_copy);
+      }
     }
     else if (!strcmp(tok0, "info")) {
       char *field = cw_tokenizer_next(&tok);
       char *value = cw_tokenizer_next(&tok);
       if (field) {
         cw_game_info_append(game, field, (value) ? value : "");
+      }
+      else {
+        cw_game_warn_invalid_record(game, line_copy);
       }
     }
     else if (!strcmp(tok0, "start")) {
@@ -735,6 +741,9 @@ static CWGame *cw_game_read_record(FILE *file)
       if (player_id && name && team && slot && pos) {
         cw_game_starter_append(game, player_id, name, cw_atoi(team, NULL), cw_atoi(slot, NULL),
                                cw_atoi(pos, NULL));
+      }
+      else {
+        cw_game_warn_invalid_record(game, line_copy);
       }
     }
     else if (!strcmp(tok0, "play")) {
@@ -814,11 +823,17 @@ static CWGame *cw_game_read_record(FILE *file)
           strcpy(pitHandPitcher, "");
         }
       }
+      else {
+        cw_game_warn_invalid_record(game, line_copy);
+      }
     }
     else if (!strcmp(tok0, "com")) {
       char *comment = cw_tokenizer_next(&tok);
       if (comment) {
         cw_game_comment_append(game, comment);
+      }
+      else {
+        cw_game_warn_invalid_record(game, line_copy);
       }
     }
     else if (!strcmp(tok0, "data")) {
@@ -868,6 +883,9 @@ static CWGame *cw_game_read_record(FILE *file)
         CW_STRLCPY(batHandBatter, batter);
         batHand = bats[0];
       }
+      else {
+        cw_game_warn_invalid_record(game, line_copy);
+      }
     }
     else if (!strcmp(tok0, "padj")) {
       char *pitcher = cw_tokenizer_next(&tok);
@@ -876,6 +894,9 @@ static CWGame *cw_game_read_record(FILE *file)
         CW_STRLCPY(pitHandPitcher, pitcher);
         pitHand = throws[0];
       }
+      else {
+        cw_game_warn_invalid_record(game, line_copy);
+      }
     }
     else if (!strcmp(tok0, "ladj")) {
       char *align = cw_tokenizer_next(&tok);
@@ -883,6 +904,9 @@ static CWGame *cw_game_read_record(FILE *file)
       if (align && slot) {
         ladjAlign = cw_atoi(align, NULL);
         ladjSlot = cw_atoi(slot, NULL);
+      }
+      else {
+        cw_game_warn_invalid_record(game, line_copy);
       }
     }
     else if (!strcmp(tok0, "cw:itb") | !strcmp(tok0, "radj")) {
@@ -897,6 +921,9 @@ static CWGame *cw_game_read_record(FILE *file)
         CW_STRLCPY(autoRunner, runner);
         autoBase = cw_atoi(base, NULL);
       }
+      else {
+        cw_game_warn_invalid_record(game, line_copy);
+      }
     }
     else if (!strcmp(tok0, "presadj")) {
       char *pitcher = cw_tokenizer_next(&tok);
@@ -909,6 +936,9 @@ static CWGame *cw_game_read_record(FILE *file)
         else {
           cw_game_warn_invalid_record(game, line_copy);
         }
+      }
+      else {
+        cw_game_warn_invalid_record(game, line_copy);
       }
     }
     else {
