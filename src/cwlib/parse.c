@@ -1405,10 +1405,26 @@ static int cw_parse_generic_out(CWParserState *state, CWEventData *event, int fl
  * Notes:
  * - Only flag that is currently accepted is /REV
  * - Sets advancement of batter to 1, which is implied by primary event
+ * - A stolen base is permitted as a compound primary (one scoring decision in 1908)
  */
 static int cw_parse_hit_by_pitch(CWParserState *state, CWEventData *event, int flags)
 {
   event->advance[0] = 1;
+
+  if (state->sym == '+') {
+    cw_parse_nextsym(state);
+    cw_parse_primary_event(state);
+
+    if (!strcmp(state->token, "SB")) {
+      if (!cw_parse_stolen_base(state, event, 0)) {
+        return 0;
+      }
+    }
+    else {
+      return cw_parse_invalid(state);
+    }
+  }
+
   while (flags && state->sym == '/') {
     cw_parse_flag(state);
 
