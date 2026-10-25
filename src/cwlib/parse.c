@@ -151,7 +151,7 @@ typedef struct {
   char sym;
   char *inputString;
   unsigned int inputPos;
-  char token[20];
+  char *token;
 } CWParserState;
 
 /*
@@ -173,7 +173,8 @@ static void cw_parse_initialize(CWParserState *state, const char *input)
   size_t write_pos = 0;
   char *c;
 
-  state->inputString = (char *) malloc(strlen(input) + 1);
+  size_t input_len = strlen(input);
+  state->inputString = (char *) malloc(2 * input_len + 4);
   for (read_pos = 0; input[read_pos] != '\0'; read_pos++) {
     unsigned char ch = (unsigned char) input[read_pos];
 
@@ -191,6 +192,9 @@ static void cw_parse_initialize(CWParserState *state, const char *input)
     *(c + 2) = '4';
   }
 
+  state->token = state->inputString + write_pos + 1;
+  state->token[0] = '\0';
+
   state->sym = state->inputString[0];
   state->inputPos = 1;
 }
@@ -202,6 +206,7 @@ static void cw_parse_cleanup(CWParserState *state)
 {
   free(state->inputString);
   state->inputString = NULL;
+  state->token = NULL;
 }
 
 /*
