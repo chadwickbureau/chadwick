@@ -658,7 +658,7 @@ static void cw_game_warn_invalid_record(CWGame *game, char *line)
   fprintf(stderr, "         %s\n", line);
 }
 
-CWGame *cw_game_read(FILE *file)
+static CWGame *cw_game_read_record(FILE *file)
 {
   CWRecordReader r;
   CWTokenizer tok;
@@ -918,6 +918,68 @@ CWGame *cw_game_read(FILE *file)
   }
   cw_record_reader_cleanup(&r);
   return game;
+}
+
+/*
+ * Code throughout the library and the tools indexes into the game's date as
+ * if it were YYYY/MM/DD, so every game that is read must have one in that
+ * form.  Like the DiamondWare tools, this accepts a month and day without a
+ * leading zero ("2025/6/5") and ignores text after the day.  The date is
+ * rewritten in the standard form.  Returns 0 if the game has no usable date.
+ */
+static int cw_game_date_normalize(CWGame *game)
+{
+  const char *date = cw_game_info_lookup(game, "date");
+  CWInfo *info;
+  int year, month, day;
+  char normal[16];
+
+  if (date == NULL || sscanf(date, "%4d/%2d/%2d", &year, &month, &day) != 3) {
+    return 0;
+  }
+  if (year < 1000 || month < 1 || month > 12 || day < 1 || day > 31) {
+    return 0;
+  }
+  snprintf(normal, sizeof(normal), "%04d/%02d/%02d", year, month, day);
+  if (strcmp(date, normal) != 0) {
+    /* The last date record is the one cw_game_info_lookup reports */
+    for (info = game->last_info; info; info = info->prev) {
+      if (!strcmp(info->label, "date")) {
+        free(info->data);
+        XCOPY(info->data, normal)
+        break;
+      }
+    }
+  }
+  return 1;
+}
+
+/*
+ * Reads the next game, skipping (with a warning) any game that has no usable
+ * date.  Returns NULL at the end of the file.
+ */
+CWGame *cw_game_read(FILE *file)
+{
+  CWGame *game;
+
+  while ((game = cw_game_read_record(file)) != NULL) {
+    const char *date;
+
+    if (cw_game_date_normalize(game)) {
+      return game;
+    }
+    date = cw_game_info_lookup(game, "date");
+    if (date == NULL) {
+      fprintf(stderr, "WARNING: Skipping game %s, which has no date\n", game->game_id);
+    }
+    else {
+      fprintf(stderr, "WARNING: Skipping game %s, which has invalid date '%s'\n", game->game_id,
+              date);
+    }
+    cw_game_cleanup(game);
+    free(game);
+  }
+  return NULL;
 }
 
 static void cw_game_write_header(CWGame *game, FILE *file)
