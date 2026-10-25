@@ -1861,25 +1861,8 @@ static int cw_parse_walk(CWParserState *state, CWEventData *event, int flags)
     else if (!strcmp(state->token, "DP")) {
       event->dp_flag = 1;
     }
-    else if (!strcmp(state->token, "BOOT")) {
-      /* Silently accept batting out of order flag */
-    }
-    else if (!strcmp(state->token, "MREV") || !strcmp(state->token, "UREV")) {
-      /* Silently accept review flags */
-    }
-    else if (state->token[0] == 'R') {
-      /* There are instances of the relay flag /R, for example, in
-	 TEX199709200, where the runner on third got picked off after
-	 a walk */
-    }
-    else if (!strcmp(state->token, "UINT")) {
-      /* Accept umpire interference flag; no action required */
-    }
-    else if (!strcmp(state->token, "COUR")) {
-      /* Accept courtesy runner flag; no action required */
-    }
     else {
-      return cw_parse_invalid(state);
+      /* Accept other flags on walks as well */
     }
   }
 
