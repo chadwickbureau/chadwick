@@ -943,11 +943,13 @@ void cw_gameiter_next(CWGameIterator *gameiter)
 int cw_gameiter_runner_fate(CWGameIterator *orig_gameiter, int base)
 {
   CWGameIterator *gameiter;
-  if (orig_gameiter->event_data->advance[base] == 0 ||
-      orig_gameiter->event_data->advance[base] >= 4) {
-    return orig_gameiter->event_data->advance[base];
+  if (strcmp(orig_gameiter->event->event_text, "NP") != 0) {
+    if (orig_gameiter->event_data->advance[base] == 0 ||
+        orig_gameiter->event_data->advance[base] >= 4) {
+      return orig_gameiter->event_data->advance[base];
+    }
+    base = orig_gameiter->event_data->advance[base];
   }
-  base = orig_gameiter->event_data->advance[base];
   gameiter = cw_gameiter_copy(orig_gameiter);
   cw_gameiter_next(gameiter);
   while (gameiter->event != NULL && gameiter->state->inning == orig_gameiter->state->inning &&
