@@ -237,6 +237,19 @@ DECLARE_FIELDFUNC(cwdaily_P_G)
   return sprintf(buffer, "%d", (player->fielding[1] != NULL) ? 1 : 0);
 }
 
+/*
+ * Whether a pitching entry belongs to the row of the given batting order entry.
+ * A player who leaves a game and returns has a row for each stint, so the
+ * pitching columns of a row count only the pitching done during its stint.
+ */
+static int cwdaily_pitcher_in_entry(CWBoxPitcher *pitcher, CWBoxPlayer *player)
+{
+  if (pitcher->player != NULL) {
+    return pitcher->player == player;
+  }
+  return !strcmp(pitcher->player_id, player->player_id);
+}
+
 #define DECLARE_PITCHING_CATEGORY(funcname, cat)                                                  \
   DECLARE_FIELDFUNC(funcname)                                                                     \
   {                                                                                               \
@@ -244,7 +257,7 @@ DECLARE_FIELDFUNC(cwdaily_P_G)
     CWBoxPitcher *pitcher = box->pitchers[team];                                                  \
     if (player->fielding[1] != NULL) {                                                            \
       while (pitcher != NULL) {                                                                   \
-        if (!strcmp(pitcher->player_id, player->player_id)) {                                     \
+        if (cwdaily_pitcher_in_entry(pitcher, player)) {                                          \
           if (pitcher->pitching->cat < 0) {                                                       \
             stat = -1;                                                                            \
             break;                                                                                \
@@ -279,7 +292,7 @@ DECLARE_FIELDFUNC(cwdaily_P_TB)
   CWBoxPitcher *pitcher = box->pitchers[team];
   if (player->fielding[1] != NULL) {
     while (pitcher != NULL) {
-      if (!strcmp(pitcher->player_id, player->player_id)) {
+      if (cwdaily_pitcher_in_entry(pitcher, player)) {
         if ((pitcher->pitching->h < 0) || (pitcher->pitching->b2 < 0) ||
             (pitcher->pitching->b3 < 0) || (pitcher->pitching->hr < 0)) {
           stat = -1;
@@ -324,7 +337,7 @@ DECLARE_FIELDFUNC(cwdaily_P_PITCH)
     CWBoxPitcher *pitcher = box->pitchers[team];
     if (player->fielding[1] != NULL) {
       while (pitcher != NULL) {
-        if (!strcmp(pitcher->player_id, player->player_id)) {
+        if (cwdaily_pitcher_in_entry(pitcher, player)) {
           if (pitcher->pitching->pitches < 0) {
             stat = -1;
             break;
@@ -352,7 +365,7 @@ DECLARE_FIELDFUNC(cwdaily_P_STRIKE)
     CWBoxPitcher *pitcher = box->pitchers[team];
     if (player->fielding[1] != NULL) {
       while (pitcher != NULL) {
-        if (!strcmp(pitcher->player_id, player->player_id)) {
+        if (cwdaily_pitcher_in_entry(pitcher, player)) {
           if (pitcher->pitching->strikes < 0) {
             stat = -1;
             break;

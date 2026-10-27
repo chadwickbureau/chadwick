@@ -178,6 +178,7 @@ static CWBoxPitcher *cw_box_pitcher_create(char *player_id, char *name)
   pitcher->name = (char *) malloc(sizeof(char) * (strlen(name) + 1));
   strcpy(pitcher->name, name);
   pitcher->pitching = cw_box_pitching_create();
+  pitcher->player = NULL;
   pitcher->prev = NULL;
   pitcher->next = NULL;
   return pitcher;
@@ -222,6 +223,7 @@ static void cw_box_enter_starters(CWBoxscore *boxscore, CWGame *game)
       }
       if (app->pos == 1) {
         boxscore->pitchers[t] = cw_box_pitcher_create(app->player_id, app->name);
+        boxscore->pitchers[t]->player = boxscore->slots[i][t];
         boxscore->pitchers[t]->pitching->g = 1;
         boxscore->pitchers[t]->pitching->gs = 1;
       }
@@ -354,6 +356,7 @@ static void cw_box_add_substitute(CWBoxscore *boxscore, CWGameIterator *gameiter
       }
 
       CWBoxPitcher *pitcher = cw_box_pitcher_create(sub->player_id, sub->name);
+      pitcher->player = boxscore->slots[sub->slot][sub->team];
       pitcher->pitching->g = 1;
       boxscore->pitchers[sub->team]->next = pitcher;
       pitcher->prev = boxscore->pitchers[sub->team];

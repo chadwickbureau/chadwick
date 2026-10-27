@@ -1,3 +1,10 @@
+# [0.12.0] - unreleased
+
+## Fixed
+- In `cwdaily`, stats of a pitcher who left the game and then re-entered the lineup appeared
+  on each of his lineup stints, so summing his stats would lead to double-counting his pitching
+  for the game.
+
 # [0.11.0] - 2026-09-10
 
 ## Behaviour changes

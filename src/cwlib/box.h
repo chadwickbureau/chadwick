@@ -82,6 +82,7 @@ typedef struct cw_box_pitching_struct {
  */
 typedef struct cw_box_pitcher_struct {
   char *player_id, *name;
+  struct cw_box_player_struct *player;
   CWBoxPitching *pitching;
   struct cw_box_pitcher_struct *prev, *next;
 } CWBoxPitcher;
