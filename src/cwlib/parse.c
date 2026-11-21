@@ -184,11 +184,11 @@ static void cw_parse_initialize(CWParserState *state, const char *input)
   }
   state->inputString[write_pos] = '\0';
 
-  /* Preprocessing to turn SBH and CSH strings into SB4 and CS4 */
-  if ((c = strstr(state->inputString, "SBH"))) {
+  /* Preprocessing to turn SBH and CSH strings into SB4 and CS4. */
+  for (c = strstr(state->inputString, "SBH"); c; c = strstr(c + 3, "SBH")) {
     *(c + 2) = '4';
   }
-  if ((c = strstr(state->inputString, "CSH"))) {
+  for (c = strstr(state->inputString, "CSH"); c; c = strstr(c + 3, "CSH")) {
     *(c + 2) = '4';
   }
 
@@ -564,7 +564,7 @@ static void cw_parse_flag(CWParserState *state)
 static int cw_parse_advance_modifier(CWParserState *state, CWEventData *event, int safe,
                                      int baseFrom, int baseTo)
 {
-  int i;
+  int i, num_errors;
   int is_error = 0;
 
   if (isfielder(state->sym) || state->sym == 'E') {
@@ -704,6 +704,36 @@ static int cw_parse_advance_modifier(CWParserState *state, CWEventData *event, i
       }
       if ((state->sym >= '2' && state->sym <= '4') || state->sym == 'H') {
         cw_parse_nextsym(state);
+      }
+    }
+    else if (!strcmp(state->token, "CS")) {
+      /* A caught stealing written on a runner's advance, as in
+       * W.1X3(CS3(15)), is treated like a wrapper around the fielding credit on the
+       * out (or attempted out).
+       */
+      if (safe || baseFrom < 1 || baseFrom > 3 || state->sym - '0' != baseTo ||
+          event->play[baseFrom][0] != '\0' || event->cs_flag[baseFrom] ||
+          event->po_flag[baseFrom]) {
+        return cw_parse_invalid(state);
+      }
+      if (cw_parse_nextsym(state) != '(') {
+        return cw_parse_invalid(state);
+      }
+      cw_parse_nextsym(state);
+      if (!isfielder(state->sym) && state->sym != 'E') {
+        return cw_parse_invalid(state);
+      }
+      num_errors = event->num_errors;
+      if (!cw_parse_advance_modifier(state, event, safe, baseFrom, baseTo)) {
+        return 0;
+      }
+      event->cs_flag[baseFrom] = 1;
+      /* As for a caught stealing as the primary event, an error on the
+       * attempt is not a fielding error on a batted ball */
+      for (i = num_errors; i < event->num_errors; i++) {
+        if (event->error_types[i] == 'F') {
+          event->error_types[i] = 'D';
+        }
       }
     }
     else {

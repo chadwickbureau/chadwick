@@ -1,5 +1,9 @@
 # [0.12.0] - unreleased
 
+## Added
+- DiamondWare now allows caught stealing to be written as a modifier on a runner's advance, as in
+  `W.1X3(CS3(15))` or `K+SB2/DP.1X3(CS3(265))`.
+
 ## Fixed
 - In `cwdaily`, stats of a pitcher who left the game and then re-entered the lineup appeared
   on each of his lineup stints, so summing his stats would lead to double-counting his pitching
