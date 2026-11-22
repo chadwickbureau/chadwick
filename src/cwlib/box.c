@@ -1007,10 +1007,10 @@ static void cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       }
     }
 
-    if (accepted && gameiter->event_data->dp_flag) {
+    if (accepted && cw_event_credits_double_play(gameiter->event_data)) {
       fielding->dp++;
     }
-    if (accepted && gameiter->event_data->tp_flag) {
+    if (accepted && cw_event_credits_triple_play(gameiter->event_data)) {
       fielding->tp++;
     }
 
@@ -1028,7 +1028,7 @@ static void cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
     }
   }
 
-  if (gameiter->event_data->dp_flag) {
+  if (cw_event_credits_double_play(gameiter->event_data)) {
     CWBoxEvent *event = cw_box_add_event(&(boxscore->dp_list), gameiter->state->inning,
                                          gameiter->state->batting_team, 0);
     for (i = 0; i < gameiter->event_data->num_touches; i++) {
@@ -1038,7 +1038,7 @@ static void cw_box_fielder_stats(CWBoxscore *boxscore, CWGameIterator *gameiter)
       event->players[i] = player->player_id;
     }
   }
-  else if (gameiter->event_data->tp_flag) {
+  else if (cw_event_credits_triple_play(gameiter->event_data)) {
     CWBoxEvent *event = cw_box_add_event(&(boxscore->tp_list), gameiter->state->inning,
                                          gameiter->state->batting_team, 0);
     for (i = 0; i < gameiter->event_data->num_touches; i++) {
@@ -1068,10 +1068,10 @@ static void cw_box_iterate_game(CWBoxscore *boxscore, CWGame *game)
       cw_box_batter_stats(boxscore, gameiter);
       cw_box_runner_stats(boxscore, gameiter);
       cw_box_fielder_stats(boxscore, gameiter);
-      if (gameiter->event_data->dp_flag) {
+      if (cw_event_credits_double_play(gameiter->event_data)) {
         boxscore->dp[1 - gameiter->state->batting_team]++;
       }
-      if (gameiter->event_data->tp_flag) {
+      if (cw_event_credits_triple_play(gameiter->event_data)) {
         boxscore->tp[1 - gameiter->state->batting_team]++;
       }
       boxscore->linescore[gameiter->state->inning][gameiter->state->batting_team] +=

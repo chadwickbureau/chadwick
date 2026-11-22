@@ -128,4 +128,11 @@ int cw_event_outs_on_play(CWEventData *event);
 int cw_event_runs_on_play(CWEventData *event);
 int cw_event_rbi_on_play(CWEventData *event);
 
+/* Whether the play credits the fielders and the team with a double play,
+ * or with a triple play.  A play marked both, as in /GDP/TP, is credited as
+ * a triple play only; the batter is still charged with grounding into a
+ * double play (gdp_flag). */
+int cw_event_credits_double_play(CWEventData *event);
+int cw_event_credits_triple_play(CWEventData *event);
+
 #endif /* CW_PARSE_H */

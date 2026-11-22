@@ -542,7 +542,7 @@ static char *cwbox_sml_get_play_type(CWGameIterator *gameiter)
   switch (gameiter->event_data->event_type) {
   case CW_EVENT_GENERICOUT:
     if (gameiter->event_data->sh_flag) {
-      if (gameiter->event_data->dp_flag) {
+      if (cw_event_credits_double_play(gameiter->event_data)) {
         return "sac-bunt-double-play";
       }
       else {
@@ -550,7 +550,7 @@ static char *cwbox_sml_get_play_type(CWGameIterator *gameiter)
       }
     }
     else if (gameiter->event_data->sf_flag) {
-      if (gameiter->event_data->dp_flag) {
+      if (cw_event_credits_double_play(gameiter->event_data)) {
         return "sac-fly-double-play";
       }
       else {
@@ -560,10 +560,10 @@ static char *cwbox_sml_get_play_type(CWGameIterator *gameiter)
     else if (gameiter->event_data->gdp_flag) {
       return "grounded-into-double-play";
     }
-    else if (gameiter->event_data->dp_flag) {
+    else if (cw_event_credits_double_play(gameiter->event_data)) {
       return "double-play";
     }
-    else if (gameiter->event_data->tp_flag) {
+    else if (cw_event_credits_triple_play(gameiter->event_data)) {
       return "triple-play";
     }
     else if (gameiter->event_data->fc_flag[1] || gameiter->event_data->fc_flag[2] ||
@@ -574,10 +574,10 @@ static char *cwbox_sml_get_play_type(CWGameIterator *gameiter)
       return "field-out";
     }
   case CW_EVENT_STRIKEOUT:
-    if (gameiter->event_data->dp_flag) {
+    if (cw_event_credits_double_play(gameiter->event_data)) {
       return "strikeout-double-play";
     }
-    else if (gameiter->event_data->tp_flag) {
+    else if (cw_event_credits_triple_play(gameiter->event_data)) {
       return "strikeout-triple-play";
     }
     else {
@@ -599,7 +599,7 @@ static char *cwbox_sml_get_play_type(CWGameIterator *gameiter)
   case CW_EVENT_INDIFFERENCE:
     return "defensive-indiff";
   case CW_EVENT_CAUGHTSTEALING:
-    if (gameiter->event_data->dp_flag) {
+    if (cw_event_credits_double_play(gameiter->event_data)) {
       return "cs-double-play";
     }
     else if (gameiter->event_data->cs_flag[1]) {

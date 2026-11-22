@@ -131,6 +131,16 @@ int cw_event_runs_on_play(CWEventData *event)
           ((event->advance[2] >= 4) ? 1 : 0) + ((event->advance[3] >= 4) ? 1 : 0));
 }
 
+int cw_event_credits_double_play(CWEventData *event)
+{
+  return event->dp_flag && !event->tp_flag;
+}
+
+int cw_event_credits_triple_play(CWEventData *event)
+{
+  return event->tp_flag;
+}
+
 int cw_event_rbi_on_play(CWEventData *event)
 {
   return (((event->rbi_flag[0] > 0) ? 1 : 0) + ((event->rbi_flag[1] > 0) ? 1 : 0) +
