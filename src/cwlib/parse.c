@@ -964,6 +964,34 @@ static int cw_parse_balk(CWParserState *state, CWEventData *event, int flags)
   return 1;
 }
 
+/*
+ * cw_parse_credit_flags: read the flags after the fielding credit of a
+ * caught stealing or pickoff, as in PO3(E5/OBS) or CS2(2E4/TH)
+ *
+ * at entry: state->sym should be the first character after the fielding credit
+ * at exit:  state->sym points to first character after the last flag
+ *           returns nonzero if a throw flag was read
+ *
+ * Notes:
+ * - A throw flag marks the error in the credit as a throwing error.
+ * - Other flags, such as /OBS and /INT, are accepted silently, as they are
+ *   on the flags of most events.
+ */
+static int cw_parse_credit_flags(CWParserState *state)
+{
+  int thrown = 0;
+
+  while (state->sym == '/') {
+    cw_parse_flag(state);
+    if (!strcmp(state->token, "TH") || !strcmp(state->token, "TH1") ||
+        !strcmp(state->token, "TH2") || !strcmp(state->token, "TH3") ||
+        !strcmp(state->token, "THH")) {
+      thrown = 1;
+    }
+  }
+  return thrown;
+}
+
 static int cw_parse_caught_stealing(CWParserState *state, CWEventData *event, int flags);
 static int cw_parse_pickoff(CWParserState *state, CWEventData *event, int flags);
 static int cw_parse_pickoff_stolen_base(CWParserState *state, CWEventData *event, int flags);
@@ -1071,24 +1099,13 @@ static int cw_parse_caught_stealing(CWParserState *state, CWEventData *event, in
         event->advance[runner] = runner + 1;
         event->muff_flag[runner] = 1;
         cw_parse_set_play(state, event, runner, state->token);
-
-        if (state->sym == '/') {
-          cw_parse_flag(state);
-          if (!strcmp(state->token, "TH") || !strcmp(state->token, "TH1") ||
-              !strcmp(state->token, "TH2") || !strcmp(state->token, "TH3") ||
-              !strcmp(state->token, "THH")) {
-            cw_event_set_last_error_type(event, 'T');
-          }
-          else if (!strcmp(state->token, "INT")) {
-            /* accept interference flag silently */
-          }
-          else {
-            return cw_parse_invalid(state);
-          }
+        if (cw_parse_credit_flags(state)) {
+          cw_event_set_last_error_type(event, 'T');
         }
       }
       else {
         cw_parse_set_play(state, event, runner, state->token);
+        cw_parse_credit_flags(state);
       }
     }
     else if (state->sym == 'E') {
@@ -1096,20 +1113,8 @@ static int cw_parse_caught_stealing(CWParserState *state, CWEventData *event, in
       event->advance[runner] = runner + 1;
       event->muff_flag[runner] = 1;
       cw_parse_set_play(state, event, runner, state->token);
-
-      if (state->sym == '/') {
-        cw_parse_flag(state);
-        if (!strcmp(state->token, "TH") || !strcmp(state->token, "TH1") ||
-            !strcmp(state->token, "TH2") || !strcmp(state->token, "TH3") ||
-            !strcmp(state->token, "THH")) {
-          cw_event_set_last_error_type(event, 'T');
-        }
-        else if (!strcmp(state->token, "INT")) {
-          /* accept interference flag silently */
-        }
-        else {
-          return cw_parse_invalid(state);
-        }
+      if (cw_parse_credit_flags(state)) {
+        cw_event_set_last_error_type(event, 'T');
       }
     }
     else if (isalpha(state->sym)) {
@@ -1616,7 +1621,7 @@ static int cw_parse_pickoff_caught_stealing(CWParserState *state, CWEventData *e
 
 static int cw_parse_pickoff(CWParserState *state, CWEventData *event, int flags)
 {
-  int runner;
+  int runner, safe;
 
   if (state->sym >= '1' && state->sym <= '3') {
     runner = state->sym - '0';
@@ -1631,27 +1636,23 @@ static int cw_parse_pickoff(CWParserState *state, CWEventData *event, int flags)
   }
   cw_parse_nextsym(state);
   if (isfielder(state->sym)) {
-    cw_parse_fielding_credit(state, event, ' ');
+    safe = cw_parse_fielding_credit(state, event, ' ');
     cw_parse_set_play(state, event, runner, state->token);
+    if (cw_parse_credit_flags(state) && safe) {
+      cw_event_set_last_error_type(event, 'T');
+    }
   }
   else if (state->sym == 'E') {
     cw_parse_fielding_credit(state, event, ' ');
     cw_parse_set_play(state, event, runner, state->token);
 
-    if (state->sym == '/') {
-      cw_parse_flag(state);
-      if (!strcmp(state->token, "TH") || !strcmp(state->token, "TH1") ||
-          !strcmp(state->token, "TH2") || !strcmp(state->token, "TH3") ||
-          !strcmp(state->token, "THH")) {
-        cw_event_set_last_error_type(event, 'T');
-      }
-      else {
-        return cw_parse_invalid(state);
-      }
+    if (cw_parse_credit_flags(state)) {
+      cw_event_set_last_error_type(event, 'T');
     }
     /* By convention, the assumption is that errors on pitcher or
      * catcher are throwing errors; others are assumed to be muffs,
-     * if not explicitly marked otherwise. */
+     * if not explicitly marked otherwise.  A flag other than a throw
+     * flag (such as /OBS) does not mark it otherwise. */
     else if (event->num_errors > 0 &&
              (event->errors[event->num_errors - 1] == 1 ||
               event->errors[event->num_errors - 1] == 2) &&

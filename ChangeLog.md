@@ -3,6 +3,8 @@
 ## Added
 - DiamondWare now allows caught stealing to be written as a modifier on a runner's advance, as in
   `W.1X3(CS3(15))` or `K+SB2/DP.1X3(CS3(265))`.
+- Flags after the fielding credit in a pickoff, pickoff-caught stealing or caught stealing,
+  as in `PO3(E5/OBS)` or `CS2(2E4/OBS)`, are accepted.
 
 ## Fixed
 - In `cwdaily`, stats of a pitcher who left the game and then re-entered the lineup appeared
